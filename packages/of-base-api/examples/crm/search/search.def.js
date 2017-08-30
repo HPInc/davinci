@@ -12,6 +12,14 @@ module.exports = {
 		'/': {
 			get: {
 				operationId: 'search',
+				parameters: [
+					{
+						name: 'searchTerm',
+						in: 'query',
+						description: 'The search term',
+						required: true
+					}
+				],
 				responses: {
 					200: {
 						schema: {

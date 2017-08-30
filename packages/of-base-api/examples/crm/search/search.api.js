@@ -2,8 +2,10 @@ const API = require('../../../src/API');
 const def = require('./search.def');
 
 class SearchAPI extends API {
-	async search(context) {
+	async search({ searchTerm }) {
 		// perform the search function here
+		console.log(`searching for '${searchTerm}'...`);
+
 		const searchResults = [1, 2, 3, 4];
 		return searchResults;
 	}
