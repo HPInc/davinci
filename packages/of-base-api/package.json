@@ -1,7 +1,7 @@
 {
   "name": "@oneflow/of-base-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "Framework for rapid and consistent API development",
   "main": "index.js",
   "scripts": {
     "example": "node examples/crm/index.js",
@@ -10,7 +10,6 @@
   "author": "Nigel Watson <nigel.watson@oneflowcloud.com> (http://www.oneflowsystems.com/)",
   "license": "ISC",
   "dependencies": {
-    "bluebird": "3.5.0",
     "express": "4.15.4",
     "feathers": "2.1.7",
     "lodash": "4.17.4"

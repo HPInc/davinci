@@ -14,10 +14,10 @@ machine:
 test:
   override:
     - mkdir -p $MOCHA_DIR
-    - mocha --require test/support/env --reporter mocha-junit-reporter --bail --check-leaks test/
+#    - mocha --require test/support/env --reporter mocha-junit-reporter --bail --check-leaks test/
   post:
-    - istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec --require test/support/env test/
-    - cat ./coverage/coverage.json | ./node_modules/codecov.io/bin/codecov.io.js
+#    - istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec --require test/support/env test/
+#    - cat ./coverage/coverage.json | ./node_modules/codecov.io/bin/codecov.io.js
 
 deployment:
     production:
