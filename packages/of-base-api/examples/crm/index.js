@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const customerAPI = require('./customers/customer.api');
 const fileAPI = require('./files/file.api');
+const searchAPI = require('./search/search.api');
 const docs = require('../../src/openapi.docs');
 
 mongoose.Promise = global.Promise;
@@ -29,6 +30,7 @@ app.get('/hello-world', (req, res) => {
 
 app.use('/api/customer', customerAPI.router);
 app.use('/api/file', fileAPI.router);
+app.use('/api/search', searchAPI.router);
 
 docs.explorer(app, {
 	discoveryUrl: '/api-doc.json',
