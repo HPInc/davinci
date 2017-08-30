@@ -1,28 +1,25 @@
-const express = require('express');
+// const express = require('express');
 const _ = require('lodash');
 const Resource = require('./openapi.resource');
 
 const SWAGGER_VERSION = '2.0';
-const router = express.Router();
+// const router = express.Router();
 
 const resources = [];
 
 const addResource = (path, doc) => {
-
 	console.log(`adding ${path} resource`);
-
 	// create the resource from the doc
 	const resource = new Resource(path, doc);
-
 	// add it to the registry
 	resources.push(resource);
 };
 
-const createApiDocs = opts => {
+const createApiDocs = (app, opts) => {
 
 	console.log(`setting up swagger docs on ${opts.discoveryUrl}`);
 
-	router.get(opts.discoveryUrl, (req, res) => {
+	app.get(opts.discoveryUrl, (req, res) => {
 
 		const basePath = opts.basePath || `http://${req.headers.host}/api`;
 
@@ -63,15 +60,15 @@ const createApiDocs = opts => {
 		res.json(fullSwagger);
 	});
 
-	return router;
+	// return app;
 };
 
 const explorer = (app, opts) => {
 	// add the swagger explorer page
-	app.use('/explorer', express.static('src/explorer'));
+	// app.use('/explorer', express.static('src/explorer'));
 
 	// add the swagger api docs
-	app.use(createApiDocs(opts));
+	createApiDocs(app, opts);
 };
 
 module.exports = {
