@@ -1,6 +1,4 @@
-
-const middleware = (err, req, res) => {
-
+const errorHandler = () => (err, req, res, next) => {
 	if ((err && !err.statusCode) || err.statusCode === 500) {
 		console.log('500 Server Error');
 		console.log(err.stack);
@@ -10,4 +8,4 @@ const middleware = (err, req, res) => {
 	});
 };
 
-module.exports = middleware;
+module.exports = errorHandler;

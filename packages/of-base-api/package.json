@@ -10,11 +10,15 @@
   "author": "Nigel Watson <nigel.watson@oneflowcloud.com> (http://www.oneflowsystems.com/)",
   "license": "ISC",
   "dependencies": {
+    "bluebird": "3.5.0",
+    "body-parser": "1.17.2",
+    "compression": "1.7.0",
     "express": "4.15.4",
     "feathers": "2.1.7",
     "feathers-mongoose": "5.1.2",
     "lodash": "4.17.4",
-    "mongoose": "4.11.9"
+    "mongoose": "4.11.9",
+    "require-dir": "0.3.2"
   },
   "devDependencies": {
     "codecov.io": "0.1.6",
