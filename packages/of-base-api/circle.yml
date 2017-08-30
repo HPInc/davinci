@@ -1,0 +1,34 @@
+dependencies:
+  pre:
+    - npm install -g istanbul
+  override:
+    - npm update
+
+machine:
+  node:
+    version: 4.2.2
+  environment:
+    MOCHA_DIR: $CIRCLE_TEST_REPORTS/junit
+    MOCHA_FILE: $MOCHA_DIR/reports.xml
+
+test:
+  override:
+    - mkdir -p $MOCHA_DIR
+    - mocha --require test/support/env --reporter mocha-junit-reporter --bail --check-leaks test/
+  post:
+    - istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec --require test/support/env test/
+    - cat ./coverage/coverage.json | ./node_modules/codecov.io/bin/codecov.io.js
+
+deployment:
+    production:
+        branch: master
+        commands:
+            - npm publish
+            - git config --global user.email "circleci@oneflowsystems.com"
+            - git config --global user.name "Circle CI"
+            - git checkout -b circle-ci-version-bump origin/development
+            - git pull
+            - npm version patch
+            - git push -u origin circle-ci-version-bump:development --follow-tags
+            - git checkout master
+            - git branch -D circle-ci-version-bump

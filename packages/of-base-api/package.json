@@ -1,0 +1,36 @@
+{
+  "name": "@oneflow/of-base-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "example": "node examples/crm/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Nigel Watson <nigel.watson@oneflowcloud.com> (http://www.oneflowsystems.com/)",
+  "license": "ISC",
+  "dependencies": {
+    "bluebird": "3.5.0",
+    "express": "4.15.4",
+    "feathers": "2.1.7",
+    "lodash": "4.17.4"
+  },
+  "devDependencies": {
+    "codecov.io": "0.1.6",
+    "eslint": "3.19.0",
+    "eslint-config-airbnb": "15.0.1",
+    "eslint-config-loopback": "4.0.0",
+    "eslint-plugin-import": "2.2.0",
+    "eslint-plugin-jsx-a11y": "5.0.3",
+    "eslint-plugin-react": "7.0.1",
+    "feathers-mongoose": "5.1.2",
+    "mongoose": "4.11.9",
+    "istanbul": "0.4.5",
+    "mocha": "3.4.1",
+    "mockery": "1.7.0",
+    "nsp": "2.6.1",
+    "should": "11.1.0",
+    "should-sinon": "0.0.5",
+    "sinon": "1.17.6"
+  }
+}
