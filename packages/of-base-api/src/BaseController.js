@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const errors = require('feathers-errors');
 
 class BaseController {
 	addContext(context, query) {
@@ -8,12 +9,12 @@ class BaseController {
 		return _.assign(contextQuery, query);
 	}
 	get(context) {
-		if (!this.model) return Promise.resolve({ message: 'No model implemented' });
+		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 		const id = context.params.id;
 		return this.model.get(id);
 	}
 	list(context) {
-		if (!this.model) return Promise.resolve({ message: 'No model implemented' });
+		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 		const query = {};
 		// return this.model.find(query);
 		return this.model.find({
@@ -21,18 +22,18 @@ class BaseController {
 		});
 	}
 	create(context) {
-		if (!this.model) return Promise.resolve({ message: 'No model implemented' });
+		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 		const doc = this.addContext(context, context.body);
 		return this.model.create(doc);
 	}
 	update(context) {
-		if (!this.model) return Promise.resolve({ message: 'No model implemented' });
+		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 		const doc = this.addContext(context, context.body);
 		const id = context.params.id;
 		return this.model.update(id, doc);
 	}
 	remove(context) {
-		if (!this.model) return Promise.resolve({ message: 'No model implemented' });
+		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 		const id = context.params.id;
 		return this.model.remove(id);
 	}
