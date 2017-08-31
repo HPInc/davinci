@@ -1,3 +1,4 @@
+const debug = require('debug')('of-base-api:example');
 const BaseController = require('../../../src/BaseController');
 const definition = require('./customer.def');
 const CustomerModel = require('./customer.model');
@@ -12,21 +13,22 @@ class CustomerController extends BaseController {
 
 	myStaticMethod(context) {
 		return new Promise(resolve => {
-			console.log('static method on', this.name);
-			console.log('context', context);
+			debug('static method on', this.name);
+			debug('context', context);
 			resolve({ results: 'my static method' });
 		});
 	}
 
 	myMethod(context) {
 		return new Promise(resolve => {
-			console.log('method on', this.name);
-			console.log('context', context);
+			debug('method on', this.name);
+			debug('context', context);
 			resolve({ results: 'my normal method' });
 		});
 	}
 
-	async myMethod2(context) {
+	async myMethod2() {
+		debug('async method on', this.name);
 		return { success: true };
 	}
 }

@@ -1,3 +1,4 @@
+const debug = require('debug')('of-base-api');
 const express = require('express');
 const compression = require('compression');
 const bodyParser = require('body-parser');
@@ -52,7 +53,7 @@ const boot = (...args) => {
 		});
 
 		await execBootScripts();
-		app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`));
+		app.listen(PORT, () => debug(`Example app listening on port ${PORT}!`));
 		return app;
 	};
 

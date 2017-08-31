@@ -5,7 +5,7 @@ machine:
 dependencies:
     override:
         - echo -e "//registry.npmjs.org/:_authToken=$NPM_TOKEN\nscope=@oneflow" > .npmrc
-        - npm update
+        - npm install
 
 deployment:
     production:

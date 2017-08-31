@@ -1,10 +1,11 @@
+const debug = require('debug')('of-base-api');
 const express = require('express');
 const _ = require('lodash');
 const swaggerDocs = require('./openapiDocs');
 const errors = require('feathers-errors');
 
 function sendResults(res, statusCode) {
-	return function (results) {
+	return results => {
 		if (results) {
 			res.status(statusCode || 200).json(results);
 		} else {
@@ -14,10 +15,10 @@ function sendResults(res, statusCode) {
 }
 
 function sendError(next) {
-	return function (err) {
-		console.error('error', err);
+	return err => {
+		debug('error', err);
 		if (typeof next === 'function') {
-			return next.call(null, err);
+			next.call(null, err);
 		}
 	};
 }
@@ -61,9 +62,9 @@ const mapReqToParameters = (req, parameters) => {
 
 function createRouterAndSwaggerDoc(Controller, rsName) {
 	const ctrlName = Controller.name;
-	const resourceName = rsName || ctrlName.replace(/Controller$/, "").toLowerCase();
+	const resourceName = rsName || ctrlName.replace(/Controller$/, '').toLowerCase();
 	const controller = new Controller();
-	console.log('creating route');
+	debug('creating route');
 
 	const router = express.Router();
 
@@ -82,21 +83,21 @@ function createRouterAndSwaggerDoc(Controller, rsName) {
 			const operationName = operationParts[operationParts.length - 1];
 			const functionName = operationName.split('#')[0];
 
-			console.log('adding express route', method, convertedPath, `=> controller.${functionName}`);
+			debug('adding express route', method, convertedPath, `=> controller.${functionName}`);
 
 			router[method](convertedPath, (req, res, next) => {
 
 				// need a custom middleware to set the context ID
 				const parameters = mapReqToParameters(req, operation.parameters);
-				console.log('calling ', functionName);
+				debug('calling ', functionName);
 
 				if (controller[functionName]) {
 					// the controller functions return a promise
 					controller[functionName](parameters)
 						.then(sendResults(res), sendError(next));
 				} else {
-					console.log('Invalid Operation ID', functionName);
-					return Promise.reject(new Error(`Invalid Controller Function: ${functionName}`));
+					debug('Invalid Operation ID', functionName);
+					throw new Error(`Invalid Controller Function: ${functionName}`);
 				}
 			});
 		});

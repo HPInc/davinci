@@ -9,8 +9,8 @@ class FileController extends BaseController {
 		this.def = def;
 	}
 
-	customFn(context) {
-		return this.model.Model.find({ _id: "591eb951522d802685231039" });
+	customFn() {
+		return this.model.Model.find({ _id: '591eb951522d802685231039' });
 	}
 }
 

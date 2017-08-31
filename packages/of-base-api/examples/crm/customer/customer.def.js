@@ -2,48 +2,48 @@ module.exports = {
 	definitions: {
 		Customer: {
 			properties: {
-				"id": {
-					"type": "string",
-					"id": true,
-					"required": true
+				id: {
+					type: 'string',
+					id: true,
+					required: true
 				},
-				"firstName": {
-					"type": "string"
+				firstName: {
+					type: 'string'
 				},
-				"lastName": {
-					"type": "string"
+				lastName: {
+					type: 'string'
 				},
-				"ssn": {
-					"type": "string"
+				ssn: {
+					type: 'string'
 				},
-				"customerSince": {
-					"type": "date"
+				customerSince: {
+					type: 'date'
 				},
-				"street": {
-					"type": "string"
+				street: {
+					type: 'string'
 				},
-				"state": {
-					"type": "string"
+				state: {
+					type: 'string'
 				},
-				"city": {
-					"type": "string"
+				city: {
+					type: 'string'
 				},
-				"zip": {
-					"type": "string"
+				zip: {
+					type: 'string'
 				},
-				"lastUpdated": {
-					"type": "date"
+				lastUpdated: {
+					type: 'date'
 				}
 			}
 		},
 		'Customer List': {
 			properties: {
 				count: {
-					type: "number"
+					type: 'number'
 				},
 				items: {
-					type: "object",
-					$ref: "#/definitions/Customer"
+					type: 'object',
+					$ref: '#/definitions/Customer'
 				}
 			}
 		}

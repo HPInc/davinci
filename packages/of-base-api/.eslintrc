@@ -1,21 +1,21 @@
 {
-	"extends": "airbnb",
+	"extends": "airbnb-base",
 	"rules": {
-	  "no-console": "off",
-	  "comma-dangle": [2, "never"],
-	  "arrow-parens": [2, "as-needed"],
-	  "linebreak-style": 0,
-	  "padded-blocks": 0,
-	  "indent": [1, "tab"],
-	  "no-underscore-dangle": [0],
-	  "no-param-reassign": [2, { "props": false }],
-	  "new-cap": [2, { "capIsNewExceptions": ["Router", "ObjectId"] }],
-	  "no-tabs": 0,
-	  "max-len": [1, 150], // extended
-	  "no-plusplus": 0, // disabled
-	  "generator-star-spacing": 0 // disabled as doesn't handle static generator methods
+		"comma-dangle": [2, "never"],
+		"arrow-parens": [2, "as-needed"],
+		"linebreak-style": 0,
+		"padded-blocks": 0,
+		"indent": [1, "tab"],
+		"no-underscore-dangle": [2, { "allow": ["_id", "__v"] } ],
+		"no-param-reassign": [2, { "props": false }],
+		"new-cap": [2, { "capIsNewExceptions": ["Router", "ObjectId"] }],
+		"no-tabs": 0,
+		"max-len": [1, 150], // extended
+		"no-plusplus": 0, // disabled
+		"class-methods-use-this": 0, // disabled
+		"arrow-body-style": 0
 	},
 	"env": {
-	  "node": true
+		"node": true
 	}
-  }
+}

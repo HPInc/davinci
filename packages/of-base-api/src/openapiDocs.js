@@ -1,3 +1,4 @@
+const debug = require('debug')('of-base-api');
 const express = require('express');
 const _ = require('lodash');
 const path = require('path');
@@ -10,17 +11,17 @@ const SWAGGER_VERSION = '2.0';
 
 const resources = [];
 
-const addResource = (path, doc) => {
-	console.log(`adding ${path} resource`);
+const addResource = (resourceName, doc) => {
+	debug(`adding ${resourceName} resource`);
 	// create the resource from the doc
-	const resource = new Resource(path, doc);
+	const resource = new Resource(resourceName, doc);
 	// add it to the registry
 	resources.push(resource);
 };
 
 const createApiDocs = (app, opts) => {
 
-	console.log(`setting up swagger docs on ${opts.discoveryUrl}`);
+	debug(`setting up swagger docs on ${opts.discoveryUrl}`);
 
 	app.get(opts.discoveryUrl, (req, res) => {
 
@@ -53,10 +54,10 @@ const createApiDocs = (app, opts) => {
 			});
 
 			// add paths
-			_.each(resource.paths, (path, pathName) => {
-				let _path = `/${resource.basePath}${pathName}`;
-				if (pathName === '/') _path = `/${resource.basePath}`;
-				fullSwagger.paths[_path] = path;
+			_.each(resource.paths, (resourcePath, pathName) => {
+				let fullPath = `/${resource.basePath}${pathName}`;
+				if (pathName === '/') fullPath = `/${resource.basePath}`;
+				fullSwagger.paths[fullPath] = resourcePath;
 			});
 		});
 

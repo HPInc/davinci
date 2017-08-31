@@ -7,7 +7,7 @@ function applyHook(service) {
 		'create',
 		'update',
 		'patch',
-		'remove',
+		'remove'
 	];
 
 	const hooks = {

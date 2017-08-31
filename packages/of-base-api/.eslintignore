@@ -1,0 +1,4 @@
+coverage/
+src/explorer/
+test/
+wallaby.js

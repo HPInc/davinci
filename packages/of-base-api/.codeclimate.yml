@@ -1,0 +1,25 @@
+engines:
+  golint:
+    enabled: false
+  eslint:
+    enabled: true
+    channel: "eslint-3"
+    checks:
+      import/no-unresolved:
+        enabled: false
+  csslint:
+    enabled: false
+  duplication:
+    enabled: true
+    config:
+      languages:
+       javascript:
+         mass_threshold: 100
+ratings:
+  paths:
+  - index.js
+  - src/**
+exclude_paths:
+  - src/explorer/**
+  - test/**
+  - examples/**
