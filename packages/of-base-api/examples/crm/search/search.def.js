@@ -11,6 +11,7 @@ module.exports = {
 	paths: {
 		'/': {
 			get: {
+				summary: 'Perform Search',
 				operationId: 'search',
 				parameters: [
 					{

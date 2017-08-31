@@ -1,6 +1,9 @@
-// const express = require('express');
+const express = require('express');
 const _ = require('lodash');
+const path = require('path');
 const Resource = require('./openapi.resource');
+
+const swaggerUiAssetPath = path.resolve(path.join(__dirname, 'explorer'));
 
 const SWAGGER_VERSION = '2.0';
 // const router = express.Router();
@@ -29,7 +32,7 @@ const createApiDocs = (app, opts) => {
 				version: '1.0.0',
 				title: 'File API'
 			},
-			schemes: ['https'],
+			schemes: [req.get('X-Forwarded-Protocol') || req.protocol || 'https'],
 			basePath,
 			host: req.headers.host,
 			paths: {},
@@ -65,7 +68,7 @@ const createApiDocs = (app, opts) => {
 
 const explorer = (app, opts) => {
 	// add the swagger explorer page
-	// app.use('/explorer', express.static('src/explorer'));
+	app.use('/explorer', express.static(swaggerUiAssetPath));
 
 	// add the swagger api docs
 	createApiDocs(app, opts);

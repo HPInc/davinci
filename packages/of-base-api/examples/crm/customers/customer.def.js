@@ -51,6 +51,8 @@ module.exports = {
 	paths: {
 		'/': {
 			post: {
+				summary: 'Create Customer',
+				description: 'This endpoint allows the user to create a customer.',
 				operationId: 'create',
 				responses: {
 					200: {
@@ -62,6 +64,8 @@ module.exports = {
 				}
 			},
 			get: {
+				summary: 'List Customers',
+				description: 'This endpoint allows the user to list all customers.',
 				operationId: 'list',
 				parameters: [
 					{
@@ -85,6 +89,8 @@ module.exports = {
 		},
 		'/custom': {
 			get: {
+				summary: 'My Custom Method',
+				description: 'This endpoint does something custom.',
 				operationId: 'myMethod',
 				responses: {
 					200: {

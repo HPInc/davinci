@@ -30,6 +30,7 @@ module.exports = {
 	paths: {
 		'/': {
 			get: {
+				summary: 'List Files',
 				operationId: 'list',
 				responses: {
 					200: {
@@ -42,6 +43,7 @@ module.exports = {
 		},
 		'/{id}': {
 			get: {
+				summary: 'Get File',
 				operationId: 'get',
 				parameters: [
 					{
@@ -64,6 +66,7 @@ module.exports = {
 		},
 		'/custom': {
 			get: {
+				summary: 'Custom Route',
 				operationId: 'customFn',
 				responses: {
 					200: {
