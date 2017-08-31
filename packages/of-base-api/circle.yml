@@ -9,7 +9,7 @@ dependencies:
 
 test:
     pre:
-	    - echo 'no tests'
+        - echo "no tests"
 
 deployment:
     production:
