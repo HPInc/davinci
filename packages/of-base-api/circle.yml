@@ -7,10 +7,6 @@ dependencies:
         - echo -e "//registry.npmjs.org/:_authToken=$NPM_TOKEN\nscope=@oneflow" > .npmrc
         - npm update
 
-test:
-    pre:
-        - echo "no tests"
-
 deployment:
     production:
         branch: master

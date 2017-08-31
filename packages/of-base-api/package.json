@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "example": "node examples/crm/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 0"
   },
   "author": "Nigel Watson <nigel.watson@oneflowcloud.com> (http://www.oneflowsystems.com/)",
   "license": "ISC",
