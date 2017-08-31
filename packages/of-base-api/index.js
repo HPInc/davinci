@@ -1,9 +1,11 @@
-const API = require('./src/API');
-const docs = require('./src/openapi.docs');
-const mongooseModel = require('./src/mongoose.model');
+const BaseController = require('./src/BaseController');
+const boot = require('./src/boot');
+const createRouter = require('./src/createRouter');
+const mongooseModel = require('./src/mongooseModel');
 
 module.exports = {
-	API,
-	docs,
+	BaseController,
+	boot,
+	createRouter,
 	mongooseModel
 };

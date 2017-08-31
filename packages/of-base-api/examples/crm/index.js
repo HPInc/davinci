@@ -1,7 +1,8 @@
-const boot = require('../../src/index');
-const customerAPI = require('./customers/customer.api');
-const fileAPI = require('./files/file.api');
-const searchAPI = require('./search/search.api');
+const boot = require('../../src/boot');
+const CustomerController = require('./customer/CustomerController');
+const FileController = require('./files/FileController');
+const SearchController = require('./search/SearchController');
+const { createRouter } = require('../../');
 
 boot(app => {
 	// add some middleware
@@ -18,7 +19,7 @@ boot(app => {
 		});
 	});
 
-	app.use('/api/customer', customerAPI.router);
-	app.use('/api/file', fileAPI.router);
-	app.use('/api/search', searchAPI.router);
+	app.use('/api/customer', createRouter(CustomerController));
+	app.use('/api/file', createRouter(FileController));
+	app.use('/api/search', createRouter(SearchController));
 });

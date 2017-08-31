@@ -1,18 +1,6 @@
 const _ = require('lodash');
-const swaggerDocs = require('./openapi.docs');
-const createRoute = require('./router.factory');
 
-class API {
-	constructor(name, def) {
-		this.name = name;
-		this.def = def;
-
-		// create the router
-		this.router = createRoute(this.def, this);
-
-		// add the defs to the centralised swagger / openapi documentation
-		swaggerDocs.addResource(this.name, this.def);
-	}
+class BaseController {
 	addContext(context, query) {
 		// use the context filter, if one was defined
 		const contextQuery = this.contextFilter ? this.contextFilter(context) : {};
@@ -22,7 +10,7 @@ class API {
 	get(context) {
 		if (!this.model) return Promise.resolve({ message: 'No model implemented' });
 		const id = context.params.id;
-		return this.model.get(id, context);
+		return this.model.get(id);
 	}
 	list(context) {
 		if (!this.model) return Promise.resolve({ message: 'No model implemented' });
@@ -50,4 +38,4 @@ class API {
 	}
 }
 
-module.exports = API;
+module.exports = BaseController;

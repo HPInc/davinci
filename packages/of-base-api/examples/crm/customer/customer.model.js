@@ -1,4 +1,4 @@
-const mongooseModel = require('../../../src/mongoose.model');
+const mongooseModel = require('../../../src/mongooseModel');
 const schema = require('./customer.schema');
 const { lowerCase } = require('feathers-hooks-common');
 

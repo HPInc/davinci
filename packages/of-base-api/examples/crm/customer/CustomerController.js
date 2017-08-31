@@ -1,8 +1,15 @@
-const API = require('../../../src/API');
-const def = require('./customer.def');
-const Customer = require('./customer.model');
+const BaseController = require('../../../src/BaseController');
+const definition = require('./customer.def');
+const CustomerModel = require('./customer.model');
 
-class CustomerAPI extends API {
+class CustomerController extends BaseController {
+	// easy to test
+	constructor({ model = CustomerModel, def = definition } = {}) {
+		super();
+		this.model = model;
+		this.def = def;
+	}
+
 	static myStaticMethod(context) {
 		return new Promise(resolve => {
 			console.log('static method on', this.name);
@@ -10,6 +17,7 @@ class CustomerAPI extends API {
 			resolve({ results: 'my static method' });
 		});
 	}
+
 	myMethod(context) {
 		return new Promise(resolve => {
 			console.log('method on', this.name);
@@ -17,13 +25,10 @@ class CustomerAPI extends API {
 			resolve({ results: 'my normal method' });
 		});
 	}
+
 	async myMethod2(context) {
 		return { success: true };
 	}
 }
 
-const controller = new CustomerAPI('customer', def);
-
-controller.model = Customer;
-
-module.exports = controller;
+module.exports = CustomerController;

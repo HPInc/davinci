@@ -1,5 +1,6 @@
 const express = require('express');
 const _ = require('lodash');
+const swaggerDocs = require('./openapiDocs');
 const errors = require('feathers-errors');
 
 function sendResults(res, statusCode) {
@@ -58,15 +59,17 @@ const mapReqToParameters = (req, parameters) => {
 	return context;
 };
 
-module.exports = (def, controller) => {
-
+function createRouterAndSwaggerDoc(Controller, rsName) {
+	const ctrlName = Controller.name;
+	const resourceName = rsName || ctrlName.replace(/Controller$/, "").toLowerCase();
+	const controller = new Controller();
 	console.log('creating route');
 
 	const router = express.Router();
 
 	// for each path in the doc
 
-	_.each(def.paths, (swaggerPath, pathName) => {
+	_.each(controller.def.paths, (swaggerPath, pathName) => {
 
 		// convert it from swagger {param} format to express :param format
 		let convertedPath = pathName;
@@ -90,7 +93,7 @@ module.exports = (def, controller) => {
 				if (controller[functionName]) {
 					// the controller functions return a promise
 					controller[functionName](parameters)
-					.then(sendResults(res), sendError(next));
+						.then(sendResults(res), sendError(next));
 				} else {
 					console.log('Invalid Operation ID', functionName);
 					return Promise.reject(new Error(`Invalid Controller Function: ${functionName}`));
@@ -100,5 +103,9 @@ module.exports = (def, controller) => {
 
 	});
 
+	swaggerDocs.addResource(resourceName, controller.def);
 	return router;
-};
+}
+
+
+module.exports = createRouterAndSwaggerDoc;

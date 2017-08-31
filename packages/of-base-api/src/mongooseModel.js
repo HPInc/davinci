@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const service = require('feathers-mongoose');
-const { applyHook } = require('./lib/HookUtils');
+const { applyHook } = require('./hookUtils');
 
 // TODO the mongoose.model library could be a separate npm module
 const mongooseModel = (name, schema, collection) => {

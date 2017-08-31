@@ -1,7 +1,7 @@
 const express = require('express');
 const _ = require('lodash');
 const path = require('path');
-const Resource = require('./openapi.resource');
+const Resource = require('./openapiResource');
 
 const swaggerUiAssetPath = path.resolve(path.join(__dirname, 'explorer'));
 

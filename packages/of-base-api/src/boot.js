@@ -5,10 +5,9 @@ const requireDir = require('require-dir');
 const _ = require('lodash');
 const path = require('path');
 const Promise = require('bluebird');
-const docs = require('./openapi.docs');
+const docs = require('./openapiDocs');
 const notFoundHandler = require('feathers-errors/not-found');
 const errorHandler = require('feathers-errors/handler');
-
 
 const boot = (...args) => {
 	let app = args[0];
