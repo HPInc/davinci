@@ -6,7 +6,9 @@ const _ = require('lodash');
 const path = require('path');
 const Promise = require('bluebird');
 const docs = require('./openapi.docs');
-const errorHandler = require('./middleware/error-handler');
+const notFoundHandler = require('feathers-errors/not-found');
+const errorHandler = require('feathers-errors/handler');
+
 
 const boot = (...args) => {
 	let app = args[0];
@@ -41,12 +43,13 @@ const boot = (...args) => {
 		app.use(bodyParser.json());
 		app.use(bodyParser.urlencoded({ extended: true }));
 		process.nextTick(() => {
-			app.use(errorHandler());
 			docs.explorer(app, {
 				discoveryUrl: '/api-doc.json',
 				version: '1.0',  // read from package.json
 				basePath: '/api'
 			});
+			app.use(notFoundHandler());
+			app.use(errorHandler({ html: false }));
 		});
 
 		await execBootScripts();
