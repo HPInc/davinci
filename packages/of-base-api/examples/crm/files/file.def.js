@@ -46,7 +46,7 @@ module.exports = {
 				parameters: [
 					{
 						name: 'id',
-						in: 'query',
+						in: 'path',
 						description: 'The file id.',
 						required: true,
 						type: 'string',
