@@ -1,4 +1,4 @@
-const boot = require('../../src/boot');
+const boot = require('../../');
 const CustomerController = require('./customer/CustomerController');
 const FileController = require('./files/FileController');
 const SearchController = require('./search/SearchController');

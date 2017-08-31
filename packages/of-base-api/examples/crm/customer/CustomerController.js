@@ -10,7 +10,7 @@ class CustomerController extends BaseController {
 		this.def = def;
 	}
 
-	static myStaticMethod(context) {
+	myStaticMethod(context) {
 		return new Promise(resolve => {
 			console.log('static method on', this.name);
 			console.log('context', context);

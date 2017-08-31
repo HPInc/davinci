@@ -1,34 +1,34 @@
-dependencies:
-  pre:
-    - npm install -g istanbul
-  override:
-    - npm update
-
 machine:
-  node:
-    version: 4.2.2
-  environment:
-    MOCHA_DIR: $CIRCLE_TEST_REPORTS/junit
-    MOCHA_FILE: $MOCHA_DIR/reports.xml
+    node:
+        version: 8
+
+dependencies:
+    override:
+        - echo -e "//registry.npmjs.org/:_authToken=$NPM_TOKEN\nscope=@oneflow" > .npmrc
+        - npm update
 
 test:
-  override:
-    - mkdir -p $MOCHA_DIR
-#    - mocha --require test/support/env --reporter mocha-junit-reporter --bail --check-leaks test/
-  post:
-#    - istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec --require test/support/env test/
-#    - cat ./coverage/coverage.json | ./node_modules/codecov.io/bin/codecov.io.js
+    pre:
+	    - echo 'no tests'
 
 deployment:
     production:
         branch: master
         commands:
             - npm publish
+            # tag the master branch and push
             - git config --global user.email "circleci@oneflowsystems.com"
             - git config --global user.name "Circle CI"
+            - git reset --hard HEAD
+            - git tag "v`grep '"version"' package.json | egrep -o "[0-9]+.[0-9]+.[0-9]+"`"
+            - git push --tags
+            # checkout development and bump the version
             - git checkout -b circle-ci-version-bump origin/development
             - git pull
-            - npm version patch
+            - npm --no-git-tag-version version patch
+            - git add package.json
+            - git commit -m "`grep '"version"' package.json | egrep -o "[0-9]+.[0-9]+.[0-9]+"`"
             - git push -u origin circle-ci-version-bump:development --follow-tags
+            # checkout master again and delete our local branch
             - git checkout master
             - git branch -D circle-ci-version-bump
