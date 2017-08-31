@@ -4,7 +4,6 @@ const errors = require('feathers-errors');
 
 function sendResults(res, statusCode) {
 	return function (results) {
-		console.log('results', results);
 		if (results) {
 			res.status(statusCode || 200).json(results);
 		} else {

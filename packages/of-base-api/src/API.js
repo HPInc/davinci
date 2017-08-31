@@ -22,7 +22,7 @@ class API {
 	get(context) {
 		if (!this.model) return Promise.resolve({ message: 'No model implemented' });
 		const id = context.params.id;
-		return this.model.get(id);
+		return this.model.get(id, context);
 	}
 	list(context) {
 		if (!this.model) return Promise.resolve({ message: 'No model implemented' });

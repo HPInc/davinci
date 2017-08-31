@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const service = require('feathers-mongoose');
+const { applyHook } = require('./lib/HookUtils');
 
 // TODO the mongoose.model library could be a separate npm module
 const mongooseModel = (name, schema, collection) => {
@@ -7,7 +8,7 @@ const mongooseModel = (name, schema, collection) => {
 	const Model = mongoose.model(name, Schema, collection);
 
 	// TODO these settings could be provided somewhere when first loading the mongoose-model library
-	return service({
+	const featherService = service({
 		Model,
 		lean: true, // set to false if you want Mongoose documents returned
 		paginate: {
@@ -15,6 +16,8 @@ const mongooseModel = (name, schema, collection) => {
 			max: 100
 		}
 	});
+
+	return applyHook(featherService);
 };
 
 module.exports = mongooseModel;

@@ -50,17 +50,20 @@ module.exports = {
 	},
 	paths: {
 		'/': {
+			post: {
+				operationId: 'create',
+				responses: {
+					200: {
+						description: 'List of Customers',
+						schema: {
+							$ref: '#/definitions/Customer List'
+						}
+					}
+				}
+			},
 			get: {
 				operationId: 'list',
 				parameters: [
-					{
-						name: 'id',
-						in: 'query',
-						description: 'The customer id.',
-						required: true,
-						type: 'string',
-						format: 'JSON'
-					},
 					{
 						name: 'filter',
 						in: 'query',
