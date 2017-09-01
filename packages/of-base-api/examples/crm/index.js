@@ -1,9 +1,8 @@
+const { boot, createRouter } = require('../../');
 const debug = require('debug')('of-base-api:example');
-const { boot } = require('../../');
 const CustomerController = require('./customer/CustomerController');
 const FileController = require('./files/FileController');
 const SearchController = require('./search/SearchController');
-const { createRouter } = require('../../');
 
 boot(app => {
 	// add some middleware
