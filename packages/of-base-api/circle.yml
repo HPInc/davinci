@@ -7,6 +7,12 @@ dependencies:
         - echo -e "//registry.npmjs.org/:_authToken=$NPM_TOKEN\nscope=@oneflow" > .npmrc
         - npm install
 
+test:
+    override:
+        - npm run cover
+    post:
+        - bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
+
 deployment:
     production:
         branch: master
