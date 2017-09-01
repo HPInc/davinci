@@ -1,41 +1,40 @@
 const _ = require('lodash');
 const errors = require('feathers-errors');
+const createQueryFilters = require('feathers-query-filters');
 
 class BaseController {
-	addContext(context, query) {
-		// use the context filter, if one was defined
-		const contextQuery = this.contextFilter ? this.contextFilter(context) : {};
-		// include any custom criteria defined on this request
-		return _.assign(contextQuery, query);
-	}
-	get(context) {
+	get({ id }, context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
-		const id = context.params.id;
-		return this.model.get(id);
+		return this.model.get(id, context);
 	}
-	list(context) {
+
+	list({ query = {} }, context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
-		const query = {};
-		// return this.model.find(query);
+		const parsedFilter = createQueryFilters(query);
+
 		return this.model.find({
-			query: this.addContext(context, query)
-		});
+			query: _.assign({}, parsedFilter.query, parsedFilter.filters)
+		}, context);
 	}
-	create(context) {
+
+	create({ data }, context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
-		const doc = this.addContext(context, context.body);
-		return this.model.create(doc);
+		return this.model.create(data, context);
 	}
-	update(context) {
+
+	update({ id, data }, context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
-		const doc = this.addContext(context, context.body);
-		const id = context.params.id;
-		return this.model.update(id, doc);
+		return this.model.update(id, data, context);
 	}
-	remove(context) {
+
+	patch({ id, data }, context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
-		const id = context.params.id;
-		return this.model.remove(id);
+		return this.model.patch(id, data, context);
+	}
+
+	remove({ id }, context) {
+		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
+		return this.model.remove(id, context);
 	}
 }
 

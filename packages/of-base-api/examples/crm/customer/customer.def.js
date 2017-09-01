@@ -69,7 +69,7 @@ module.exports = {
 				operationId: 'list',
 				parameters: [
 					{
-						name: 'filter',
+						name: 'query',
 						in: 'query',
 						description: 'The criteria used to narrow down the number of customers returned.',
 						required: false,
@@ -80,6 +80,58 @@ module.exports = {
 				responses: {
 					200: {
 						description: 'List of Customers',
+						schema: {
+							$ref: '#/definitions/Customer List'
+						}
+					}
+				}
+			}
+		},
+		'/{id}': {
+			get: {
+				summary: 'Get Customer',
+				operationId: 'get',
+				parameters: [
+					{
+						name: 'id',
+						in: 'path',
+						description: 'The customer id.',
+						required: true,
+						type: 'string',
+						format: 'JSON'
+					}
+				],
+				responses: {
+					200: {
+						schema: {
+							$ref: '#/definitions/Customer List'
+						}
+					}
+				}
+			},
+			put: {
+				summary: 'update Customer',
+				operationId: 'update',
+				parameters: [
+					{
+						name: 'id',
+						in: 'path',
+						description: 'The customer id.',
+						required: true,
+						type: 'string',
+						format: 'JSON'
+					},
+					{
+						name: 'data',
+						in: 'body',
+						description: 'The customer data.',
+						required: true,
+						type: 'string',
+						format: 'JSON'
+					}
+				],
+				responses: {
+					200: {
 						schema: {
 							$ref: '#/definitions/Customer List'
 						}

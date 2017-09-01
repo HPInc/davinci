@@ -23,17 +23,8 @@ function sendError(next) {
 	};
 }
 
-const mapReqToParameters = (req, parameters) => {
-	if (!parameters) {
-		return {
-			body: req.body,
-			params: req.params,
-			query: req.query,
-			contextId: req.contextId
-		};
-	}
-
-	const context = {};
+const mapReqToParameters = (req, res, parameters = []) => {
+	const parameterList = {};
 	_.each(parameters, p => {
 		if (p.name) {
 			let value = null;
@@ -54,10 +45,23 @@ const mapReqToParameters = (req, parameters) => {
 				if (p.required) throw new errors.BadRequest(`Missing required field ${p.name}`);
 				if (p.schema && p.schema.default) value = p.schema.default;
 			}
-			context[p.name] = value;
+			parameterList[p.name] = value;
 		}
 	});
-	return context;
+
+	const context = {
+		body: req.body,
+		params: req.params,
+		query: req.query,
+		contextId: req.contextId,
+		req,
+		res
+	};
+
+	return {
+		parameterList,
+		context
+	};
 };
 
 function createRouterAndSwaggerDoc(Controller, rsName) {
@@ -88,12 +92,12 @@ function createRouterAndSwaggerDoc(Controller, rsName) {
 			router[method](convertedPath, (req, res, next) => {
 
 				// need a custom middleware to set the context ID
-				const parameters = mapReqToParameters(req, operation.parameters);
+				const { parameterList, context } = mapReqToParameters(req, res, operation.parameters);
 				debug('calling ', functionName);
 
 				if (controller[functionName]) {
 					// the controller functions return a promise
-					controller[functionName](parameters)
+					controller[functionName](parameterList, context)
 						.then(sendResults(res), sendError(next));
 				} else {
 					debug('Invalid Operation ID', functionName);

@@ -8,6 +8,10 @@ const customerModel = mongooseModel('Customer', new mongoose.Schema(schema), 'cu
 // or
 // const customerModel = mongooseModel('Customer', schema, 'customers');
 
+customerModel.addHook('before', 'create', hook => {
+	debug(hook.params);
+});
+
 customerModel.addHook('before', 'find', hook => {
 	debug(hook.params);
 });
@@ -17,5 +21,8 @@ customerModel.addHook('after', 'find', hook => {
 });
 
 customerModel.addHook('before', 'create', lowerCase('name'));
+customerModel.addHook('before', 'update', [lowerCase('name'), hook => {
+	console.log(hook);
+}]);
 
 module.exports = customerModel;

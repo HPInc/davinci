@@ -1,4 +1,5 @@
 const Promise = require('bluebird');
+const _ = require('lodash');
 
 function applyHook(service) {
 	const serviceMethods = [
@@ -45,35 +46,37 @@ function applyHook(service) {
 			result
 		};
 
+		const context = methodArgs[methodArgs.length - 1];
+
 		const methodHooks = {
 			find: {
-				params: methodArgs[0]
+				params: _.assign({}, methodArgs[0], { context })
 			},
 			get: {
 				id: methodArgs[0],
-				params: methodArgs[1]
+				params: _.assign({}, methodArgs[1], { context })
 			},
 			create: {
 				data: methodArgs[0],
-				params: methodArgs[1]
+				params: _.assign({}, methodArgs[1], { context })
 			},
 			update: {
 				id: methodArgs[0],
 				data: methodArgs[1],
-				params: methodArgs[2]
+				params: _.assign({}, methodArgs[2], { context })
 			},
 			patch: {
 				id: methodArgs[0],
 				data: methodArgs[1],
-				params: methodArgs[2]
+				params: _.assign({}, methodArgs[2], { context })
 			},
 			remove: {
 				id: methodArgs[0],
-				params: methodArgs[1]
+				params: _.assign({}, methodArgs[1], { context })
 			}
 		};
 
-		return Object.assign({}, baseHook, methodHooks[method]);
+		return _.assign({}, baseHook, methodHooks[method]);
 	};
 
 	const execMethodHooks = (target, propName) => () => {
