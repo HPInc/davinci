@@ -22,7 +22,7 @@ customerModel.addHook('after', 'find', hook => {
 
 customerModel.addHook('before', 'create', lowerCase('name'));
 customerModel.addHook('before', 'update', [lowerCase('name'), hook => {
-	console.log(hook);
+	debug(hook);
 }]);
 
 module.exports = customerModel;
