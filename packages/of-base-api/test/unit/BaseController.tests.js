@@ -8,17 +8,17 @@ describe('BaseController', () => {
 		it('should throw an error when no model was specified', done => {
 			const controller = new BaseController();
 
-			should(() => controller.get({})).throw('No model implemented');
+			should(() => controller.getById({})).throw('No model implemented');
 
 			done();
 		});
 
 		it('should call model.get with the id', done => {
 			const controller = new BaseController();
-			controller.model = { get: () => ({ _id: '123' }) };
+			controller.model = { findOne: () => ({ _id: '123' }) };
 			const context = { params: { id: 123 } };
 
-			const result = controller.get(context);
+			const result = controller.getById(context);
 			result.should.have.property('_id').equal('123');
 
 			done();

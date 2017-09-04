@@ -3,9 +3,11 @@ const errors = require('feathers-errors');
 const createQueryFilters = require('feathers-query-filters');
 
 class BaseController {
-	get({ id }, context) {
+	getById({ id }, context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
-		return this.model.get(id, context);
+		return this.model.findOne({
+			query: { [this.model.id]: id }
+		}, context);
 	}
 
 	list({ query = {} }, context) {
@@ -24,17 +26,14 @@ class BaseController {
 
 	update({ id, data }, context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
-		return this.model.update(id, data, context);
-	}
-
-	patch({ id, data }, context) {
-		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
-		return this.model.patch(id, data, context);
+		context.query = { [this.model.id]: id };
+		return this.model.patch(null, data, context);
 	}
 
 	remove({ id }, context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
-		return this.model.remove(id, context);
+		context.query = { [this.model.id]: id };
+		return this.model.remove(null, context);
 	}
 }
 

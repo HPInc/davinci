@@ -87,10 +87,25 @@ module.exports = {
 				}
 			}
 		},
+		'/custom': {
+			get: {
+				summary: 'My Custom Method',
+				description: 'This endpoint does something custom.',
+				operationId: 'customMethod',
+				responses: {
+					200: {
+						description: 'Access to a custom controller method',
+						schema: {
+							$ref: '#/definitions/Customer'
+						}
+					}
+				}
+			}
+		},
 		'/{id}': {
 			get: {
 				summary: 'Get Customer',
-				operationId: 'get',
+				operationId: 'getById',
 				parameters: [
 					{
 						name: 'id',
@@ -134,21 +149,6 @@ module.exports = {
 					200: {
 						schema: {
 							$ref: '#/definitions/Customer List'
-						}
-					}
-				}
-			}
-		},
-		'/custom': {
-			get: {
-				summary: 'My Custom Method',
-				description: 'This endpoint does something custom.',
-				operationId: 'myMethod',
-				responses: {
-					200: {
-						description: 'Access to a custom controller method',
-						schema: {
-							$ref: '#/definitions/Customer'
 						}
 					}
 				}

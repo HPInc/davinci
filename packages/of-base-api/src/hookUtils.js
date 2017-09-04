@@ -1,10 +1,11 @@
 const Promise = require('bluebird');
 const _ = require('lodash');
+const baseService = require('./baseService');
 
 function applyHook(service) {
 	const serviceMethods = [
 		'find',
-		'get',
+		'findOne',
 		'create',
 		'update',
 		'patch',
@@ -15,7 +16,7 @@ function applyHook(service) {
 		before: {
 			all: [],
 			find: [],
-			get: [],
+			findOne: [],
 			create: [],
 			update: [],
 			patch: [],
@@ -24,7 +25,7 @@ function applyHook(service) {
 		after: {
 			all: [],
 			find: [],
-			get: [],
+			findOne: [],
 			create: [],
 			update: [],
 			patch: [],
@@ -38,6 +39,12 @@ function applyHook(service) {
 		methodHooks.push(...fns);
 	};
 
+	const hooksMethods = {
+		addHook,
+		before: (method, fn) => addHook('before', method, fn),
+		after: (method, fn) => addHook('after', method, fn)
+	};
+
 	const createHookObject = ({ type, methodName: method, methodArgs, result }) => {
 		const baseHook = {
 			method,
@@ -48,35 +55,47 @@ function applyHook(service) {
 
 		const context = methodArgs[methodArgs.length - 1];
 
+		const buildParams = arg => _.assign({}, arg, { context });
+
 		const methodHooks = {
 			find: {
-				params: _.assign({}, methodArgs[0], { context })
+				params: buildParams(methodArgs[0])
 			},
-			get: {
-				id: methodArgs[0],
-				params: _.assign({}, methodArgs[1], { context })
+			findOne: {
+				params: buildParams(methodArgs[0])
 			},
 			create: {
 				data: methodArgs[0],
-				params: _.assign({}, methodArgs[1], { context })
+				params: buildParams(methodArgs[1])
 			},
 			update: {
 				id: methodArgs[0],
 				data: methodArgs[1],
-				params: _.assign({}, methodArgs[2], { context })
+				params: buildParams(methodArgs[2])
 			},
 			patch: {
 				id: methodArgs[0],
 				data: methodArgs[1],
-				params: _.assign({}, methodArgs[2], { context })
+				params: buildParams(methodArgs[2])
 			},
 			remove: {
 				id: methodArgs[0],
-				params: _.assign({}, methodArgs[1], { context })
+				params: buildParams(methodArgs[1])
 			}
 		};
 
 		return _.assign({}, baseHook, methodHooks[method]);
+	};
+
+	const getArgsFromHookObject = (methodName, hook) => {
+		const methodArgsFormat = {
+			find: [hook.params],
+			findOne: [hook.params],
+			create: [hook.data, hook.params],
+			patch: [hook.id, hook.data, hook.params],
+			remove: [hook.id, hook.params]
+		};
+		return methodArgsFormat[methodName];
 	};
 
 	const execMethodHooks = (target, propName) => () => {
@@ -85,30 +104,37 @@ function applyHook(service) {
 			const beforeHooks = hooks.before[propName];
 			const afterHooks = hooks.after[propName];
 
-			await Promise.each(beforeHooks, hook => hook(createHookObject({
+			const hookObj = createHookObject({
 				type: 'before',
 				methodName: propName,
 				methodArgs: args
-			})));
+			});
 
-			const result = await method.call(target, ...args);
+			if (!hookObj.skipHooks) {
+				await Promise.each(beforeHooks, hook => hook(hookObj));
+			}
 
-			await Promise.each(afterHooks, hook => hook(createHookObject({
-				type: 'after',
-				methodName: propName,
-				methodArgs: args,
-				result
-			})));
+			const newArgs = getArgsFromHookObject(propName, hookObj);
+			if (!hookObj.result) {
+				hookObj.result = await method.call(target, ...newArgs);
+			}
 
-			return result;
+			const afterHookObj = _.assign({}, hookObj, { type: 'after' });
+			if (!hookObj.skipHooks) {
+				await Promise.each(afterHooks, hook => hook(afterHookObj));
+			}
+
+			return afterHookObj.result;
 		};
 	};
 
-	const createServiceProxy = () => new Proxy(service, {
+	const decorateWithBaseServiceMethods = srvc => Object.assign(srvc, baseService);
+
+	const createServiceProxy = () => new Proxy(decorateWithBaseServiceMethods(service), {
 		get(target, propName) {
 			if (serviceMethods.includes(propName)) {
 				return execMethodHooks(target, propName)();
-			} else if (propName === 'addHook') return addHook;
+			} else if (hooksMethods[propName]) return hooksMethods[propName];
 
 			return target[propName];
 		}

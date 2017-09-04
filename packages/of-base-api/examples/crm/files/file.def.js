@@ -44,7 +44,7 @@ module.exports = {
 		'/{id}': {
 			get: {
 				summary: 'Get File',
-				operationId: 'get',
+				operationId: 'getById',
 				parameters: [
 					{
 						name: 'id',
