@@ -10,10 +10,7 @@ class MongooseModel {
 		const featherService = service({
 			Model: this.Model,
 			lean: true, // set to false if you want Mongoose documents returned
-			paginate: {
-				default: 10,
-				max: 100
-			}
+			paginate: false
 		});
 
 		return applyHook(featherService);
