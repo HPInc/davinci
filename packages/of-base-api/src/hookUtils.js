@@ -110,7 +110,7 @@ function applyHook(service) {
 				methodArgs: args
 			});
 
-			if (!hookObj.skipHooks) {
+			if (!hookObj.params.skipHooks) {
 				await Promise.each(beforeHooks, hook => hook(hookObj));
 			}
 
@@ -120,7 +120,7 @@ function applyHook(service) {
 			}
 
 			const afterHookObj = _.assign({}, hookObj, { type: 'after' });
-			if (!hookObj.skipHooks) {
+			if (!hookObj.params.skipHooks) {
 				await Promise.each(afterHooks, hook => hook(afterHookObj));
 			}
 
