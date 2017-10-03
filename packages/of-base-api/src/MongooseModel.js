@@ -4,7 +4,7 @@ const { applyHook } = require('./hookUtils');
 
 class MongooseModel {
 	constructor(name, schema, collection, options = {}) {
-		this.Schema = schema instanceof mongoose.Schema ? schema : new mongoose.Schema(schema);
+		this.Schema = schema.constructor.name === 'Schema' ? schema : new mongoose.Schema(schema);
 		this.Model = mongoose.model(name, this.Schema, collection);
 
 		const featherService = service({
