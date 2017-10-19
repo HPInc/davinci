@@ -53,7 +53,7 @@ const mapReqToParameters = (req, res, parameters = []) => {
 		body: req.body,
 		params: req.params,
 		query: req.query,
-		contextId: req.contextId,
+		accountId: req.accountId,
 		req,
 		res
 	};
