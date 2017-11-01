@@ -24,8 +24,9 @@ const createApiDocs = (app, opts) => {
 	debug(`setting up swagger docs on ${opts.discoveryUrl}`);
 
 	app.get(opts.discoveryUrl, (req, res) => {
+		const protocol = process.env.NODE_ENV === 'local' ? 'http' : 'https';
 
-		const basePath = opts.basePath || `http://${req.headers.host}/api`;
+		const basePath = opts.basePath || `${protocol}://${req.headers.host}/api`;
 
 		const fullSwagger = {
 			swagger: SWAGGER_VERSION,
@@ -33,7 +34,7 @@ const createApiDocs = (app, opts) => {
 				version: '1.0.0',
 				title: 'File API'
 			},
-			schemes: [req.get('X-Forwarded-Protocol') || req.protocol || 'https'],
+			schemes: [req.get('X-Forwarded-Protocol') || protocol],
 			basePath,
 			host: req.headers.host,
 			paths: {},
