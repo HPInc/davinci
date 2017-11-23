@@ -15,7 +15,7 @@ class BaseController {
 		const parsedFilter = createQueryFilters(query);
 
 		return this.model.find({
-			query: _.assign({}, parsedFilter.query, parsedFilter.filters),
+			query: _.defaultsDeep({}, parsedFilter.query, parsedFilter.filters),
 			paginate: {
 				default: 10,
 				max: 1000
