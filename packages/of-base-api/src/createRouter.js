@@ -36,7 +36,9 @@ const coerceType = (value, paramConfig) => {
 	const coerceSwitch = {
 		string: String,
 		integer: Number,
-		string_JSON: JSON.parse
+		string_JSON: val => {
+			return _.isObject(val) ? val : JSON.parse(val);
+		}
 	};
 
 	return (coerceSwitch[key] && coerceSwitch[key](value)) || value;
