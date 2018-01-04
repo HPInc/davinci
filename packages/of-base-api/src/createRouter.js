@@ -23,6 +23,25 @@ function sendError(next) {
 	};
 }
 
+
+/* TODO: implement a more robust type coercion system
+	using one of: yup, joi or ajv
+ */
+
+const coerceType = (value, paramConfig) => {
+	if (_.isNull(value) || _.isUndefined(value)) return value;
+	const { type, format } = paramConfig;
+	const key = _.compact([type, format]).join('_');
+
+	const coerceSwitch = {
+		string: String,
+		integer: Number,
+		string_JSON: JSON.parse
+	};
+
+	return (coerceSwitch[key] && coerceSwitch[key](value)) || value;
+};
+
 const mapReqToParameters = (req, res, parameters = []) => {
 	const parameterList = {};
 	_.each(parameters, p => {
@@ -45,7 +64,9 @@ const mapReqToParameters = (req, res, parameters = []) => {
 				if (p.required) throw new errors.BadRequest(`Missing required field ${p.name}`);
 				if (p.schema && p.schema.default) value = p.schema.default;
 			}
-			parameterList[p.name] = value;
+
+
+			parameterList[p.name] = coerceType(value, p);
 		}
 	});
 
