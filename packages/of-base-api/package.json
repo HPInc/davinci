@@ -1,6 +1,6 @@
 {
   "name": "@oneflow/of-base-api",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "Framework for rapid and consistent API development",
   "main": "index.js",
   "scripts": {
