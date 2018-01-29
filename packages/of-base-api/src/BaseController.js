@@ -3,6 +3,11 @@ const errors = require('feathers-errors');
 const createQueryFilters = require('feathers-query-filters');
 
 class BaseController {
+	constructor(def, model) {
+		this.def = def;
+		this.model = model;
+	}
+
 	getById({ id }, context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 		return this.model.findOne({
