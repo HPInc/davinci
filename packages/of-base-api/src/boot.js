@@ -27,7 +27,6 @@ const boot = (...args) => {
 	}
 
 	const checkAndAssignBootDir = async () => {
-
 		const checkPath = async currentPath => {
 			const stats = await fs.statAsync(currentPath);
 			if (stats.isDirectory()) {
@@ -38,35 +37,34 @@ const boot = (...args) => {
 
 		const paths = [];
 
-		paths.push(path.join(
-			path.dirname(process.argv[1]),
-			'src/boot'
-		));
-
-		paths.push(path.join(
-			path.dirname(process.argv[1]),
-			'boot'
-		));
-
 		if (options && options.bootDirPath) {
 			paths.push(path.join(
-				path.dirname(process.argv[1]),
+				process.cwd(),
 				options.bootDirPath
 			));
 		}
 
+		paths.push(path.join(
+			process.cwd(),
+			'boot'
+		));
+
+		paths.push(path.join(
+			process.cwd(),
+			'src/boot'
+		));
+
+		let result;
+
 		try {
-			return checkPath(paths.pop());
+			result = await Promise.any(paths.map(p => {
+				return checkPath(p);
+			}));
 		} catch (err) {
-			if (
-				paths.length > 0 &&
-				(err.message.includes('ENOENT: no such file or directory') ||
-				err.message.includes('"boot" must be a directory'))
-			) {
-				return checkPath(paths.pop());
-			}
-			throw err;
+			throw new Error('Cannot find boot directory or boot is not a directory');
 		}
+
+		return result;
 	};
 
 	const execBootScripts = async () => {
