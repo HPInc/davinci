@@ -92,7 +92,8 @@ const boot = (...args) => {
 		});
 
 		await execBootScripts();
-		app.listen(PORT, () => debug(`Example app listening on port ${PORT}!`));
+		const server = app.server || app;
+		server.listen(PORT, () => debug(`Example app listening on port ${PORT}!`));
 		return app;
 	};
 
