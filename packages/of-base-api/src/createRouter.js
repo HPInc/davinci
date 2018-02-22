@@ -33,12 +33,18 @@ const coerceType = (value, paramConfig) => {
 	const { type, format } = paramConfig;
 	const key = _.compact([type, format]).join('_');
 
+	const jsonParse = val => {
+		if (_.isObject(val) || _.isArray(val)) return val;
+		return JSON.parse(val);
+	};
+
 	const coerceSwitch = {
 		string: String,
-		integer: Number,
-		string_JSON: val => {
-			return _.isObject(val) ? val : JSON.parse(val);
-		}
+		number: Number,
+		integer: parseInt,
+		object: jsonParse,
+		array: jsonParse,
+		string_JSON: jsonParse
 	};
 
 	return (coerceSwitch[key] && coerceSwitch[key](value)) || value;
@@ -137,3 +143,4 @@ function createRouterAndSwaggerDoc(Controller, rsName) {
 
 
 module.exports = createRouterAndSwaggerDoc;
+module.exports.coerceType = coerceType;
