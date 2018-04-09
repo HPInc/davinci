@@ -16,7 +16,7 @@ const boot = (...args) => {
 	let options = args[1];
 	let callback = args[2];
 
-	const PORT = process.env.PORT || 3000;
+	const PORT = process.env.PORT || 8000;
 
 	if (args.length === 1) {
 		callback = app;
