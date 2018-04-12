@@ -61,7 +61,16 @@ module.exports = {
 							$ref: '#/definitions/Customer List'
 						}
 					}
-				}
+				},
+				parameters: [
+					{
+						name: 'data',
+						in: 'body',
+						description: 'The customer data to add to the database.',
+						required: true,
+						type: 'object'
+					}
+				]
 			},
 			get: {
 				summary: 'List Customers',
@@ -112,8 +121,7 @@ module.exports = {
 						in: 'path',
 						description: 'The customer id.',
 						required: true,
-						type: 'string',
-						format: 'JSON'
+						type: 'string'
 					}
 				],
 				responses: {

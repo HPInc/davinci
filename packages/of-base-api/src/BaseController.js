@@ -8,11 +8,17 @@ class BaseController {
 		this.model = model;
 	}
 
-	getById({ id }, context) {
+	async getById({ id }, context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
-		return this.model.findOne({
+		const result = await this.model.findOne({
 			query: { [this.model.id]: id }
 		}, context);
+
+		if (!result) {
+			throw new errors.NotFound();
+		}
+
+		return result;
 	}
 
 	list({ query = {} }, context) {
