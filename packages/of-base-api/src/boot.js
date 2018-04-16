@@ -1,7 +1,6 @@
 const debug = require('debug')('of-base-api');
 const express = require('express');
 const compression = require('compression');
-const bodyParser = require('body-parser');
 const requireDir = require('require-dir');
 const _ = require('lodash');
 const path = require('path');
@@ -79,8 +78,8 @@ const boot = (...args) => {
 
 	const configure = async () => {
 		app.use(compression());
-		app.use(bodyParser.json());
-		app.use(bodyParser.urlencoded({ extended: true }));
+		app.use(express.json({ limit: '1mb' }));
+		app.use(express.urlencoded({ extended: true }));
 		process.nextTick(() => {
 			docs.explorer(app, {
 				discoveryUrl: '/api-doc.json',

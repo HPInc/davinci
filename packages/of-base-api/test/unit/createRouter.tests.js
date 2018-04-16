@@ -1,6 +1,6 @@
 const { coerceType } = require('../../src/createRouter');
 
-describe('createRpouter', () => {
+describe('createRouter', () => {
 	describe('#coerceType', () => {
 		it('Should correctly coerce types', async () => {
 			coerceType('{ "test": 1 }', { type: 'object' }).should.be.Object().and.have.property('test').equal(1);
