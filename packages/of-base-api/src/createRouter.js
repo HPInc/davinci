@@ -132,7 +132,10 @@ const createRouteHandlers = controller => {
 	const routeHandlers = [];
 
 	// for each path
-	_.each(controller.def.paths, (swaggerPath, path) => {
+	_.each(controller.def.paths, (swaggerPath, pathName) => {
+
+		// convert it from swagger {param} format to express :param format
+		const path = pathName.replace(/{(.*?)}/gi, ':$1');
 
 		// for each path/method
 		_.each(swaggerPath, (operation, method) => {

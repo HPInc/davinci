@@ -53,4 +53,35 @@ describe('createRouter', () => {
 		done();
 	});
 
+	it('should convert paths from swagger {x} to express :x format', done => {
+		const def = {
+			paths: {
+				'/{id}': {
+					put: {
+						summary: 'First Thing',
+						operationId: 'update',
+					}
+				},
+				'/{one}/{two}': {
+					get: {
+						summary: 'Another Thing',
+						operationId: 'update',
+					}
+				}
+			}
+		};
+		class ParamController extends BaseController {
+			constructor() { super(def); }
+		}
+
+		const router = createRouter(ParamController);
+
+		router.should.have.property('stack').of.length(2);
+		router.stack[0].should.have.property('route');
+		router.stack[0].route.should.have.property('path').equal('/:id');
+		router.stack[1].should.have.property('route');
+		router.stack[1].route.should.have.property('path').equal('/:one/:two');
+		done();
+	});
+
 });
