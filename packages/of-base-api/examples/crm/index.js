@@ -1,10 +1,10 @@
-const { boot, createRouter } = require('../../');
+const { createApp, createRouter } = require('../../');
 const debug = require('debug')('of-base-api:example');
 const CustomerController = require('./customer/CustomerController');
 const FileController = require('./files/FileController');
 const SearchController = require('./search/SearchController');
 
-boot(app => {
+createApp(app => {
 	// add some middleware
 	app.use((req, res, next) => {
 		debug('logger', req.hostname, req.method, req.path);
