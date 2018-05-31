@@ -1,107 +1,64 @@
 const debug = require('debug')('of-base-api');
-const express = require('express');
-const compression = require('compression');
 const requireDir = require('require-dir');
 const _ = require('lodash');
 const path = require('path');
 const Promise = require('bluebird');
-const docs = require('./openapiDocs');
-const notFoundHandler = require('feathers-errors/not-found');
-const errorHandler = require('feathers-errors/handler');
 const fs = Promise.promisifyAll(require('fs'));
 
-const boot = (...args) => {
-	let app = args[0];
-	let options = args[1];
-	let callback = args[2];
+const checkAndAssignBootDir = options => {
 
-	const PORT = process.env.PORT || 8000;
+	// create an array of boot paths
+	const paths = [];
 
-	if (args.length === 1) {
-		callback = app;
-		app = express();
-	} else if (args.length === 2) {
-		callback = typeof options === 'function' ? options : (callback || (() => app));
-		options = {};
+	// start with the bootDirPath passed in
+	if (options && options.bootDirPath) {
+		paths.push(path.join(process.cwd(), options.bootDirPath));
 	}
+	// add some standard paths
+	paths.push(path.join(process.cwd(), 'boot'));
+	paths.push(path.join(process.cwd(), 'src/boot'));
 
-	const checkAndAssignBootDir = async () => {
-		const checkPath = async currentPath => {
-			const stats = await fs.statAsync(currentPath);
-			if (stats.isDirectory()) {
-				return currentPath;
-			}
-			throw new Error('"boot" must be a directory');
-		};
+	// find only the valid folders that exist
+	const validBootPath = paths.find(testPath => {
+		if (!fs.existsSync(testPath)) return false;
+		const stats = fs.statSync(testPath);
+		if (stats.isDirectory()) return true;
+		return false;
+	});
 
-		const paths = [];
-
-		if (options && options.bootDirPath) {
-			paths.push(path.join(
-				process.cwd(),
-				options.bootDirPath
-			));
-		}
-
-		paths.push(path.join(
-			process.cwd(),
-			'boot'
-		));
-
-		paths.push(path.join(
-			process.cwd(),
-			'src/boot'
-		));
-
-		let result;
-
-		try {
-			result = await Promise.any(paths.map(p => {
-				return checkPath(p);
-			}));
-		} catch (err) {
-			throw new Error('Cannot find boot directory or boot is not a directory');
-		}
-
-		return result;
-	};
-
-	const execBootScripts = async () => {
-		const bootDirPath = await checkAndAssignBootDir();
-
-		const bootScripts = _.values(requireDir(bootDirPath));
-		return Promise.map(bootScripts, script => {
-			if (typeof script === 'function') return script(app);
-			return false;
-		});
-	};
-
-	const configure = async () => {
-		app.use(compression());
-		app.use(express.json({ limit: '1mb' }));
-		app.use(express.urlencoded({ extended: true }));
-		process.nextTick(() => {
-			docs.explorer(app, {
-				discoveryUrl: '/api-doc.json',
-				version: '1.0',  // read from package.json
-				basePath: '/api'
-			});
-			app.use(notFoundHandler());
-			app.use(errorHandler({ html: false }));
-		});
-
-		await execBootScripts();
-		const server = app.server || app;
-		server.listen(PORT, () => debug(`Example app listening on port ${PORT}!`));
-		return app;
-	};
-
-	if (typeof callback === 'function') {
-		configure();
-		return callback.call(app, app);
-	}
-
-	return configure();
+	return validBootPath;
 };
 
-module.exports = boot;
+const execBootScripts = (app, options) => {
+
+	debug('Executing Boot Scripts');
+
+	const bootDirPath = checkAndAssignBootDir(options);
+
+	// no valid boot path so do nothing
+	if (!bootDirPath) return false;
+
+	debug('Boot Folder ', bootDirPath);
+
+	// found some valid scripts (ignore not functions)
+	const scripts = requireDir(bootDirPath);
+
+	const bootScripts = _.values(scripts).filter((s, i) => {
+		debug('Checking Scripts', i);
+		return (typeof s === 'function' || typeof s.default === 'function');
+	});
+
+	// execute them
+	return Promise.map(bootScripts, (script, i) => {
+		debug(`Executing script ${i}`);
+		if (script.default) {
+			return script.default(app);
+		}
+		return script(app);
+	});
+};
+
+module.exports = {
+	checkAndAssignBootDir,
+	execBootScripts
+};

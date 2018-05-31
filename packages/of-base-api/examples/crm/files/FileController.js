@@ -1,12 +1,10 @@
 const BaseController = require('../../../src/BaseController');
 const definition = require('./file.def');
-const File = require('./file.model');
+const FileModel = require('./file.model');
 
 class FileController extends BaseController {
-	constructor({ model = File, def = definition } = {}) {
-		super();
-		this.model = model;
-		this.def = def;
+	constructor({ model = FileModel.create(), def = definition } = {}) {
+		super(def, model);
 	}
 
 	customFn() {

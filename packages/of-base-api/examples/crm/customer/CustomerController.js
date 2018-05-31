@@ -5,14 +5,13 @@ const FileModel = require('../files/file.model');
 
 class CustomerController extends BaseController {
 	// easy to test
-	constructor({ model = CustomerModel, def = definition } = {}) {
-		super();
-		this.model = model;
-		this.def = def;
+	constructor({ model = CustomerModel.create(), def = definition } = {}) {
+		super(def, model);
+		this.fileModel = FileModel.create();
 	}
 
 	customMethod() {
-		return FileModel.find({});
+		return this.fileModel.find({});
 	}
 }
 

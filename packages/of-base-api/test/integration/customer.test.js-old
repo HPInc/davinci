@@ -1,0 +1,66 @@
+const should = require('should');
+const express = require('express');
+const createRouter = require('../../src/createRouter');
+const CustomerController = require('../../examples/crm/customer/CustomerController');
+const utils = require('../support/utils');
+
+describe('schemas', () => {
+
+	describe('POST /api/customer', () => {
+		it('should return 400 when submitting invalid data', done => {
+			const mockClass = utils.makeMockControllerClass({ find: () => 888 }, CustomerController);
+			const router = createRouter(mockClass, 'customers');
+			router.should.have.property('params');
+			done();
+		});
+
+		it('should throw validation errors when submitting invalid data', done => {
+			const mockClass = utils.makeMockControllerClass({ }, CustomerController);
+			const router = createRouter(mockClass, 'customers');
+			const response = utils.makeMockResponse(() => {
+				throw new Error('Should not succeed');
+			});
+			const request = utils.makeMockRequest('POST', '/', {
+				// missing firstname
+				lastname: 'maltese',
+				weight: 'not a number' // wrong type
+			});
+			// we want an error to be thrown and caught in the express middleware
+			const next = err => {
+				err.should.have.property('errors');
+				err.errors.should.be.instanceOf(Array).of.length(2);
+				err.errors[0].should.have.properties(['keyword', 'message']);
+				err.errors[0].keyword.should.equal('required');
+				err.errors[0].params.should.deepEqual({ missingProperty: 'firstname' });
+				err.errors[0].message.should.equal('should have required property \'firstname\'');
+				err.errors[1].keyword.should.equal('type');
+				err.errors[1].dataPath.should.equal('.weight');
+				err.errors[1].message.should.equal('should be integer');
+				done();
+			};
+			// make the request
+			router.handle(request, response, next);
+		});
+
+		it('should coerce the data submitted', done => {
+			// the mock model just passes the incoming data back to the calling function
+			// this data is already processed using the schema checking system
+			const mockClass = utils.makeMockControllerClass({ create: data => Promise.resolve(data) }, CustomerController);
+			const router = createRouter(mockClass, 'customers');
+			const body = {
+				firstname: 'piero',
+				lastname: 'maltese',
+				weight: '10' // wrong type
+			};
+			const response = utils.makeMockResponse(results => {
+				results.firstname.should.be.equal(body.firstname);
+				results.lastname.should.be.equal(body.lastname);
+				results.weight.should.be.equal(10); // converted to number
+				done();
+			});
+			const request = utils.makeMockRequest('POST', '/', body);
+			// make the request
+			router.handle(request, response);
+		});
+	});
+});

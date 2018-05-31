@@ -1,8 +1,16 @@
+const Ajv = require('ajv');
 const debug = require('debug')('of-base-api');
 const express = require('express');
 const _ = require('lodash');
 const swaggerDocs = require('./openapiDocs');
 const errors = require('feathers-errors');
+
+const AJV_OPTS = {
+	allErrors: true,
+	coerceTypes: true,
+	useDefaults: true,
+	removeAdditional: 'all'
+};
 
 function sendResults(res, statusCode) {
 	return results => {
@@ -23,36 +31,52 @@ function sendError(next) {
 	};
 }
 
+const attemptJsonParsing = ({ value, config, schema }) => {
+	if (_.startsWith(value, '{') && _.endsWith(value, '}')) {
+		try {
+			return {
+				value: JSON.parse(value),
+				config,
+				schema
+			};
+		} catch (err) {
+			return {
+				value,
+				config,
+				schema
+			};
+		}
+	}
 
-/* TODO: implement a more robust type coercion system
-	using one of: yup, joi or ajv
- */
-
-const coerceType = (value, paramConfig) => {
-	if (_.isNull(value) || _.isUndefined(value)) return value;
-	const { type, format } = paramConfig;
-	const key = _.compact([type, format]).join('_');
-
-	const jsonParse = val => {
-		if (_.isObject(val) || _.isArray(val)) return val;
-		return JSON.parse(val);
-	};
-
-	const coerceSwitch = {
-		string: String,
-		number: Number,
-		integer: parseInt,
-		object: jsonParse,
-		array: jsonParse,
-		string_JSON: jsonParse
-	};
-
-	return (coerceSwitch[key] && coerceSwitch[key](value)) || value;
+	return { value, config, schema };
 };
 
-const mapReqToParameters = (req, res, parameters = []) => {
-	const parameterList = {};
-	_.each(parameters, p => {
+const validateAndCoerce = ({ value, config, schema: resourceSchema }) => {
+	const isUndefinedButNotRequired = !config.required && typeof value === 'undefined';
+	if (config.schema && !isUndefinedButNotRequired) {
+		const ajv = new Ajv(AJV_OPTS);
+		const valid = ajv
+			.addSchema({ ...config.schema, ...resourceSchema }, 'schema')
+			.validate('schema', value);
+		if (!valid) {
+			const error = new errors.BadRequest();
+			error.errors = ajv.errors;
+			throw error;
+		}
+	}
+
+	return { value, config };
+};
+
+const processParameter = ({ value, config, schema }) =>
+	_.flow(attemptJsonParsing, validateAndCoerce, ({ value: val }) => val)({
+		value,
+		config,
+		schema
+	});
+
+const mapReqToParameters = (req, res, parameters = [], schema) => {
+	const parameterList = parameters.reduce((acc, p) => {
 		if (p.name) {
 			let value = null;
 			if (p.in === 'query') {
@@ -66,17 +90,10 @@ const mapReqToParameters = (req, res, parameters = []) => {
 			} else {
 				throw new errors.NotImplemented(`Can't get field ${p.name} - ${p.in} not yet supported`);
 			}
-
-			// TODO: better swagger validation (types, min/max, etc)
-			if (_.isNil(value)) {
-				if (p.required) throw new errors.BadRequest(`Missing required field ${p.name}`);
-				if (p.schema && p.schema.default) value = p.schema.default;
-			}
-
-
-			parameterList[p.name] = coerceType(value, p);
+			acc[p.name] = processParameter({ value, config: p, schema });
 		}
-	});
+		return acc;
+	}, {});
 
 	const context = {
 		body: req.body,
@@ -93,54 +110,76 @@ const mapReqToParameters = (req, res, parameters = []) => {
 	};
 };
 
-function createRouterAndSwaggerDoc(Controller, rsName) {
-	const ctrlName = Controller.name;
-	const resourceName = rsName || ctrlName.replace(/Controller$/, '').toLowerCase();
-	const controller = new Controller();
-	debug('creating route');
+const makeHandlerFunction = (operation, controller, functionName) => {
+	return (req, res, next) => {
+		// need a custom middleware to set the context ID
+		const { parameterList, context } = mapReqToParameters(req, res, operation.parameters, controller.def);
+		debug('calling ', functionName);
+		// the controller functions return a promise
+		controller[functionName](parameterList, context).then(sendResults(res), sendError(next));
+	};
+};
 
-	const router = express.Router();
+const makeMethodName = operation => {
+	// this allows for namespaced operationId names
+	// TODO is this required anymore?
+	const operationParts = operation.operationId.split('.');
+	const operationName = operationParts[operationParts.length - 1];
+	return operationName.split('#')[0];
+};
 
-	// for each path in the doc
+const createRouteHandlers = controller => {
+	const routeHandlers = [];
 
-	_.each(controller.def.paths, (swaggerPath, pathName) => {
+	// for each path
+	_.each(controller.def.paths, (swaggerPath, path) => {
 
-		// convert it from swagger {param} format to express :param format
-		let convertedPath = pathName;
-		convertedPath = convertedPath.replace(/{(.*?)}/gi, ':$1');
-
-		// for each method in the path add the operation to express
+		// for each path/method
 		_.each(swaggerPath, (operation, method) => {
 
-			const operationParts = operation.operationId.split('.');
-			const operationName = operationParts[operationParts.length - 1];
-			const functionName = operationName.split('#')[0];
+			// get the method name for the controller
+			const methodName = makeMethodName(operation);
 
-			debug('adding express route', method, convertedPath, `=> controller.${functionName}`);
+			// only add it if the controller method exists, otherwise ignore it
+			if (!controller[methodName]) return;
 
-			router[method](convertedPath, (req, res, next) => {
-
-				// need a custom middleware to set the context ID
-				const { parameterList, context } = mapReqToParameters(req, res, operation.parameters);
-				debug('calling ', functionName);
-
-				if (controller[functionName]) {
-					// the controller functions return a promise
-					controller[functionName](parameterList, context)
-						.then(sendResults(res), sendError(next));
-				} else {
-					debug('Invalid Operation ID', functionName);
-					throw new Error(`Invalid Controller Function: ${functionName}`);
-				}
-			});
+			// create the handler function
+			const handler = makeHandlerFunction(operation, controller, methodName);
+			routeHandlers.push({ method, path, handler });
 		});
-
 	});
+	return routeHandlers;
+};
 
+const validateController = Controller => {
+	if (!Controller) throw new Error('Invalid Controller - missing Controller');
+	if (typeof Controller !== 'function') throw new Error('Invalid Controller - not function');
+};
+
+const createRouterAndSwaggerDoc = (Controller, rsName) => {
+
+	// need to validate the inputs here
+	validateController(Controller);
+
+	// get a resource name either supplied or derive from Controller name
+	const resourceName = rsName || Controller.name.replace(/Controller$/, '').toLowerCase();
+
+	// create the controller from the supplied class
+	const controller = new Controller();
+
+	// create the router
+	const router = express.Router();
+
+	// now process the swagger structure and get an array of method/path mappings to handlers
+	const routes = createRouteHandlers(controller);
+
+	// add them to the router
+	routes.forEach(route => router[route.method](route.path, route.handler));
+
+	// add the resource to the swagger documentation
 	swaggerDocs.addResource(resourceName, controller.def);
-	return router;
-}
 
+	return router;
+};
 
 module.exports = createRouterAndSwaggerDoc;
-module.exports.coerceType = coerceType;

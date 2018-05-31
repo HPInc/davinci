@@ -1,4 +1,8 @@
 const MongooseModel = require('../../../src/MongooseModel');
 const schema = require('./file.schema');
 
-module.exports = new MongooseModel('File', schema, 'files');
+const create = () => {
+	return new MongooseModel('File', schema, 'files');
+};
+
+module.exports = { create };

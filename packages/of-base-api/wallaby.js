@@ -1,16 +1,24 @@
 module.exports = function () {
 	return {
 		files: [
-			'test/support/env.js',
+			'index.js',
+			'test/support/**/*.js',
+			'test/unit/boot/*.js',
 			'src/**/*.js'
 		],
 
 		tests: [
-			'test/**/*.tests.js'
+			'test/**/*.test.js'
 		],
 
 		env: {
 			type: 'node'
+		},
+
+		workers: {
+		  initial: 1,
+		  regular: 1,
+		  recycle: true
 		},
 
 		setup: function () {

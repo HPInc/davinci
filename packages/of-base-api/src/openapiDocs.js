@@ -2,12 +2,12 @@ const debug = require('debug')('of-base-api');
 const express = require('express');
 const _ = require('lodash');
 const path = require('path');
-const Resource = require('./openapiResource');
+const Resource = require('./Resource');
+const config = require('./config');
 
 const swaggerUiAssetPath = path.resolve(path.join(__dirname, 'explorer'));
 
 const SWAGGER_VERSION = '2.0';
-// const router = express.Router();
 
 const resources = [];
 
@@ -19,51 +19,54 @@ const addResource = (resourceName, doc) => {
 	resources.push(resource);
 };
 
-const createApiDocs = (app, opts) => {
+const createApiDocs = (app, opts = {}) => {
 
 	debug(`setting up swagger docs on ${opts.discoveryUrl}`);
 
-	app.get(opts.discoveryUrl, (req, res) => {
-		const protocol = process.env.NODE_ENV === 'local' ? 'http' : 'https';
+	const makeHandler = () => {
+		return (req, res) => {
+			const protocol = opts.protocol || config.PROTOCOL;
+			const basePath = opts.basePath || `${protocol}://${req.headers.host}/api`;
+			const fullSwagger = {
+				swagger: SWAGGER_VERSION,
+				info: {
+					version: '1.0.0',
+					title: opts.title || 'API'
+				},
+				schemes: [req.get('X-Forwarded-Protocol') || protocol],
+				basePath,
+				host: req.headers.host,
+				paths: {},
+				definitions: {},
+				parameters: {}
+			};
 
-		const basePath = opts.basePath || `${protocol}://${req.headers.host}/api`;
+			resources.forEach(resource => {
 
-		const fullSwagger = {
-			swagger: SWAGGER_VERSION,
-			info: {
-				version: '1.0.0',
-				title: 'File API'
-			},
-			schemes: [req.get('X-Forwarded-Protocol') || protocol],
-			basePath,
-			host: req.headers.host,
-			paths: {},
-			definitions: {},
-			parameters: {}
+				// add definitions
+				_.each(resource.definitions, (resourceDefinition, defName) => {
+					fullSwagger.definitions[defName] = resourceDefinition;
+				});
+
+				// TODO is this actually used, it is not part of the openAPI specification
+				// add parameters
+				_.each(resource.parameters, (resourceParameter, paramName) => {
+					fullSwagger.parameters[paramName] = resourceParameter;
+				});
+
+				// add paths
+				_.each(resource.paths, (resourcePath, pathName) => {
+					let fullPath = `/${resource.basePath}${pathName}`;
+					if (pathName === '/') fullPath = `/${resource.basePath}`;
+					fullSwagger.paths[fullPath] = resourcePath;
+				});
+			});
+
+			res.json(fullSwagger);
 		};
+	};
 
-		resources.forEach(resource => {
-
-			// add definitions
-			_.each(resource.definitions, (resourceDefinition, defName) => {
-				fullSwagger.definitions[defName] = resourceDefinition;
-			});
-
-			// add parameters
-			_.each(resource.parameters, (resourceParameter, paramName) => {
-				fullSwagger.parameters[paramName] = resourceParameter;
-			});
-
-			// add paths
-			_.each(resource.paths, (resourcePath, pathName) => {
-				let fullPath = `/${resource.basePath}${pathName}`;
-				if (pathName === '/') fullPath = `/${resource.basePath}`;
-				fullSwagger.paths[fullPath] = resourcePath;
-			});
-		});
-
-		res.json(fullSwagger);
-	});
+	app.get(opts.discoveryUrl, makeHandler());
 
 	// return app;
 };

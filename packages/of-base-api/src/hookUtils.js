@@ -128,17 +128,35 @@ function applyHook(service) {
 		};
 	};
 
-	const decorateWithBaseServiceMethods = srvc => Object.assign(srvc, baseService);
+	const decorateWithBaseServiceMethods = srvc => {
+		// create an object that takes the baseService (findOne) methods
+		return Object.assign(srvc, baseService);
+	};
 
-	const createServiceProxy = () => new Proxy(decorateWithBaseServiceMethods(service), {
-		get(target, propName) {
-			if (serviceMethods.includes(propName)) {
-				return execMethodHooks(target, propName)();
-			} else if (hooksMethods[propName]) return hooksMethods[propName];
+	const createServiceProxy = () => {
 
-			return target[propName];
-		}
-	});
+		const baseServiceMethods = {
+			// overwriting the .get method
+			get(target, propName) {
+				// is it a fundamental service method
+				if (serviceMethods.includes(propName)) {
+					// execute the hooks
+					return execMethodHooks(target, propName)();
+				} else if (hooksMethods[propName]) {
+					// otherwise return the hook function (before, after etc)
+					return hooksMethods[propName];
+				}
+				// otherwise just return the property value on the target
+				return target[propName];
+			}
+		};
+
+		// this adds the baseService.findOne method
+		const decoratedService = decorateWithBaseServiceMethods(service);
+
+		// new Proxy(target, handlerObject)
+		return new Proxy(decoratedService, baseServiceMethods);
+	};
 
 	return createServiceProxy();
 }

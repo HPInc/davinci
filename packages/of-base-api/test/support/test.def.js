@@ -27,6 +27,18 @@ module.exports = {
 			}
 		}
 	},
+	// is this actually used? it is not part of the openAPI spec
+	parameters: [
+		{
+			name: 'data',
+			in: 'body',
+			description: 'The new customer data',
+			required: true,
+			schema: {
+				$ref: '#/definitions/Customer'
+			}
+		}
+	],
 	paths: {
 		'/': {
 			post: {
@@ -122,7 +134,6 @@ module.exports = {
 						description: 'The customer id.',
 						required: true,
 						type: 'object'
-
 					},
 					{
 						name: 'data',
@@ -130,7 +141,6 @@ module.exports = {
 						description: 'The customer data.',
 						required: true,
 						type: 'object'
-
 					}
 				],
 				responses: {

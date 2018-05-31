@@ -3,5 +3,6 @@ const mongoose = require('mongoose');
 module.exports = () => {
 	mongoose.Promise = global.Promise;
 	mongoose.set('debug', true);
-	return mongoose.connect('mongodb://localhost/files-api', { useMongoClient: true });
+	const mongodbUrl = process.env.MONGODB_URL || 'mongodb://localhost/files-api';
+	return mongoose.connect(mongodbUrl, { useMongoClient: true });
 };

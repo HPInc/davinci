@@ -21,7 +21,7 @@ class BaseController {
 		return result;
 	}
 
-	list({ query = {} }, context) {
+	list({ query = {} } = {}, context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 		const parsedFilter = createQueryFilters(query);
 
