@@ -36,6 +36,6 @@
     "sinon": "1.17.6"
   },
   "peerDependencies": {
-    "mongoose": "4.11.14"
+    "mongoose": "5.2.4"
   }
 }
