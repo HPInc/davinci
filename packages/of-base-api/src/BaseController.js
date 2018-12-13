@@ -39,16 +39,24 @@ class BaseController {
 		return this.model.create(data, context);
 	}
 
-	update({ id, data }, context) {
+	async update({ id, data }, context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 		context.query = { [this.model.id]: id };
-		return this.model.patch(null, data, context);
+		const updated = await this.model.patch(null, data, context);
+		if (updated.length === 0) {
+			throw new errors.NotFound();
+		}
+		return updated[0];
 	}
 
-	remove({ id }, context) {
+	async remove({ id }, context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 		context.query = { [this.model.id]: id };
-		return this.model.remove(null, context);
+		const removed = await this.model.remove(null, context);
+		if (removed.length === 0) {
+			throw new errors.NotFound();
+		}
+		return removed[0];
 	}
 }
 

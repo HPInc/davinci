@@ -82,7 +82,6 @@ describe('createApp', () => {
 		it('Should successfully configure an express app with no middleware', async () => {
 			const { server } = await createApp();
 			server.should.have.property('listen');
-			console.log(server.server);
 			server.close();
 		});
 
