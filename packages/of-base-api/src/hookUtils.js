@@ -92,6 +92,7 @@ function applyHook(service) {
 			find: [hook.params],
 			findOne: [hook.params],
 			create: [hook.data, hook.params],
+			update: [hook.id, hook.data, hook.params],
 			patch: [hook.id, hook.data, hook.params],
 			remove: [hook.id, hook.params]
 		};
@@ -101,8 +102,8 @@ function applyHook(service) {
 	const execMethodHooks = (target, propName) => () => {
 		return async function methodProxy(...args) {
 			const method = target[propName];
-			const beforeHooks = hooks.before[propName];
-			const afterHooks = hooks.after[propName];
+			const beforeHooks = [...hooks.before.all, ...hooks.before[propName]];
+			const afterHooks = [...hooks.after.all, ...hooks.after[propName]];
 
 			const hookObj = createHookObject({
 				type: 'before',

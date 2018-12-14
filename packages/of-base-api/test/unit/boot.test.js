@@ -9,7 +9,7 @@ describe('boot', () => {
 
 	before(() => {
 		// set our current working directory to this unit test's directory
-		cwdStub = sinon.stub(process, 'cwd', () => __dirname);
+		cwdStub = sinon.stub(process, 'cwd').callsFake(() => __dirname);
 	});
 
 	after(() => {

@@ -49,7 +49,7 @@ const configureExpress = (app, runMiddlewares) => {
 	// add the swagger routes
 	docs.explorer(app, {
 		discoveryUrl: '/api-doc.json',
-		version: '1.0',  // read from package.json
+		version: '1.0', // read from package.json
 		basePath: '/api'
 	});
 	app.use(notFoundHandler());

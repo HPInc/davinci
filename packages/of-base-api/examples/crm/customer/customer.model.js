@@ -9,6 +9,10 @@ const create = () => {
 	const customerSchema = new mongoose.Schema(schema);
 	const customerModel = new MongooseModel('Customer', customerSchema, 'customers');
 
+	customerModel.before('all', hook => {
+		debug(hook.params);
+	});
+
 	customerModel.before('find', hook => {
 		debug(hook.params);
 	});

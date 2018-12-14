@@ -6,9 +6,9 @@
   "scripts": {
     "example": "node examples/crm/index.js",
     "test": "mocha",
-    "posttest": "eslint . && nsp check",
+    "posttest": "eslint . && npm audit",
     "cover": "nyc --reporter=lcov mocha",
-    "postcover": "eslint . && nsp check"
+    "postcover": "eslint . && npm audit"
   },
   "author": "Nigel Watson <nigel.watson@oneflowcloud.com> (http://www.oneflowsystems.com/)",
   "license": "ISC",
@@ -28,12 +28,11 @@
     "eslint": "3.13.1",
     "eslint-config-airbnb-base": "11.0.1",
     "eslint-plugin-import": "2.2.0",
-    "mocha": "3.1.2",
+    "mocha": "5.2.0",
     "mongoose": "5.2.4",
-    "nsp": "2.6.2",
-    "nyc": "11.0.2",
+    "nyc": "13.1.0",
     "should": "11.1.2",
-    "sinon": "1.17.6"
+    "sinon": "4.5.0"
   },
   "peerDependencies": {
     "mongoose": "5.2.4"
