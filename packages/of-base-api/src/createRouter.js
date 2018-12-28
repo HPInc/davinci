@@ -111,12 +111,14 @@ const mapReqToParameters = (req, res, parameters = [], schema) => {
 };
 
 const makeHandlerFunction = (operation, controller, functionName) => {
+	const successCode = _.findKey(operation.responses, (obj, key) => (+key >= 200 && +key < 400));
+
 	return (req, res, next) => {
 		// need a custom middleware to set the context ID
 		const { parameterList, context } = mapReqToParameters(req, res, operation.parameters, controller.def);
 		debug('calling ', functionName);
 		// the controller functions return a promise
-		controller[functionName](parameterList, context).then(sendResults(res), sendError(next));
+		controller[functionName](parameterList, context).then(sendResults(res, successCode), sendError(next));
 	};
 };
 

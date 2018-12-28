@@ -84,4 +84,73 @@ describe('createRouter', () => {
 		done();
 	});
 
+	describe('response definitions', () => {
+		const mockDef = {
+			paths: {
+				"/test": {
+					get: {
+						summary: "Testing given success response code",
+						operationId: "test",
+						responses: {
+							201: {
+								description: 'Created something'
+							},
+							429: {
+								description: 'Slow down!'
+							}
+						}
+					},
+					put: {
+						summary: "Testing default response code",
+						operationId: "test",
+						responses: {}
+					}
+				}
+			}
+		};
+		class MockController extends BaseController {
+			constructor({ def = mockDef } = {}) {
+				super(def, null);
+			}
+
+			async test({}) {
+				return {};
+			}
+		};
+
+		it('should use the specified success response code', async () => {
+			const router = createRouter(MockController);
+
+			const req = {};
+			const res = {
+				status: code => {
+					res.statusCode = +code;
+					return res;
+				},
+				json: () => { return res; },
+				end: () => {}
+			};
+
+			await router.stack[0].route.stack[0].handle(req, res);
+			res.statusCode.should.equal(201);
+		});
+
+		it('should use a default response code when none specified', async () => {
+			const router = createRouter(MockController);
+
+			const req = {};
+			const res = {
+				status: code => {
+					res.statusCode = +code;
+					return res;
+				},
+				json: () => { return res; },
+				end: () => {}
+			};
+
+			await router.stack[1].route.stack[0].handle(req, res);
+			res.statusCode.should.equal(200);
+		});
+
+	});
 });
