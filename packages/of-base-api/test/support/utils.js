@@ -15,10 +15,10 @@ module.exports.makeMockRequest = (method, url, body = {}) => {
 	return { url, method, body };
 };
 
-module.exports.makeMockControllerClass = (model, classToExtend) => {
+module.exports.makeMockControllerClass = ({ model, def } = {}, classToExtend) => {
 	return class extends classToExtend {
 		constructor() {
-			super({ model });
+			super({ model, def });
 		}
 	};
 };

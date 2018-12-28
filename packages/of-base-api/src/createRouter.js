@@ -2,6 +2,7 @@ const Ajv = require('ajv');
 const debug = require('debug')('of-base-api');
 const express = require('express');
 const _ = require('lodash');
+const Promise = require('bluebird');
 const swaggerDocs = require('./openapiDocs');
 const errors = require('feathers-errors');
 
@@ -118,7 +119,8 @@ const makeHandlerFunction = (operation, controller, functionName) => {
 		const { parameterList, context } = mapReqToParameters(req, res, operation.parameters, controller.def);
 		debug('calling ', functionName);
 		// the controller functions return a promise
-		controller[functionName](parameterList, context).then(sendResults(res, successCode), sendError(next));
+		// coerce the controller return value to be a promise
+		return Promise.try(() => controller[functionName](parameterList, context)).then(sendResults(res, successCode), sendError(next));
 	};
 };
 
@@ -188,3 +190,4 @@ const createRouterAndSwaggerDoc = (Controller, rsName) => {
 };
 
 module.exports = createRouterAndSwaggerDoc;
+module.exports.createRouteHandlers = createRouteHandlers;

@@ -151,6 +151,26 @@ module.exports = {
 					}
 				}
 			}
+		},
+		'/syncMethod': {
+			get: {
+				summary: 'Method with synchronous handler',
+				description: '',
+				operationId: 'syncMethod',
+				responses: {
+					200: {}
+				}
+			}
+		},
+		'/asyncMethod': {
+			get: {
+				summary: 'Method with asynchronous handler',
+				description: '',
+				operationId: 'asyncMethod',
+				responses: {
+					200: {}
+				}
+			}
 		}
 	}
 };
