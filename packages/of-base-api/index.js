@@ -1,4 +1,4 @@
-const errors = require('feathers-errors');
+const errors = require('./src/errors');
 const BaseController = require('./src/BaseController');
 const baseService = require('./src/baseService');
 const { createApp } = require('./src/createApp');

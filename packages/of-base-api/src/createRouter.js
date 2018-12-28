@@ -4,7 +4,7 @@ const express = require('express');
 const _ = require('lodash');
 const Promise = require('bluebird');
 const swaggerDocs = require('./openapiDocs');
-const errors = require('feathers-errors');
+const errors = require('./errors');
 
 const AJV_OPTS = {
 	allErrors: true,

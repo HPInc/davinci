@@ -1,8 +1,8 @@
 const debug = require('debug')('of-base-api');
-const errorHandler = require('feathers-errors/handler');
 const express = require('express');
 const http = require('http');
-const notFoundHandler = require('feathers-errors/not-found');
+const errorHandler = require('./errorHandler');
+const notFoundHandler = require('./notFoundHandler');
 const config = require('./config');
 const { execBootScripts } = require('./boot');
 const docs = require('./openapiDocs');

@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const errors = require('feathers-errors');
+const errors = require('./errors');
 const createQueryFilters = require('feathers-query-filters');
 
 class BaseController {
