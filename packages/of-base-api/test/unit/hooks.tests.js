@@ -6,7 +6,7 @@ const MongooseModel = require('../../src/MongooseModel');
 const connectToMongodb = () => {
 	mongoose.Promise = global.Promise;
 	mongoose.set('debug', true);
-	return mongoose.connect(process.env.MONGODB_URL, { useMongoClient: true });
+	return mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true });
 };
 
 const schema = { firstname: String };
