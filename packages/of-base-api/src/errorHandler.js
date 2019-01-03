@@ -2,24 +2,23 @@ const debug = require('debug')('of-base-api');
 const errors = require('./errors');
 
 module.exports = ({ exposeStack = false } = {}) => {
-	return (routeError, req, res) => {
-		debug(routeError);
+	return (err, req, res, next) => { // eslint-disable-line no-unused-vars
+		debug(err);
 
-		let error = routeError;
+		let error = err;
 
 		// include support for Feathers errors, coming from feathers-mongoose/etc
-		if (routeError.type === 'FeathersError') {
-			const { message, name, code, className, data } = routeError;
-			error = new errors.HttpError(message, name, code, className, data);
-			error.errors = routeError.errors;
-			error.stack = routeError.stack;
-		} else if (!(routeError instanceof errors.HttpError)) {
-			error = new errors.InternalServerError(routeError.message, {
-				errors: routeError.errors
+		if (err.type === 'FeathersError') {
+			error = new errors.HttpError(err.message, err.name, err.code, err.className, err.data);
+			error.errors = err.errors;
+			error.stack = err.stack;
+		} else if (!(err instanceof errors.HttpError)) {
+			error = new errors.InternalServerError(err.message, {
+				errors: err.errors
 			});
 
-			if (routeError.stack) {
-				error.stack = routeError.stack;
+			if (err.stack) {
+				error.stack = err.stack;
 			}
 		}
 

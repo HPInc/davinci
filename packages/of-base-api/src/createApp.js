@@ -53,7 +53,7 @@ const configureExpress = (app, runMiddlewares) => {
 		basePath: '/api'
 	});
 	app.use(notFoundHandler());
-	app.use(errorHandler({ html: false }));
+	app.use(errorHandler({}));
 };
 
 const createApp = async (...args) => {
