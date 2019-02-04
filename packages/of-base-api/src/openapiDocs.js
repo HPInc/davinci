@@ -30,15 +30,17 @@ const createApiDocs = (app, opts = {}) => {
 			const fullSwagger = {
 				swagger: SWAGGER_VERSION,
 				info: {
-					version: '1.0.0',
+					version: opts.version || '1.0.0',
 					title: opts.title || 'API'
 				},
 				schemes: [req.get('X-Forwarded-Protocol') || protocol],
 				basePath,
 				host: req.headers.host,
 				paths: {},
+				securityDefinitions: opts.securityDefinitions,
 				definitions: {},
-				parameters: {}
+				parameters: {},
+				externalDocs: opts.externalDocs
 			};
 
 			resources.forEach(resource => {

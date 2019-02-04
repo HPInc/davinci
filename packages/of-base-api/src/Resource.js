@@ -9,16 +9,18 @@ function Resource(basePath, doc) {
 	_.each(this.paths, path => {
 		_.each(path, operation => {
 
-			if (!operation.consumes) operation.consumes = [];
-			operation.consumes.push('application/json');
+			if (!operation.consumes || operation.consumes.length === 0) {
+				operation.consumes = ['application/json'];
+			}
 
-			if (!operation.produces) operation.produces = [];
-			operation.produces.push('application/json');
+			if (!operation.produces || operation.produces.length === 0) {
+				operation.produces = ['application/json'];
+			}
 
 			// tags
-			if (!operation.tags) operation.tags = [];
-			operation.tags.push(this.basePath);
-
+			if (!operation.tags || operation.tags.length === 0) {
+				operation.tags = [_.capitalize(this.basePath)];
+			}
 			// operations
 			if (!operation.responses) operation.responses = {};
 			if (!operation.responses['200'] && !operation.responses[200]) {
