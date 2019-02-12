@@ -1,5 +1,5 @@
 const debug = require('debug')('of-base-api:example');
-const BaseController = require('../../../src/BaseController');
+import BaseController from '../../../src/BaseController';
 const definition = require('./search.def');
 
 class SearchController extends BaseController {

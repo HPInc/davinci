@@ -1,8 +1,11 @@
-const debug = require('debug')('of-base-api');
-const errors = require('./errors');
+import Debug from 'debug';
+import * as errors from './errors';
 
-module.exports = ({ exposeStack = false } = {}) => {
-	return (err, req, res, next) => { // eslint-disable-line no-unused-vars
+const debug = Debug('of-base-api');
+
+export default ({ exposeStack = false } = {}) => {
+	return (err, _req, res) => {
+		// eslint-disable-line no-unused-vars
 		debug(err);
 
 		let error = err;

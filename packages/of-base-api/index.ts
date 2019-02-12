@@ -1,9 +1,8 @@
-const errors = require('./src/errors');
-const BaseController = require('./src/BaseController');
-const baseService = require('./src/baseService');
-const { createApp } = require('./src/createApp');
-const createRouter = require('./src/createRouter');
-const MongooseModel = require('./src/MongooseModel');
+import * as errors from './src/errors';
+import BaseController from './src/BaseController';
+import baseService from './src/baseService';
+import { createApp } from './src/createApp';
+import createRouter from './src/createRouter';
 
 /**
  * This is only here to assist people when upgrading their API.
@@ -15,12 +14,11 @@ const boot = () => {
 	process.exit(-1);
 };
 
-module.exports = {
+export {
 	BaseController,
 	baseService,
 	boot,
 	createApp,
 	createRouter,
-	MongooseModel,
 	errors
 };

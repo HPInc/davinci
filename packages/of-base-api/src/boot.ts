@@ -1,12 +1,13 @@
-const debug = require('debug')('of-base-api');
-const requireDir = require('require-dir');
-const _ = require('lodash');
-const path = require('path');
-const Promise = require('bluebird');
+import Debug from 'debug';
+import requireDir from 'require-dir';
+import _ from 'lodash';
+import path from 'path';
+import Promise from 'bluebird';
 const fs = Promise.promisifyAll(require('fs'));
 
-const checkAndAssignBootDir = options => {
+const debug = Debug('of-base-api');
 
+export const checkAndAssignBootDir = options => {
 	// create an array of boot paths
 	const paths = [];
 
@@ -29,8 +30,7 @@ const checkAndAssignBootDir = options => {
 	return validBootPath;
 };
 
-const execBootScripts = (app, options) => {
-
+export const execBootScripts = (app, options) => {
 	debug('Executing Boot Scripts');
 
 	const bootDirPath = checkAndAssignBootDir(options);
@@ -45,20 +45,15 @@ const execBootScripts = (app, options) => {
 
 	const bootScripts = _.values(scripts).filter((s, i) => {
 		debug('Checking Scripts', i);
-		return (typeof s === 'function' || typeof s.default === 'function');
+		return typeof s === 'function' || typeof s.default === 'function';
 	});
 
 	// execute them
-	return Promise.map(bootScripts, (script, i) => {
+	return Promise.map(bootScripts, (script:any, i) => {
 		debug(`Executing script ${i}`);
 		if (script.default) {
 			return script.default(app);
 		}
 		return script(app);
 	});
-};
-
-module.exports = {
-	checkAndAssignBootDir,
-	execBootScripts
 };

@@ -2,17 +2,22 @@ const _ = require('lodash');
 const errors = require('./errors');
 const createQueryFilters = require('feathers-query-filters');
 
-class BaseController {
-	constructor(def, model) {
+export default class BaseController {
+	def: any;
+	model: any;
+	constructor(def?, model?) {
 		this.def = def;
 		this.model = model;
 	}
 
 	async getById({ id, query = {} }, context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
-		const result = await this.model.findOne({
-			query: { ...query, [this.model.id]: id }
-		}, context);
+		const result = await this.model.findOne(
+			{
+				query: { ...query, [this.model.id]: id }
+			},
+			context
+		);
 
 		if (!result) {
 			throw new errors.NotFound();
@@ -25,13 +30,16 @@ class BaseController {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 		const parsedFilter = createQueryFilters(query);
 
-		return this.model.find({
-			query: _.defaultsDeep({}, parsedFilter.query, parsedFilter.filters),
-			paginate: {
-				default: 10,
-				max: 1000
-			}
-		}, context);
+		return this.model.find(
+			{
+				query: _.defaultsDeep({}, parsedFilter.query, parsedFilter.filters),
+				paginate: {
+					default: 10,
+					max: 1000
+				}
+			},
+			context
+		);
 	}
 
 	create({ data }, context) {
@@ -59,5 +67,3 @@ class BaseController {
 		return removed[0];
 	}
 }
-
-module.exports = BaseController;

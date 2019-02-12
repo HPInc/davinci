@@ -1,7 +1,7 @@
-const _ = require('lodash');
+import * as _ from 'lodash';
 
 const baseService = {
-	async findOne(query, params = {}) {
+	async findOne(query, params:any = {}) {
 		const defaultQuery = { filters: { $limit: 1 } };
 		const q = _.defaultsDeep({}, defaultQuery, query);
 		params.skipHooks = true;
@@ -11,4 +11,4 @@ const baseService = {
 	}
 };
 
-module.exports = baseService;
+export default baseService;

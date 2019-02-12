@@ -1,40 +1,56 @@
 {
-  "name": "@oneflow/of-base-api",
-  "version": "0.0.28",
-  "description": "Framework for rapid and consistent API development",
-  "main": "index.js",
-  "scripts": {
-    "example": "node examples/crm/index.js",
-    "test": "mocha",
-    "posttest": "eslint . && npm audit",
-    "cover": "nyc --reporter=lcov mocha",
-    "postcover": "eslint . && npm audit"
-  },
-  "author": "Nigel Watson <nigel.watson@oneflowcloud.com> (http://www.oneflowsystems.com/)",
-  "license": "ISC",
-  "dependencies": {
-    "ajv": "6.2.1",
-    "bluebird": "3.5.0",
-    "debug": "3.1.0",
-    "express": "4.16.1",
-    "feathers-hooks-common": "3.7.2",
-    "feathers-mongoose": "5.1.2",
-    "feathers-query-filters": "2.1.2",
-    "lodash": "4.17.10",
-    "require-dir": "0.3.2"
-  },
-  "devDependencies": {
-    "eslint": "3.13.1",
-    "eslint-config-airbnb-base": "11.0.1",
-    "eslint-plugin-import": "2.2.0",
-    "feathers-errors": "^2.9.2",
-    "mocha": "5.2.0",
-    "mongoose": "5.2.4",
-    "nyc": "13.1.0",
-    "should": "11.1.2",
-    "sinon": "4.5.0"
-  },
-  "peerDependencies": {
-    "mongoose": "5.2.4"
-  }
+	"name": "@oneflow/of-base-api",
+	"version": "0.0.28",
+	"description": "Framework for rapid and consistent API development",
+	"main": "index.ts",
+	"scripts": {
+		"example": "ts-node examples/crm/index.js",
+		"start": "ts-node ./src/app.ts",
+		"build": "tsc -p ./tsconfig.release.json",
+		"start-release": "node build/src/app.js",
+		"tslint": "tslint -t stylish --project \"tsconfig.json\" '{src,test}/**/*{.ts,.tsx}'",
+		"tslintfix": "tslint --fix -c ./tslint.json '{src,test}/**/*{.ts,.tsx}'",
+		"pretest": "npm run tslint && npm run build",
+		"test": "mocha --exit",
+		"cover": "nyc npm test"
+	},
+	"author": "Nigel Watson <nigel.watson@oneflowcloud.com> (http://www.oneflowsystems.com/)",
+	"license": "ISC",
+	"dependencies": {
+		"ajv": "6.2.1",
+		"bluebird": "3.5.0",
+		"debug": "3.1.0",
+		"express": "4.16.1",
+		"feathers-hooks-common": "3.7.2",
+		"feathers-mongoose": "5.1.2",
+		"feathers-query-filters": "2.1.2",
+		"lodash": "4.17.10",
+		"reflect-metadata": "0.1.13",
+		"require-dir": "0.3.2"
+	},
+	"devDependencies": {
+		"@types/bluebird": "3.5.25",
+		"@types/express": "4.16.1",
+		"@types/lodash": "4.14.120",
+		"@types/mocha": "5.2.5",
+		"@types/mongoose": "5.3.12",
+		"@types/node": "11.9.0",
+		"eslint": "3.13.1",
+		"eslint-config-airbnb-base": "11.0.1",
+		"eslint-plugin-import": "2.2.0",
+		"feathers-errors": "^2.9.2",
+		"mocha": "5.2.0",
+		"mongoose": "5.2.4",
+		"nyc": "13.1.0",
+		"should": "11.1.2",
+		"sinon": "4.5.0",
+		"ts-node": "8.0.2",
+		"tslint": "5.12.1",
+		"tslint-config-airbnb": "5.11.1",
+		"typescript": "3.3.3",
+		"typings": "2.1.1"
+	},
+	"peerDependencies": {
+		"mongoose": "5.2.4"
+	}
 }

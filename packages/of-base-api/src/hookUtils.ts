@@ -1,16 +1,9 @@
-const Promise = require('bluebird');
-const _ = require('lodash');
-const baseService = require('./baseService');
+import Bluebird from 'bluebird';
+import _ from 'lodash';
+import baseService from './baseService';
 
 function applyHook(service) {
-	const serviceMethods = [
-		'find',
-		'findOne',
-		'create',
-		'update',
-		'patch',
-		'remove'
-	];
+	const serviceMethods = ['find', 'findOne', 'create', 'update', 'patch', 'remove'];
 
 	const hooks = {
 		before: {
@@ -45,7 +38,14 @@ function applyHook(service) {
 		after: (method, fn) => addHook('after', method, fn)
 	};
 
-	const createHookObject = ({ type, methodName: method, methodArgs, result }) => {
+	interface ICreateHookObjectsArgs {
+		type: string;
+		methodName: string;
+		methodArgs: any;
+		result?: any;
+	}
+
+	const createHookObject = ({ type, methodName: method, methodArgs, result }: ICreateHookObjectsArgs) => {
 		const baseHook = {
 			method,
 			service,
@@ -112,7 +112,7 @@ function applyHook(service) {
 			});
 
 			if (!hookObj.params.skipHooks) {
-				await Promise.each(beforeHooks, hook => hook(hookObj));
+				await Bluebird.each(beforeHooks, hook => hook(hookObj));
 			}
 
 			const newArgs = getArgsFromHookObject(propName, hookObj);
@@ -122,7 +122,7 @@ function applyHook(service) {
 
 			const afterHookObj = _.assign({}, hookObj, { type: 'after' });
 			if (!hookObj.params.skipHooks) {
-				await Promise.each(afterHooks, hook => hook(afterHookObj));
+				await Bluebird.each(afterHooks, hook => hook(afterHookObj));
 			}
 
 			return afterHookObj.result;
@@ -135,7 +135,6 @@ function applyHook(service) {
 	};
 
 	const createServiceProxy = () => {
-
 		const baseServiceMethods = {
 			// overwriting the .get method
 			get(target, propName) {

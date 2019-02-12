@@ -1,4 +1,4 @@
-module.exports = {
+export default {
 	definitions: {
 		Customer: {
 			type: 'object',

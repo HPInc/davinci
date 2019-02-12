@@ -1,4 +1,4 @@
-const _ = require('lodash');
+import * as _ from 'lodash';
 
 function Resource(basePath, doc) {
 	this.basePath = basePath;
@@ -8,7 +8,6 @@ function Resource(basePath, doc) {
 
 	_.each(this.paths, path => {
 		_.each(path, operation => {
-
 			if (!operation.consumes || operation.consumes.length === 0) {
 				operation.consumes = ['application/json'];
 			}

@@ -1,14 +1,15 @@
-const debug = require('debug')('of-base-api');
-const express = require('express');
-const http = require('http');
-const errorHandler = require('./errorHandler');
-const notFoundHandler = require('./notFoundHandler');
-const config = require('./config');
-const { execBootScripts } = require('./boot');
-const docs = require('./openapiDocs');
+import Debug from 'debug';
+import express from 'express';
+import http from 'http';
+import errorHandler from './errorHandler';
+import notFoundHandler from './notFoundHandler';
+import config from './config';
+import { execBootScripts } from './boot';
+import * as docs from './openapiDocs';
 
-const processArgs = (...args) => {
+const debug = Debug('of-base-api');
 
+export const processArgs = (...args) => {
 	/*
 		options are either
 		createApp(runMiddlewares) -> Promise
@@ -29,22 +30,21 @@ const processArgs = (...args) => {
 		// createApp(app, runMiddlewares)
 		runMiddlewares = options;
 	}
-	if (!options)	options = {};
-	if (!runMiddlewares)	runMiddlewares = () => {};
+	if (!options) options = {};
+	if (!runMiddlewares) runMiddlewares = () => {};
 	// if (args.length === 3) then no change
 
 	// for 3 arguments then we can assume app, options and callback are set
 	return [app, options, runMiddlewares];
 };
 
-const configureExpress = (app, runMiddlewares) => {
-
+export const configureExpress = (app, runMiddlewares) => {
 	// this is at the start
 	app.use(express.json({ limit: '1mb' }));
 	app.use(express.urlencoded({ extended: true }));
 
 	// middlewares
-	if (runMiddlewares)	runMiddlewares(app);
+	if (runMiddlewares) runMiddlewares(app);
 
 	// add the swagger routes
 	docs.explorer(app, {
@@ -56,8 +56,7 @@ const configureExpress = (app, runMiddlewares) => {
 	app.use(errorHandler({}));
 };
 
-const createApp = async (...args) => {
-
+export const createApp = async (...args) => {
 	// process the arguments
 	const [app, options, addMiddlewares] = processArgs(...args);
 
@@ -72,10 +71,4 @@ const createApp = async (...args) => {
 	server.listen(config.PORT, () => debug(`Server listening on ${config.PORT}`));
 
 	return { app, server };
-};
-
-module.exports = {
-	createApp,
-	processArgs,
-	configureExpress
 };

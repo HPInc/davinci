@@ -1,6 +1,10 @@
-const _ = require('lodash');
+import * as _ from 'lodash';
 
-class HttpError extends Error {
+export class HttpError extends Error {
+	code: number;
+	className?: string;
+	data: any;
+	errors: [any];
 	/**
 	 * Create an HttpError instance
 	 *
@@ -17,7 +21,7 @@ class HttpError extends Error {
 		this.code = code;
 		this.className = className;
 
-		const clonedData = _.clone(data);
+		const clonedData: any = _.clone(data);
 		this.data = clonedData;
 		if (clonedData.errors) {
 			this.errors = clonedData.errors;
@@ -39,141 +43,120 @@ class HttpError extends Error {
 }
 
 // 400 - Bad Request
-class BadRequest extends HttpError {
-	constructor(message, data) {
+export class BadRequest extends HttpError {
+	constructor(message?: string, data?: any) {
 		super(message, 'BadRequest', 400, 'bad-request', data);
 	}
 }
 
 // 401 - Not Authenticated
-class NotAuthenticated extends HttpError {
-	constructor(message, data) {
+export class NotAuthenticated extends HttpError {
+	constructor(message?: string, data?: any) {
 		super(message, 'NotAuthenticated', 401, 'not-authenticated', data);
 	}
 }
 
 // 402 - Payment Error
-class PaymentError extends HttpError {
-	constructor(message, data) {
+export class PaymentError extends HttpError {
+	constructor(message?: string, data?: any) {
 		super(message, 'PaymentError', 402, 'payment-error', data);
 	}
 }
 
 // 403 - Forbidden
-class Forbidden extends HttpError {
-	constructor(message, data) {
+export class Forbidden extends HttpError {
+	constructor(message?: string, data?: any) {
 		super(message, 'Forbidden', 403, 'forbidden', data);
 	}
 }
 
 // 404 - Not Found
-class NotFound extends HttpError {
-	constructor(message, data) {
+export class NotFound extends HttpError {
+	constructor(message?: string, data?: any) {
 		super(message, 'NotFound', 404, 'not-found', data);
 	}
 }
 
 // 405 - Method Not Allowed
-class MethodNotAllowed extends HttpError {
-	constructor(message, data) {
+export class MethodNotAllowed extends HttpError {
+	constructor(message?: string, data?: any) {
 		super(message, 'MethodNotAllowed', 405, 'method-not-allowed', data);
 	}
 }
 
 // 406 - Not Acceptable
-class NotAcceptable extends HttpError {
-	constructor(message, data) {
+export class NotAcceptable extends HttpError {
+	constructor(message?: string, data?: any) {
 		super(message, 'NotAcceptable', 406, 'not-acceptable', data);
 	}
 }
 
 // 408 - Timeout
-class Timeout extends HttpError {
-	constructor(message, data) {
+export class Timeout extends HttpError {
+	constructor(message?: string, data?: any) {
 		super(message, 'Timeout', 408, 'timeout', data);
 	}
 }
 
 // 409 - Conflict
-class Conflict extends HttpError {
-	constructor(message, data) {
+export class Conflict extends HttpError {
+	constructor(message?: string, data?: any) {
 		super(message, 'Conflict', 409, 'conflict', data);
 	}
 }
 
 // 411 - Length Required
-class LengthRequired extends HttpError {
-	constructor(message, data) {
+export class LengthRequired extends HttpError {
+	constructor(message?: string, data?: any) {
 		super(message, 'LengthRequired', 411, 'length-required', data);
 	}
 }
 
 // 422 - Unprocessable
-class Unprocessable extends HttpError {
-	constructor(message, data) {
+export class Unprocessable extends HttpError {
+	constructor(message?: string, data?: any) {
 		super(message, 'Unprocessable', 422, 'unprocessable', data);
 	}
 }
 
 // 429 - Too Many Requests
-class TooManyRequests extends HttpError {
-	constructor(message, data) {
+export class TooManyRequests extends HttpError {
+	constructor(message?: string, data?: any) {
 		super(message, 'TooManyRequests', 429, 'too-many-requests', data);
 	}
 }
 
 // 500 - General Error
-class GeneralError extends HttpError {
-	constructor(message, data) {
+export class GeneralError extends HttpError {
+	constructor(message?: string, data?: any) {
 		super(message, 'GeneralError', 500, 'general-error', data);
 	}
 }
 
 // 500 - Internal Server Error
-class InternalServerError extends HttpError {
-	constructor(message, data) {
+export class InternalServerError extends HttpError {
+	constructor(message?: string, data?: any) {
 		super(message, 'InternalServerError', 500, 'internal-server-error', data);
 	}
 }
 
 // 501 - Not Implemented
-class NotImplemented extends HttpError {
-	constructor(message, data) {
+export class NotImplemented extends HttpError {
+	constructor(message?: string, data?: any) {
 		super(message, 'NotImplemented', 501, 'not-implemented', data);
 	}
 }
 
 // 502 - Bad Gateway
-class BadGateway extends HttpError {
-	constructor(message, data) {
+export class BadGateway extends HttpError {
+	constructor(message?: string, data?: any) {
 		super(message, 'BadGateway', 502, 'bad-gateway', data);
 	}
 }
 
 // 503 - Unavailable
-class Unavailable extends HttpError {
-	constructor(message, data) {
+export class Unavailable extends HttpError {
+	constructor(message?: string, data?: any) {
 		super(message, 'Unavailable', 503, 'unavailable', data);
 	}
 }
-
-module.exports = {
-	HttpError,
-	BadRequest,
-	NotAuthenticated,
-	PaymentError,
-	Forbidden,
-	NotFound,
-	MethodNotAllowed,
-	NotAcceptable,
-	Timeout,
-	Conflict,
-	LengthRequired,
-	Unprocessable,
-	TooManyRequests,
-	GeneralError,
-	InternalServerError,
-	NotImplemented,
-	BadGateway,
-	Unavailable
-};

@@ -11,7 +11,7 @@ const SWAGGER_VERSION = '2.0';
 
 const resources = [];
 
-const addResource = (resourceName, doc) => {
+export const addResource = (resourceName, doc) => {
 	debug(`adding ${resourceName} resource`);
 	// create the resource from the doc
 	const resource = new Resource(resourceName, doc);
@@ -19,7 +19,7 @@ const addResource = (resourceName, doc) => {
 	resources.push(resource);
 };
 
-const createApiDocs = (app, opts = {}) => {
+export const createApiDocs = (app, opts:any = {}) => {
 
 	debug(`setting up swagger docs on ${opts.discoveryUrl}`);
 
@@ -73,16 +73,10 @@ const createApiDocs = (app, opts = {}) => {
 	// return app;
 };
 
-const explorer = (app, opts) => {
+export const explorer = (app, opts) => {
 	// add the swagger explorer page
 	app.use('/explorer', express.static(swaggerUiAssetPath));
 
 	// add the swagger api docs
 	createApiDocs(app, opts);
-};
-
-module.exports = {
-	createApiDocs,
-	addResource,
-	explorer
 };

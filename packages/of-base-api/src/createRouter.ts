@@ -1,10 +1,12 @@
-const Ajv = require('ajv');
-const debug = require('debug')('of-base-api');
-const express = require('express');
-const _ = require('lodash');
-const Promise = require('bluebird');
-const swaggerDocs = require('./openapiDocs');
-const errors = require('./errors');
+import Ajv  from 'ajv';
+import Debug from 'debug';
+import express  from 'express';
+import _  from 'lodash';
+import Promise  from 'bluebird';
+import * as swaggerDocs  from './openapiDocs';
+import * as errors  from './errors';
+
+const debug = Debug('of-base-api');
 
 const AJV_OPTS = {
 	allErrors: true,
@@ -55,6 +57,7 @@ const attemptJsonParsing = ({ value, config, schema }) => {
 const validateAndCoerce = ({ value, config, schema: resourceSchema }) => {
 	const isUndefinedButNotRequired = !config.required && typeof value === 'undefined';
 	if (config.schema && !isUndefinedButNotRequired) {
+		// @ts-ignore
 		const ajv = new Ajv(AJV_OPTS);
 		const valid = ajv
 			.addSchema({ ...config.schema, ...resourceSchema }, 'schema')
@@ -112,7 +115,7 @@ const mapReqToParameters = (req, res, parameters = [], schema) => {
 };
 
 const makeHandlerFunction = (operation, controller, functionName) => {
-	const successCode = _.findKey(operation.responses, (obj, key) => (+key >= 200 && +key < 400));
+	const successCode = _.findKey(operation.responses, (_obj, key) => (+key >= 200 && +key < 400));
 
 	return (req, res, next) => {
 		// need a custom middleware to set the context ID
@@ -132,7 +135,7 @@ const makeMethodName = operation => {
 	return operationName.split('#')[0];
 };
 
-const createRouteHandlers = controller => {
+export const createRouteHandlers = controller => {
 	const routeHandlers = [];
 
 	// for each path
@@ -189,5 +192,4 @@ const createRouterAndSwaggerDoc = (Controller, rsName) => {
 	return router;
 };
 
-module.exports = createRouterAndSwaggerDoc;
-module.exports.createRouteHandlers = createRouteHandlers;
+export default createRouterAndSwaggerDoc;
