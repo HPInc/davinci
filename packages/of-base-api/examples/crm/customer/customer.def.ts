@@ -56,7 +56,7 @@ export default {
 			get: {
 				summary: 'List Customers',
 				description: 'This endpoint allows the user to list all customers.',
-				operationId: 'list',
+				operationId: 'find',
 				parameters: [
 					{
 						name: 'query',
@@ -94,12 +94,46 @@ export default {
 		'/{id}': {
 			get: {
 				summary: 'Get Customer',
-				operationId: 'getById',
+				operationId: 'findById',
 				parameters: [
 					{
 						name: 'id',
 						in: 'path',
 						description: 'The customer id.',
+						required: true,
+						type: 'object'
+					},
+					{
+						name: 'query',
+						in: 'query',
+						description: '',
+						required: false,
+						type: 'object'
+					}
+				],
+				responses: {
+					200: {
+						schema: {
+							$ref: '#/definitions/Customer List'
+						}
+					}
+				}
+			},
+			patch: {
+				summary: 'Update Customer',
+				operationId: 'updateById',
+				parameters: [
+					{
+						name: 'id',
+						in: 'path',
+						description: 'The customer id.',
+						required: true,
+						type: 'object'
+					},
+					{
+						name: 'data',
+						in: 'body',
+						description: 'The customer data.',
 						required: true,
 						type: 'object'
 					}
@@ -112,9 +146,9 @@ export default {
 					}
 				}
 			},
-			put: {
-				summary: 'update Customer',
-				operationId: 'update',
+			delete: {
+				summary: 'Delete Customer',
+				operationId: 'removeById',
 				parameters: [
 					{
 						name: 'id',
@@ -122,15 +156,6 @@ export default {
 						description: 'The customer id.',
 						required: true,
 						type: 'object'
-
-					},
-					{
-						name: 'data',
-						in: 'body',
-						description: 'The customer data.',
-						required: true,
-						type: 'object'
-
 					}
 				],
 				responses: {

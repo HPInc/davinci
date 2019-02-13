@@ -1,10 +1,15 @@
-const { createApp, createRouter } = require('../../');
+import express from 'express';
 const debug = require('debug')('of-base-api:example');
+const { createApp, createRouter } = require('../../');
 import CustomerController from './customer/customer.controller';
 // const FileController = require('./files/FileController');
 const SearchController = require('./search/search.controller');
 
-createApp(app => {
+const bootOptions: { bootDirPath?: string } = {};
+bootOptions.bootDirPath = './build/examples/crm/boot';
+const expressApp = express();
+
+createApp(expressApp, bootOptions, app => {
 	// add some middleware
 	app.use((req, _res, next) => {
 		debug('logger', req.hostname, req.method, req.path);

@@ -35,13 +35,22 @@ export function index(index) {
 // Helper functions
 const getSchemaDefinition = (theClass: Function) => {
 	const props = Reflect.getMetadata('tsmongoose:props', theClass.prototype);
-	return props.reduce((acc, { key, opts }) => {
-		const type = Reflect.getMetadata('design:type', theClass.prototype, key);
+	return props.reduce((acc, { key, opts = {} }: { key: string; opts: SchemaTypeOpts<any> }) => {
+		let type = opts.type || Reflect.getMetadata('design:type', theClass.prototype, key);
+		const isArray = Array.isArray(type) || type.name === 'Array';
+		if (isArray && type.length > 0) {
+			type = type[0];
+		}
+
+		const isFunction = ![String, Number, Object, Boolean].includes(type) && typeof type === 'function';
+		if (isFunction) {
+			type = getSchemaDefinition(type);
+		}
 		return {
 			...acc,
 			[key]: {
-				type,
-				...opts
+				...opts,
+				type
 			}
 		};
 	}, {});
@@ -70,7 +79,9 @@ export const generateModel = (theClass: Function, modelName = theClass.name, col
 	const schema = new Schema(schemaDef);
 	schema.methods = methods;
 	schema.statics = statics;
-	schema.index(indexes);
+	if (indexes.length > 0) {
+		schema.index(indexes);
+	}
 
 	return model(modelName, schema, collectionName);
 };
