@@ -3,7 +3,7 @@ const express = require('express');
 const _ = require('lodash');
 const path = require('path');
 const Resource = require('./Resource');
-const config = require('./config');
+const config = require('../../config');
 
 const swaggerUiAssetPath = path.resolve(path.join(__dirname, 'explorer'));
 

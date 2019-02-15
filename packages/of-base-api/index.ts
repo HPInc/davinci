@@ -1,8 +1,7 @@
 import * as errors from './src/errors';
 import BaseController from './src/BaseController';
-import baseService from './src/baseService';
 import { createApp } from './src/createApp';
-import createRouter from './src/createRouter';
+import createRouter from './src/rest/createRouter';
 
 /**
  * This is only here to assist people when upgrading their API.
@@ -16,7 +15,6 @@ const boot = () => {
 
 export {
 	BaseController,
-	baseService,
 	boot,
 	createApp,
 	createRouter,

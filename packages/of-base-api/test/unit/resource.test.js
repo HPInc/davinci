@@ -1,6 +1,6 @@
 const should = require('should');
 const sinon = require('sinon');
-const Resource = require('../../src/Resource');
+const Resource = require('../../src/rest/swagger/Resource');
 const testDef = require('../support/test.def.js');
 
 describe('Resource', () => {

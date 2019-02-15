@@ -3,7 +3,7 @@ const path = require('path');
 const sinon = require('sinon');
 // const openapiDocs = require('../../src/openapiDocs');
 const testDef = require('../support/test.def');
-const openapiDocs = require('../../src/openapiDocs');
+const openapiDocs = require('../../src/rest/swagger/openapiDocs');
 
 describe('openapiDocs', () => {
 

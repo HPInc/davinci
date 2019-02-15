@@ -1,10 +1,6 @@
 import 'reflect-metadata';
 import { model, Schema, SchemaTypeOpts } from 'mongoose';
 
-export class Model {
-	save: () => {};
-}
-
 // Decorators
 export function prop(opts?: SchemaTypeOpts<any>) {
 	// this is the decorator factory

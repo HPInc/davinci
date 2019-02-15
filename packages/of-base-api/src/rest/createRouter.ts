@@ -1,11 +1,12 @@
-import Ajv  from 'ajv';
+import Ajv from 'ajv';
 import Debug from 'debug';
-import express  from 'express';
-import _  from 'lodash';
-import Promise  from 'bluebird';
-import * as swaggerDocs  from './openapiDocs';
-import * as errors  from './errors';
-
+import express from 'express';
+import _ from 'lodash';
+import Promise from 'bluebird';
+import * as swaggerDocs from './swagger/openapiDocs';
+import * as errors from '../errors';
+import createPaths from './swagger/createPaths';
+import createSchemaDefinition from './swagger/createSchemaDefinition';
 const debug = Debug('of-base-api');
 
 const AJV_OPTS = {
@@ -59,9 +60,7 @@ const validateAndCoerce = ({ value, config, schema: resourceSchema }) => {
 	if (config.schema && !isUndefinedButNotRequired) {
 		// @ts-ignore
 		const ajv = new Ajv(AJV_OPTS);
-		const valid = ajv
-			.addSchema({ ...config.schema, ...resourceSchema }, 'schema')
-			.validate('schema', value);
+		const valid = ajv.addSchema({ ...config.schema, ...resourceSchema }, 'schema').validate('schema', value);
 		if (!valid) {
 			const error = new errors.BadRequest();
 			error.errors = ajv.errors;
@@ -73,7 +72,11 @@ const validateAndCoerce = ({ value, config, schema: resourceSchema }) => {
 };
 
 const processParameter = ({ value, config, schema }) =>
-	_.flow(attemptJsonParsing, validateAndCoerce, ({ value: val }) => val)({
+	_.flow(
+		attemptJsonParsing,
+		validateAndCoerce,
+		({ value: val }) => val
+	)({
 		value,
 		config,
 		schema
@@ -94,10 +97,10 @@ const mapReqToParameters = (req, res, parameters = [], schema) => {
 			} else {
 				throw new errors.NotImplemented(`Can't get field ${p.name} - ${p.in} not yet supported`);
 			}
-			acc[p.name] = processParameter({ value, config: p, schema });
+			acc.push(processParameter({ value, config: p, schema }));
 		}
 		return acc;
-	}, {});
+	}, []);
 
 	const context = {
 		body: req.body,
@@ -115,7 +118,7 @@ const mapReqToParameters = (req, res, parameters = [], schema) => {
 };
 
 const makeHandlerFunction = (operation, controller, functionName) => {
-	const successCode = _.findKey(operation.responses, (_obj, key) => (+key >= 200 && +key < 400));
+	const successCode = _.findKey(operation.responses, (_obj, key) => +key >= 200 && +key < 400);
 
 	return (req, res, next) => {
 		// need a custom middleware to set the context ID
@@ -123,7 +126,10 @@ const makeHandlerFunction = (operation, controller, functionName) => {
 		debug('calling ', functionName);
 		// the controller functions return a promise
 		// coerce the controller return value to be a promise
-		return Promise.try(() => controller[functionName](parameterList, context)).then(sendResults(res, successCode), sendError(next));
+		return Promise.try(() => controller[functionName](...parameterList, context)).then(
+			sendResults(res, successCode),
+			sendError(next)
+		);
 	};
 };
 
@@ -140,13 +146,11 @@ export const createRouteHandlers = controller => {
 
 	// for each path
 	_.each(controller.def.paths, (swaggerPath, pathName) => {
-
 		// convert it from swagger {param} format to express :param format
 		const path = pathName.replace(/{(.*?)}/gi, ':$1');
 
 		// for each path/method
 		_.each(swaggerPath, (operation, method) => {
-
 			// get the method name for the controller
 			const methodName = makeMethodName(operation);
 
@@ -167,7 +171,6 @@ const validateController = Controller => {
 };
 
 const createRouterAndSwaggerDoc = (Controller, rsName) => {
-
 	// need to validate the inputs here
 	validateController(Controller);
 
@@ -187,7 +190,12 @@ const createRouterAndSwaggerDoc = (Controller, rsName) => {
 	routes.forEach(route => router[route.method](route.path, route.handler));
 
 	// add the resource to the swagger documentation
-	swaggerDocs.addResource(resourceName, controller.def);
+	const definition = {
+		definitions: createSchemaDefinition(controller.schema),
+		paths: createPaths(Controller)
+	};
+
+	swaggerDocs.addResource(resourceName, definition);
 
 	return router;
 };

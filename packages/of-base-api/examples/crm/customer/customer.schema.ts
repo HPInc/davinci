@@ -1,4 +1,5 @@
-import { prop } from '../../../src/lib/mongoose.helpers';
+import { prop as mongooseProp } from '../../../src/lib/mongoose.helpers';
+import { prop as swaggerProp, definition } from '../../../src/rest/swagger/decorators/prop';
 
 export interface ICustomer {
 	firstname: string;
@@ -12,22 +13,28 @@ export interface ICustomerPhone {
 }
 
 class CustomerPhone implements ICustomerPhone {
-	@prop()
+	@mongooseProp()
+	@swaggerProp()
 	number: string;
-	@prop()
+	@mongooseProp()
 	isPrimary: boolean;
 }
 
+@definition({ title: 'Customer' })
 export default class Customer implements ICustomer {
-	@prop()
+	@mongooseProp()
+	@swaggerProp()
 	firstname: string;
 
-	@prop()
+	@mongooseProp()
+	@swaggerProp()
 	lastname: string;
 
-	@prop()
+	@mongooseProp()
+	@swaggerProp()
 	weight: number;
 
-	@prop({ type: [CustomerPhone] })
+	@mongooseProp({ type: [CustomerPhone] })
+	@swaggerProp({ type: [CustomerPhone] })
 	phones: CustomerPhone[];
 }

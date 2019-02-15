@@ -4,7 +4,7 @@ const _ = require('lodash');
 const sinon = require('sinon').createSandbox();
 const testDef = require('../support/test.def');
 const BaseController = require('../../src/BaseController');
-const createRouter = require('../../src/createRouter');
+const createRouter = require('../../src/rest/createRouter');
 const utils = require('../support/utils');
 
 const { createRouteHandlers } = createRouter;

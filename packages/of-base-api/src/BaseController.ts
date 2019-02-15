@@ -1,6 +1,6 @@
 import _ from 'lodash';
 const errors = require('./errors');
-// const createQueryFilters = require('feathers-query-filters');
+import { get, param } from './rest/swagger';
 
 interface IParsedMongooseFilters {
 	limit?: number;
@@ -14,12 +14,15 @@ interface IParsedMongooseFilters {
 export default class BaseController {
 	def: any;
 	model: any;
-	constructor(def?, model?) {
+	schema: Function;
+	constructor(def?, model?, schema?) {
 		this.def = def;
 		this.model = model;
+		this.schema = schema;
 	}
 
-	find({ query = {} }: any = {}, context) {
+	@get({ path: '/', summary: 'List' })
+	find(@param({ name: 'query', in: 'query' }) query, context): JsonResponse {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 		const { limit, skip, sort, select, populate, where } = this.parseQuery(query);
 		const mQuery = this.model.find(where, select, { limit, skip, sort, context });
@@ -48,6 +51,7 @@ export default class BaseController {
 		return result[0];
 	}
 
+	@get({ path: '/:id', summary: 'Fetch by id' })
 	async findById({ id, query = {} }, context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 

@@ -3,7 +3,7 @@ const debug = require('debug')('of-base-api:example');
 const { createApp, createRouter } = require('../../');
 import CustomerController from './customer/customer.controller';
 // const FileController = require('./files/FileController');
-const SearchController = require('./search/search.controller');
+// const SearchController = require('./search/search.controller');
 
 const bootOptions: { bootDirPath?: string } = {};
 bootOptions.bootDirPath = './build/examples/crm/boot';
@@ -26,5 +26,5 @@ createApp(expressApp, bootOptions, app => {
 
 	app.use('/api/customer', createRouter(CustomerController));
 	// app.use('/api/file', createRouter(FileController));
-	app.use('/api/search', createRouter(SearchController));
+	// app.use('/api/search', createRouter(SearchController));
 });
