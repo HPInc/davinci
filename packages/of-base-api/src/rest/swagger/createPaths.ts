@@ -4,14 +4,15 @@ import _ from 'lodash';
 type MethodParameter = {
 	name: string;
 	in: 'body' | 'path' | 'query';
+	type: string;
 	description?: string;
 	required?: boolean;
 	schema?: { $ref: string };
 };
 
-const getMethodParameterDefinition = methodParameterConfig => {
+const getParameterDefinition = methodParameterConfig => {
 	const options: MethodParameter = methodParameterConfig.options;
-	return options;
+	return { ...options, type: methodParameterConfig.type.name.toLowerCase() };
 };
 
 const createPathsDefinition = (theClass: Function): any => {
@@ -27,16 +28,14 @@ const createPathsDefinition = (theClass: Function): any => {
 			const { methodName, path, verb, summary, description } = method;
 			acc[path] = acc[path] || {};
 
-			const parameters = _.filter(methodParameters, { methodName }).map(getMethodParameterDefinition);
+			const parameters = _.filter(methodParameters, { methodName }).map(getParameterDefinition);
 
-			acc[path] = {
-				[verb]: {
-					summary,
-					description,
-					operationId: methodName,
-					parameters
-				}
-			};
+			_.set(acc, `${path}.${verb}`, {
+				summary,
+				description,
+				operationId: methodName,
+				parameters
+			});
 
 			return acc;
 		},

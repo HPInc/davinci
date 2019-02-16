@@ -1,6 +1,6 @@
 import _ from 'lodash';
-const errors = require('./errors');
-import { get, param } from './rest/swagger';
+import * as errors from './errors';
+import { get, post, patch, del, param } from './rest/swagger';
 
 interface IParsedMongooseFilters {
 	limit?: number;
@@ -15,8 +15,7 @@ export default class BaseController {
 	def: any;
 	model: any;
 	schema: Function;
-	constructor(def?, model?, schema?) {
-		this.def = def;
+	constructor(model?, schema?) {
 		this.model = model;
 		this.schema = schema;
 	}
@@ -34,7 +33,7 @@ export default class BaseController {
 		return mQuery;
 	}
 
-	async findOne({ query = {} }, context) {
+	async findOne(@param({ name: 'query', in: 'query' }) query, context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 		const { sort, select, populate, where } = this.parseQuery(query);
 		let mQuery = this.model.find(where, select, { limit: 1, sort, context });
@@ -52,20 +51,22 @@ export default class BaseController {
 	}
 
 	@get({ path: '/:id', summary: 'Fetch by id' })
-	async findById({ id, query = {} }, context) {
+	async findById(@param({ name: 'id', in: 'path' }) id, @param({ name: 'query', in: 'query' }) query, context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 
-		return this.findOne({ query: { ...query, _id: id } }, context);
+		return this.findOne({ ...query, _id: id }, context);
 	}
 
-	async create({ data }, context) {
+	@post({ path: '/', summary: 'Create' })
+	async create(@param({ name: 'data', in: 'body' }) data, context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 		const [record] = await this.model.create([data], { context });
 
 		return record;
 	}
 
-	async updateById({ id, data }, context) {
+	@patch({ path: '/:id', summary: 'Update' })
+	async updateById(@param({ name: 'id', in: 'path' }) id, @param({ name: 'data', in: 'body' }) data, context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 		const updated = await this.model.findOneAndUpdate({ _id: id }, data, {
 			new: true,
@@ -81,7 +82,8 @@ export default class BaseController {
 		return updated;
 	}
 
-	async removeById({ id }, context) {
+	@del({ path: '/:id', summary: 'Delete' })
+	async removeById(@param({ name: 'id', in: 'path' }) id, context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 		const removed = await this.model.findOneAndDelete({ _id: id }, { context });
 

@@ -1,6 +1,8 @@
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 export class HttpError extends Error {
+	// https://github.com/Microsoft/TypeScript/issues/13965
+	__proto__: Error;
 	code: number;
 	className?: string;
 	data: any;
@@ -16,7 +18,10 @@ export class HttpError extends Error {
 	 * @param data {*} response extra, could hold error codes or any relevant information
 	 */
 	constructor(message, name, code, className, data = {}) {
+		const trueProto = new.target.prototype;
 		super(message);
+		this.__proto__ = trueProto;
+
 		this.name = name || 'Error';
 		this.code = code;
 		this.className = className;
@@ -26,6 +31,12 @@ export class HttpError extends Error {
 		if (clonedData.errors) {
 			this.errors = clonedData.errors;
 			delete clonedData.errors;
+		}
+
+		if (Error.captureStackTrace) {
+			Error.captureStackTrace(this);
+		} else {
+			this.stack = new Error().stack;
 		}
 	}
 

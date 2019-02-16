@@ -141,11 +141,11 @@ const makeMethodName = operation => {
 	return operationName.split('#')[0];
 };
 
-export const createRouteHandlers = controller => {
+export const createRouteHandlers = (controller, definition) => {
 	const routeHandlers = [];
 
 	// for each path
-	_.each(controller.def.paths, (swaggerPath, pathName) => {
+	_.each(definition.paths, (swaggerPath, pathName) => {
 		// convert it from swagger {param} format to express :param format
 		const path = pathName.replace(/{(.*?)}/gi, ':$1');
 
@@ -183,17 +183,17 @@ const createRouterAndSwaggerDoc = (Controller, rsName) => {
 	// create the router
 	const router = express.Router();
 
-	// now process the swagger structure and get an array of method/path mappings to handlers
-	const routes = createRouteHandlers(controller);
-
-	// add them to the router
-	routes.forEach(route => router[route.method](route.path, route.handler));
-
 	// add the resource to the swagger documentation
 	const definition = {
 		definitions: createSchemaDefinition(controller.schema),
 		paths: createPaths(Controller)
 	};
+
+	// now process the swagger structure and get an array of method/path mappings to handlers
+	const routes = createRouteHandlers(controller, definition);
+
+	// add them to the router
+	routes.forEach(route => router[route.method](route.path, route.handler));
 
 	swaggerDocs.addResource(resourceName, definition);
 

@@ -25,30 +25,47 @@ type MethodDecoratorOptions = {
 	responses?: MethodResponses;
 };
 
-export function get({ path, summary, description }: MethodDecoratorOptions): Function {
-	return function(target: Object, methodName: string | symbol) {
-		// get the existing metadata props
-		const methods = Reflect.getMetadata('tsswagger:methods', target) || [];
-		methods.push({ path, verb: 'get', methodName, handler: target[methodName], summary, description });
-		// define new metadata methods
-		Reflect.defineMetadata('tsswagger:methods', methods, target);
+const createMethodDecorator = verb =>
+	function({ path, summary, description }: MethodDecoratorOptions): Function {
+		return function(target: Object, methodName: string | symbol) {
+			// get the existing metadata props
+			const methods = Reflect.getMetadata('tsswagger:methods', target) || [];
+			methods.push({ path, verb, methodName, handler: target[methodName], summary, description });
+			// define new metadata methods
+			Reflect.defineMetadata('tsswagger:methods', methods, target);
+		};
 	};
-}
+
+export const get = createMethodDecorator('get');
+export const post = createMethodDecorator('post');
+export const put = createMethodDecorator('put');
+export const patch = createMethodDecorator('patch');
+export const del = createMethodDecorator('delete');
+export const head = createMethodDecorator('head');
 
 export function param(options: MethodParameter): Function {
 	return function(target: Object, methodName: string | symbol, index) {
 		// get the existing metadata props
 		const methodParameters = Reflect.getMetadata('tsswagger:method-parameters', target) || [];
+		const paramtypes = Reflect.getMetadata('design:paramtypes', target, methodName);
 		const isAlreadySet: boolean = !!_.find(methodParameters, { methodName, index });
 		if (isAlreadySet) return;
-		methodParameters.push({ target, methodName, handler: target[methodName], index, options });
+
+		methodParameters.unshift({
+			target,
+			methodName,
+			handler: target[methodName],
+			index,
+			options,
+			type: paramtypes[index]
+		});
 		Reflect.defineMetadata('tsswagger:method-parameters', methodParameters, target);
 	};
 }
 
-interface IControllerArgs {
+type IControllerArgs = {
 	basepath: string;
-}
+};
 
 export function controller({ basepath }: IControllerArgs): Function {
 	return function(target: Object) {

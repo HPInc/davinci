@@ -1,12 +1,13 @@
-import Debug from 'debug';
+// import Debug from 'debug';
 import * as errors from './errors';
 
-const debug = Debug('of-base-api');
+// const debug = Debug('of-base-api');
 
 export default ({ exposeStack = false } = {}) => {
-	return (err, _req, res) => {
+	// @ts-ignore
+	return (err, _req, res, next) => {
 		// eslint-disable-line no-unused-vars
-		debug(err);
+		// debug(err);
 
 		let error = err;
 

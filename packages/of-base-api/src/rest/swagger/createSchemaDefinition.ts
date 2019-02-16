@@ -31,12 +31,21 @@ const getSchemaDefinition = (theClass: Function): SwaggerDefinitions => {
 				return {
 					...acc,
 					[key]: {
-						title: definition.title,
 						type: 'array',
-						schema: { $ref: `#/${definition.title}` }
+						items: {
+							$ref: `${definition.title}`
+						}
 					}
 				};
 			}
+
+			if (typeof type === 'object' || Object === type) {
+				return {
+					...acc,
+					[key]: definition
+				};
+			}
+
 			return {
 				...acc,
 				[key]: {
