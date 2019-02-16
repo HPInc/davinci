@@ -1,5 +1,4 @@
-import { prop as mongooseProp } from '../../../src/lib/mongoose.helpers';
-import { prop as swaggerProp, definition } from '../../../src/rest/swagger/decorators/prop';
+import { mongooseProp, swaggerProp, swaggerDefinition } from '../../../src';
 
 export interface ICustomer {
 	firstname: string;
@@ -20,7 +19,7 @@ class CustomerPhone implements ICustomerPhone {
 	isPrimary: boolean;
 }
 
-@definition({ title: 'Customer' })
+@swaggerDefinition({ title: 'Customer' })
 export default class Customer implements ICustomer {
 	@mongooseProp()
 	@swaggerProp()

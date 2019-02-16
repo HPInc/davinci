@@ -1,23 +1,21 @@
 import BaseController from '../../../src/BaseController';
-import CustomerModel from './customer.model';
+import model from './customer.model';
 import CustomerSchema from './customer.schema';
 import { controller, get, param } from '../../../src/rest';
-import { ICustomer } from './customer.schema';
 
-@controller({ basepath: '/customer' })
+@controller({ basepath: '/customers' })
 export default class CustomerController extends BaseController {
-	// easy to test
-	constructor({ model = CustomerModel } = {}) {
+	constructor() {
 		super(model, CustomerSchema);
-		// this.fileModel = FileModel.create();
 	}
 
 	@get({ path: '/', summary: 'List' })
-	find(@param({ name: 'query', in: 'query' }) query: string, context): ICustomer {
+	find(@param({ name: 'query', in: 'query' }) query: string, context): CustomerSchema {
 		return super.find(query, context);
 	}
 
-	customMethod() {
-		// return this.fileModel.find({});
+	@get({ path: '/hello', summary: 'That is a hello method' })
+	hello(@param({ name: 'firstname', in: 'query' }) firstname): string {
+		return firstname;
 	}
 }

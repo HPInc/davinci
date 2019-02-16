@@ -1,33 +1,6 @@
 import 'reflect-metadata';
 import { model, Schema, SchemaTypeOpts } from 'mongoose';
 
-// Decorators
-export function prop(opts?: SchemaTypeOpts<any>) {
-	// this is the decorator factory
-	return function(target: Object, key: string | symbol) {
-		// this is the decorator
-
-		// get the existing metadata props
-		const props = Reflect.getMetadata('tsmongoose:props', target) || [];
-		props.push({ key, opts });
-		// define new metadata props
-		Reflect.defineMetadata('tsmongoose:props', props, target);
-	};
-}
-
-export function index(index) {
-	// this is the decorator factory
-	return function(target: Object) {
-		// this is the decorator
-
-		// get the existing metadata props
-		const indexes = Reflect.getMetadata('tsmongoose:indexes', target) || [];
-		indexes.push(index);
-		// define new metadata props
-		Reflect.defineMetadata('tsmongoose:indexes', indexes, target);
-	};
-}
-
 // Helper functions
 const getSchemaDefinition = (theClass: Function) => {
 	const props = Reflect.getMetadata('tsmongoose:props', theClass.prototype);

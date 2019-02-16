@@ -1,13 +1,6 @@
 import 'reflect-metadata';
 import _ from 'lodash';
-
-type MethodParameter = {
-	name: string;
-	in: 'body' | 'path' | 'query';
-	description?: string;
-	required?: boolean;
-	schema?: { $ref: string };
-};
+import { MethodParameter } from '../types';
 
 type MethodResponseOutput = {
 	description?: string;
@@ -30,7 +23,7 @@ const createMethodDecorator = verb =>
 		return function(target: Object, methodName: string | symbol) {
 			// get the existing metadata props
 			const methods = Reflect.getMetadata('tsswagger:methods', target) || [];
-			methods.push({ path, verb, methodName, handler: target[methodName], summary, description });
+			methods.unshift({ path, verb, methodName, summary, description, handler: target[methodName] });
 			// define new metadata methods
 			Reflect.defineMetadata('tsswagger:methods', methods, target);
 		};
@@ -54,9 +47,9 @@ export function param(options: MethodParameter): Function {
 		methodParameters.unshift({
 			target,
 			methodName,
-			handler: target[methodName],
 			index,
 			options,
+			handler: target[methodName],
 			type: paramtypes[index]
 		});
 		Reflect.defineMetadata('tsswagger:method-parameters', methodParameters, target);

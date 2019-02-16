@@ -1,21 +1,13 @@
 import 'reflect-metadata';
 import _ from 'lodash';
-
-type MethodParameter = {
-	name: string;
-	in: 'body' | 'path' | 'query';
-	type: string;
-	description?: string;
-	required?: boolean;
-	schema?: { $ref: string };
-};
+import { MethodParameter, PathsDefinition } from './types';
 
 const getParameterDefinition = methodParameterConfig => {
 	const options: MethodParameter = methodParameterConfig.options;
 	return { ...options, type: methodParameterConfig.type.name.toLowerCase() };
 };
 
-const createPathsDefinition = (theClass: Function): any => {
+const createPathsDefinition = (theClass: Function): PathsDefinition => {
 	const controller = Reflect.getMetadata('tsswagger:controller', theClass);
 	if (!controller) throw new Error('');
 	const methods = Reflect.getMetadata('tsswagger:methods', theClass.prototype) || [];

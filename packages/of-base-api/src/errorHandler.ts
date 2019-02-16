@@ -5,7 +5,7 @@ import * as errors from './errors';
 
 export default ({ exposeStack = false } = {}) => {
 	// @ts-ignore
-	return (err, _req, res, next) => {
+	return (err, req, res, next) => {
 		// eslint-disable-line no-unused-vars
 		// debug(err);
 

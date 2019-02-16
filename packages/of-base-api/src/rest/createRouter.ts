@@ -118,7 +118,8 @@ const mapReqToParameters = (req, res, parameters = [], schema) => {
 };
 
 const makeHandlerFunction = (operation, controller, functionName) => {
-	const successCode = _.findKey(operation.responses, (_obj, key) => +key >= 200 && +key < 400);
+	// @ts-ignore
+	const successCode = _.findKey(operation.responses, (obj, key) => +key >= 200 && +key < 400);
 
 	return (req, res, next) => {
 		// need a custom middleware to set the context ID

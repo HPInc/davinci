@@ -2,6 +2,7 @@ import express from 'express';
 const debug = require('debug')('of-base-api:example');
 const { createApp, createRouter } = require('../../');
 import CustomerController from './customer/customer.controller';
+import FileController from './file/file.controller';
 // const FileController = require('./files/FileController');
 // const SearchController = require('./search/search.controller');
 
@@ -25,6 +26,6 @@ createApp(expressApp, bootOptions, app => {
 	});
 
 	app.use('/api/customer', createRouter(CustomerController));
-	// app.use('/api/file', createRouter(FileController));
+	app.use('/api/file', createRouter(FileController));
 	// app.use('/api/search', createRouter(SearchController));
 });

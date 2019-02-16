@@ -2,6 +2,7 @@ import _ from 'lodash';
 
 export class HttpError extends Error {
 	// https://github.com/Microsoft/TypeScript/issues/13965
+	// tslint:disable-next-line variable-name
 	__proto__: Error;
 	code: number;
 	className?: string;

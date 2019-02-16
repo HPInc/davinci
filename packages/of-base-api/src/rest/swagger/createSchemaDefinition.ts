@@ -1,16 +1,5 @@
 import 'reflect-metadata';
-
-type SwaggerDefinition = {
-	title: string;
-	type: string;
-	description?: string;
-	properties?: { [key: string]: SwaggerDefinition };
-	required?: string[];
-};
-
-type SwaggerDefinitions = {
-	[key: string]: SwaggerDefinition;
-};
+import { SwaggerDefinition, SwaggerDefinitions } from './types';
 
 const getSchemaDefinition = (theClass: Function): SwaggerDefinitions => {
 	const props = Reflect.getMetadata('tsswagger:props', theClass.prototype) || [];
@@ -40,6 +29,10 @@ const getSchemaDefinition = (theClass: Function): SwaggerDefinitions => {
 			}
 
 			if (typeof type === 'object' || Object === type) {
+				const defs = getSchemaDefinition(type[0]);
+				const definition: SwaggerDefinition = defs[Object.keys(defs)[0]];
+				definitions[definition.title] = definition;
+
 				return {
 					...acc,
 					[key]: definition

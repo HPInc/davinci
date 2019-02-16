@@ -1,9 +1,11 @@
-const debug = require('debug')('of-base-api');
-const express = require('express');
-const _ = require('lodash');
-const path = require('path');
-const Resource = require('./Resource');
-const config = require('../../config');
+import Debug from 'debug';
+import express from 'express';
+import _ from 'lodash';
+import path from 'path';
+import Resource from './Resource';
+import config from '../../config';
+
+const debug = Debug('of-base-api');
 
 const swaggerUiAssetPath = path.resolve(path.join(__dirname, 'explorer'));
 
@@ -19,8 +21,7 @@ export const addResource = (resourceName, doc) => {
 	resources.push(resource);
 };
 
-export const createApiDocs = (app, opts:any = {}) => {
-
+export const createApiDocs = (app, opts: any = {}) => {
 	debug(`setting up swagger docs on ${opts.discoveryUrl}`);
 
 	const makeHandler = () => {
@@ -44,7 +45,6 @@ export const createApiDocs = (app, opts:any = {}) => {
 			};
 
 			resources.forEach(resource => {
-
 				// add definitions
 				_.each(resource.definitions, (resourceDefinition, defName) => {
 					fullSwagger.definitions[defName] = resourceDefinition;

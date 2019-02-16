@@ -1,6 +1,6 @@
 import { generateModel } from '../../../src/mongoose/mongoose.helpers';
-import Customer from './customer.schema';
+import File from './file.schema';
 
-const model = generateModel(Customer);
+const model = generateModel(File);
 
 export default model;
