@@ -173,7 +173,7 @@ const validateController = Controller => {
 	if (typeof Controller !== 'function') throw new Error('Invalid Controller - not function');
 };
 
-const createRouterAndSwaggerDoc = (Controller, rsName, contextFactory) => {
+const createRouterAndSwaggerDoc = (Controller, rsName?, contextFactory?) => {
 	// need to validate the inputs here
 	validateController(Controller);
 
