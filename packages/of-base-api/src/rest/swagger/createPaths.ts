@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import _ from 'lodash';
 import { MethodParameter, PathsDefinition } from './types';
+import { IControllerDecoratorArgs } from './decorators/rest';
 
 const getParameterDefinition = methodParameterConfig => {
 	const options: MethodParameter = methodParameterConfig.options;
@@ -8,9 +9,12 @@ const getParameterDefinition = methodParameterConfig => {
 };
 
 const createPathsDefinition = (theClass: Function): PathsDefinition => {
-	const controller = Reflect.getMetadata('tsswagger:controller', theClass);
-	if (!controller) throw new Error('');
-	const methods = Reflect.getMetadata('tsswagger:methods', theClass.prototype) || [];
+	const controllerMetadata: IControllerDecoratorArgs = Reflect.getMetadata('tsswagger:controller', theClass);
+	if (!controllerMetadata) throw new Error('');
+	const { excludedMethods = [] } = controllerMetadata;
+	const methods = (Reflect.getMetadata('tsswagger:methods', theClass.prototype) || []).filter(
+		({ methodName }) => !excludedMethods.includes(methodName)
+	);
 	const methodParameters = Reflect.getMetadata('tsswagger:method-parameters', theClass.prototype) || [];
 	// method parameters type Reflect.getMetadata('design:paramtypes', theClass.prototype, 'find');
 
@@ -18,8 +22,6 @@ const createPathsDefinition = (theClass: Function): PathsDefinition => {
 		methods,
 		(acc, method) => {
 			const { methodName, path, verb, summary, description } = method;
-			acc[path] = acc[path] || {};
-
 			const parameters = _.filter(methodParameters, { methodName }).map(getParameterDefinition);
 
 			_.set(acc, `${path}.${verb}`, {

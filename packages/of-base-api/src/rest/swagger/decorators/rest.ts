@@ -56,13 +56,14 @@ export function param(options: MethodParameter): Function {
 	};
 }
 
-type IControllerArgs = {
+export type IControllerDecoratorArgs = {
 	basepath: string;
+	excludedMethods?: string[];
 };
 
-export function controller({ basepath }: IControllerArgs): Function {
+export function controller(args: IControllerDecoratorArgs): Function {
 	return function(target: Object) {
 		// define new metadata props
-		Reflect.defineMetadata('tsswagger:controller', { basepath }, target);
+		Reflect.defineMetadata('tsswagger:controller', args, target);
 	};
 }

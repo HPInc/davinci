@@ -40,7 +40,7 @@
 		"eslint-plugin-import": "2.2.0",
 		"feathers-errors": "^2.9.2",
 		"mocha": "5.2.0",
-		"mongoose": "5.2.4",
+		"mongoose": "5.4.13",
 		"nyc": "13.1.0",
 		"should": "11.1.2",
 		"sinon": "4.5.0",
@@ -52,6 +52,6 @@
 		"typings": "2.1.1"
 	},
 	"peerDependencies": {
-		"mongoose": "5.2.4"
+		"mongoose": "5.4.13"
 	}
 }

@@ -4,6 +4,7 @@ export interface ICustomer {
 	firstname: string;
 	lastname: string;
 	weight: number;
+	accountId: number;
 }
 
 export interface ICustomerPhone {
@@ -36,4 +37,8 @@ export default class Customer implements ICustomer {
 	@mongooseProp({ type: [CustomerPhone] })
 	@swaggerProp({ type: [CustomerPhone] })
 	phones: CustomerPhone[];
+
+	@mongooseProp()
+	@swaggerProp()
+	accountId: number;
 }

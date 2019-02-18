@@ -3,7 +3,7 @@ import model from './customer.model';
 import CustomerSchema from './customer.schema';
 import { controller, get, param } from '../../../src/rest';
 
-@controller({ basepath: '/customers' })
+@controller({ basepath: '/customers', excludedMethods: ['deleteById'] })
 export default class CustomerController extends BaseController {
 	constructor() {
 		super(model, CustomerSchema);

@@ -50,7 +50,15 @@ export default class BaseController {
 	}
 
 	@get({ path: '/:id', summary: 'Fetch by id' })
-	async findById(@param({ name: 'id', in: 'path' }) id, @param({ name: 'query', in: 'query' }) query, context) {
+	async findById(
+		@param({
+			name: 'id',
+			in: 'path'
+		})
+		id,
+		@param({ name: 'query', in: 'query' }) query,
+		context
+	) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 
 		return this.findOne({ ...query, _id: id }, context);
@@ -65,7 +73,15 @@ export default class BaseController {
 	}
 
 	@patch({ path: '/:id', summary: 'Update' })
-	async updateById(@param({ name: 'id', in: 'path' }) id, @param({ name: 'data', in: 'body' }) data, context) {
+	async updateById(
+		@param({
+			name: 'id',
+			in: 'path'
+		})
+		id,
+		@param({ name: 'data', in: 'body' }) data,
+		context
+	) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 		const updated = await this.model.findOneAndUpdate({ _id: id }, data, {
 			new: true,
@@ -82,7 +98,7 @@ export default class BaseController {
 	}
 
 	@del({ path: '/:id', summary: 'Delete' })
-	async removeById(@param({ name: 'id', in: 'path' }) id: string, context) {
+	async deleteById(@param({ name: 'id', in: 'path' }) id: string, context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 		const removed = await this.model.findOneAndDelete({ _id: id }, { context });
 

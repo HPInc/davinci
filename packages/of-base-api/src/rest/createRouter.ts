@@ -71,7 +71,7 @@ const validateAndCoerce = ({ value, config, schema: resourceSchema }) => {
 	return { value, config };
 };
 
-const processParameter = ({ value, config, schema }) =>
+const processParameter = ({ value, config, schema = {} }) =>
 	_.flow(
 		attemptJsonParsing,
 		validateAndCoerce,
@@ -82,7 +82,16 @@ const processParameter = ({ value, config, schema }) =>
 		schema
 	});
 
-const mapReqToParameters = (req, res, parameters = [], schema) => {
+const defaultContextFactory = ({ req, res }) => ({
+	body: req.body,
+	params: req.params,
+	query: req.query,
+	accountId: req.accountId,
+	req,
+	res
+});
+
+const mapReqToParameters = (req, res, parameters = [], contextFactory = defaultContextFactory) => {
 	const parameterList = parameters.reduce((acc, p) => {
 		if (p.name) {
 			let value = null;
@@ -97,19 +106,12 @@ const mapReqToParameters = (req, res, parameters = [], schema) => {
 			} else {
 				throw new errors.NotImplemented(`Can't get field ${p.name} - ${p.in} not yet supported`);
 			}
-			acc.push(processParameter({ value, config: p, schema }));
+			acc.push(processParameter({ value, config: p }));
 		}
 		return acc;
 	}, []);
 
-	const context = {
-		body: req.body,
-		params: req.params,
-		query: req.query,
-		accountId: req.accountId,
-		req,
-		res
-	};
+	const context = contextFactory({ req, res });
 
 	return {
 		parameterList,
@@ -117,13 +119,13 @@ const mapReqToParameters = (req, res, parameters = [], schema) => {
 	};
 };
 
-const makeHandlerFunction = (operation, controller, functionName) => {
+const makeHandlerFunction = (operation, controller, functionName, contextFactory) => {
 	// @ts-ignore
 	const successCode = _.findKey(operation.responses, (obj, key) => +key >= 200 && +key < 400);
 
 	return (req, res, next) => {
 		// need a custom middleware to set the context ID
-		const { parameterList, context } = mapReqToParameters(req, res, operation.parameters, controller.def);
+		const { parameterList, context } = mapReqToParameters(req, res, operation.parameters, contextFactory);
 		debug('calling ', functionName);
 		// the controller functions return a promise
 		// coerce the controller return value to be a promise
@@ -142,7 +144,7 @@ const makeMethodName = operation => {
 	return operationName.split('#')[0];
 };
 
-export const createRouteHandlers = (controller, definition) => {
+export const createRouteHandlers = (controller, definition, contextFactory) => {
 	const routeHandlers = [];
 
 	// for each path
@@ -159,7 +161,7 @@ export const createRouteHandlers = (controller, definition) => {
 			if (!controller[methodName]) return;
 
 			// create the handler function
-			const handler = makeHandlerFunction(operation, controller, methodName);
+			const handler = makeHandlerFunction(operation, controller, methodName, contextFactory);
 			routeHandlers.push({ method, path, handler });
 		});
 	});
@@ -171,7 +173,7 @@ const validateController = Controller => {
 	if (typeof Controller !== 'function') throw new Error('Invalid Controller - not function');
 };
 
-const createRouterAndSwaggerDoc = (Controller, rsName) => {
+const createRouterAndSwaggerDoc = (Controller, rsName, contextFactory) => {
 	// need to validate the inputs here
 	validateController(Controller);
 
@@ -191,7 +193,7 @@ const createRouterAndSwaggerDoc = (Controller, rsName) => {
 	};
 
 	// now process the swagger structure and get an array of method/path mappings to handlers
-	const routes = createRouteHandlers(controller, definition);
+	const routes = createRouteHandlers(controller, definition, contextFactory);
 
 	// add them to the router
 	routes.forEach(route => router[route.method](route.path, route.handler));
@@ -200,5 +202,7 @@ const createRouterAndSwaggerDoc = (Controller, rsName) => {
 
 	return router;
 };
+
+// const createRoutersAndSwaggerDoc = ({}) => {};
 
 export default createRouterAndSwaggerDoc;

@@ -1,4 +1,4 @@
-import { generateModel } from '../../../src/mongoose/mongoose.helpers';
+import { generateModel } from '../../../src/mongoose';
 import File from './file.schema';
 
 const model = generateModel(File);

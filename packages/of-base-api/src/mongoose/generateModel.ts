@@ -28,7 +28,7 @@ const getSchemaDefinition = (theClass: Function) => {
 const EXCLUDED_INSTANCE_METHODS = ['constructor'];
 const EXCLUDED_STATIC_METHODS = ['name', 'length', 'prototype'];
 
-export const generateModel = (theClass: Function, modelName = theClass.name, collectionName?) => {
+export const generateSchema = (theClass: Function) => {
 	// get schema
 	const schemaDef = getSchemaDefinition(theClass);
 
@@ -52,5 +52,10 @@ export const generateModel = (theClass: Function, modelName = theClass.name, col
 		schema.index(indexes);
 	}
 
+	return schema;
+};
+
+export const generateModel = (theClass: Function, modelName = theClass.name, collectionName?) => {
+	const schema = generateSchema(theClass);
 	return model(modelName, schema, collectionName);
 };
