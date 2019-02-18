@@ -15,7 +15,7 @@ export default class CustomerController extends BaseController {
 	}
 
 	@get({ path: '/hello', summary: 'That is a hello method' })
-	hello(@param({ name: 'firstname', in: 'query' }) firstname): string {
+	hello(@param({ name: 'firstname', in: 'query' }) firstname: string): string {
 		return firstname;
 	}
 }

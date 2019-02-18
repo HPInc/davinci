@@ -13,6 +13,9 @@ const boot = () => {
 	process.exit(-1);
 };
 
+export * from './src/rest'
+export * from './src/mongoose'
+
 export {
 	BaseController,
 	boot,
