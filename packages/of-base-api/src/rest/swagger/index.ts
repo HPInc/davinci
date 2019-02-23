@@ -1,2 +1,4 @@
-export * from './decorators/rest';
-export * from './decorators/swagger';
+import * as rest from './decorators/rest';
+import * as swagger from './decorators/swagger';
+
+export { rest, swagger };

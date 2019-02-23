@@ -1,9 +1,8 @@
-import { BaseController } from '../../../src';
+import { BaseController, rest } from '../../../src';
 import model from './file.model';
 import FileSchema from './file.schema';
-import { controller } from "../../../src/rest/swagger";
 
-@controller({ basepath: '/files' })
+@rest.controller({ basepath: '/files' })
 class FileController extends BaseController {
 	constructor() {
 		super(model, FileSchema);

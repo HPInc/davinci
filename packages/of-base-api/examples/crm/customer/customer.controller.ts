@@ -1,21 +1,21 @@
 import BaseController from '../../../src/BaseController';
 import model from './customer.model';
 import CustomerSchema from './customer.schema';
-import { controller, get, param, context } from '../../../src';
+import { rest, context } from '../../../src';
 
-@controller({ basepath: '/customers', excludedMethods: ['deleteById'] })
+@rest.controller({ basepath: '/customers', excludedMethods: ['deleteById'] })
 export default class CustomerController extends BaseController {
 	constructor() {
 		super(model, CustomerSchema);
 	}
 
-	@get({ path: '/', summary: 'List' })
-	find(@param({ name: 'query', in: 'query' }) query: string, @context() context): CustomerSchema {
+	@rest.get({ path: '/', summary: 'List' })
+	find(@rest.param({ name: 'query', in: 'query' }) query: string, @context() context): CustomerSchema {
 		return super.find(query, context);
 	}
 
-	@get({ path: '/hello', summary: 'That is a hello method' })
-	hello(@param({ name: 'firstname', in: 'query' }) firstname: string): string {
+	@rest.get({ path: '/hello', summary: 'That is a hello method' })
+	hello(@rest.param({ name: 'firstname', in: 'query' }) firstname: string): string {
 		return firstname;
 	}
 }

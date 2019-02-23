@@ -1,4 +1,4 @@
-import { mongooseProp, swaggerProp, swaggerDefinition } from '../../../src';
+import { mongooseProp, swagger } from '../../../src';
 
 export interface ICustomer {
 	firstname: string;
@@ -15,35 +15,35 @@ export interface ICustomerPhone {
 
 class CustomerPhone implements ICustomerPhone {
 	@mongooseProp()
-	@swaggerProp()
+	@swagger.prop()
 	number: string;
 	@mongooseProp()
 	isPrimary: boolean;
 }
 
-@swaggerDefinition({ title: 'Customer' })
+@swagger.definition({ title: 'Customer' })
 export default class Customer implements ICustomer {
 	@mongooseProp()
-	@swaggerProp()
+	@swagger.prop()
 	firstname: string;
 
 	@mongooseProp()
-	@swaggerProp()
+	@swagger.prop()
 	lastname: string;
 
 	@mongooseProp()
-	@swaggerProp()
+	@swagger.prop()
 	weight: number;
 
 	@mongooseProp({ type: [CustomerPhone] })
-	@swaggerProp({ type: [CustomerPhone] })
+	@swagger.prop({ type: [CustomerPhone] })
 	phones: CustomerPhone[];
 
 	@mongooseProp()
-	@swaggerProp()
+	@swagger.prop()
 	accountId: number;
 
 	@mongooseProp({ type: Date })
-	@swaggerProp({ type: Date })
+	@swagger.prop({ type: Date })
 	startDate: string;
 }

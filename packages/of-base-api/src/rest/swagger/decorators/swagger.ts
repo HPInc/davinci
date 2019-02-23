@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 
-export function swaggerProp(opts?: any) {
+export function prop(opts?: any) {
 	// this is the decorator factory
 	return function(target: Object, key: string | symbol): void {
 		// this is the decorator
@@ -13,7 +13,7 @@ export function swaggerProp(opts?: any) {
 	};
 }
 
-export function swaggerDefinition(opts?: { title }) {
+export function definition(opts?: { title }) {
 	// this is the decorator factory
 	return function(target: Object): void {
 		// this is the decorator

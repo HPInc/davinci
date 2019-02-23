@@ -2,8 +2,8 @@
 	"name": "@oneflow/of-base-api",
 	"version": "0.0.28",
 	"description": "Framework for rapid and consistent API development",
-	"main": "build/index.js",
-	"types": "build/index.d.ts",
+	"main": "build/src/index.js",
+	"types": "build/src/index.d.ts",
 	"scripts": {
 		"example": "ts-node examples/crm/index.js",
 		"start": "ts-node ./src/app.ts",

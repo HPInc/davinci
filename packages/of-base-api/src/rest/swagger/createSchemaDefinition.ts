@@ -10,7 +10,7 @@ const getSchemaDefinition = (theClass: Function, definitions = {}): SwaggerDefin
 		title,
 		type: 'object',
 		properties: props.reduce((acc, { key, opts }) => {
-			let type = (opts && opts.type) || Reflect.getMetadata('design:type', theClass.prototype, key);
+			const type = (opts && opts.type) || Reflect.getMetadata('design:type', theClass.prototype, key);
 			if (Array.isArray(type)) {
 				const isFunction =
 					![String, Number, Object, Boolean, Date].includes(type[0]) && typeof type[0] === 'function';
@@ -39,17 +39,6 @@ const getSchemaDefinition = (theClass: Function, definitions = {}): SwaggerDefin
 					[key]: {
 						type: 'date'
 					}
-				};
-			}
-
-			if (typeof type === 'object' || Object === type) {
-				const defs = getSchemaDefinition(type[0]);
-				const definition: SwaggerDefinition = defs[Object.keys(defs)[0]];
-				definitions[definition.title] = definition;
-
-				return {
-					...acc,
-					[key]: definition
 				};
 			}
 

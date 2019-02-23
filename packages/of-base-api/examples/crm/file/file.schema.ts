@@ -1,4 +1,4 @@
-import { mongooseProp, swaggerProp, swaggerDefinition } from '../../../src';
+import { mongooseProp, swagger } from '../../../src';
 
 export interface IFile {
 	_id: string;
@@ -6,18 +6,18 @@ export interface IFile {
 	accountId: string;
 }
 
-@swaggerDefinition({ title: 'File' })
+@swagger.definition({ title: 'File' })
 export default class File implements IFile {
 	@mongooseProp()
-	@swaggerProp()
+	@swagger.prop()
 	// @ts-ignore
 	_id: string;
 
 	@mongooseProp()
-	@swaggerProp()
+	@swagger.prop()
 	name: string;
 
 	@mongooseProp()
-	@swaggerProp()
+	@swagger.prop()
 	accountId: string;
 }
