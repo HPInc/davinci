@@ -2,7 +2,8 @@
 	"name": "@oneflow/of-base-api",
 	"version": "0.0.28",
 	"description": "Framework for rapid and consistent API development",
-	"main": "index.ts",
+	"main": "build/index.js",
+	"types": "build/index.d.ts",
 	"scripts": {
 		"example": "ts-node examples/crm/index.js",
 		"start": "ts-node ./src/app.ts",
@@ -17,6 +18,7 @@
 	"author": "Nigel Watson <nigel.watson@oneflowcloud.com> (http://www.oneflowsystems.com/)",
 	"license": "ISC",
 	"dependencies": {
+		"@oneflow/oneflow-message": "2.0.8",
 		"ajv": "6.2.1",
 		"bluebird": "3.5.0",
 		"debug": "3.1.0",

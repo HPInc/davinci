@@ -1,5 +1,4 @@
 import * as errors from './src/errors';
-import BaseController from './src/BaseController';
 import { createApp } from './src/createApp';
 import createRouter from './src/rest/createRouter';
 
@@ -13,11 +12,9 @@ const boot = () => {
 	process.exit(-1);
 };
 
-export * from './src/rest'
-export * from './src/mongoose'
+export * from './src'
 
 export {
-	BaseController,
 	boot,
 	createApp,
 	createRouter,

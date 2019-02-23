@@ -1,7 +1,7 @@
 import BaseController from '../../../src/BaseController';
 import model from './customer.model';
 import CustomerSchema from './customer.schema';
-import { controller, get, param } from '../../../src/rest';
+import { controller, get, param, context } from '../../../src';
 
 @controller({ basepath: '/customers', excludedMethods: ['deleteById'] })
 export default class CustomerController extends BaseController {
@@ -10,7 +10,7 @@ export default class CustomerController extends BaseController {
 	}
 
 	@get({ path: '/', summary: 'List' })
-	find(@param({ name: 'query', in: 'query' }) query: string, context): CustomerSchema {
+	find(@param({ name: 'query', in: 'query' }) query: string, @context() context): CustomerSchema {
 		return super.find(query, context);
 	}
 

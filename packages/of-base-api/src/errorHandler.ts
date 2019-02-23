@@ -1,3 +1,4 @@
+
 // import Debug from 'debug';
 import * as errors from './errors';
 
@@ -35,6 +36,7 @@ export default ({ exposeStack = false } = {}) => {
 			delete output.stack;
 		}
 
+		console.error(error);
 		res.status(error.code);
 		res.set('Content-Type', 'application/json');
 		res.json(output);

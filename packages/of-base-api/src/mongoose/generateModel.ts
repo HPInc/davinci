@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { model, Schema, SchemaTypeOpts } from 'mongoose';
+import { model, Schema, SchemaTypeOpts, SchemaOptions } from 'mongoose';
 
 // Helper functions
 const getSchemaDefinition = (theClass: Function) => {
@@ -11,16 +11,35 @@ const getSchemaDefinition = (theClass: Function) => {
 			type = type[0];
 		}
 
-		const isFunction = ![String, Number, Object, Boolean].includes(type) && typeof type === 'function';
+		const isFunction = ![String, Number, Object, Boolean, Date].includes(type) && typeof type === 'function';
 		if (isFunction) {
 			type = getSchemaDefinition(type);
 		}
+
+		if (type.ref) {
+			const prop = {
+				...opts,
+				type: 'ObjectId',
+				ref: type.ref.name
+			};
+			return {
+				...acc,
+				[key]: isArray ? [prop] : prop
+			};
+		}
+
+		let prop = {
+			...opts,
+			type
+		};
+
+		if (typeof prop.type === 'object') {
+			prop = { ...type };
+		}
+
 		return {
 			...acc,
-			[key]: {
-				...opts,
-				type
-			}
+			[key]: isArray ? [prop] : prop
 		};
 	}, {});
 };
@@ -28,7 +47,10 @@ const getSchemaDefinition = (theClass: Function) => {
 const EXCLUDED_INSTANCE_METHODS = ['constructor'];
 const EXCLUDED_STATIC_METHODS = ['name', 'length', 'prototype'];
 
-export const generateSchema = (theClass: Function) => {
+export const generateSchema = (
+	theClass: Function,
+	options: SchemaOptions = { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
+) => {
 	// get schema
 	const schemaDef = getSchemaDefinition(theClass);
 
@@ -45,7 +67,7 @@ export const generateSchema = (theClass: Function) => {
 	// get indexes
 	const indexes = Reflect.getMetadata('tsmongoose:indexes', theClass) || [];
 
-	const schema = new Schema(schemaDef);
+	const schema = new Schema(schemaDef, options);
 	schema.methods = methods;
 	schema.statics = statics;
 	if (indexes.length > 0) {
@@ -55,7 +77,12 @@ export const generateSchema = (theClass: Function) => {
 	return schema;
 };
 
-export const generateModel = (theClass: Function, modelName = theClass.name, collectionName?) => {
-	const schema = generateSchema(theClass);
+export const generateModel = (
+	theClass: Function,
+	modelName = theClass.name,
+	collectionName?,
+	options?: SchemaOptions
+) => {
+	const schema = generateSchema(theClass, options);
 	return model(modelName, schema, collectionName);
 };

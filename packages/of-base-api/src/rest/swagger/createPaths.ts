@@ -1,11 +1,16 @@
 import 'reflect-metadata';
 import _ from 'lodash';
+import _fp from 'lodash/fp';
 import { MethodParameter, PathsDefinition } from './types';
 import { IControllerDecoratorArgs } from './decorators/rest';
 
 const getParameterDefinition = methodParameterConfig => {
 	const options: MethodParameter = methodParameterConfig.options;
-	return { ...options, type: methodParameterConfig.type.name.toLowerCase() };
+	const type =
+		methodParameterConfig.type === 'context'
+			? methodParameterConfig.type
+			: methodParameterConfig.type.name.toLowerCase();
+	return { ...options, type };
 };
 
 const createPathsDefinition = (theClass: Function): PathsDefinition => {
@@ -15,7 +20,12 @@ const createPathsDefinition = (theClass: Function): PathsDefinition => {
 	const methods = (Reflect.getMetadata('tsswagger:methods', theClass.prototype) || []).filter(
 		({ methodName }) => !excludedMethods.includes(methodName)
 	);
-	const methodParameters = Reflect.getMetadata('tsswagger:method-parameters', theClass.prototype) || [];
+	const contextMetadata: IControllerDecoratorArgs = Reflect.getMetadata('tscontroller:context', theClass.prototype);
+	const methodParameters = _fp.flow(
+		_fp.concat([contextMetadata]),
+		_fp.sortBy('index'),
+		_fp.compact
+	)(Reflect.getMetadata('tsswagger:method-parameters', theClass.prototype) || []);
 	// method parameters type Reflect.getMetadata('design:paramtypes', theClass.prototype, 'find');
 
 	return _.reduce(

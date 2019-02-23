@@ -5,6 +5,7 @@ export interface ICustomer {
 	lastname: string;
 	weight: number;
 	accountId: number;
+	startDate: string;
 }
 
 export interface ICustomerPhone {
@@ -41,4 +42,8 @@ export default class Customer implements ICustomer {
 	@mongooseProp()
 	@swaggerProp()
 	accountId: number;
+
+	@mongooseProp({ type: Date })
+	@swaggerProp({ type: Date })
+	startDate: string;
 }

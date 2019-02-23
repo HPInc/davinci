@@ -92,8 +92,12 @@ const defaultContextFactory = ({ req, res }) => ({
 });
 
 const mapReqToParameters = (req, res, parameters = [], contextFactory = defaultContextFactory) => {
-	const parameterList = parameters.reduce((acc, p) => {
-		if (p.name) {
+	const context = contextFactory({ req, res });
+
+	return parameters.reduce((acc, p) => {
+		if (p.type === 'context') {
+			acc.push(context);
+		} else if (p.name) {
 			let value = null;
 			if (p.in === 'query') {
 				value = req.query[p.name];
@@ -110,13 +114,6 @@ const mapReqToParameters = (req, res, parameters = [], contextFactory = defaultC
 		}
 		return acc;
 	}, []);
-
-	const context = contextFactory({ req, res });
-
-	return {
-		parameterList,
-		context
-	};
 };
 
 const makeHandlerFunction = (operation, controller, functionName, contextFactory) => {
@@ -125,11 +122,11 @@ const makeHandlerFunction = (operation, controller, functionName, contextFactory
 
 	return (req, res, next) => {
 		// need a custom middleware to set the context ID
-		const { parameterList, context } = mapReqToParameters(req, res, operation.parameters, contextFactory);
+		const parameterList = mapReqToParameters(req, res, operation.parameters, contextFactory);
 		debug('calling ', functionName);
 		// the controller functions return a promise
 		// coerce the controller return value to be a promise
-		return Promise.try(() => controller[functionName](...parameterList, context)).then(
+		return Promise.try(() => controller[functionName](...parameterList)).then(
 			sendResults(res, successCode),
 			sendError(next)
 		);
