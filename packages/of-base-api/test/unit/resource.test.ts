@@ -4,7 +4,6 @@ const Resource = require('../../src/rest/swagger/Resource');
 const testDef = require('../support/test.def.js');
 
 describe('Resource', () => {
-
 	const makeDef = () => JSON.parse(JSON.stringify(testDef));
 
 	it('should create a resource from a standard swagger definition structure', async () => {
@@ -20,6 +19,4 @@ describe('Resource', () => {
 		resource.should.have.property('paths');
 		resource.should.have.property('definitions');
 	});
-
 });
-

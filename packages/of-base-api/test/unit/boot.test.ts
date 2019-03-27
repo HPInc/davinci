@@ -1,8 +1,7 @@
-const should = require('should');
-const path = require('path');
-const sinon = require('sinon');
-const process = require('process');
-const { checkAndAssignBootDir, execBootScripts } = require('../../src/boot');
+import should from 'should';
+import sinon from 'sinon';
+import process from 'process';
+import { checkAndAssignBootDir, execBootScripts } from '../../src/boot';
 
 describe('boot', () => {
 	let cwdStub;
@@ -17,10 +16,8 @@ describe('boot', () => {
 	});
 
 	describe('#checkAndAssignBootDir', () => {
-
-
 		it('Should successfully check and assign a default boot dir', () => {
-			const options = { }; // no bootDirPath
+			const options = {}; // no bootDirPath
 			const validPaths = checkAndAssignBootDir(options);
 			should(validPaths).be.String();
 		});
@@ -43,16 +40,13 @@ describe('boot', () => {
 	});
 
 	describe('#execBootScripts', async () => {
-
 		it('Should successfully check and assign a default boot dir', async () => {
 			const app = sinon.mock();
-			const options = { }; // no bootDirPath
+			const options = {}; // no bootDirPath
 			const newApp = await execBootScripts(app, options);
-			newApp.should.be.Array().of.length(1);
+			should(newApp).be.Array().of.length(1);
 			// there is a test boot script called stub.js that returns ['complete']
 			newApp[0].should.equal('complete');
 		});
-
 	});
 });
-

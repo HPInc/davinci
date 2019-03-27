@@ -38,7 +38,7 @@ export const processArgs = (...args) => {
 	return [app, options, runMiddlewares];
 };
 
-export const configureExpress = (app, runMiddlewares) => {
+export const configureExpress = (app, runMiddlewares?) => {
 	// this is at the start
 	app.use(express.json({ limit: '1mb' }));
 	app.use(express.urlencoded({ extended: true }));

@@ -1,4 +1,4 @@
-module.exports.makeMockResponse = done => {
+export const makeMockResponse = done => {
 	const logDone = (...args) => {
 		done(...args);
 	};
@@ -11,11 +11,11 @@ module.exports.makeMockResponse = done => {
 	return request;
 };
 
-module.exports.makeMockRequest = (method, url, body = {}) => {
+export const makeMockRequest = (method, url, body = {}) => {
 	return { url, method, body };
 };
 
-module.exports.makeMockControllerClass = ({ model, def } = {}, classToExtend) => {
+export const makeMockControllerClass = ({ model, def }, classToExtend) => {
 	return class extends classToExtend {
 		constructor() {
 			super({ model, def });
@@ -23,7 +23,7 @@ module.exports.makeMockControllerClass = ({ model, def } = {}, classToExtend) =>
 	};
 };
 
-module.exports.makeContext = (accountId = '') => {
+export const makeContext = (accountId = '') => {
 	return {
 		accountId,
 		body: {},

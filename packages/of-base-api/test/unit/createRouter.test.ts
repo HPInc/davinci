@@ -1,13 +1,10 @@
-const should = require('should');
-const express = require('express');
-const _ = require('lodash');
-const sinon = require('sinon').createSandbox();
-const testDef = require('../support/test.def');
-const BaseController = require('../../src/BaseController');
-const createRouter = require('../../src/rest/createRouter');
-const utils = require('../support/utils');
+import _ from 'lodash';
+import Sinon from 'sinon';
+import BaseController from '../../src/BaseController';
+import createRouter, { createRouteHandlers } from '../../src/rest/createRouter';
+import * as utils from '../support/utils';
 
-const { createRouteHandlers } = createRouter;
+const sinon = Sinon.createSandbox();
 
 describe('createRouter', () => {
 	afterEach(() => {
@@ -18,10 +15,9 @@ describe('createRouter', () => {
 
 		beforeEach(() => {
 			TestController = class extends BaseController {
-				constructor({ model, def = {} }) {
+				constructor(model) {
 					super();
 					this.model = model;
-					this.def = def;
 				}
 			};
 		});
@@ -31,15 +27,13 @@ describe('createRouter', () => {
 			const def = testDef;
 			const mockClass = utils.makeMockControllerClass({ model, def }, TestController);
 			const router = createRouter(mockClass, 'test');
-			router.should.have.property('params');
+			should(router).have.property('params');
 			done();
 		});
 
 		it('should fail with missing controller', done => {
-			const model = {};
-			const def = testDef;
 			try {
-				const router = createRouter(null, 'test');
+				createRouter(null, 'test');
 			} catch (err) {
 				err.should.have.property('message').equal('Invalid Controller - missing Controller');
 				done();
@@ -47,10 +41,8 @@ describe('createRouter', () => {
 		});
 
 		it('should fail with invalid controller', done => {
-			const model = {};
-			const def = testDef;
 			try {
-				const router = createRouter('this is the wrong type', 'test');
+				createRouter('this is the wrong type', 'test');
 			} catch (err) {
 				err.should.have.property('message').equal('Invalid Controller - not function');
 				done();
@@ -60,7 +52,7 @@ describe('createRouter', () => {
 		it('should succeed even with invalid controller definitions', done => {
 			const model = {};
 			const def = null;
-			const mockClass = utils.makeMockControllerClass({ model, def }, TestController);
+			utils.makeMockControllerClass({ model, def }, TestController);
 			done();
 		});
 
@@ -90,7 +82,9 @@ describe('createRouter', () => {
 
 			const router = createRouter(ParamController);
 
-			router.should.have.property('stack').of.length(2);
+			should(router)
+				.have.property('stack')
+				.of.length(2);
 			router.stack[0].should.have.property('route');
 			router.stack[0].route.should.have.property('path').equal('/:id');
 			router.stack[1].should.have.property('route');
@@ -138,6 +132,7 @@ describe('createRouter', () => {
 
 			const req = {};
 			const res = {
+				statusCode: null,
 				status: code => {
 					res.statusCode = +code;
 					return res;
@@ -157,6 +152,7 @@ describe('createRouter', () => {
 
 			const req = {};
 			const res = {
+				statusCode: null,
 				status: code => {
 					res.statusCode = +code;
 					return res;
@@ -176,10 +172,9 @@ describe('createRouter', () => {
 		let TestController;
 		beforeEach(() => {
 			TestController = class extends BaseController {
-				constructor({ model, def = {} }) {
+				constructor(model) {
 					super();
 					this.model = model;
-					this.def = def;
 				}
 
 				syncMethod() {
@@ -196,10 +191,14 @@ describe('createRouter', () => {
 			const model = {};
 			const def = testDef;
 			const MockClass = utils.makeMockControllerClass({ model, def }, TestController);
-			const handlers = createRouteHandlers(new MockClass());
+			const handlers = createRouteHandlers(new MockClass(), null, null);
+			// @ts-ignore
 			const { handler: synchronousHandler } = _.find(handlers, { path: '/syncMethod' });
 			const reqMock = { body: {} };
-			const resMock = {};
+			const resMock = {
+				status: null,
+				json: null
+			};
 			resMock.status = sinon.stub().returns(resMock);
 			resMock.json = sinon.stub();
 			const promise = synchronousHandler(reqMock, resMock);
@@ -212,10 +211,14 @@ describe('createRouter', () => {
 			const model = {};
 			const def = testDef;
 			const MockClass = utils.makeMockControllerClass({ model, def }, TestController);
-			const handlers = createRouteHandlers(new MockClass());
+			const handlers = createRouteHandlers(new MockClass(), null, null);
+			// @ts-ignore
 			const { handler: asynchronousHandler } = _.find(handlers, { path: '/asyncMethod' });
 			const reqMock = { body: {} };
-			const resMock = {};
+			const resMock = {
+				status: null,
+				json: null
+			};
 			resMock.status = sinon.stub().returns(resMock);
 			resMock.json = sinon.stub();
 			const promise = asynchronousHandler(reqMock, resMock);

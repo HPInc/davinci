@@ -1,9 +1,10 @@
 --reporter spec
 --ui bdd
---exit
 --recursive
 --bail
 --check-leaks
 --globals sinon,_
---require test/support/env.js
-test/
+--require ts-node/register
+--require source-map-support/register
+--require test/support/env.ts
+test/**/*.{js,ts}
