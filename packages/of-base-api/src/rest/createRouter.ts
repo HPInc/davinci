@@ -2,11 +2,14 @@ import Ajv from 'ajv';
 import Debug from 'debug';
 import express from 'express';
 import _ from 'lodash';
+import _fp from 'lodash/fp';
 import Promise from 'bluebird';
+import path from 'path';
 import * as swaggerDocs from './swagger/openapiDocs';
-import * as errors from '../errors';
+import { NotImplemented, BadRequest } from '../errors';
 import createPaths from './swagger/createPaths';
 import createSchemaDefinition from './swagger/createSchemaDefinition';
+
 const debug = Debug('of-base-api');
 
 const AJV_OPTS = {
@@ -35,51 +38,64 @@ function sendError(next) {
 	};
 }
 
-const attemptJsonParsing = ({ value, config, schema }) => {
+const attemptJsonParsing = ({ value, config, definitions }) => {
+	let val = value;
 	if (_.startsWith(value, '{') && _.endsWith(value, '}')) {
 		try {
-			return {
-				value: JSON.parse(value),
-				config,
-				schema
-			};
+			val = JSON.parse(value);
 		} catch (err) {
-			return {
-				value,
-				config,
-				schema
-			};
+			val = value;
 		}
 	}
 
-	return { value, config, schema };
+	return { value: val, config, definitions };
 };
 
-const validateAndCoerce = ({ value, config, schema: resourceSchema }) => {
+const performAjvValidation = ({ value, config, definitions }) => {
+	// @ts-ignore
+	const ajv = new Ajv(AJV_OPTS);
+	const schema = {
+		type: 'object',
+		properties: { [config.name]: config.schema },
+		required: config.required ? [config.name] : []
+	};
+	const data = { [config.name]: value };
+
+	_.forEach(definitions, (schema, name) => ajv.addSchema(schema, name));
+
+	let errors;
+	const valid = ajv.addSchema({ ...schema }, 'schema').validate('schema', data);
+	if (!valid) {
+		errors = ajv.errors;
+	}
+
+	return { value: data[config.name], errors };
+};
+
+const validateAndCoerce = ({ value, config, definitions }) => {
 	const isUndefinedButNotRequired = !config.required && typeof value === 'undefined';
 	if (config.schema && !isUndefinedButNotRequired) {
 		// @ts-ignore
-		const ajv = new Ajv(AJV_OPTS);
-		const valid = ajv.addSchema({ ...config.schema, ...resourceSchema }, 'schema').validate('schema', value);
-		if (!valid) {
-			const error = new errors.BadRequest();
-			error.errors = ajv.errors;
-			throw error;
+		const { value: val, errors } = performAjvValidation({ value, config, definitions });
+		if (errors) {
+			throw new BadRequest('Validation error', { errors });
 		}
+
+		return { value: val, config };
 	}
 
 	return { value, config };
 };
 
-const processParameter = ({ value, config, schema = {} }) =>
-	_.flow(
+const processParameter = ({ value, config, definitions }) =>
+	_fp.flow(
 		attemptJsonParsing,
 		validateAndCoerce,
-		({ value: val }) => val
+		_fp.get('value')
 	)({
 		value,
 		config,
-		schema
+		definitions
 	});
 
 const defaultContextFactory = ({ req, res }) => ({
@@ -91,7 +107,7 @@ const defaultContextFactory = ({ req, res }) => ({
 	res
 });
 
-const mapReqToParameters = (req, res, parameters = [], contextFactory = defaultContextFactory) => {
+const mapReqToParameters = (req, res, parameters = [], definitions, contextFactory = defaultContextFactory) => {
 	const context = contextFactory({ req, res });
 
 	return parameters.reduce((acc, p) => {
@@ -108,21 +124,21 @@ const mapReqToParameters = (req, res, parameters = [], contextFactory = defaultC
 			} else if (p.in === 'body') {
 				value = req.body;
 			} else {
-				throw new errors.NotImplemented(`Can't get field ${p.name} - ${p.in} not yet supported`);
+				throw new NotImplemented(`Can't get field ${p.name} - ${p.in} not yet supported`);
 			}
-			acc.push(processParameter({ value, config: p }));
+			acc.push(processParameter({ value, config: p, definitions }));
 		}
 		return acc;
 	}, []);
 };
 
-const makeHandlerFunction = (operation, controller, functionName, contextFactory) => {
+const makeHandlerFunction = (operation, controller, functionName, definitions, contextFactory) => {
 	// @ts-ignore
 	const successCode = _.findKey(operation.responses, (obj, key) => +key >= 200 && +key < 400);
 
 	return (req, res, next) => {
 		// need a custom middleware to set the context ID
-		const parameterList = mapReqToParameters(req, res, operation.parameters, contextFactory);
+		const parameterList = mapReqToParameters(req, res, operation.parameters, definitions, contextFactory);
 		debug('calling ', functionName);
 		// the controller functions return a promise
 		// coerce the controller return value to be a promise
@@ -158,7 +174,13 @@ export const createRouteHandlers = (controller, definition, contextFactory) => {
 			if (!controller[methodName]) return;
 
 			// create the handler function
-			const handler = makeHandlerFunction(operation, controller, methodName, contextFactory);
+			const handler = makeHandlerFunction(
+				operation,
+				controller,
+				methodName,
+				definition.definitions,
+				contextFactory
+			);
 			routeHandlers.push({ method, path, handler });
 		});
 	});
@@ -177,13 +199,17 @@ const createRouterAndSwaggerDoc = (Controller, rsName?, contextFactory?) => {
 	// get a resource name either supplied or derive from Controller name
 	const resourceName = rsName || Controller.name.replace(/Controller$/, '').toLowerCase();
 
+	// get controller metadata
+	const metadata = Reflect.getMetadata('tsswagger:controller', Controller) || {};
+	const basepath = metadata.basepath || '';
+
 	// create the controller from the supplied class
 	const controller = new Controller();
 
 	// create the router
 	const router = express.Router();
 
-	// add the resource to the swagger documentation
+	// create the swagger structure
 	const definition = {
 		definitions: createSchemaDefinition(controller.schema),
 		paths: createPaths(Controller)
@@ -193,7 +219,10 @@ const createRouterAndSwaggerDoc = (Controller, rsName?, contextFactory?) => {
 	const routes = createRouteHandlers(controller, definition, contextFactory);
 
 	// add them to the router
-	routes.forEach(route => router[route.method](route.path, route.handler));
+	routes.forEach(route => {
+		const routePath = path.join(basepath, route.path);
+		return router[route.method](routePath, route.handler);
+	});
 
 	swaggerDocs.addResource(resourceName, definition);
 

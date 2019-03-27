@@ -15,7 +15,7 @@ export type MethodParameter = {
 	in: 'body' | 'path' | 'query';
 	description?: string;
 	required?: boolean;
-	schema?: { $ref: string };
+	schema?: { $ref?: string; type?: string; [key: string]: any };
 };
 
 export type Verb = 'get' | 'post' | 'put' | 'patch' | 'head' | 'delete';

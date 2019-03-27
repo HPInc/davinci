@@ -3,6 +3,7 @@ import { mongooseProp, swagger } from '../../../src';
 export interface ICustomer {
 	firstname: string;
 	lastname: string;
+	age: number;
 	weight: number;
 	accountId: number;
 	startDate: string;
@@ -30,6 +31,10 @@ export default class Customer implements ICustomer {
 	@mongooseProp()
 	@swagger.prop()
 	lastname: string;
+
+	@mongooseProp()
+	@swagger.prop()
+	age: number;
 
 	@mongooseProp()
 	@swagger.prop()

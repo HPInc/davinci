@@ -6,11 +6,15 @@ import { IControllerDecoratorArgs } from './decorators/rest';
 
 const getParameterDefinition = methodParameterConfig => {
 	const options: MethodParameter = methodParameterConfig.options;
-	const type =
-		methodParameterConfig.type === 'context'
-			? methodParameterConfig.type
-			: methodParameterConfig.type.name.toLowerCase();
-	return { ...options, type };
+	const definition = { ...options };
+	/*if (!definition.schema) {
+		const type =
+			methodParameterConfig.type === 'context'
+				? methodParameterConfig.type
+				: methodParameterConfig.type.name.toLowerCase();
+		definition.schema = { type };
+	}*/
+	return definition;
 };
 
 const createPathsDefinition = (theClass: Function): PathsDefinition => {

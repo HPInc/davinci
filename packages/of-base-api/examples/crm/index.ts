@@ -25,7 +25,7 @@ createApp(expressApp, bootOptions, app => {
 		});
 	});
 
-	app.use('/api/customer', createRouter(CustomerController));
+	app.use(createRouter(CustomerController));
 	app.use('/api/file', createRouter(FileController));
 	// app.use('/api/search', createRouter(SearchController));
 });

@@ -3,7 +3,7 @@ import model from './customer.model';
 import CustomerSchema from './customer.schema';
 import { rest, context } from '../../../src';
 
-@rest.controller({ basepath: '/customers', excludedMethods: ['deleteById'] })
+@rest.controller({ basepath: '/api/customer', excludedMethods: ['deleteById'] })
 export default class CustomerController extends BaseController {
 	constructor() {
 		super(model, CustomerSchema);
@@ -15,7 +15,20 @@ export default class CustomerController extends BaseController {
 	}
 
 	@rest.get({ path: '/hello', summary: 'That is a hello method' })
-	hello(@rest.param({ name: 'firstname', in: 'query' }) firstname: string): string {
-		return firstname;
+	hello(
+		@rest.param({ name: 'firstname', in: 'query' }) firstname: string,
+		@rest.param({
+			name: 'customerObj',
+			in: 'query',
+			required: true,
+			schema: {
+				// type: 'number',
+				$ref: 'Customer'
+			}
+		})
+		customerObj
+	) {
+		console.log(firstname);
+		return customerObj;
 	}
 }

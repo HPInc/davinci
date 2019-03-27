@@ -37,7 +37,8 @@ const getSchemaDefinition = (theClass: Function, definitions = {}): SwaggerDefin
 				return {
 					...acc,
 					[key]: {
-						type: 'date'
+						type: 'string',
+						format: 'date'
 					}
 				};
 			}

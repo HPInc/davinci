@@ -57,7 +57,7 @@ export function param(options: MethodParameter): Function {
 }
 
 export type IControllerDecoratorArgs = {
-	basepath: string;
+	basepath?: string;
 	excludedMethods?: string[];
 };
 
