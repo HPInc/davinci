@@ -15,10 +15,10 @@ export const makeMockRequest = (method, url, body = {}) => {
 	return { url, method, body };
 };
 
-export const makeMockControllerClass = ({ model, def }, classToExtend) => {
+export const makeMockControllerClass = (model, classToExtend) => {
 	return class extends classToExtend {
 		constructor() {
-			super({ model, def });
+			super(model);
 		}
 	};
 };

@@ -1,3 +1,4 @@
+import should from 'should';
 import * as errors from '../../src/errors';
 
 describe('errors', () => {

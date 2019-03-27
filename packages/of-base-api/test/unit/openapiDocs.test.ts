@@ -1,7 +1,7 @@
 import * as openapiDocs from '../../src/rest/swagger/openapiDocs';
 
 describe('openapiDocs', () => {
-	const makeDef = () => JSON.parse(JSON.stringify(testDef));
+	const makeDef = () => {};
 	const makeApp = done => {
 		return {
 			// @ts-ignore

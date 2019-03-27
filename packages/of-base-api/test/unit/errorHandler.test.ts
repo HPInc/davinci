@@ -1,3 +1,4 @@
+import should from 'should';
 import feathersErrors from 'feathers-errors';
 import * as errors from '../../src/errors';
 import errorHandler from '../../src/errorHandler';

@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import should from 'should';
 import Sinon from 'sinon';
 import BaseController from '../../src/BaseController';
 import createRouter, { createRouteHandlers } from '../../src/rest/createRouter';
@@ -24,8 +25,7 @@ describe('createRouter', () => {
 
 		it('should successfully create a router', done => {
 			const model = {};
-			const def = testDef;
-			const mockClass = utils.makeMockControllerClass({ model, def }, TestController);
+			const mockClass = utils.makeMockControllerClass(model, TestController);
 			const router = createRouter(mockClass, 'test');
 			should(router).have.property('params');
 			done();
@@ -51,8 +51,7 @@ describe('createRouter', () => {
 
 		it('should succeed even with invalid controller definitions', done => {
 			const model = {};
-			const def = null;
-			utils.makeMockControllerClass({ model, def }, TestController);
+			utils.makeMockControllerClass(model, TestController);
 			done();
 		});
 
@@ -189,8 +188,7 @@ describe('createRouter', () => {
 
 		it('should correctly coerce synchronous controller methods to return a promise', async () => {
 			const model = {};
-			const def = testDef;
-			const MockClass = utils.makeMockControllerClass({ model, def }, TestController);
+			const MockClass = utils.makeMockControllerClass(model, TestController);
 			const handlers = createRouteHandlers(new MockClass(), null, null);
 			// @ts-ignore
 			const { handler: synchronousHandler } = _.find(handlers, { path: '/syncMethod' });
@@ -209,8 +207,7 @@ describe('createRouter', () => {
 
 		it('should correctly handle asynchronous controller methods', async () => {
 			const model = {};
-			const def = testDef;
-			const MockClass = utils.makeMockControllerClass({ model, def }, TestController);
+			const MockClass = utils.makeMockControllerClass(model, TestController);
 			const handlers = createRouteHandlers(new MockClass(), null, null);
 			// @ts-ignore
 			const { handler: asynchronousHandler } = _.find(handlers, { path: '/asyncMethod' });
