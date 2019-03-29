@@ -36,18 +36,18 @@ export default class BaseController {
 	async findOne(@rest.param({ name: 'query', in: 'query' }) query, @context() context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 		const { sort, select, populate, where } = this.parseQuery(query);
-		let mQuery = this.model.find(where, select, { limit: 1, sort, context });
+		let mQuery = this.model.findOne(where, select, { sort, context });
 
 		if (populate) {
 			mQuery = mQuery.populate(populate);
 		}
 
 		const result = await mQuery;
-		if (!result.length) {
+		if (!result) {
 			throw new errors.NotFound();
 		}
 
-		return result[0];
+		return result;
 	}
 
 	@rest.get({ path: '/:id', summary: 'Fetch by id' })
