@@ -1,7 +1,7 @@
 import * as openapiDocs from '../../src/rest/swagger/openapiDocs';
 
 describe('openapiDocs', () => {
-	const makeDef = () => {};
+	// const makeDef = () => {};
 	const makeApp = done => {
 		return {
 			// @ts-ignore
@@ -62,18 +62,6 @@ describe('openapiDocs', () => {
 			version: '1.0', // read from package.json
 			basePath: null,
 			protocol: 'https'
-		});
-	});
-
-	it('Should throw error if unable to find "boot" or "src/boot" in current directory', async done => {
-		const app = makeApp(done);
-		const def = makeDef();
-
-		openapiDocs.addResource('test', def);
-
-		openapiDocs.createApiDocs(app, {
-			discoveryUrl: '/api',
-			basePath: 'http://localhost'
 		});
 	});
 });
