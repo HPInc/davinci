@@ -157,7 +157,7 @@ const makeMethodName = operation => {
 	return operationName.split('#')[0];
 };
 
-export const createRouteHandlers = (controller, definition, contextFactory) => {
+export const createRouteHandlers = (controller, definition, contextFactory?) => {
 	const routeHandlers = [];
 
 	// for each path

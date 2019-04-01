@@ -61,7 +61,7 @@ export type IControllerDecoratorArgs = {
 	excludedMethods?: string[];
 };
 
-export function controller(args: IControllerDecoratorArgs): Function {
+export function controller(args?: IControllerDecoratorArgs): Function {
 	return function(target: Object) {
 		// define new metadata props
 		Reflect.defineMetadata('tsswagger:controller', args, target);

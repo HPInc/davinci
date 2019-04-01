@@ -1,3 +1,5 @@
+import { rest } from '../../src';
+
 export const makeMockResponse = done => {
 	const logDone = (...args) => {
 		done(...args);
@@ -16,11 +18,15 @@ export const makeMockRequest = (method, url, body = {}) => {
 };
 
 export const makeMockControllerClass = (model, classToExtend) => {
-	return class extends classToExtend {
+	const TheClass = class extends classToExtend {
 		constructor() {
 			super(model);
 		}
 	};
+
+	rest.controller()(TheClass);
+
+	return TheClass;
 };
 
 export const makeContext = (accountId = '') => {

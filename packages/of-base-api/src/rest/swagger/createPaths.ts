@@ -14,8 +14,8 @@ const getParameterDefinition = methodParameterConfig => {
 };
 
 const createPathsDefinition = (theClass: Function): PathsDefinition => {
-	const controllerMetadata: IControllerDecoratorArgs = Reflect.getMetadata('tsswagger:controller', theClass);
-	if (!controllerMetadata) throw new Error('');
+	const controllerMetadata: IControllerDecoratorArgs = Reflect.getMetadata('tsswagger:controller', theClass) || {};
+	// if (!controllerMetadata) throw new Error('Invalid Class. It must be decorated as controller');
 	const { excludedMethods = [] } = controllerMetadata;
 	const methods = (Reflect.getMetadata('tsswagger:methods', theClass.prototype) || []).filter(
 		({ methodName }) => !excludedMethods.includes(methodName)

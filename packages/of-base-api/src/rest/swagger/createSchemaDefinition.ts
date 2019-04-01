@@ -62,9 +62,7 @@ const getSchemaDefinition = (theClass: Function, definitions = {}): SwaggerDefin
 };
 
 export const createSchemaDefinition = (theClass: Function) => {
-	const schemaDef = getSchemaDefinition(theClass);
-
-	return schemaDef;
+	return theClass ? getSchemaDefinition(theClass) : {};
 };
 
 export default createSchemaDefinition;
