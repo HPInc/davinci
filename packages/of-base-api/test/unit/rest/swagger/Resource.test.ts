@@ -1,5 +1,5 @@
 import should from 'should';
-import Resource from '../../src/rest/swagger/Resource';
+import Resource from '../../../../src/rest/swagger/Resource';
 
 describe('Resource', () => {
 	const makeDef = () => ({

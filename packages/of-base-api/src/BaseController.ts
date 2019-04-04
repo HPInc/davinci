@@ -15,9 +15,11 @@ interface IParsedMongooseFilters {
 export default class BaseController {
 	model: any;
 	schema: Function;
-	constructor(model?, schema?) {
+	additionalSchemas: Function;
+	constructor(model?, schema?, additionalSchemas?) {
 		this.model = model;
 		this.schema = schema;
+		this.additionalSchemas = additionalSchemas;
 	}
 
 	@rest.get({ path: '/', summary: 'List' })

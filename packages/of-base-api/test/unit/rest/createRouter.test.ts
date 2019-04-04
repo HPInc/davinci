@@ -1,11 +1,11 @@
 import _ from 'lodash';
 import should from 'should';
 import Sinon from 'sinon';
-import BaseController from '../../src/BaseController';
-import createRouter, { createRouteHandlers } from '../../src/rest/createRouter';
-import { rest } from '../../src';
-import * as utils from '../support/utils';
-import createPathsDefinition from '../../src/rest/swagger/createPaths';
+import BaseController from '../../../src/BaseController';
+import createRouter, { createRouteHandlers } from '../../../src/rest/createRouter';
+import { rest } from '../../../src';
+import * as utils from '../../support/utils';
+import createPathsDefinition from '../../../src/rest/swagger/createPaths';
 
 const sinon = Sinon.createSandbox();
 

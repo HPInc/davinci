@@ -1,4 +1,4 @@
-import * as openapiDocs from '../../src/rest/swagger/openapiDocs';
+import * as openapiDocs from '../../../../src/rest/swagger/openapiDocs';
 
 describe('openapiDocs', () => {
 	// const makeDef = () => {};

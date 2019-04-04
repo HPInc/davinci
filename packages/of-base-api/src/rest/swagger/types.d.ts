@@ -10,12 +10,20 @@ export type SwaggerDefinitions = {
 	[key: string]: SwaggerDefinition;
 };
 
+export type Schema = { $ref?: string; type?: string; [key: string]: any };
+
 export type MethodParameter = {
 	name: string;
 	in: 'body' | 'path' | 'query';
 	description?: string;
 	required?: boolean;
-	schema?: { $ref?: string; type?: string; [key: string]: any };
+	schema?: Schema;
+	responses?: {
+		[key: number]: {
+			description?: string;
+			schema?: Schema;
+		};
+	};
 };
 
 export type Verb = 'get' | 'post' | 'put' | 'patch' | 'head' | 'delete';
@@ -29,7 +37,7 @@ export type PathsDefinition = {
 			consumes: string[];
 			produces: string[];
 			tags: string[];
-			responses: {
+			responses?: {
 				[key: number]: {
 					description: string;
 				};

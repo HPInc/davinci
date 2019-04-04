@@ -9,6 +9,7 @@ import * as swaggerDocs from './swagger/openapiDocs';
 import { NotImplemented, BadRequest } from '../errors';
 import createPaths from './swagger/createPaths';
 import createSchemaDefinition from './swagger/createSchemaDefinition';
+// import { rest } from '../rest';
 
 const debug = Debug('of-base-api');
 
@@ -210,8 +211,17 @@ const createRouterAndSwaggerDoc = (Controller, rsName?, contextFactory?) => {
 	const router = express.Router();
 
 	// create the swagger structure
+	const mainDefinition = createSchemaDefinition(controller.schema);
+	const additionalDefinitions = _.reduce(
+		controller.additionalSchemas,
+		(acc, schema) => ({ ...acc, ...createSchemaDefinition(schema) }),
+		[]
+	);
 	const definition = {
-		definitions: createSchemaDefinition(controller.schema),
+		definitions: {
+			...mainDefinition,
+			...additionalDefinitions
+		},
 		paths: createPaths(Controller)
 	};
 
@@ -228,7 +238,5 @@ const createRouterAndSwaggerDoc = (Controller, rsName?, contextFactory?) => {
 
 	return router;
 };
-
-// const createRoutersAndSwaggerDoc = ({}) => {};
 
 export default createRouterAndSwaggerDoc;

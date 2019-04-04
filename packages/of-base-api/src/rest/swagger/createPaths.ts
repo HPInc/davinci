@@ -26,19 +26,19 @@ const createPathsDefinition = (theClass: Function): PathsDefinition => {
 		_fp.sortBy('index'),
 		_fp.compact
 	)(Reflect.getMetadata('tsswagger:method-parameters', theClass.prototype) || []);
-	// method parameters type Reflect.getMetadata('design:paramtypes', theClass.prototype, 'find');
 
 	return _.reduce(
 		methods,
 		(acc, method) => {
-			const { methodName, path, verb, summary, description } = method;
+			const { methodName, path, verb, summary, description, responses } = method;
 			const parameters = _.filter(methodParameters, { methodName }).map(getParameterDefinition);
 
 			_.set(acc, `${path}.${verb}`, {
 				summary,
 				description,
 				operationId: methodName,
-				parameters
+				parameters,
+				responses
 			});
 
 			return acc;
