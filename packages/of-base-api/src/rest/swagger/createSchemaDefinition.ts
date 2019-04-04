@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import _ from 'lodash';
 import { SwaggerDefinition, SwaggerDefinitions } from './types';
 
 const getSchemaDefinition = (theClass: Function, definitions = {}): SwaggerDefinitions => {
@@ -11,6 +12,17 @@ const getSchemaDefinition = (theClass: Function, definitions = {}): SwaggerDefin
 		type: 'object',
 		properties: props.reduce((acc, { key, opts }) => {
 			const type = (opts && opts.type) || Reflect.getMetadata('design:type', theClass.prototype, key);
+			const isFunction = ![String, Number, Object, Boolean, Date].includes(type) && typeof type === 'function';
+
+			if (isFunction) {
+				const defs = getSchemaDefinition(type, definitions);
+				const definition: SwaggerDefinition = defs[Object.keys(defs)[0]];
+				definitions[definition.title] = definition;
+				acc[key] = { $ref: definition.title };
+
+				return acc;
+			}
+
 			if (Array.isArray(type)) {
 				const isFunction =
 					![String, Number, Object, Boolean, Date].includes(type[0]) && typeof type[0] === 'function';
@@ -27,7 +39,7 @@ const getSchemaDefinition = (theClass: Function, definitions = {}): SwaggerDefin
 					definitions[definition.title] = definition;
 					acc[key].items.$ref = title;
 				} else {
-					acc[key].items.type = type[0].name;
+					acc[key].items.type = type[0].name.toLowerCase();
 				}
 
 				return acc;
@@ -46,8 +58,8 @@ const getSchemaDefinition = (theClass: Function, definitions = {}): SwaggerDefin
 			return {
 				...acc,
 				[key]: {
-					type: type.name.toLowerCase(),
-					...opts
+					..._.omit(opts, ['required']),
+					type: type.name.toLowerCase()
 				}
 			};
 		}, {}),
