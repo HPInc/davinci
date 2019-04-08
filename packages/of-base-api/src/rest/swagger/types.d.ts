@@ -1,9 +1,12 @@
 export type SwaggerDefinition = {
 	title?: string;
-	type: string;
+	type?: string;
 	description?: string;
+	format?: string;
 	properties?: { [key: string]: SwaggerDefinition };
+	items?: SwaggerDefinition;
 	required?: string[];
+	$ref?: string;
 };
 
 export type SwaggerDefinitions = {

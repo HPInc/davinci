@@ -6,7 +6,7 @@ import { swagger } from '../../../../../src';
 const sinon = Sinon.createSandbox();
 
 describe('swagger decorators', () => {
-	beforeEach(() => {
+	afterEach(() => {
 		sinon.restore();
 	});
 

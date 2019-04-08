@@ -1,15 +1,16 @@
 import should from 'should';
-import 'reflect-metadata';
 import Sinon from 'sinon';
+import 'reflect-metadata';
 import { createMethodDecorator } from '../../../../../src/rest/swagger/decorators/rest';
 import { rest } from '../../../../../src';
 
 const sinon = Sinon.createSandbox();
 
 describe('rest decorators', () => {
-	beforeEach(() => {
+	afterEach(() => {
 		sinon.restore();
 	});
+
 	describe('createMethodDecorator', () => {
 		it('should create a method decorator', () => {
 			const decorator = createMethodDecorator('get');
