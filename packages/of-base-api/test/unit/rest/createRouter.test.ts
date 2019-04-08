@@ -161,9 +161,10 @@ describe('createRouter', () => {
 			const definition = {
 				paths: createPathsDefinition(MockClass)
 			};
-			const handlers = createRouteHandlers(new MockClass(), definition);
+			const routeHandlers = createRouteHandlers(new MockClass(), definition);
 			// @ts-ignore
-			const { handler: synchronousHandler } = _.find(handlers, { path: '/syncMethod' });
+			const { handlers } = _.find(routeHandlers, { path: '/syncMethod' });
+			const synchronousHandler = handlers[0];
 			const reqMock = { body: {} };
 			const resMock = {
 				status: null,
@@ -183,9 +184,10 @@ describe('createRouter', () => {
 			const definition = {
 				paths: createPathsDefinition(MockClass)
 			};
-			const handlers = createRouteHandlers(new MockClass(), definition);
+			const routeHandlers = createRouteHandlers(new MockClass(), definition);
 			// @ts-ignore
-			const { handler: asynchronousHandler } = _.find(handlers, { path: '/asyncMethod' });
+			const { handlers } = _.find(routeHandlers, { path: '/asyncMethod' });
+			const asynchronousHandler = handlers[0];
 			const reqMock = { body: {} };
 			const resMock = {
 				status: null,

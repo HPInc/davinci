@@ -205,7 +205,8 @@ describe('rest decorators', () => {
 
 		We want only the decorator specified in the CustomerController class, to have effect
 		*/
-		it('should ignore setting metadata on the method, if metadata already exists (example: it was defined by the extending class)', () => {
+		it(`should ignore setting metadata on the method, if metadata already exists 
+				(example: it was defined by the extending class)`, () => {
 			const BaseClass = class {
 				myMethod(query) {
 					return query;
