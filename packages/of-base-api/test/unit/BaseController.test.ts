@@ -1,4 +1,4 @@
-// import should from 'should';
+import should from 'should';
 import BaseController from '../../src/BaseController';
 import Sinon from 'sinon';
 
@@ -41,7 +41,7 @@ describe('BaseController', () => {
 				throw new Error('should not get here');
 			} catch (err) {
 				err.name.should.be.equal('NotFound');
-				model.findOneAndUpdate.calledOnce.should.be.True();
+				should(model.findOneAndUpdate.calledOnce).be.True();
 			}
 		});
 
@@ -55,7 +55,7 @@ describe('BaseController', () => {
 			const result = await controller.updateById('MISSING', { foo: 'bar' }, context);
 
 			result.should.eql({ _id: '1234', foo: 'bar' });
-			model.findOneAndUpdate.calledOnce.should.be.True();
+			should(model.findOneAndUpdate.calledOnce).be.True();
 		});
 	});
 
@@ -72,7 +72,7 @@ describe('BaseController', () => {
 				throw new Error('should not get here');
 			} catch (err) {
 				err.name.should.be.equal('NotFound');
-				model.findOneAndDelete.calledOnce.should.be.True();
+				should(model.findOneAndDelete.calledOnce).be.True();
 			}
 		});
 
@@ -85,7 +85,7 @@ describe('BaseController', () => {
 			const result = await controller.deleteById('1234', context);
 
 			result.should.eql({ _id: '1234', foo: 'bar' });
-			model.findOneAndDelete.calledOnce.should.be.True();
+			should(model.findOneAndDelete.calledOnce).be.True();
 		});
 	});
 });

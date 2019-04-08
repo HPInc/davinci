@@ -18,7 +18,7 @@ type MethodDecoratorOptions = {
 	responses?: MethodResponses;
 };
 
-const createMethodDecorator = verb =>
+export const createMethodDecorator = verb =>
 	function({ path, summary, description, responses }: MethodDecoratorOptions): Function {
 		return function(target: Object, methodName: string | symbol) {
 			// get the existing metadata props
@@ -71,8 +71,4 @@ export function controller(args?: IControllerDecoratorArgs): Function {
 		// define new metadata props
 		Reflect.defineMetadata('tsswagger:controller', args, target);
 	};
-}
-
-export function getControllerMetadata(target: Object) {
-	return Reflect.getMetadata('tsswagger:controller', target);
 }

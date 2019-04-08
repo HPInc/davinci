@@ -1,4 +1,5 @@
 import sinon from 'sinon';
+import should from 'should';
 import notFoundHandler from '../../src/notFoundHandler';
 
 describe('notFoundHandler', () => {
@@ -10,7 +11,7 @@ describe('notFoundHandler', () => {
 
 		handler(req, res, next);
 
-		next.callCount.should.equal(1);
+		should(next.callCount).equal(1);
 		const [error] = next.getCall(0).args;
 		error.should.match({ code: 404, data: { url: 'some-url' } });
 	});

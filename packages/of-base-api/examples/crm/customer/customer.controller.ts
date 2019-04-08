@@ -33,11 +33,13 @@ export default class CustomerController extends BaseController {
 	}
 
 	@rest.get({ path: '/customresponse', summary: 'That is a custom response method' })
+	customResponse(@express.res() res) {
+		res.json({ test: 1 });
+	}
+
 	@express.middleware((req, res, next) => {
 		console.log(req, res);
 		next();
 	})
-	customResponse(@express.res() res) {
-		res.json({ test: 1 });
-	}
+	pathWithCustomMiddleware() {}
 }
