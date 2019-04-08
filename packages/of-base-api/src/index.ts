@@ -2,6 +2,7 @@ export { default as BaseController } from './BaseController';
 export * from './mongoose';
 export * from './rest';
 export * from './context';
+export * from './express';
 import * as errors from './errors';
 import { createApp } from './createApp';
 import createRouter from './rest/createRouter';

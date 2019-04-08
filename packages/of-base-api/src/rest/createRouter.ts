@@ -1,6 +1,6 @@
 import Ajv from 'ajv';
 import Debug from 'debug';
-import express from 'express';
+import express, { Request, Response } from 'express';
 import _ from 'lodash';
 import _fp from 'lodash/fp';
 import Promise from 'bluebird';
@@ -18,6 +18,16 @@ const AJV_OPTS = {
 	coerceTypes: true,
 	useDefaults: true,
 	removeAdditional: 'all'
+};
+
+export interface RequestCustom extends Request {
+	context?: any;
+	accountId?: any;
+}
+
+type ContextFactoryArgs = {
+	req?: RequestCustom;
+	res?: Response;
 };
 
 function sendResults(res, statusCode) {
@@ -99,13 +109,11 @@ const processParameter = ({ value, config, definitions }) =>
 		definitions
 	});
 
-const defaultContextFactory = ({ req, res }) => ({
+const defaultContextFactory = ({ req }: ContextFactoryArgs) => ({
 	body: req.body,
 	params: req.params,
 	query: req.query,
-	accountId: req.accountId,
-	req,
-	res
+	accountId: req.accountId
 });
 
 const mapReqToParameters = (req, res, parameters = [], definitions, contextFactory = defaultContextFactory) => {
@@ -114,6 +122,10 @@ const mapReqToParameters = (req, res, parameters = [], definitions, contextFacto
 	return parameters.reduce((acc, p) => {
 		if (p.type === 'context') {
 			acc.push(context);
+		} else if (p.type === 'req') {
+			acc.push(req);
+		} else if (p.type === 'res') {
+			acc.push(res);
 		} else if (p.name) {
 			let value = null;
 			if (p.in === 'query') {
@@ -133,21 +145,25 @@ const mapReqToParameters = (req, res, parameters = [], definitions, contextFacto
 	}, []);
 };
 
-const makeHandlerFunction = (operation, controller, functionName, definitions, contextFactory) => {
+const makeHandlerFunction = (operation, controller, functionName, definitions, middlewaresMeta, contextFactory) => {
 	// @ts-ignore
 	const successCode = _.findKey(operation.responses, (obj, key) => +key >= 200 && +key < 400);
 
-	return (req, res, next) => {
-		// need a custom middleware to set the context ID
-		const parameterList = mapReqToParameters(req, res, operation.parameters, definitions, contextFactory);
-		debug('calling ', functionName);
-		// the controller functions return a promise
-		// coerce the controller return value to be a promise
-		return Promise.try(() => controller[functionName](...parameterList)).then(
-			sendResults(res, successCode),
-			sendError(next)
-		);
-	};
+	const methodMiddlewaresMeta = _.filter(middlewaresMeta, { handler: controller[functionName] });
+	return [
+		..._.map(methodMiddlewaresMeta, 'middlewareFunction'),
+		(req, res, next) => {
+			// need a custom middleware to set the context ID
+			const parameterList = mapReqToParameters(req, res, operation.parameters, definitions, contextFactory);
+			debug('calling ', functionName);
+			// the controller functions return a promise
+			// coerce the controller return value to be a promise
+			return Promise.try(() => controller[functionName](...parameterList)).then(
+				sendResults(res, successCode),
+				sendError(next)
+			);
+		}
+	];
 };
 
 const makeMethodName = operation => {
@@ -158,7 +174,7 @@ const makeMethodName = operation => {
 	return operationName.split('#')[0];
 };
 
-export const createRouteHandlers = (controller, definition, contextFactory?) => {
+export const createRouteHandlers = (controller, definition, middlewaresMeta?, contextFactory?) => {
 	const routeHandlers = [];
 
 	// for each path
@@ -175,14 +191,15 @@ export const createRouteHandlers = (controller, definition, contextFactory?) => 
 			if (!controller[methodName]) return;
 
 			// create the handler function
-			const handler = makeHandlerFunction(
+			const handlers = makeHandlerFunction(
 				operation,
 				controller,
 				methodName,
 				definition.definitions,
+				middlewaresMeta,
 				contextFactory
 			);
-			routeHandlers.push({ method, path, handler });
+			routeHandlers.push({ method, path, handlers });
 		});
 	});
 	return routeHandlers;
@@ -207,6 +224,9 @@ const createRouterAndSwaggerDoc = (Controller, rsName?, contextFactory?) => {
 	// create the controller from the supplied class
 	const controller = new Controller();
 
+	// get middlewares
+	const middlewaresMeta = Reflect.getMetadata('tsexpress:method-middleware', Controller.prototype);
+
 	// create the router
 	const router = express.Router();
 
@@ -226,12 +246,12 @@ const createRouterAndSwaggerDoc = (Controller, rsName?, contextFactory?) => {
 	};
 
 	// now process the swagger structure and get an array of method/path mappings to handlers
-	const routes = createRouteHandlers(controller, definition, contextFactory);
+	const routes = createRouteHandlers(controller, definition, middlewaresMeta, contextFactory);
 
 	// add them to the router
 	routes.forEach(route => {
 		const routePath = path.join(basepath, route.path);
-		return router[route.method](routePath, route.handler);
+		return router[route.method](routePath, ...route.handlers);
 	});
 
 	swaggerDocs.addResource(resourceName, definition);

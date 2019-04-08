@@ -1,5 +1,4 @@
 import 'reflect-metadata';
-// import Reflect from '../../../lib/Reflect';
 import _ from 'lodash';
 import { MethodParameter } from '../types';
 
@@ -53,7 +52,7 @@ export function param(options: MethodParameter): Function {
 			handler: target[methodName],
 			/*
 				The method: Reflect.getMetadata('design:paramtypes', target, methodName);
-				doesn't seem to be working in the test enviroment.
+				doesn't seem to be working in the test environment, so the paramtypes array is always undefined
 				TODO: find a better solution
 			 */
 			type: paramtypes && paramtypes[index]

@@ -1,7 +1,7 @@
 import BaseController from '../../../src/BaseController';
 import model from './customer.model';
 import CustomerSchema from './customer.schema';
-import { rest, context } from '../../../src';
+import { rest, context, express } from '../../../src';
 
 @rest.controller({ basepath: '/api/customer', excludedMethods: ['deleteById'] })
 export default class CustomerController extends BaseController {
@@ -30,5 +30,14 @@ export default class CustomerController extends BaseController {
 	) {
 		console.log(firstname);
 		return customerObj;
+	}
+
+	@rest.get({ path: '/customresponse', summary: 'That is a custom response method' })
+	@express.middleware((req, res, next) => {
+		console.log(req, res);
+		next();
+	})
+	customResponse(@express.res() res) {
+		res.json({ test: 1 });
 	}
 }

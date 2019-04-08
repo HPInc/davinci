@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import _ from 'lodash';
+import _fp from 'lodash/fp';
 import { SwaggerDefinition, SwaggerDefinitions } from './types';
 
 const getSchemaDefinition = (theClass: Function, definitions = {}): SwaggerDefinitions => {
@@ -24,22 +24,21 @@ const getSchemaDefinition = (theClass: Function, definitions = {}): SwaggerDefin
 			}
 
 			if (Array.isArray(type)) {
-				const isFunction =
-					![String, Number, Object, Boolean, Date].includes(type[0]) && typeof type[0] === 'function';
-
 				acc[key] = {
 					type: 'array',
 					items: {}
 				};
-				const definitionMetadata = Reflect.getMetadata('tsswagger:definition', type[0]) || {};
-				const title: string = definitionMetadata.title || type[0].name;
+
+				const isFunction =
+					![String, Number, Object, Boolean, Date].includes(type[0]) && typeof type[0] === 'function';
+
+				const def = getSchemaDefinition(type[0], definitions);
+				const schema = def[Object.keys(def)[0]];
 				if (isFunction) {
-					const defs = getSchemaDefinition(type[0], definitions);
-					const definition: SwaggerDefinition = defs[Object.keys(defs)[0]];
-					definitions[definition.title] = definition;
-					acc[key].items.$ref = title;
+					definitions[schema.title] = schema;
+					acc[key].items.$ref = schema.title;
 				} else {
-					acc[key].items.type = type[0].name.toLowerCase();
+					acc[key].items = { ...schema };
 				}
 
 				return acc;
@@ -55,19 +54,19 @@ const getSchemaDefinition = (theClass: Function, definitions = {}): SwaggerDefin
 				};
 			}
 
+			// is object
 			return {
 				...acc,
 				[key]: {
-					..._.omit(opts, ['required']),
+					..._fp.omit(['required'], opts),
 					type: type.name.toLowerCase()
 				}
 			};
 		}, {}),
-		required: props.reduce((acc, { key, opts }) => {
-			if (opts && opts.required) acc.push(key);
-
-			return acc;
-		}, [])
+		required: _fp.flow(
+			_fp.filter({ opts: { required: true } }),
+			_fp.map('key')
+		)(props)
 	};
 
 	return definitions;
