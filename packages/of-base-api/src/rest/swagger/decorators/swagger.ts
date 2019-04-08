@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 
-export function prop(opts?: any) {
+export function prop(opts?: { type?: any; required?: boolean }) {
 	// this is the decorator factory
 	return function(target: Object, key: string | symbol): void {
 		// this is the decorator

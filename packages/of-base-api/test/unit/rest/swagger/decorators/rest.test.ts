@@ -37,7 +37,7 @@ describe('rest decorators', () => {
 			return { decorator, decoratorArgs, MyClass };
 		};
 
-		describe('rest.get', () => {
+		describe('#rest.get()', () => {
 			it('should define metadata correctly', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('get');
 
@@ -56,7 +56,7 @@ describe('rest decorators', () => {
 			});
 		});
 
-		describe('rest.post', () => {
+		describe('#rest.post()', () => {
 			it('should define metadata correctly', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('post');
 
@@ -75,7 +75,7 @@ describe('rest decorators', () => {
 			});
 		});
 
-		describe('rest.put', () => {
+		describe('#rest.put()', () => {
 			it('should define metadata correctly', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('put');
 
@@ -94,7 +94,7 @@ describe('rest decorators', () => {
 			});
 		});
 
-		describe('rest.patch', () => {
+		describe('#rest.patch()', () => {
 			it('should define metadata correctly', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('patch');
 
@@ -113,7 +113,7 @@ describe('rest decorators', () => {
 			});
 		});
 
-		describe('rest.delete', () => {
+		describe('#rest.delete()', () => {
 			it('should define metadata correctly', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('delete');
 
@@ -132,7 +132,7 @@ describe('rest decorators', () => {
 			});
 		});
 
-		describe('rest.head', () => {
+		describe('#rest.head()', () => {
 			it('should define metadata correctly', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('head');
 
@@ -152,7 +152,7 @@ describe('rest decorators', () => {
 		});
 	});
 
-	describe('rest.param', () => {
+	describe('#rest.param()', () => {
 		it('should define metadata correctly', () => {
 			const MyClass = class {
 				myMethod(query) {
@@ -246,7 +246,7 @@ describe('rest decorators', () => {
 		});
 	});
 
-	describe('rest.controller', () => {
+	describe('#rest.controller()', () => {
 		it('should define metadata correctly', () => {
 			const MyClass = class {
 				myMethod(query) {
