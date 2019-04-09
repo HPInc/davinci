@@ -47,7 +47,7 @@ jobs:
           command: |
             if [ "${CIRCLE_BRANCH}" == "refactor/typescript" ]; then
               npm publish --tag next
-            else if [ "${CIRCLE_BRANCH}" == "master" ]; then
+            elif [ "${CIRCLE_BRANCH}" == "master" ]; then
               npm publish
             fi
 
