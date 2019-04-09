@@ -46,7 +46,11 @@ jobs:
       - run:
           name: publish
           command: |
-            npm publish
+            if [ "${CIRCLE_BRANCH}" == "refactor/typescript" ]; then
+              npm publish --tag next
+            else
+              npm publish
+            fi
 
   bump_version:
     docker:
@@ -93,6 +97,7 @@ workflows:
             branches:
               only:
                 - master
+                - refactor/typescript
       - bump_version:
           context: oneflow
           requires:
