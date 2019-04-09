@@ -40,7 +40,6 @@ jobs:
     docker:
       - image: circleci/node:8-stretch
     steps:
-      - setup_remote_docker
       - restore_cache:
           key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
       - run:
@@ -48,8 +47,8 @@ jobs:
           command: |
             if [ "${CIRCLE_BRANCH}" == "refactor/typescript" ]; then
               npm publish --tag next
-            else
-              #npm publish
+            else if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              npm publish
             fi
 
   bump_version:
