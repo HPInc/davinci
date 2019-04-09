@@ -49,7 +49,7 @@ jobs:
             if [ "${CIRCLE_BRANCH}" == "refactor/typescript" ]; then
               npm publish --tag next
             else
-              npm publish
+              #npm publish
             fi
 
   bump_version:

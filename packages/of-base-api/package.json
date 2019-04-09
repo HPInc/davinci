@@ -1,6 +1,6 @@
 {
   "name": "@oneflow/of-base-api",
-  "version": "0.0.28",
+  "version": "2.0.0",
   "description": "Framework for rapid and consistent API development",
   "main": "build/src/index.js",
   "types": "build/src/index.d.ts",
@@ -47,8 +47,7 @@
     "tslint": "5.12.1",
     "tslint-config-airbnb": "5.11.1",
     "tslint-config-prettier": "1.18.0",
-    "typescript": "3.4.1",
-    "typings": "2.1.1"
+    "typescript": "3.4.2"
   },
   "peerDependencies": {
     "mongoose": "5.4.13"
