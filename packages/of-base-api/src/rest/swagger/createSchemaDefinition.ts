@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import _fp from 'lodash/fp';
 import { SwaggerDefinitions } from './types';
 

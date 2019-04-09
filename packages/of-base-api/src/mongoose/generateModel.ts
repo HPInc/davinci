@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import { model, Schema, SchemaTypeOpts, SchemaOptions } from 'mongoose';
 
 // Helper functions

@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import _ from 'lodash';
 import _fp from 'lodash/fp';
 import { MethodParameter, PathsDefinition } from './types';
@@ -6,10 +5,16 @@ import { IControllerDecoratorArgs } from './decorators/rest';
 
 const getParameterDefinition = methodParameterConfig => {
 	const options: MethodParameter = methodParameterConfig.options;
-	const definition = { type: null, ...options };
+	const definition = { ...options };
 	// handling special parameters
 	if (['context', 'req', 'res'].includes(methodParameterConfig.type)) {
-		definition.type = methodParameterConfig.type;
+		definition.schema = { type: methodParameterConfig.type };
+	} else {
+		const schema = _.get(methodParameterConfig, 'options.schema');
+		definition.schema = {
+			type: _.get(methodParameterConfig, 'type.name', '').toLowerCase(),
+			...schema
+		};
 	}
 	return definition;
 };

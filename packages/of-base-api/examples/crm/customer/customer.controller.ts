@@ -17,18 +17,15 @@ export default class CustomerController extends BaseController {
 	@rest.get({ path: '/hello', summary: 'That is a hello method' })
 	hello(
 		@rest.param({ name: 'firstname', in: 'query' }) firstname: string,
+		@rest.param({ name: 'age', in: 'query' }) age: number,
 		@rest.param({
 			name: 'customerObj',
 			in: 'query',
-			required: true,
-			schema: {
-				// type: 'number',
-				$ref: 'Customer'
-			}
+			required: true
 		})
-		customerObj
+		customerObj: object
 	) {
-		console.log(firstname);
+		console.log(firstname, age);
 		return customerObj;
 	}
 

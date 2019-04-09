@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import _ from 'lodash';
 
 export const createReqResExpressDecorator = (reqOrRes: 'req' | 'res') => () => (

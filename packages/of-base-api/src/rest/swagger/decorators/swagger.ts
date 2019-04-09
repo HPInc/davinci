@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 
 export function prop(opts?: { type?: any; required?: boolean }) {
 	// this is the decorator factory

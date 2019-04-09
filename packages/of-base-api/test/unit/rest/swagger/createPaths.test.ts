@@ -1,6 +1,7 @@
 import should from 'should';
 import createPathsDefinition from '../../../../src/rest/swagger/createPaths';
-import { context, rest } from '../../../../src';
+import { context } from '../../../../src/context';
+import { rest } from '../../../../src/rest';
 
 describe('createPathsDefinition', () => {
 	it('should create a path definition object from a decorated controller', () => {
@@ -18,7 +19,7 @@ describe('createPathsDefinition', () => {
 			MyClass.prototype,
 			'find'
 		);
-		rest.param({ name: 'query', in: 'query' })(MyClass.prototype, 'find', 0);
+		rest.param({ name: 'query', in: 'query', schema: { type: 'string' } })(MyClass.prototype, 'find', 0);
 		context()(MyClass.prototype, 'find', 1);
 
 		const paths = createPathsDefinition(MyClass);
@@ -28,7 +29,10 @@ describe('createPathsDefinition', () => {
 					summary: 'List',
 					description: 'My find method',
 					operationId: 'find',
-					parameters: [{ type: null, name: 'query', in: 'query' }, { type: 'context' }],
+					parameters: [
+						{ name: 'query', in: 'query', schema: { type: 'string' } },
+						{ schema: { type: 'context' } }
+					],
 					responses: { '200': {} }
 				}
 			}

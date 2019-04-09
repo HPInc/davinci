@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import _ from 'lodash';
 import { MethodParameter } from '../types';
 

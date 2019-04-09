@@ -1,6 +1,5 @@
 import should from 'should';
 import Sinon from 'sinon';
-import 'reflect-metadata';
 import { createMethodDecorator } from '../../../../../src/rest/swagger/decorators/rest';
 import { rest } from '../../../../../src';
 

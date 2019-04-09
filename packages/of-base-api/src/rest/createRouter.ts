@@ -49,7 +49,7 @@ function sendError(next) {
 	};
 }
 
-const attemptJsonParsing = ({ value, config, definitions }) => {
+/*const attemptJsonParsing = ({ value, config, definitions }) => {
 	let val = value;
 	if (_.startsWith(value, '{') && _.endsWith(value, '}')) {
 		try {
@@ -60,7 +60,7 @@ const attemptJsonParsing = ({ value, config, definitions }) => {
 	}
 
 	return { value: val, config, definitions };
-};
+};*/
 
 const performAjvValidation = ({ value, config, definitions }) => {
 	// @ts-ignore
@@ -100,7 +100,7 @@ const validateAndCoerce = ({ value, config, definitions }) => {
 
 const processParameter = ({ value, config, definitions }) =>
 	_fp.flow(
-		attemptJsonParsing,
+		// attemptJsonParsing,
 		validateAndCoerce,
 		_fp.get('value')
 	)({
@@ -120,11 +120,11 @@ const mapReqToParameters = (req, res, parameters = [], definitions, contextFacto
 	const context = contextFactory({ req, res });
 
 	return parameters.reduce((acc, p) => {
-		if (p.type === 'context') {
+		if (p.schema.type === 'context') {
 			acc.push(context);
-		} else if (p.type === 'req') {
+		} else if (p.schema.type === 'req') {
 			acc.push(req);
-		} else if (p.type === 'res') {
+		} else if (p.schema.type === 'res') {
 			acc.push(res);
 		} else if (p.name) {
 			let value = null;

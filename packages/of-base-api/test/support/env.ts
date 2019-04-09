@@ -2,6 +2,3 @@
 
 process.env.NODE_ENV = 'unittest';
 process.env.MONGODB_URL = 'mongodb://localhost:27017/of-base-api-tests';
-
-require('should');
-require('mocha');

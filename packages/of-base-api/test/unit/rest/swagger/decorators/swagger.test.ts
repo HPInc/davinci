@@ -1,5 +1,4 @@
 import should from 'should';
-import 'reflect-metadata';
 import Sinon from 'sinon';
 import { swagger } from '../../../../../src';
 
