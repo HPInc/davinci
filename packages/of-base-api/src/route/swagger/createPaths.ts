@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import _fp from 'lodash/fp';
-import { MethodParameter, PathsDefinition } from './types';
-import { IControllerDecoratorArgs } from './decorators/rest';
+import { MethodParameter, PathsDefinition } from '../types';
+import { IControllerDecoratorArgs } from '../decorators/route';
 
 const getParameterDefinition = methodParameterConfig => {
 	const options: MethodParameter = methodParameterConfig.options;

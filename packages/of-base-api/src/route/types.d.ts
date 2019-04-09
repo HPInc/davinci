@@ -15,9 +15,8 @@ export type SwaggerDefinitions = {
 
 export type Schema = { $ref?: string; type?: string; [key: string]: any };
 
-export type MethodParameter = {
+export interface MethodParameterBase {
 	name: string;
-	in: 'body' | 'path' | 'query';
 	description?: string;
 	required?: boolean;
 	schema?: Schema;
@@ -27,7 +26,11 @@ export type MethodParameter = {
 			schema?: Schema;
 		};
 	};
-};
+}
+
+export interface MethodParameter extends MethodParameterBase {
+	in: 'body' | 'path' | 'query';
+}
 
 export type Verb = 'get' | 'post' | 'put' | 'patch' | 'head' | 'delete';
 

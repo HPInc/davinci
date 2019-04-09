@@ -1,5 +1,5 @@
 import _fp from 'lodash/fp';
-import { SwaggerDefinitions } from './types';
+import { SwaggerDefinitions } from '../types';
 
 const getSchemaDefinition = (theClass: Function, definitions = {}): SwaggerDefinitions => {
 	const makeSchema = typeOrClass => {

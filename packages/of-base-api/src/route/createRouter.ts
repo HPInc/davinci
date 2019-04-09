@@ -9,7 +9,7 @@ import * as swaggerDocs from './swagger/openapiDocs';
 import { NotImplemented, BadRequest } from '../errors';
 import createPaths from './swagger/createPaths';
 import createSchemaDefinition from './swagger/createSchemaDefinition';
-// import { rest } from '../rest';
+// import { route } from '../route';
 
 const debug = Debug('of-base-api');
 

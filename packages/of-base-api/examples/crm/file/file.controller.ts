@@ -1,8 +1,8 @@
-import { BaseController, rest } from '../../../src';
+import { BaseController, route } from '../../../src';
 import model from './file.model';
 import FileSchema from './file.schema';
 
-@rest.controller({ basepath: '/files' })
+@route.controller({ basepath: '/files' })
 class FileController extends BaseController {
 	constructor() {
 		super(model, FileSchema);

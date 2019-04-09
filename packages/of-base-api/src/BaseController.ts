@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import * as errors from './errors';
-import { rest } from './rest';
+import { route } from './route';
 import { context } from './context';
 
 interface IParsedMongooseFilters {
@@ -22,8 +22,8 @@ export default class BaseController {
 		this.additionalSchemas = additionalSchemas;
 	}
 
-	@rest.get({ path: '/', summary: 'List' })
-	find(@rest.param({ name: 'query', in: 'query' }) query, @context() context) {
+	@route.get({ path: '/', summary: 'List' })
+	find(@route.param({ name: 'query', in: 'query' }) query, @context() context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 		const { limit, skip, sort, select, populate, where } = this.parseQuery(query);
 		const mQuery = this.model.find(where, select, { limit, skip, sort, context });
@@ -35,7 +35,7 @@ export default class BaseController {
 		return mQuery;
 	}
 
-	async findOne(@rest.param({ name: 'query', in: 'query' }) query, @context() context) {
+	async findOne(@route.param({ name: 'query', in: 'query' }) query, @context() context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 		const { sort, select, populate, where } = this.parseQuery(query);
 		let mQuery = this.model.findOne(where, select, { sort, context });
@@ -52,14 +52,14 @@ export default class BaseController {
 		return result;
 	}
 
-	@rest.get({ path: '/:id', summary: 'Fetch by id' })
+	@route.get({ path: '/:id', summary: 'Fetch by id' })
 	async findById(
-		@rest.param({
+		@route.param({
 			name: 'id',
 			in: 'path'
 		})
 		id,
-		@rest.param({ name: 'query', in: 'query' }) query,
+		@route.param({ name: 'query', in: 'query' }) query,
 		@context() context
 	) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
@@ -67,22 +67,22 @@ export default class BaseController {
 		return this.findOne({ ...query, _id: id }, { context });
 	}
 
-	@rest.post({ path: '/', summary: 'Create' })
-	async create(@rest.param({ name: 'data', in: 'body' }) data, @context() context) {
+	@route.post({ path: '/', summary: 'Create' })
+	async create(@route.param({ name: 'data', in: 'body' }) data, @context() context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 		const [record] = await this.model.create([data], { context });
 
 		return record;
 	}
 
-	@rest.patch({ path: '/:id', summary: 'Update' })
+	@route.patch({ path: '/:id', summary: 'Update' })
 	async updateById(
-		@rest.param({
+		@route.param({
 			name: 'id',
 			in: 'path'
 		})
 		id,
-		@rest.param({ name: 'data', in: 'body' }) data,
+		@route.param({ name: 'data', in: 'body' }) data,
 		@context() context
 	) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
@@ -100,8 +100,8 @@ export default class BaseController {
 		return updated;
 	}
 
-	@rest.del({ path: '/:id', summary: 'Delete' })
-	async deleteById(@rest.param({ name: 'id', in: 'path' }) id: string, @context() context) {
+	@route.del({ path: '/:id', summary: 'Delete' })
+	async deleteById(@route.param({ name: 'id', in: 'path' }) id: string, @context() context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 		const removed = await this.model.findOneAndDelete({ _id: id }, { context });
 

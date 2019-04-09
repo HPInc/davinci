@@ -1,5 +1,5 @@
 import should from 'should';
-import createSchemaDefinition from '../../../../src/rest/swagger/createSchemaDefinition';
+import createSchemaDefinition from '../../../../src/route/swagger/createSchemaDefinition';
 import { swagger } from '../../../../src';
 
 describe('createSchemaDefinition', () => {

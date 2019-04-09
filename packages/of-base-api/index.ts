@@ -1,6 +1,6 @@
 import * as errors from './src/errors';
 import { createApp } from './src/createApp';
-import createRouter from './src/rest/createRouter';
+import createRouter from './src/route/createRouter';
 
 /**
  * This is only here to assist people when upgrading their API.

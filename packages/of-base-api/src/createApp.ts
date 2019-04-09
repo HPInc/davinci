@@ -5,7 +5,7 @@ import errorHandler from './errorHandler';
 import notFoundHandler from './notFoundHandler';
 import config from './config';
 import { execBootScripts } from './boot';
-import * as docs from './rest/swagger/openapiDocs';
+import * as docs from './route/swagger/openapiDocs';
 
 const debug = Debug('of-base-api');
 

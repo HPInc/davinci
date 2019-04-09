@@ -2,16 +2,16 @@ import _ from 'lodash';
 import should from 'should';
 import Sinon from 'sinon';
 import BaseController from '../../../src/BaseController';
-import createRouter, { createRouteHandlers } from '../../../src/rest/createRouter';
-import { rest } from '../../../src';
+import createRouter, { createRouteHandlers } from '../../../src/route/createRouter';
+import { route } from '../../../src';
 import * as utils from '../../support/utils';
-import createPathsDefinition from '../../../src/rest/swagger/createPaths';
+import createPathsDefinition from '../../../src/route/swagger/createPaths';
 
 const sinon = Sinon.createSandbox();
 
 describe('createRouter', () => {
 	afterEach(() => {
-		sinon.restore();
+		sinon.reset();
 	});
 	describe('main function', () => {
 		let TestController;
@@ -151,8 +151,8 @@ describe('createRouter', () => {
 				}
 			};
 
-			rest.get({ path: '/syncMethod', summary: '' })(TestController.prototype, 'syncMethod');
-			rest.get({ path: '/asyncMethod', summary: '' })(TestController.prototype, 'asyncMethod');
+			route.get({ path: '/syncMethod', summary: '' })(TestController.prototype, 'syncMethod');
+			route.get({ path: '/asyncMethod', summary: '' })(TestController.prototype, 'asyncMethod');
 		});
 
 		it('should correctly coerce synchronous controller methods to return a promise', async () => {

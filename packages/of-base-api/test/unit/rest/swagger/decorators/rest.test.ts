@@ -1,11 +1,11 @@
 import should from 'should';
 import Sinon from 'sinon';
-import { createMethodDecorator } from '../../../../../src/rest/swagger/decorators/rest';
-import { rest } from '../../../../../src';
+import { createMethodDecorator } from '../../../../../src/route/decorators/route';
+import { route } from '../../../../../src';
 
 const sinon = Sinon.createSandbox();
 
-describe('rest decorators', () => {
+describe('route decorators', () => {
 	afterEach(() => {
 		sinon.restore();
 	});
@@ -19,7 +19,7 @@ describe('rest decorators', () => {
 
 	describe('verb methods', () => {
 		const createArtifactsAndDecorate = verb => {
-			const decorator = verb === 'delete' ? rest.del : rest[verb];
+			const decorator = verb === 'delete' ? route.del : route[verb];
 			const MyClass = class {
 				myMethod() {}
 			};
@@ -37,7 +37,7 @@ describe('rest decorators', () => {
 			return { decorator, decoratorArgs, MyClass };
 		};
 
-		describe('#rest.get()', () => {
+		describe('#route.get()', () => {
 			it('should define metadata correctly', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('get');
 
@@ -56,7 +56,7 @@ describe('rest decorators', () => {
 			});
 		});
 
-		describe('#rest.post()', () => {
+		describe('#route.post()', () => {
 			it('should define metadata correctly', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('post');
 
@@ -75,7 +75,7 @@ describe('rest decorators', () => {
 			});
 		});
 
-		describe('#rest.put()', () => {
+		describe('#route.put()', () => {
 			it('should define metadata correctly', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('put');
 
@@ -94,7 +94,7 @@ describe('rest decorators', () => {
 			});
 		});
 
-		describe('#rest.patch()', () => {
+		describe('#route.patch()', () => {
 			it('should define metadata correctly', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('patch');
 
@@ -113,7 +113,7 @@ describe('rest decorators', () => {
 			});
 		});
 
-		describe('#rest.delete()', () => {
+		describe('#route.delete()', () => {
 			it('should define metadata correctly', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('delete');
 
@@ -132,7 +132,7 @@ describe('rest decorators', () => {
 			});
 		});
 
-		describe('#rest.head()', () => {
+		describe('#route.head()', () => {
 			it('should define metadata correctly', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('head');
 
@@ -152,7 +152,7 @@ describe('rest decorators', () => {
 		});
 	});
 
-	describe('#rest.param()', () => {
+	describe('#route.param()', () => {
 		it('should define metadata correctly', () => {
 			const MyClass = class {
 				myMethod(query) {
@@ -168,7 +168,7 @@ describe('rest decorators', () => {
 				.returns(['string']);
 			sinon.stub(Reflect, 'defineMetadata');
 
-			rest.param({ name: 'query', in: 'query' })(MyClass.prototype, 'myMethod', 0);
+			route.param({ name: 'query', in: 'query' })(MyClass.prototype, 'myMethod', 0);
 
 			// @ts-ignore
 			should(Reflect.defineMetadata.getCall(0).args[0]).be.equal('tsswagger:method-parameters');
@@ -191,12 +191,12 @@ describe('rest decorators', () => {
 		Assuming we have:
 
 		class BaseController {
-			@rest.param({ name: 'correctName', in: 'path' })
+			@route.param({ name: 'correctName', in: 'path' })
 			find() {}
 		}
 
 		class CustomerController extends BaseController {
-			@rest.param({ name: 'correctName', in: 'path' })
+			@route.param({ name: 'correctName', in: 'path' })
 			find() {}
 		}
 
@@ -212,7 +212,7 @@ describe('rest decorators', () => {
 					return query;
 				}
 			};
-			rest.param({ name: 'wrongName', in: 'query' })(BaseClass.prototype, 'myMethod', 0);
+			route.param({ name: 'wrongName', in: 'query' })(BaseClass.prototype, 'myMethod', 0);
 
 			const MyClass = class extends BaseClass {
 				myMethod(query) {
@@ -228,7 +228,7 @@ describe('rest decorators', () => {
 				.returns(['string']);
 			sinon.stub(Reflect, 'defineMetadata');
 
-			rest.param({ name: 'correctName', in: 'query' })(MyClass.prototype, 'myMethod', 0);
+			route.param({ name: 'correctName', in: 'query' })(MyClass.prototype, 'myMethod', 0);
 
 			// @ts-ignore
 			should(Reflect.defineMetadata.getCall(0).args[0]).be.equal('tsswagger:method-parameters');
@@ -247,7 +247,7 @@ describe('rest decorators', () => {
 		});
 	});
 
-	describe('#rest.controller()', () => {
+	describe('#route.controller()', () => {
 		it('should define metadata correctly', () => {
 			const MyClass = class {
 				myMethod(query) {
@@ -257,7 +257,7 @@ describe('rest decorators', () => {
 			sinon.stub(Reflect, 'defineMetadata');
 
 			const decoratorArg = { basepath: '/thebasepath', excludedMethods: ['testMethod'] };
-			rest.controller(decoratorArg)(MyClass);
+			route.controller(decoratorArg)(MyClass);
 
 			// @ts-ignore
 			should(Reflect.defineMetadata.getCall(0).args[0]).be.equal('tsswagger:controller');

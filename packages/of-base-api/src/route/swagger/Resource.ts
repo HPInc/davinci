@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { SwaggerDefinitions, PathsDefinition } from './types';
+import { SwaggerDefinitions, PathsDefinition } from '../types';
 
 class Resource {
 	basePath: string;

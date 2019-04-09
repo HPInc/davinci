@@ -1,4 +1,4 @@
-import { rest } from '../../src';
+import { route } from '../../src';
 
 export const makeMockResponse = done => {
 	const logDone = (...args) => {
@@ -24,7 +24,7 @@ export const makeMockControllerClass = (model, classToExtend) => {
 		}
 	};
 
-	rest.controller()(TheClass);
+	route.controller()(TheClass);
 
 	return TheClass;
 };

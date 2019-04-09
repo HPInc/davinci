@@ -1,12 +1,12 @@
 import 'reflect-metadata';
 export { default as BaseController } from './BaseController';
 export * from './mongoose';
-export * from './rest';
+export * from './route';
 export * from './context';
 export * from './express';
 import * as errors from './errors';
 import { createApp } from './createApp';
-import createRouter from './rest/createRouter';
+import createRouter from './route/createRouter';
 
 /**
  * This is only here to assist people when upgrading their API.

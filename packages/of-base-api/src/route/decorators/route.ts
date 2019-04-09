@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { MethodParameter } from '../types';
+import { MethodParameter, MethodParameterBase } from '../types';
 
 type MethodResponseOutput = {
 	description?: string;
@@ -59,6 +59,27 @@ export function param(options: MethodParameter): Function {
 		Reflect.defineMetadata('tsswagger:method-parameters', methodParameters, target);
 	};
 }
+
+type ParameterName = string;
+type CreateParamDecoratorFunctionArg = MethodParameterBase | ParameterName;
+
+// TODO: use openApi 3 requestBody for 'body'
+export const createParamDecorator = (inKey: 'path' | 'query' | 'body') => (
+	opts: CreateParamDecoratorFunctionArg
+): Function => {
+	let options;
+	if (typeof opts === 'string') {
+		options = { name: opts, in: inKey };
+	} else {
+		options = { ...opts, in: inKey };
+	}
+
+	return param(options);
+};
+
+export const path = createParamDecorator('path');
+export const query = createParamDecorator('query');
+export const body = createParamDecorator('body');
 
 export type IControllerDecoratorArgs = {
 	basepath?: string;
