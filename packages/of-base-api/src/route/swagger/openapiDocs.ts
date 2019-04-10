@@ -21,6 +21,21 @@ export const addResource = (resourceName, doc) => {
 	resources.push(resource);
 };
 
+const sanitiseResourcePath = resourcePaths => {
+	const EXCLUDED_PARAMETER_TYPES = ['res', 'req', 'context'];
+
+	// remove non-standard parameters
+	return _.mapValues(resourcePaths, path => {
+		return {
+			...path,
+			parameters: _.filter(
+				path.parameters,
+				parameter => !EXCLUDED_PARAMETER_TYPES.includes(parameter.schema.type)
+			)
+		};
+	});
+};
+
 export const createApiDocs = (app, opts: any = {}) => {
 	debug(`setting up swagger docs on ${opts.discoveryUrl}`);
 
@@ -60,7 +75,7 @@ export const createApiDocs = (app, opts: any = {}) => {
 				_.each(resource.paths, (resourcePath, pathName) => {
 					let fullPath = `/${resource.basePath}${pathName}`;
 					if (pathName === '/') fullPath = `/${resource.basePath}`;
-					fullSwagger.paths[fullPath] = resourcePath;
+					fullSwagger.paths[fullPath] = sanitiseResourcePath(resourcePath);
 				});
 			});
 

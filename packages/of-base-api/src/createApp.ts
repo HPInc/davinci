@@ -1,6 +1,7 @@
 import Debug from 'debug';
 import express from 'express';
 import http from 'http';
+import responseHandler from './responseHandler';
 import errorHandler from './errorHandler';
 import notFoundHandler from './notFoundHandler';
 import config from './config';
@@ -52,6 +53,7 @@ export const configureExpress = (app, runMiddlewares?) => {
 		version: '1.0', // read from package.json
 		basePath: '/api'
 	});
+	app.use(responseHandler());
 	app.use(notFoundHandler());
 	app.use(errorHandler({}));
 };

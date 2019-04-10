@@ -30,7 +30,7 @@ type ContextFactoryArgs = {
 	res?: Response;
 };
 
-function sendResults(res, statusCode) {
+/*function sendResults(res, statusCode) {
 	return results => {
 		if (results) {
 			res.status(statusCode || 200).json(results);
@@ -47,7 +47,7 @@ function sendError(next) {
 			next.call(null, err);
 		}
 	};
-}
+}*/
 
 /*const attemptJsonParsing = ({ value, config, definitions }) => {
 	let val = value;
@@ -159,8 +159,12 @@ const makeHandlerFunction = (operation, controller, functionName, definitions, m
 			// the controller functions return a promise
 			// coerce the controller return value to be a promise
 			return Promise.try(() => controller[functionName](...parameterList)).then(
-				sendResults(res, successCode),
-				sendError(next)
+				result => {
+					req.result = result;
+					req.statusCode = successCode;
+					next();
+				},
+				err => next(err)
 			);
 		}
 	];

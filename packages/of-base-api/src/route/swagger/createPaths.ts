@@ -28,7 +28,7 @@ const createPathsDefinition = (theClass: Function): PathsDefinition => {
 	);
 	const contextMetadata: IControllerDecoratorArgs = Reflect.getMetadata('tscontroller:context', theClass.prototype);
 	const methodParameters = _fp.flow(
-		_fp.concat([contextMetadata]),
+		_fp.concat(contextMetadata),
 		_fp.sortBy('index'),
 		_fp.compact
 	)(Reflect.getMetadata('tsswagger:method-parameters', theClass.prototype) || []);
