@@ -165,17 +165,16 @@ describe('createRouter', () => {
 			// @ts-ignore
 			const { handlers } = _.find(routeHandlers, { path: '/syncMethod' });
 			const synchronousHandler = handlers[0];
-			const reqMock = { body: {} };
+			const reqMock = { body: {}, result: null, statusCode: null };
 			const resMock = {
 				status: null,
 				json: null
 			};
-			resMock.status = sinon.stub().returns(resMock);
-			resMock.json = sinon.stub();
-			const promise = synchronousHandler(reqMock, resMock);
+			const nextMock = () => {};
+			const promise = synchronousHandler(reqMock, resMock, nextMock);
 			promise.should.be.a.Promise();
 			await promise;
-			resMock.json.firstCall.args[0].should.be.equal('result');
+			reqMock.result.should.be.equal('result');
 		});
 
 		it('should correctly handle asynchronous controller methods', async () => {
@@ -188,17 +187,16 @@ describe('createRouter', () => {
 			// @ts-ignore
 			const { handlers } = _.find(routeHandlers, { path: '/asyncMethod' });
 			const asynchronousHandler = handlers[0];
-			const reqMock = { body: {} };
+			const reqMock = { body: {}, result: null, statusCode: null };
 			const resMock = {
 				status: null,
 				json: null
 			};
-			resMock.status = sinon.stub().returns(resMock);
-			resMock.json = sinon.stub();
-			const promise = asynchronousHandler(reqMock, resMock);
+			const nextMock = () => {};
+			const promise = asynchronousHandler(reqMock, resMock, nextMock);
 			promise.should.be.a.Promise();
 			await promise;
-			resMock.json.firstCall.args[0].should.be.equal('asyncResult');
+			reqMock.result.should.be.equal('asyncResult');
 		});
 	});
 });
