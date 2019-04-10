@@ -1,15 +1,15 @@
 import _ from 'lodash';
 
-const READ_HOOKS = [
-	'count',
-	'deleteMany',
-	'deleteOne',
+export const READ_HOOKS = [
+	// 'count',
 	'find',
 	'findOne',
 	'findOneAndDelete',
 	'findOneAndRemove',
 	'findOneAndUpdate',
-	'remove',
+	'deleteMany',
+	// 'deleteOne',
+	// 'remove',
 	'update',
 	'updateOne',
 	'updateMany'
@@ -17,20 +17,26 @@ const READ_HOOKS = [
 
 const WRITE_HOOKS = ['findOneAndUpdate', 'save', 'update', 'updateMany'];
 
-const DELETE_HOOKS = ['deleteMany', 'deleteOne', 'remove'];
+const DELETE_HOOKS = ['deleteMany', 'findOneAndDelete', 'findOneAndRemove'];
 
 const createRegisterHooks = (hooksList, stage) => (mongooseSchema, handler) => {
 	const isReadHook = hooksList === READ_HOOKS;
 	const isWriteHook = hooksList === WRITE_HOOKS;
 	const isDeleteHook = hooksList === DELETE_HOOKS;
+	// const isPre = stage === 'pre';
+	// const isPost = stage === 'post';
+
+	const hasContextInOptions = hook =>
+		isReadHook || isDeleteHook || ['findOneAndUpdate', 'update', 'updateMany'].includes(hook);
+	const hasContextinSaveOptions = hook => isWriteHook && !['findOneAndUpdate', 'update', 'updateMany'].includes(hook);
 
 	return hooksList.forEach(hook =>
 		mongooseSchema[stage](hook, async function() {
 			const args = [hook];
-			if (isReadHook || isDeleteHook) {
+			if (hasContextInOptions(hook)) {
 				args.unshift(this.options.context);
 			}
-			if (isWriteHook) {
+			if (hasContextinSaveOptions(hook)) {
 				args.unshift(_.get(this.$__.saveOptions, 'context'));
 			}
 			return handler(this, ...args);
