@@ -9,7 +9,7 @@ describe('swagger decorators', () => {
 		sinon.restore();
 	});
 
-	describe('#swagger.prop()', () => {
+	describe('@swagger.prop()', () => {
 		it('should define metadata correctly', () => {
 			const Customer = class {
 				firstname: string;
@@ -28,7 +28,7 @@ describe('swagger decorators', () => {
 		});
 	});
 
-	describe('#swagger.definition()', () => {
+	describe('@swagger.definition()', () => {
 		it('should define metadata correctly', () => {
 			const Customer = class {};
 			sinon.stub(Reflect, 'defineMetadata');

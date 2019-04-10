@@ -37,7 +37,7 @@ describe('route decorators', () => {
 			return { decorator, decoratorArgs, MyClass };
 		};
 
-		describe('#route.get()', () => {
+		describe('@route.get()', () => {
 			it('should define metadata correctly', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('get');
 
@@ -56,7 +56,7 @@ describe('route decorators', () => {
 			});
 		});
 
-		describe('#route.post()', () => {
+		describe('@route.post()', () => {
 			it('should define metadata correctly', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('post');
 
@@ -75,7 +75,7 @@ describe('route decorators', () => {
 			});
 		});
 
-		describe('#route.put()', () => {
+		describe('@route.put()', () => {
 			it('should define metadata correctly', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('put');
 
@@ -94,7 +94,7 @@ describe('route decorators', () => {
 			});
 		});
 
-		describe('#route.patch()', () => {
+		describe('@route.patch()', () => {
 			it('should define metadata correctly', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('patch');
 
@@ -113,7 +113,7 @@ describe('route decorators', () => {
 			});
 		});
 
-		describe('#route.delete()', () => {
+		describe('@route.delete()', () => {
 			it('should define metadata correctly', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('delete');
 
@@ -132,7 +132,7 @@ describe('route decorators', () => {
 			});
 		});
 
-		describe('#route.head()', () => {
+		describe('@route.head()', () => {
 			it('should define metadata correctly', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('head');
 
@@ -152,7 +152,7 @@ describe('route decorators', () => {
 		});
 	});
 
-	describe('#route.param()', () => {
+	describe('@route.param()', () => {
 		it('should define metadata correctly', () => {
 			const MyClass = class {
 				myMethod(query) {
@@ -247,7 +247,7 @@ describe('route decorators', () => {
 		});
 	});
 
-	describe('#route.controller()', () => {
+	describe('@route.controller()', () => {
 		it('should define metadata correctly', () => {
 			const MyClass = class {
 				myMethod(query) {
