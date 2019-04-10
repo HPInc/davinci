@@ -101,6 +101,7 @@ workflows:
           context: oneflow
           requires:
             - publish
+            - refactor/typescript
           filters:
             branches:
               only: master
