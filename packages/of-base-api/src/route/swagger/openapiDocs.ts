@@ -11,7 +11,7 @@ const swaggerUiAssetPath = path.resolve(path.join(__dirname, 'explorer'));
 
 const SWAGGER_VERSION = '2.0';
 
-const resources = [];
+export const resources = [];
 
 export const addResource = (resourceName, doc) => {
 	debug(`adding ${resourceName} resource`);
@@ -21,7 +21,7 @@ export const addResource = (resourceName, doc) => {
 	resources.push(resource);
 };
 
-const sanitiseResourcePath = resourcePaths => {
+export const sanitiseResourcePath = resourcePaths => {
 	const EXCLUDED_PARAMETER_TYPES = ['res', 'req', 'context'];
 
 	// remove non-standard parameters
@@ -36,54 +36,71 @@ const sanitiseResourcePath = resourcePaths => {
 	});
 };
 
-export const createApiDocs = (app, opts: any = {}) => {
-	debug(`setting up swagger docs on ${opts.discoveryUrl}`);
+export const generateFullSwagger = ({ protocol, basePath, host }, opts?) => {
+	const options = opts || {};
+
+	const fullSwagger = {
+		swagger: SWAGGER_VERSION,
+		info: {
+			version: options.version || '1.0.0',
+			title: options.title || 'API'
+		},
+		schemes: protocol,
+		basePath,
+		host,
+		paths: {},
+		securityDefinitions: null,
+		definitions: {},
+		parameters: {},
+		externalDocs: null
+	};
+
+	if (options.securityDefinitions) {
+		fullSwagger.securityDefinitions = options.securityDefinitions;
+	}
+
+	if (options.externalDocs) {
+		fullSwagger.externalDocs = options.externalDocs;
+	}
+
+	resources.forEach(resource => {
+		// add definitions
+		_.each(resource.definitions, (resourceDefinition, defName) => {
+			fullSwagger.definitions[defName] = resourceDefinition;
+		});
+
+		// TODO is this actually used, it is not part of the openAPI specification
+		// add parameters
+		_.each(resource.parameters, (resourceParameter, paramName) => {
+			fullSwagger.parameters[paramName] = resourceParameter;
+		});
+
+		// add paths
+		_.each(resource.paths, (resourcePath, pathName) => {
+			let fullPath = `/${resource.basePath}${pathName}`;
+			if (pathName === '/') fullPath = `/${resource.basePath}`;
+			fullSwagger.paths[fullPath] = sanitiseResourcePath(resourcePath);
+		});
+	});
+
+	return fullSwagger;
+};
+
+export const createApiDocs = (app, opts?: any) => {
+	const options = opts || {};
+	debug(`setting up swagger docs on ${options.discoveryUrl}`);
 
 	const makeHandler = () => {
 		return (req, res) => {
-			const protocol = opts.protocol || config.PROTOCOL;
-			const basePath = opts.basePath || `${protocol}://${req.headers.host}/api`;
-			const fullSwagger = {
-				swagger: SWAGGER_VERSION,
-				info: {
-					version: opts.version || '1.0.0',
-					title: opts.title || 'API'
-				},
-				schemes: [req.get('X-Forwarded-Protocol') || protocol],
-				basePath,
-				host: req.headers.host,
-				paths: {},
-				securityDefinitions: opts.securityDefinitions,
-				definitions: {},
-				parameters: {},
-				externalDocs: opts.externalDocs
-			};
-
-			resources.forEach(resource => {
-				// add definitions
-				_.each(resource.definitions, (resourceDefinition, defName) => {
-					fullSwagger.definitions[defName] = resourceDefinition;
-				});
-
-				// TODO is this actually used, it is not part of the openAPI specification
-				// add parameters
-				_.each(resource.parameters, (resourceParameter, paramName) => {
-					fullSwagger.parameters[paramName] = resourceParameter;
-				});
-
-				// add paths
-				_.each(resource.paths, (resourcePath, pathName) => {
-					let fullPath = `/${resource.basePath}${pathName}`;
-					if (pathName === '/') fullPath = `/${resource.basePath}`;
-					fullSwagger.paths[fullPath] = sanitiseResourcePath(resourcePath);
-				});
-			});
-
+			const protocol = req.get('X-Forwarded-Protocol') || options.protocol || config.PROTOCOL;
+			const basePath = options.basePath || `${protocol}://${req.headers.host}/api`;
+			const host = req.headers.host;
+			const fullSwagger = generateFullSwagger({ protocol, basePath, host }, opts);
 			res.json(fullSwagger);
 		};
 	};
 
-	app.get(opts.discoveryUrl, makeHandler());
+	app.get(options.discoveryUrl, makeHandler());
 
 	// return app;
 };
