@@ -12,7 +12,7 @@ export default class CustomerController extends BaseController {
 	}
 
 	@get({ path: '/', summary: 'List' })
-	find(@query('query') query: string, @context() context): CustomerSchema {
+	find(@query('query') query: string, @context() context) {
 		return super.find(query, context);
 	}
 

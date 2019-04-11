@@ -1,38 +1,52 @@
 import _ from 'lodash';
+import bluebird from 'bluebird';
 import * as errors from './errors';
 import { route } from './route';
 import { context } from './context';
 
-interface IParsedMongooseFilters {
+type ParsedMongooseFilters = {
 	limit?: number;
 	skip?: number;
 	sort?: string | object;
 	select?: string | [string];
 	populate?: object | [object];
 	where: object;
-}
+};
 
 export default class BaseController {
 	model: any;
 	schema: Function;
 	additionalSchemas: Function;
+	maxLimit: number;
+	defaultQuery: { $limit: number; $skip: number };
 	constructor(model?, schema?, additionalSchemas?) {
 		this.model = model;
 		this.schema = schema;
 		this.additionalSchemas = additionalSchemas;
+		this.maxLimit = 1000;
+		this.defaultQuery = {
+			$limit: 10,
+			$skip: 0
+		};
 	}
 
 	@route.get({ path: '/', summary: 'List' })
-	find(@route.param({ name: 'query', in: 'query' }) query, @context() context) {
+	async find(@route.param({ name: 'query', in: 'query' }) query, @context() context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 		const { limit, skip, sort, select, populate, where } = this.parseQuery(query);
 		const mQuery = this.model.find(where, select, { limit, skip, sort, context });
 
-		if (populate) {
-			return mQuery.populate(populate);
-		}
+		const [data, total] = await bluebird.all([
+			populate ? mQuery.populate(populate) : mQuery,
+			this.model.count(where)
+		]);
 
-		return mQuery;
+		return {
+			data,
+			limit,
+			skip,
+			total
+		};
 	}
 
 	async findOne(@route.param({ name: 'query', in: 'query' }) query, @context() context) {
@@ -112,11 +126,19 @@ export default class BaseController {
 		return removed;
 	}
 
-	parseQuery(query): IParsedMongooseFilters {
+	parseQuery(qry): ParsedMongooseFilters {
+		const query = _.merge({}, this.defaultQuery, qry);
+
 		return _.reduce(
 			query,
 			(acc, value: any, key: string) => {
-				if (['$limit', '$skip'].includes(key)) {
+				if (key === '$limit') {
+					const k = key.substr(1);
+					const val = Math.min(Number(value), this.maxLimit);
+					return { ...acc, [k]: val };
+				}
+
+				if (key === '$skip') {
 					const k = key.substr(1);
 					return { ...acc, [k]: Number(value) };
 				}
