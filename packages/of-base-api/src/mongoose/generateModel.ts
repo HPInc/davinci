@@ -1,8 +1,8 @@
 import { model, Schema, SchemaTypeOpts, SchemaOptions } from 'mongoose';
 
 // Helper functions
-const getSchemaDefinition = (theClass: Function) => {
-	const props = Reflect.getMetadata('tsmongoose:props', theClass.prototype);
+export const getSchemaDefinition = (theClass: Function) => {
+	const props = Reflect.getMetadata('tsmongoose:props', theClass.prototype) || [];
 	return props.reduce((acc, { key, opts = {} }: { key: string; opts: SchemaTypeOpts<any> }) => {
 		let type = opts.type || Reflect.getMetadata('design:type', theClass.prototype, key);
 		const isArray = Array.isArray(type) || type.name === 'Array';

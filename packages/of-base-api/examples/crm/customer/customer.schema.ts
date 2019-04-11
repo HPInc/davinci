@@ -1,20 +1,6 @@
-import { mongooseProp, swagger } from '../../../src';
+import { mongooseProp, mongooseIndex, swagger } from '../../../src';
 
-export interface ICustomer {
-	firstname: string;
-	lastname: string;
-	age: number;
-	weight: number;
-	accountId: number;
-	startDate: string;
-}
-
-export interface ICustomerPhone {
-	number: string;
-	isPrimary: boolean;
-}
-
-class CustomerPhone implements ICustomerPhone {
+class CustomerPhone {
 	@mongooseProp()
 	@swagger.prop()
 	number: string;
@@ -22,8 +8,15 @@ class CustomerPhone implements ICustomerPhone {
 	isPrimary: boolean;
 }
 
+class BirthType {
+	@mongooseProp()
+	@swagger.prop()
+	city: string;
+}
+
+@mongooseIndex({ firstname: 1, lastname: 1 })
 @swagger.definition({ title: 'Customer' })
-export default class Customer implements ICustomer {
+export default class Customer {
 	@mongooseProp()
 	@swagger.prop()
 	firstname: string;
@@ -51,4 +44,8 @@ export default class Customer implements ICustomer {
 	@mongooseProp({ type: Date })
 	@swagger.prop({ type: Date })
 	startDate: string;
+
+	@mongooseProp()
+	@swagger.prop()
+	birth: BirthType;
 }
