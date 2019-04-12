@@ -33,11 +33,13 @@ export default class BaseController {
 	@route.get({ path: '/', summary: 'List' })
 	async find(@route.param({ name: 'query', in: 'query' }) query, @context() context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
-		const { limit, skip, sort, select, populate, where } = this.parseQuery(query);
-		let mQuery = this.model.find(where, select, { limit, skip, sort, context });
-		mQuery = this.addPopulation(mQuery, populate, context);
+		const { limit, skip, sort, select, populate, where } = this.parseQuery(query, context);
+		const mQuery = this.model.find(where, select, { limit, skip, sort, context });
 
-		const [data, total] = await bluebird.all([mQuery, this.model.count(where)]);
+		const [data, total] = await bluebird.all([
+			populate ? mQuery.populate(populate) : mQuery,
+			this.model.count(where)
+		]);
 
 		return {
 			data,
@@ -50,8 +52,10 @@ export default class BaseController {
 	async findOne(@route.param({ name: 'query', in: 'query' }) query, @context() context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 		const { sort, select, populate, where } = this.parseQuery(query);
-		let mQuery = this.model.findOne(where, select, { sort, context });
-		mQuery = this.addPopulation(mQuery, populate, context);
+		const mQuery = this.model.findOne(where, select, { sort, context });
+		if (populate) {
+			mQuery.populate(populate);
+		}
 
 		const result = await mQuery;
 		if (!result) {
@@ -121,31 +125,46 @@ export default class BaseController {
 		return removed;
 	}
 
-	parseQuery(qry): ParsedMongooseFilters {
+	/**
+	 * Function to convert from `feathers` query format to mongoose
+	 * { $limit, $skip, $populate, $sort, $select, (where |...rest) } =>
+	 * { limit, skip, populate, sort, select, where }
+	 * @param qry
+	 * @param context
+	 */
+	parseQuery(qry, context?: any): ParsedMongooseFilters {
 		const query = _.merge({}, this.defaultQuery, qry);
 
 		return _.reduce(
 			query,
 			(acc, value: any, key: string) => {
+				const k = key.substr(1);
 				if (key === '$limit') {
-					const k = key.substr(1);
 					const val = Math.min(Number(value), this.maxLimit);
 					return { ...acc, [k]: val };
 				}
 
 				if (key === '$skip') {
-					const k = key.substr(1);
 					return { ...acc, [k]: Number(value) };
 				}
 
-				if (['$sort', '$populate'].includes(key)) {
-					const k = key.substr(1);
+				if (key === '$sort') {
 					return { ...acc, [k]: value };
 				}
 
+				if (key === '$populate' && value) {
+					const parsedPopulates = this.parsePopulate(value, context);
+
+					return { ...acc, [k]: parsedPopulates };
+				}
+
 				if (key === '$select' && value) {
-					const k = key.substr(1);
 					return { ...acc, [k]: (value || []).join(' ') };
+				}
+
+				if (key === '$where' && value) {
+					const where = acc.where || {};
+					return { ...acc, [k]: { ...where, ...value } };
 				}
 
 				return { ...acc, where: { ...acc.where, [key]: value } };
@@ -155,23 +174,36 @@ export default class BaseController {
 	}
 
 	/**
-	 * Normalise population parameters, adding context
-	 * @param mQuery
-	 * @param populate
+	 * Normalise $populate query parameter
+	 * @param populateQuery
 	 * @param context
 	 *
-	 * @return mQuery
+	 * @return mongoose populate
 	 */
-	addPopulation(mQuery, populate, context) {
-		if (!populate || _.isEmpty(populate)) return mQuery;
-		const populates = Array.isArray(populate) ? populate : [populate];
+	private parsePopulate(populateQuery, context) {
+		const populates = Array.isArray(populateQuery) ? populateQuery : [populateQuery];
 
 		return populates.reduce((acc, pop) => {
-			const basePopOptions = typeof pop === 'object' ? { ...pop } : { path: pop };
-			const populateOptions = _.merge(basePopOptions, {
-				options: { context }
-			});
-			return acc.populate(populateOptions);
-		}, mQuery);
+			const populateArgs: any = {};
+			let query = {};
+			if (typeof pop === 'string') {
+				populateArgs.path = pop;
+			} else if (typeof pop === 'object') {
+				query = _.pick(pop, ['$limit', '$skip', '$sort', '$select', '$populate', '$where']);
+				populateArgs.path = pop.path;
+			}
+			const { limit, skip, sort, select, populate, where } = this.parseQuery(query, context);
+
+			acc.push(
+				_.merge(populateArgs, {
+					match: where,
+					populate,
+					select,
+					options: { limit, skip, sort, context }
+				})
+			);
+
+			return acc;
+		}, []);
 	}
 }
