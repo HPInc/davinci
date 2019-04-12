@@ -1,51 +1,69 @@
-import { mongooseProp, mongooseIndex, swagger } from '../../../src';
+import { ObjectId } from 'mongodb';
+import { mgoose, swagger } from '../../../src';
 
 class CustomerPhone {
-	@mongooseProp()
+	@mgoose.prop()
 	@swagger.prop()
 	number: string;
-	@mongooseProp()
+	@mgoose.prop()
 	isPrimary: boolean;
 }
 
 class BirthType {
-	@mongooseProp()
+	@mgoose.prop()
 	@swagger.prop()
 	city: string;
 }
 
-@mongooseIndex({ firstname: 1, lastname: 1 })
+@mgoose.index({ firstname: 1, lastname: 1 })
 @swagger.definition({ title: 'Customer' })
 export default class Customer {
-	@mongooseProp()
+	@mgoose.prop()
 	@swagger.prop()
 	firstname: string;
 
-	@mongooseProp()
+	@mgoose.prop()
 	@swagger.prop()
 	lastname: string;
 
-	@mongooseProp()
+	@mgoose.prop()
 	@swagger.prop()
 	age: number;
 
-	@mongooseProp()
+	@mgoose.prop()
 	@swagger.prop()
 	weight: number;
 
-	@mongooseProp({ type: [CustomerPhone] })
+	@mgoose.prop({ type: [CustomerPhone] })
 	@swagger.prop({ type: [CustomerPhone] })
 	phones: CustomerPhone[];
 
-	@mongooseProp()
+	@mgoose.prop({ type: ObjectId })
 	@swagger.prop()
 	accountId: number;
 
-	@mongooseProp({ type: Date })
+	@mgoose.prop({ type: Date })
 	@swagger.prop({ type: Date })
 	startDate: string;
 
-	@mongooseProp()
+	@mgoose.prop()
 	@swagger.prop()
 	birth: BirthType;
+
+	@mgoose.prop({ type: ObjectId })
+	@mgoose.populate({ name: 'file', opts: { ref: 'File', foreignField: '_id', justOne: true } })
+	@swagger.prop()
+	fileId: string;
+
+	@mgoose.virtual()
+	@swagger.prop()
+	test() {
+		return 1;
+	}
+
+	@mgoose.method()
+	static getSomething() {}
+
+	@mgoose.method()
+	getPrototypeSomething() {}
 }

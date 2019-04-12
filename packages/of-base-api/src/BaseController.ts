@@ -34,12 +34,10 @@ export default class BaseController {
 	async find(@route.param({ name: 'query', in: 'query' }) query, @context() context) {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 		const { limit, skip, sort, select, populate, where } = this.parseQuery(query);
-		const mQuery = this.model.find(where, select, { limit, skip, sort, context });
+		let mQuery = this.model.find(where, select, { limit, skip, sort, context });
+		mQuery = this.addPopulation(mQuery, populate, context);
 
-		const [data, total] = await bluebird.all([
-			populate ? mQuery.populate(populate) : mQuery,
-			this.model.count(where)
-		]);
+		const [data, total] = await bluebird.all([mQuery, this.model.count(where)]);
 
 		return {
 			data,
@@ -53,10 +51,7 @@ export default class BaseController {
 		if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 		const { sort, select, populate, where } = this.parseQuery(query);
 		let mQuery = this.model.findOne(where, select, { sort, context });
-
-		if (populate) {
-			mQuery = mQuery.populate(populate);
-		}
+		mQuery = this.addPopulation(mQuery, populate, context);
 
 		const result = await mQuery;
 		if (!result) {
@@ -72,7 +67,7 @@ export default class BaseController {
 			name: 'id',
 			in: 'path'
 		})
-		id,
+		id: string,
 		@route.param({ name: 'query', in: 'query' }) query,
 		@context() context
 	) {
@@ -95,7 +90,7 @@ export default class BaseController {
 			name: 'id',
 			in: 'path'
 		})
-		id,
+		id: string,
 		@route.param({ name: 'data', in: 'body' }) data,
 		@context() context
 	) {
@@ -157,5 +152,26 @@ export default class BaseController {
 			},
 			{ where: {}, select: null }
 		);
+	}
+
+	/**
+	 * Normalise population parameters, adding context
+	 * @param mQuery
+	 * @param populate
+	 * @param context
+	 *
+	 * @return mQuery
+	 */
+	addPopulation(mQuery, populate, context) {
+		if (!populate || _.isEmpty(populate)) return mQuery;
+		const populates = Array.isArray(populate) ? populate : [populate];
+
+		return populates.reduce((acc, pop) => {
+			const basePopOptions = typeof pop === 'object' ? { ...pop } : { path: pop };
+			const populateOptions = _.merge(basePopOptions, {
+				options: { context }
+			});
+			return acc.populate(populateOptions);
+		}, mQuery);
 	}
 }

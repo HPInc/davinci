@@ -160,6 +160,7 @@ const makeHandlerFunction = (operation, controller, functionName, definitions, m
 			// coerce the controller return value to be a promise
 			return Promise.try(() => controller[functionName](...parameterList)).then(
 				result => {
+					req.requestHandled = true;
 					req.result = result;
 					req.statusCode = successCode;
 					next();

@@ -1,6 +1,13 @@
-import { generateModel } from '../../../src/mongoose';
-import File from './file.schema';
+import { model } from 'mongoose';
+import { mgoose } from '../../../src/mongoose';
+import FileSchema from './file.schema';
 
-const model = generateModel(File);
+const schema = mgoose.generateSchema(FileSchema);
 
-export default model;
+mgoose.beforeRead(schema, (mQuery, context) => {
+	console.log(mQuery, context);
+});
+
+const File = model('File', schema, 'files');
+
+export default File;

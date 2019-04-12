@@ -1,6 +1,8 @@
 import should from 'should';
 import { Model } from 'mongoose';
-import { getSchemaDefinition, generateSchema, generateModel, mongooseProp, mongooseIndex } from '../../../src/mongoose';
+import { mgoose } from '../../../src/mongoose';
+
+const { getSchemaDefinition, generateSchema, generateModel, prop, index, method } = mgoose;
 
 describe('typed mongoose', () => {
 	describe('#getSchemaDefinition', () => {
@@ -10,9 +12,9 @@ describe('typed mongoose', () => {
 				age: number;
 				isActive: boolean;
 			}
-			mongooseProp({ type: String })(Customer.prototype, 'firstname');
-			mongooseProp({ type: Number })(Customer.prototype, 'age');
-			mongooseProp({ type: Boolean })(Customer.prototype, 'isActive');
+			prop({ type: String })(Customer.prototype, 'firstname');
+			prop({ type: Number })(Customer.prototype, 'age');
+			prop({ type: Boolean })(Customer.prototype, 'isActive');
 			const schema = getSchemaDefinition(Customer);
 
 			should(schema).be.deepEqual({
@@ -37,8 +39,8 @@ describe('typed mongoose', () => {
 				birth: CustomerBirth;
 			}
 
-			mongooseProp({ type: CustomerBirth })(Customer.prototype, 'birth');
-			mongooseProp({ type: String })(CustomerBirth.prototype, 'place');
+			prop({ type: CustomerBirth })(Customer.prototype, 'birth');
+			prop({ type: String })(CustomerBirth.prototype, 'place');
 			const schema = getSchemaDefinition(Customer);
 
 			should(schema).be.deepEqual({
@@ -60,9 +62,9 @@ describe('typed mongoose', () => {
 				tags: string[];
 			}
 
-			mongooseProp({ type: [CustomerBirth] })(Customer.prototype, 'birth');
-			mongooseProp({ type: [String] })(Customer.prototype, 'tags');
-			mongooseProp({ type: String })(CustomerBirth.prototype, 'place');
+			prop({ type: [CustomerBirth] })(Customer.prototype, 'birth');
+			prop({ type: [String] })(Customer.prototype, 'tags');
+			prop({ type: String })(CustomerBirth.prototype, 'place');
 			const schema = getSchemaDefinition(Customer);
 
 			should(schema).be.deepEqual({
@@ -85,6 +87,8 @@ describe('typed mongoose', () => {
 				myMethod() {}
 			}
 
+			method()(Customer, 'myStaticMethod');
+			method()(Customer.prototype, 'myMethod');
 			const schema = generateSchema(Customer);
 			should(schema.statics.myStaticMethod).be.equal(Customer.myStaticMethod);
 			should(schema.methods.myMethod).be.equal(Customer.prototype.myMethod);
@@ -96,9 +100,9 @@ describe('typed mongoose', () => {
 				lastname: string;
 			}
 
-			mongooseProp({ type: String, index: true })(Customer.prototype, 'firstname');
-			mongooseProp({ type: String })(Customer.prototype, 'lastname');
-			mongooseIndex({ firstname: 1, lastname: 1 })(Customer);
+			prop({ type: String, index: true })(Customer.prototype, 'firstname');
+			prop({ type: String })(Customer.prototype, 'lastname');
+			index({ firstname: 1, lastname: 1 })(Customer);
 			const schema = generateSchema(Customer);
 			should(schema.indexes()).be.deepEqual([
 				[

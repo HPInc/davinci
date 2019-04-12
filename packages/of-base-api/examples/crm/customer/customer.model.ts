@@ -1,6 +1,8 @@
 import { model } from 'mongoose';
-import { generateSchema, beforeRead, beforeWrite, beforeDelete } from '../../../src/mongoose';
+import { mgoose } from '../../../src/mongoose';
 import CustomerSchema from './customer.schema';
+
+const { generateSchema, beforeRead, beforeWrite, beforeDelete } = mgoose;
 
 const schema = generateSchema(CustomerSchema);
 

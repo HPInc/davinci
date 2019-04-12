@@ -1,7 +1,9 @@
 import should from 'should';
 import mongoose from 'mongoose';
 import Sinon from 'sinon';
-import { beforeRead, afterRead, beforeWrite, afterWrite, beforeDelete, afterDelete } from '../../../src/mongoose';
+import { mgoose } from '../../../src/mongoose';
+
+const { beforeRead, afterRead, beforeWrite, afterWrite, beforeDelete, afterDelete } = mgoose;
 
 const sinon = Sinon.createSandbox();
 

@@ -23,7 +23,7 @@ describe('BaseController', () => {
 			const model = { findOne: () => ({ _id: '123' }) };
 			const controller = new BaseController(model);
 
-			const result = await controller.findById(123, null, null);
+			const result = await controller.findById('123', null, null);
 			result.should.have.property('_id').equal('123');
 		});
 	});

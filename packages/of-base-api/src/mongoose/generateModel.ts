@@ -1,4 +1,5 @@
 import { model, Schema, SchemaTypeOpts, SchemaOptions } from 'mongoose';
+import { ObjectId } from 'mongodb';
 
 // Helper functions
 export const getSchemaDefinition = (theClass: Function) => {
@@ -11,7 +12,9 @@ export const getSchemaDefinition = (theClass: Function) => {
 		}
 
 		const isFunction = ![String, Number, Object, Boolean, Date].includes(type) && typeof type === 'function';
-		if (isFunction) {
+		if (type === ObjectId) {
+			type = ObjectId;
+		} else if (isFunction) {
 			type = getSchemaDefinition(type);
 		}
 
@@ -54,17 +57,23 @@ export const generateSchema = (
 	const schemaDef = getSchemaDefinition(theClass);
 
 	// get methods
-	const methods = Object.getOwnPropertyNames(theClass.prototype)
-		.filter(n => !EXCLUDED_INSTANCE_METHODS.includes(n))
-		.reduce((acc, methodName) => ({ ...acc, [methodName]: theClass.prototype[methodName] }), {});
+	const methods = (Reflect.getMetadata('tsmongoose:methods', theClass.prototype) || [])
+		.filter(({ name }) => !EXCLUDED_INSTANCE_METHODS.includes(name))
+		.reduce((acc, { name, handler }) => ({ ...acc, [name]: handler }), {});
 
 	// get statics
-	const statics = Object.getOwnPropertyNames(theClass)
-		.filter(n => !EXCLUDED_STATIC_METHODS.includes(n))
-		.reduce((acc, methodName) => ({ ...acc, [methodName]: theClass[methodName] }), {});
+	const statics = (Reflect.getMetadata('tsmongoose:methods', theClass) || [])
+		.filter(({ name }) => !EXCLUDED_STATIC_METHODS.includes(name))
+		.reduce((acc, { name, handler }) => ({ ...acc, [name]: handler }), {});
 
 	// get indexes
 	const indexes = Reflect.getMetadata('tsmongoose:indexes', theClass) || [];
+
+	// get virtual fields that allow population
+	const populates = Reflect.getMetadata('tsmongoose:populates', theClass.prototype) || [];
+
+	// get virtual fields
+	const virtuals = Reflect.getMetadata('tsmongoose:virtuals', theClass.prototype) || [];
 
 	const schema = new Schema(schemaDef, options);
 	schema.methods = methods;
@@ -72,6 +81,8 @@ export const generateSchema = (
 	if (indexes.length > 0) {
 		schema.index(indexes);
 	}
+	virtuals.forEach(({ name, handler }) => schema.virtual(name, handler));
+	populates.forEach(({ name, options }) => schema.virtual(name, options));
 
 	return schema;
 };

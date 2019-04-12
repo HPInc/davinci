@@ -1,23 +1,12 @@
-import { mongooseProp, swagger } from '../../../src';
-
-export interface IFile {
-	_id: string;
-	name: string;
-	accountId: string;
-}
+import { mgoose, swagger } from '../../../src';
 
 @swagger.definition({ title: 'File' })
-export default class File implements IFile {
-	@mongooseProp()
-	@swagger.prop()
-	// @ts-ignore
-	_id: string;
-
-	@mongooseProp()
+export default class File {
+	@mgoose.prop()
 	@swagger.prop()
 	name: string;
 
-	@mongooseProp()
+	@mgoose.prop()
 	@swagger.prop()
 	accountId: string;
 }

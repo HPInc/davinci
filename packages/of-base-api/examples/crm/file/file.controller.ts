@@ -2,7 +2,7 @@ import { BaseController, route } from '../../../src';
 import model from './file.model';
 import FileSchema from './file.schema';
 
-@route.controller({ basepath: '/files' })
+@route.controller({ basepath: '/api/files' })
 class FileController extends BaseController {
 	constructor() {
 		super(model, FileSchema);
