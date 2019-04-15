@@ -1,6 +1,6 @@
 import should from 'should';
 import Sinon from 'sinon';
-import { createMethodDecorator } from '../../../../src/route/decorators/route';
+import { createRouteMethodDecorator } from '../../../../src/route/decorators/route';
 import { route } from '../../../../src';
 
 const sinon = Sinon.createSandbox();
@@ -10,9 +10,9 @@ describe('route decorators', () => {
 		sinon.restore();
 	});
 
-	describe('createMethodDecorator', () => {
+	describe('createRouteMethodDecorator', () => {
 		it('should create a method decorator', () => {
-			const decorator = createMethodDecorator('get');
+			const decorator = createRouteMethodDecorator('get');
 			should(decorator).be.a.Function();
 		});
 	});

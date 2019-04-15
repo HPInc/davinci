@@ -19,8 +19,7 @@ describe('createRouter', () => {
 		beforeEach(() => {
 			TestController = class extends BaseController {
 				constructor(model) {
-					super();
-					this.model = model;
+					super(model);
 				}
 			};
 		});
@@ -138,8 +137,7 @@ describe('createRouter', () => {
 		beforeEach(() => {
 			TestController = class extends BaseController {
 				constructor(model) {
-					super();
-					this.model = model;
+					super(model);
 				}
 
 				syncMethod() {

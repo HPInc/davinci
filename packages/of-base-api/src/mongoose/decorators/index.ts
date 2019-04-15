@@ -1,5 +1,9 @@
 import { SchemaTypeOpts } from 'mongoose';
 
+/**
+ * Decorate a props as mongoose schema property
+ * @param opts
+ */
 export function prop(opts?: SchemaTypeOpts<any>) {
 	return function(target: Object, key: string | symbol) {
 		const props = Reflect.getMetadata('tsmongoose:props', target) || [];
@@ -8,6 +12,11 @@ export function prop(opts?: SchemaTypeOpts<any>) {
 	};
 }
 
+/**
+ * Gives the ability to add compound indexes to a schema.
+ * It decorates classes
+ * @param index
+ */
 export function index(index) {
 	return function(target: Object) {
 		const indexes = Reflect.getMetadata('tsmongoose:indexes', target) || [];
@@ -16,6 +25,11 @@ export function index(index) {
 	};
 }
 
+/**
+ * Decorate a method as:
+ * - mongoose static method is the class method is `static`
+ * - mongoose method is the class method is a `prototype` method
+ */
 export function method() {
 	return function(target: Function | Object, key: string) {
 		const isPrototype = typeof target === 'object' && typeof target.constructor === 'function';
@@ -30,7 +44,7 @@ export function method() {
 	};
 }
 
-type VirtualArgs = {
+interface IVirtualArgs {
 	ref: string; // The model to use
 	localField?: string; // Find people where `localField`
 	foreignField: string; // is equal to `foreignField`
@@ -38,9 +52,21 @@ type VirtualArgs = {
 	// an array. `justOne` is false by default.
 	justOne?: boolean;
 	options?: object;
-};
+}
 
-export function populate({ name, opts }: { name: string; opts: VirtualArgs }) {
+/**
+ * Decorator that annotates a field as localField
+ * for a virtual property
+ * Example:
+ *   @populate({ name: 'file', opts: { ref: 'File', foreignField: '_id', justOne: true } })
+ *   fileId: string
+ *
+ * will create a `file` property that will use `fileId` as localField
+ *
+ * @param name
+ * @param opts
+ */
+export function populate({ name, opts }: { name: string; opts: IVirtualArgs }) {
 	return function(target: Object, key: string) {
 		const options = { ...opts, localField: key };
 
@@ -50,6 +76,10 @@ export function populate({ name, opts }: { name: string; opts: VirtualArgs }) {
 	};
 }
 
+/**
+ * Decorator that annotate a method marking it as virtual.
+ * The annotated method will be used as the `getter` of the virtual
+ */
 export function virtual() {
 	return function(target: Object, key: string) {
 		const handler = target[key];

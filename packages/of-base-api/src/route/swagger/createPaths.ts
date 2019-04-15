@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import _fp from 'lodash/fp';
-import { MethodParameter, PathsDefinition } from '../types';
+import { IMethodParameter, PathsDefinition } from '../types';
 import { IControllerDecoratorArgs } from '../decorators/route';
 
 const getParameterDefinition = methodParameterConfig => {
-	const options: MethodParameter = methodParameterConfig.options;
+	const options: IMethodParameter = methodParameterConfig.options;
 	const definition = { ...options };
 	// handling special parameters
 	if (['context', 'req', 'res'].includes(methodParameterConfig.type)) {

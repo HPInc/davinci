@@ -1,10 +1,10 @@
 import _ from 'lodash';
-import { SwaggerDefinitions, PathsDefinition } from '../types';
+import { ISwaggerDefinitions, PathsDefinition } from '../types';
 
 class Resource {
 	basePath: string;
 	paths: PathsDefinition;
-	definitions: SwaggerDefinitions;
+	definitions: ISwaggerDefinitions;
 	parameters: object;
 	constructor(basePath, doc) {
 		this.basePath = basePath;

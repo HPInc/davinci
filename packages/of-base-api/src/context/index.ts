@@ -1,8 +1,10 @@
 import find from 'lodash/find';
 
-export const context = (options?): Function => {
+/**
+ * Decorate a parameter as context
+ */
+export const context = (): Function => {
 	return function(target: Object, methodName: string | symbol, index) {
-		// get the existing metadata props
 		const contextParameters = Reflect.getMetadata('tscontroller:context', target) || [];
 		const isAlreadySet = !!find(contextParameters, { methodName, index });
 		if (isAlreadySet) return;
@@ -11,7 +13,6 @@ export const context = (options?): Function => {
 			target,
 			methodName,
 			index,
-			options,
 			handler: target[methodName],
 			type: 'context'
 		});

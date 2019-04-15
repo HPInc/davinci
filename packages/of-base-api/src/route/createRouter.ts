@@ -249,6 +249,7 @@ const createRouterAndSwaggerDoc = (Controller, rsName?, contextFactory?) => {
 		(acc, schema) => ({ ...acc, ...createSchemaDefinition(schema) }),
 		[]
 	);
+
 	const definition = {
 		definitions: {
 			...mainDefinition,

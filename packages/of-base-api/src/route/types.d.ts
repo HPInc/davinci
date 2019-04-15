@@ -1,45 +1,49 @@
-export type SwaggerDefinition = {
+export interface ISwaggerDefinition {
 	title?: string;
 	type?: string;
 	description?: string;
 	format?: string;
-	properties?: { [key: string]: SwaggerDefinition };
-	items?: SwaggerDefinition;
+	properties?: { [key: string]: ISwaggerDefinition };
+	items?: ISwaggerDefinition;
 	required?: string[];
 	$ref?: string;
-};
+}
 
-export type SwaggerDefinitions = {
-	[key: string]: SwaggerDefinition;
-};
+export interface ISwaggerDefinitions {
+	[key: string]: ISwaggerDefinition;
+}
 
-export type Schema = { $ref?: string; type?: string; [key: string]: any };
+export interface ISchema {
+	$ref?: string;
+	type?: string;
+	[key: string]: any;
+}
 
-export interface MethodParameterBase {
+export interface IMethodParameterBase {
 	name: string;
 	description?: string;
 	required?: boolean;
-	schema?: Schema;
+	schema?: ISchema;
 	responses?: {
 		[key: number]: {
 			description?: string;
-			schema?: Schema;
+			schema?: ISchema;
 		};
 	};
 }
 
-export interface MethodParameter extends MethodParameterBase {
+export interface IMethodParameter extends IMethodParameterBase {
 	in: 'body' | 'path' | 'query';
 }
 
 export type Verb = 'get' | 'post' | 'put' | 'patch' | 'head' | 'delete';
 
-export type PathsDefinition = {
+export interface PathsDefinition {
 	[key: string]: {
 		[key in Verb]: {
 			summary: string;
 			operationId: string;
-			parameters: MethodParameter[];
+			parameters: IMethodParameter[];
 			consumes: string[];
 			produces: string[];
 			tags: string[];
@@ -50,4 +54,4 @@ export type PathsDefinition = {
 			};
 		}
 	};
-};
+}

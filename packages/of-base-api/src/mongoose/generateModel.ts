@@ -1,27 +1,39 @@
 import { model, Schema, SchemaTypeOpts, SchemaOptions } from 'mongoose';
 import { ObjectId } from 'mongodb';
 
-// Helper functions
+/**
+ * Utility function that given a class passed as parameter,
+ * it creates ad returns an object that will be used to generate a Mongoose schema
+ * @param theClass
+ */
 export const getSchemaDefinition = (theClass: Function) => {
 	const props = Reflect.getMetadata('tsmongoose:props', theClass.prototype) || [];
+
+	// loop over the variable decorated as props
 	return props.reduce((acc, { key, opts = {} }: { key: string; opts: SchemaTypeOpts<any> }) => {
+		// the type can be explicitly passed as option, or can be inferred
+		// it's important to note that not in all the situations
+		// the type can be retrieved with reflect-metadata, for example:
+		// - arrays: [string] or [object] or [MyClass]
+		// - objects
 		let type = opts.type || Reflect.getMetadata('design:type', theClass.prototype, key);
 		const isArray = Array.isArray(type) || type.name === 'Array';
 		if (isArray && type.length > 0) {
 			type = type[0];
 		}
 
-		const isFunction = ![String, Number, Object, Boolean, Date].includes(type) && typeof type === 'function';
-		if (type === ObjectId) {
-			type = ObjectId;
-		} else if (isFunction) {
+		const isFunction =
+			![String, Number, Object, Boolean, Date, ObjectId].includes(type) && typeof type === 'function';
+
+		// if the type is a function, we need to recursively get the schema definition
+		if (isFunction) {
 			type = getSchemaDefinition(type);
 		}
 
 		if (type.ref) {
 			const prop = {
 				...opts,
-				type: 'ObjectId',
+				type: ObjectId,
 				ref: type.ref.name
 			};
 			return {
@@ -49,6 +61,12 @@ export const getSchemaDefinition = (theClass: Function) => {
 const EXCLUDED_INSTANCE_METHODS = ['constructor'];
 const EXCLUDED_STATIC_METHODS = ['name', 'length', 'prototype'];
 
+/**
+ * Create an instance of a Mongoose schema from a class,
+ * attaching virtuals, static/prototype methods, indexes
+ * @param theClass
+ * @param options
+ */
 export const generateSchema = (
 	theClass: Function,
 	options: SchemaOptions = { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
@@ -87,6 +105,13 @@ export const generateSchema = (
 	return schema;
 };
 
+/**
+ * Create an instance of a Mongoose model
+ * @param theClass
+ * @param modelName
+ * @param collectionName
+ * @param options
+ */
 export const generateModel = (
 	theClass: Function,
 	modelName = theClass.name,

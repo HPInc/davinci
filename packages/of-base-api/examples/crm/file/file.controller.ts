@@ -2,14 +2,14 @@ import { BaseController, route } from '../../../src';
 import model from './file.model';
 import FileSchema from './file.schema';
 
-@route.controller({ basepath: '/api/files' })
+@route.controller({ basepath: '/api/files', resourceSchema: FileSchema })
 class FileController extends BaseController {
 	constructor() {
-		super(model, FileSchema);
+		super(model);
 	}
 
 	customFn() {
-		return this.model.Model.find({ _id: '591eb951522d802685231039' });
+		return this.model.find({ _id: '591eb951522d802685231039' });
 	}
 }
 

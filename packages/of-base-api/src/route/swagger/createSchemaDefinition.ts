@@ -1,7 +1,7 @@
 import _fp from 'lodash/fp';
-import { SwaggerDefinitions } from '../types';
+import { ISwaggerDefinitions } from '../types';
 
-const getSchemaDefinition = (theClass: Function, definitions = {}): SwaggerDefinitions => {
+const getSchemaDefinition = (theClass: Function, definitions = {}): ISwaggerDefinitions => {
 	const makeSchema = (typeOrClass, key?) => {
 		if ([String, Number, Boolean, Date].includes(typeOrClass)) {
 			if (typeOrClass === Date) {

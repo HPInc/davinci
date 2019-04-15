@@ -1,5 +1,9 @@
 import _ from 'lodash';
 
+/**
+ * Factory function that generates a `req` or `res` decorator
+ * @param reqOrRes
+ */
 export const createReqResExpressDecorator = (reqOrRes: 'req' | 'res') => () => (
 	target: Object,
 	methodName: string,
@@ -20,9 +24,21 @@ export const createReqResExpressDecorator = (reqOrRes: 'req' | 'res') => () => (
 	Reflect.defineMetadata('tsswagger:method-parameters', methodParameters, target);
 };
 
+/**
+ * Decorator that inject the `req` express object as controller method parameter
+ */
 export const req = createReqResExpressDecorator('req');
+
+/**
+ * Decorator that inject the `res` express object as controller method parameter
+ */
 export const res = createReqResExpressDecorator('res');
 
+/**
+ * Decorator that allow to specify middlewares per controller method basis
+ * @param middlewareFunction
+ * @param stage
+ */
 const middleware = (middlewareFunction, stage: 'before' | 'after' = 'before') => {
 	return function(target: Object, methodName: string | symbol) {
 		// get the existing metadata props
@@ -33,7 +49,16 @@ const middleware = (middlewareFunction, stage: 'before' | 'after' = 'before') =>
 	};
 };
 
+/**
+ * Decorator that allow to specify a `before` middlewares per controller method basis
+ * @param middlewareFunction
+ */
 middleware.before = middlewareFunction => middleware(middlewareFunction, 'before');
+
+/**
+ * Decorator that allow to specify a `after` middlewares per controller method basis
+ * @param middlewareFunction
+ */
 middleware.after = middlewareFunction => middleware(middlewareFunction, 'after');
 
 export { middleware };

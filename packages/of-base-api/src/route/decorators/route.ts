@@ -1,24 +1,28 @@
 import _ from 'lodash';
-import { MethodParameter, MethodParameterBase } from '../types';
+import { IMethodParameter, IMethodParameterBase } from '../types';
 
-type MethodResponseOutput = {
+interface IMethodResponseOutput {
 	description?: string;
 	schema?: { $ref: string };
-};
+}
 
-type MethodResponses = {
-	[key: number]: MethodResponseOutput | ((string) => MethodResponseOutput);
-};
+interface IMethodResponses {
+	[key: number]: IMethodResponseOutput | ((string) => IMethodResponseOutput);
+}
 
-type MethodDecoratorOptions = {
+interface IMethodDecoratorOptions {
 	path: string;
 	summary: string;
 	description?: string;
-	responses?: MethodResponses;
-};
+	responses?: IMethodResponses;
+}
 
-export const createMethodDecorator = verb =>
-	function({ path, summary, description, responses }: MethodDecoratorOptions): Function {
+/**
+ * Factory function that generates route method decorators
+ * @param verb
+ */
+export const createRouteMethodDecorator = verb =>
+	function({ path, summary, description, responses }: IMethodDecoratorOptions): Function {
 		return function(target: Object, methodName: string | symbol) {
 			// get the existing metadata props
 			const methods = Reflect.getMetadata('tsswagger:methods', target) || [];
@@ -28,14 +32,18 @@ export const createMethodDecorator = verb =>
 		};
 	};
 
-export const get = createMethodDecorator('get');
-export const post = createMethodDecorator('post');
-export const put = createMethodDecorator('put');
-export const patch = createMethodDecorator('patch');
-export const del = createMethodDecorator('delete');
-export const head = createMethodDecorator('head');
+export const get = createRouteMethodDecorator('get');
+export const post = createRouteMethodDecorator('post');
+export const put = createRouteMethodDecorator('put');
+export const patch = createRouteMethodDecorator('patch');
+export const del = createRouteMethodDecorator('delete');
+export const head = createRouteMethodDecorator('head');
 
-export function param(options: MethodParameter): Function {
+/**
+ * Decorator that annotate a method parameter
+ * @param options
+ */
+export function param(options: IMethodParameter): Function {
 	return function(target: Object, methodName: string, index) {
 		// get the existing metadata props
 		const methodParameters = Reflect.getMetadata('tsswagger:method-parameters', target) || [];
@@ -61,7 +69,7 @@ export function param(options: MethodParameter): Function {
 }
 
 type ParameterName = string;
-type CreateParamDecoratorFunctionArg = MethodParameterBase | ParameterName;
+type CreateParamDecoratorFunctionArg = IMethodParameterBase | ParameterName;
 
 // TODO: use openApi 3 requestBody for 'body'
 export const createParamDecorator = (inKey: 'path' | 'query' | 'body') => (
@@ -87,6 +95,11 @@ export interface IControllerDecoratorArgs {
 	resourceSchema?: Function;
 }
 
+/**
+ * Decorator that annotate a controller.
+ * It allows setting the basepath, resourceSchema, etc
+ * @param args
+ */
 export function controller(args?: IControllerDecoratorArgs): Function {
 	return function(target: Object) {
 		// define new metadata props
