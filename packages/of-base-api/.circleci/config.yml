@@ -97,7 +97,6 @@ workflows:
             branches:
               only:
                 - master
-                - refactor/typescript
       - bump_version:
           context: oneflow
           requires:
