@@ -67,6 +67,67 @@ describe('createSchemaDefinition', () => {
 		 *  	isPrimary: boolean;
 		 *  };
 		 *
+		 * @swagger.definition({ title: 'Customer'})
+		 * class Customer {
+		 * 		@swagger.prop()
+		 *  	phone: CustomerPhone;
+		 *  };
+		 */
+
+		const definition = createSchemaDefinition(Customer);
+		should(definition).be.deepEqual({
+			Customer: {
+				title: 'Customer',
+				type: 'object',
+				properties: {
+					phone: {
+						title: 'phone',
+						type: 'object',
+						properties: {
+							number: {
+								type: 'string'
+							},
+							isPrimary: {
+								type: 'boolean'
+							}
+						},
+						required: []
+					}
+				},
+				required: []
+			}
+		});
+	});
+
+	it('supports nested definitions', () => {
+		class CustomerPhone {
+			number: string;
+			isPrimary: boolean;
+		}
+
+		const Customer = class {
+			phone: CustomerPhone;
+		};
+
+		swagger.definition({ title: 'Customer' })(Customer);
+		swagger.prop({ type: CustomerPhone })(Customer.prototype, 'phone');
+
+		swagger.definition({ title: 'CustomerPhone' })(CustomerPhone);
+		swagger.prop({ type: String })(CustomerPhone.prototype, 'number');
+		swagger.prop({ type: Boolean })(CustomerPhone.prototype, 'isPrimary');
+
+		/**
+		 * This is equivalent to:
+		 *
+		 * @swagger.definition({ title: 'CustomerPhone' })
+		 * class CustomerPhone {
+		 * 		@swagger.prop()
+		 *  	number: number;
+		 * 		@swagger.prop()
+		 *  	isPrimary: boolean;
+		 *  };
+		 *
+		 * @swagger.definition({ title: 'Customer' })
 		 * class Customer {
 		 * 		@swagger.prop()
 		 *  	phone: CustomerPhone;
@@ -161,6 +222,70 @@ describe('createSchemaDefinition', () => {
 		 *  	isPrimary: boolean;
 		 *  };
 		 *
+		 * @swagger.definition({ title: 'Customer' })
+		 * class Customer {
+		 * 		@swagger.prop()
+		 *  	phone: CustomerPhone[];
+		 *  };
+		 */
+
+		const definition = createSchemaDefinition(Customer);
+		should(definition).be.deepEqual({
+			Customer: {
+				title: 'Customer',
+				type: 'object',
+				properties: {
+					phone: {
+						type: 'array',
+						items: {
+							title: 'phone',
+							type: 'object',
+							properties: {
+								number: {
+									type: 'string'
+								},
+								isPrimary: {
+									type: 'boolean'
+								}
+							},
+							required: []
+						}
+					}
+				},
+				required: []
+			}
+		});
+	});
+
+	it('support array of definitions', () => {
+		class CustomerPhone {
+			number: string;
+			isPrimary: boolean;
+		}
+
+		const Customer = class {
+			phone: CustomerPhone[];
+		};
+
+		swagger.definition({ title: 'Customer' })(Customer);
+		swagger.prop({ type: [CustomerPhone] })(Customer.prototype, 'phone');
+
+		swagger.definition({ title: 'CustomerPhone' })(CustomerPhone);
+		swagger.prop({ type: String })(CustomerPhone.prototype, 'number');
+		swagger.prop({ type: Boolean })(CustomerPhone.prototype, 'isPrimary');
+
+		/**
+		 * This is equivalent to:
+		 *
+		 * @swagger.definition({ title: 'CustomerPhone' })
+		 * class CustomerPhone {
+		 * 		@swagger.prop()
+		 *  	number: number;
+		 * 		@swagger.prop()
+		 *  	isPrimary: boolean;
+		 *  };
+		 *
+		 * @swagger.definition({ title: 'Customer' })
 		 * class Customer {
 		 * 		@swagger.prop()
 		 *  	phone: CustomerPhone[];

@@ -1,4 +1,3 @@
-
 export function prop(opts?: { type?: any; required?: boolean }) {
 	// this is the decorator factory
 	return function(target: Object, key: string | symbol): void {
@@ -12,11 +11,11 @@ export function prop(opts?: { type?: any; required?: boolean }) {
 	};
 }
 
-export function definition(opts?: { title }) {
+export function definition(definition?: { title }) {
 	// this is the decorator factory
 	return function(target: Object): void {
 		// this is the decorator
 		// define new metadata props
-		Reflect.defineMetadata('tsswagger:definition', opts, target);
+		Reflect.defineMetadata('tsswagger:definition', definition, target);
 	};
 }

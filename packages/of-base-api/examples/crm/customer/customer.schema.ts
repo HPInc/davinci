@@ -55,12 +55,6 @@ export default class Customer {
 	@swagger.prop()
 	fileId: string;
 
-	@mgoose.virtual()
-	@swagger.prop()
-	test() {
-		return 1;
-	}
-
 	@mgoose.method()
 	static getSomething() {}
 

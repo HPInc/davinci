@@ -225,6 +225,8 @@ const createRouterAndSwaggerDoc = (Controller, rsName?, contextFactory?) => {
 	// get controller metadata
 	const metadata = Reflect.getMetadata('tsswagger:controller', Controller) || {};
 	const basepath = metadata.basepath || '';
+	const resourceSchema = metadata.resourceSchema;
+	const additionalSchemas = metadata.additionalSchemas;
 
 	// create the controller from the supplied class
 	const controller = new Controller();
@@ -236,9 +238,9 @@ const createRouterAndSwaggerDoc = (Controller, rsName?, contextFactory?) => {
 	const router = express.Router();
 
 	// create the swagger structure
-	const mainDefinition = createSchemaDefinition(controller.schema);
+	const mainDefinition = resourceSchema ? createSchemaDefinition(resourceSchema) : {};
 	const additionalDefinitions = _.reduce(
-		controller.additionalSchemas,
+		additionalSchemas,
 		(acc, schema) => ({ ...acc, ...createSchemaDefinition(schema) }),
 		[]
 	);

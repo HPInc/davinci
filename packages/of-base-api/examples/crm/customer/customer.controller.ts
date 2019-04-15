@@ -5,10 +5,10 @@ import { context, express, route } from '../../../src';
 
 const { get, controller, query } = route;
 
-@controller({ basepath: '/api/customer', excludedMethods: ['deleteById'] })
+@controller({ basepath: '/api/customer', resourceSchema: CustomerSchema, excludedMethods: ['deleteById'] })
 export default class CustomerController extends BaseController {
 	constructor() {
-		super(model, CustomerSchema);
+		super(model);
 	}
 
 	@get({ path: '/', summary: 'List' })

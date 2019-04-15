@@ -81,10 +81,11 @@ export const path = createParamDecorator('path');
 export const query = createParamDecorator('query');
 export const body = createParamDecorator('body');
 
-export type IControllerDecoratorArgs = {
+export interface IControllerDecoratorArgs {
 	basepath?: string;
 	excludedMethods?: string[];
-};
+	resourceSchema?: Function;
+}
 
 export function controller(args?: IControllerDecoratorArgs): Function {
 	return function(target: Object) {

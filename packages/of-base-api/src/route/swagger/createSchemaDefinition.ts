@@ -2,7 +2,7 @@ import _fp from 'lodash/fp';
 import { SwaggerDefinitions } from '../types';
 
 const getSchemaDefinition = (theClass: Function, definitions = {}): SwaggerDefinitions => {
-	const makeSchema = typeOrClass => {
+	const makeSchema = (typeOrClass, key?) => {
 		if ([String, Number, Boolean, Date].includes(typeOrClass)) {
 			if (typeOrClass === Date) {
 				return { type: 'string', format: 'date' };
@@ -14,7 +14,7 @@ const getSchemaDefinition = (theClass: Function, definitions = {}): SwaggerDefin
 		if (Array.isArray(typeOrClass)) {
 			return {
 				type: 'array',
-				items: makeSchema(typeOrClass[0])
+				items: makeSchema(typeOrClass[0], key)
 			};
 		}
 
@@ -26,28 +26,35 @@ const getSchemaDefinition = (theClass: Function, definitions = {}): SwaggerDefin
 		}
 
 		if (typeof typeOrClass === 'function') {
-			const definitionMetadata = Reflect.getMetadata('tsswagger:definition', typeOrClass) || {};
-			const title: string = definitionMetadata.title || typeOrClass.name;
-			definitions[title] = {
-				...definitionMetadata,
+			const definitionMetadata = Reflect.getMetadata('tsswagger:definition', typeOrClass);
+			const hasDefinitionDecoration = !!definitionMetadata;
+			const title: string = hasDefinitionDecoration ? definitionMetadata.title : key || typeOrClass.name;
+			const definitionObj = {
+				...(definitionMetadata || {}),
 				title,
 				type: 'object'
 			};
+
 			const props = Reflect.getMetadata('tsswagger:props', typeOrClass.prototype) || [];
-			definitions[title].properties = props.reduce((acc, { key, opts }) => {
+			definitionObj.properties = props.reduce((acc, { key, opts }) => {
 				const type = (opts && opts.type) || Reflect.getMetadata('design:type', typeOrClass.prototype, key);
-				acc[key] = makeSchema(type);
+				acc[key] = makeSchema(type, key);
 				return acc;
 			}, {});
 
-			definitions[title].required = _fp.flow(
+			definitionObj.required = _fp.flow(
 				_fp.filter({ opts: { required: true } }),
 				_fp.map('key')
 			)(props);
 
-			return {
-				$ref: title
-			};
+			if (hasDefinitionDecoration) {
+				definitions[title] = definitionObj;
+				return {
+					$ref: title
+				};
+			}
+
+			return definitionObj;
 		}
 	};
 
