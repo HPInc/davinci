@@ -23,12 +23,17 @@ export const createReqResExpressDecorator = (reqOrRes: 'req' | 'res') => () => (
 export const req = createReqResExpressDecorator('req');
 export const res = createReqResExpressDecorator('res');
 
-export const middleware = middlewareFunction => {
+const middleware = (middlewareFunction, stage: 'before' | 'after' = 'before') => {
 	return function(target: Object, methodName: string | symbol) {
 		// get the existing metadata props
 		const methods = Reflect.getMetadata('tsexpress:method-middleware', target) || [];
-		methods.unshift({ middlewareFunction, handler: target[methodName] });
+		methods.unshift({ middlewareFunction, handler: target[methodName], stage });
 		// define new metadata methods
 		Reflect.defineMetadata('tsexpress:method-middleware', methods, target);
 	};
 };
+
+middleware.before = middlewareFunction => middleware(middlewareFunction, 'before');
+middleware.after = middlewareFunction => middleware(middlewareFunction, 'after');
+
+export { middleware };

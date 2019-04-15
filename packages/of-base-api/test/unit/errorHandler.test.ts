@@ -29,7 +29,7 @@ describe('errorHandler', () => {
 		const routeError = new errors.BadRequest('explosions');
 		const res = new ResMock();
 
-		handler(routeError, null, res);
+		handler(routeError, null, res, () => {});
 
 		should(res.json).match({ code: 400, name: 'BadRequest', message: 'explosions' });
 		should(res.json).not.have.property('stack');
@@ -41,7 +41,7 @@ describe('errorHandler', () => {
 		const routeError = new Error('oh no');
 		const res = new ResMock();
 
-		handler(routeError, null, res);
+		handler(routeError, null, res, () => {});
 
 		should(res.json).match({ code: 500, name: 'InternalServerError', message: 'oh no' });
 		should(res.json).not.have.property('stack');
@@ -53,7 +53,7 @@ describe('errorHandler', () => {
 		const routeError = new Error('oh no');
 		const res = new ResMock();
 
-		handler(routeError, null, res);
+		handler(routeError, null, res, () => {});
 
 		should(res.json).match({ code: 500, name: 'InternalServerError', message: 'oh no' });
 		should(res.json).have.property('stack');
@@ -66,7 +66,7 @@ describe('errorHandler', () => {
 		const routeError = new errors.NotFound('nope');
 		const res = new ResMock();
 
-		handler(routeError, null, res);
+		handler(routeError, null, res, () => {});
 
 		should(res.json).match({ code: 404, name: 'NotFound', message: 'nope' });
 		should(res.json).not.have.property('stack');
@@ -77,7 +77,7 @@ describe('errorHandler', () => {
 		const routeError = new feathersErrors.BadRequest('feathers!', { errors: { foo: 'bar' } });
 		const res = new ResMock();
 
-		handler(routeError, null, res);
+		handler(routeError, null, res, () => {});
 
 		should(res.json).match({ code: 400, name: 'BadRequest', message: 'feathers!', errors: { foo: 'bar' } });
 	});

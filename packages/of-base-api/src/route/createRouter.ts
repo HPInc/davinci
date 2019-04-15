@@ -150,9 +150,13 @@ const makeHandlerFunction = (operation, controller, functionName, definitions, m
 	const successCode = _.findKey(operation.responses, (obj, key) => +key >= 200 && +key < 400);
 
 	const methodMiddlewaresMeta = _.filter(middlewaresMeta, { handler: controller[functionName] });
+	const beforeMiddlewares = _.filter(methodMiddlewaresMeta, { stage: 'before' });
+	const afterMiddlewares = _.filter(methodMiddlewaresMeta, { stage: 'after' });
+
 	return [
-		..._.map(methodMiddlewaresMeta, 'middlewareFunction'),
+		..._.map(beforeMiddlewares, 'middlewareFunction'),
 		(req, res, next) => {
+			if (req.requestHandled) return next();
 			// need a custom middleware to set the context ID
 			const parameterList = mapReqToParameters(req, res, operation.parameters, definitions, contextFactory);
 			debug('calling ', functionName);
@@ -167,7 +171,8 @@ const makeHandlerFunction = (operation, controller, functionName, definitions, m
 				},
 				err => next(err)
 			);
-		}
+		},
+		..._.map(afterMiddlewares, 'middlewareFunction')
 	];
 };
 

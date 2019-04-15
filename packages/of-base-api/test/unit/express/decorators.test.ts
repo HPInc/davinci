@@ -45,4 +45,67 @@ describe('express decorators', () => {
 			});
 		});
 	});
+
+	describe('@middleware()', () => {
+		it('should decorate correctly', () => {
+			const MyClass = class {
+				myMethod(res) {
+					return res.something;
+				}
+			};
+
+			const middlewareFn = () => {};
+			express.middleware(middlewareFn)(MyClass.prototype, 'myMethod');
+			const methodMiddlewareMeta = Reflect.getMetadata('tsexpress:method-middleware', MyClass.prototype);
+
+			should(methodMiddlewareMeta).have.length(1);
+			should(methodMiddlewareMeta[0]).be.deepEqual({
+				stage: 'before',
+				handler: MyClass.prototype.myMethod,
+				middlewareFunction: middlewareFn
+			});
+		});
+	});
+
+	describe('@middleware.before()', () => {
+		it('should decorate correctly', () => {
+			const MyClass = class {
+				myMethod(res) {
+					return res.something;
+				}
+			};
+
+			const middlewareFn = () => {};
+			express.middleware.before(middlewareFn)(MyClass.prototype, 'myMethod');
+			const methodMiddlewareMeta = Reflect.getMetadata('tsexpress:method-middleware', MyClass.prototype);
+
+			should(methodMiddlewareMeta).have.length(1);
+			should(methodMiddlewareMeta[0]).be.deepEqual({
+				stage: 'before',
+				handler: MyClass.prototype.myMethod,
+				middlewareFunction: middlewareFn
+			});
+		});
+	});
+
+	describe('@middleware.after()', () => {
+		it('should decorate correctly', () => {
+			const MyClass = class {
+				myMethod(res) {
+					return res.something;
+				}
+			};
+
+			const middlewareFn = () => {};
+			express.middleware.after(middlewareFn)(MyClass.prototype, 'myMethod');
+			const methodMiddlewareMeta = Reflect.getMetadata('tsexpress:method-middleware', MyClass.prototype);
+
+			should(methodMiddlewareMeta).have.length(1);
+			should(methodMiddlewareMeta[0]).be.deepEqual({
+				stage: 'after',
+				handler: MyClass.prototype.myMethod,
+				middlewareFunction: middlewareFn
+			});
+		});
+	});
 });
