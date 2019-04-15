@@ -22,7 +22,6 @@ describe('@context()', () => {
 		should(contextMetadata[0]).be.deepEqual({
 			handler: MyClass.prototype.myOtherMethod,
 			target: MyClass.prototype,
-			options: undefined,
 			methodName: 'myOtherMethod',
 			index: 1,
 			type: 'context'
@@ -31,7 +30,6 @@ describe('@context()', () => {
 		should(contextMetadata[1]).be.deepEqual({
 			handler: MyClass.prototype.myMethod,
 			target: MyClass.prototype,
-			options: undefined,
 			methodName: 'myMethod',
 			index: 0,
 			type: 'context'
