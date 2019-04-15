@@ -1,7 +1,7 @@
 import should from 'should';
 import Sinon from 'sinon';
-import { createMethodDecorator } from '../../../../../src/route/decorators/route';
-import { route } from '../../../../../src';
+import { createMethodDecorator } from '../../../../src/route/decorators/route';
+import { route } from '../../../../src';
 
 const sinon = Sinon.createSandbox();
 

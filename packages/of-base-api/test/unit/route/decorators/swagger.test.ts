@@ -1,6 +1,6 @@
 import should from 'should';
 import Sinon from 'sinon';
-import { swagger } from '../../../../../src';
+import { swagger } from '../../../../src';
 
 const sinon = Sinon.createSandbox();
 

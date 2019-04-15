@@ -34,7 +34,8 @@ export default class CustomerController extends BaseController {
 	customResponse(@express.res() res) {
 		res.json({ test: 1 });
 	}
-	@get({ path: '/customMiddlewares', summary: 'That is a ' })
+
+	@get({ path: '/customMiddlewares', summary: 'This is a method with custom middlewares' })
 	@express.middleware.before((req, res, next) => {
 		console.log(req, res);
 		next();
