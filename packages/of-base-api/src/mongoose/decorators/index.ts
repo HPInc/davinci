@@ -44,7 +44,7 @@ export function method() {
 	};
 }
 
-interface IVirtualArgs {
+export interface IVirtualArgs {
 	ref: string; // The model to use
 	localField?: string; // Find people where `localField`
 	foreignField: string; // is equal to `foreignField`

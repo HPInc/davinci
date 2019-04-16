@@ -72,10 +72,15 @@ describe('createApp', () => {
 	});
 
 	describe('createApp', () => {
+		let app;
+		afterEach(() => {
+			app.close();
+		});
+
 		it('Should successfully configure an express app with no middleware', async () => {
-			const { server } = await createApp();
-			should(server).have.property('listen');
-			server.close();
+			app = await createApp();
+			await app.start();
+			should(app.server).have.property('listen');
 		});
 
 		it('Should successfully configure an express app with middleware', async () => {
@@ -83,9 +88,9 @@ describe('createApp', () => {
 			const middlewares = app => {
 				should(app).have.property('use');
 			};
-			const { server } = await createApp(myApp, middlewares);
-			should(server).have.property('listen');
-			server.close();
+			app = await createApp(myApp, middlewares);
+			await app.start();
+			should(app.server).have.property('listen');
 		});
 
 		it('Should successfully configure an express app with middleware', async () => {
@@ -94,9 +99,9 @@ describe('createApp', () => {
 				should(app).have.property('use');
 			};
 			const myOptions = { boot: 'dir' };
-			const { server } = await createApp(myApp, myOptions, middlewares);
-			should(server).have.property('listen');
-			server.close();
+			app = await createApp(myApp, myOptions, middlewares);
+			await app.start();
+			should(app.server).have.property('listen');
 		});
 	});
 });

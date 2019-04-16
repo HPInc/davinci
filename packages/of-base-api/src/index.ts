@@ -6,6 +6,7 @@ export * from './context';
 export * from './express';
 import * as errors from './errors';
 import { createApp } from './createApp';
+import { IOfBaseExpress } from './types';
 import createRouter from './route/createRouter';
 
 /**
@@ -18,9 +19,4 @@ const boot = () => {
 	process.exit(-1);
 };
 
-export {
-	boot,
-	createApp,
-	createRouter,
-	errors
-};
+export { boot, createApp, createRouter, IOfBaseExpress, errors };

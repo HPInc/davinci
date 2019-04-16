@@ -3,6 +3,7 @@ const debug = require('debug')('of-base-api:example');
 const { createApp, createRouter } = require('../../');
 import CustomerController from './customer/customer.controller';
 import FileController from './file/file.controller';
+import { IOfBaseExpress } from '../../src';
 // const FileController = require('./files/FileController');
 // const SearchController = require('./search/search.controller');
 
@@ -29,3 +30,10 @@ createApp(expressApp, bootOptions, app => {
 	app.use(createRouter(FileController));
 	// app.use('/api/search', createRouter(SearchController));
 });
+
+if (require.main === module) {
+	// this module was run directly from the command line as in node xxx.js
+	(expressApp as IOfBaseExpress).start();
+}
+
+export default expressApp;
