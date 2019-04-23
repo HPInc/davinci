@@ -47,6 +47,7 @@ jobs:
           name: publish
           command: |
             if [ "${CIRCLE_BRANCH}" == "refactor/typescript" ]; then
+              npm version --no-git-tag-version 1.0.0-beta.$CIRCLE_BUILD_NUM
               npm publish --tag next
             elif [ "${CIRCLE_BRANCH}" == "master" ]; then
               npm publish
@@ -97,10 +98,13 @@ workflows:
             branches:
               only:
                 - master
+                - refactor/typescript
       - bump_version:
           context: oneflow
           requires:
             - publish
           filters:
             branches:
-              only: master
+              only:
+                - master
+                - refactor/typescript
