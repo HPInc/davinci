@@ -62,3 +62,18 @@ middleware.before = middlewareFunction => middleware(middlewareFunction, 'before
 middleware.after = middlewareFunction => middleware(middlewareFunction, 'after');
 
 export { middleware };
+
+/**
+ * Decorator that allow to set a response HTTP header
+ * @param name
+ * @param value
+ */
+export const header = (name: string, value: string) => {
+	return function(target: Object, methodName: string | symbol) {
+		// get the existing metadata props
+		const methods = Reflect.getMetadata('tsexpress:method-response-header', target) || [];
+		methods.unshift({ name, value, handler: target[methodName] });
+		// define new metadata methods
+		Reflect.defineMetadata('tsexpress:method-response-header', methods, target);
+	};
+};

@@ -30,38 +30,6 @@ type ContextFactoryArgs = {
 	res?: Response;
 };
 
-/*function sendResults(res, statusCode) {
-	return results => {
-		if (results) {
-			res.status(statusCode || 200).json(results);
-		} else {
-			res.status(statusCode || 204).end();
-		}
-	};
-}
-
-function sendError(next) {
-	return err => {
-		debug('error', err);
-		if (typeof next === 'function') {
-			next.call(null, err);
-		}
-	};
-}*/
-
-/*const attemptJsonParsing = ({ value, config, definitions }) => {
-	let val = value;
-	if (_.startsWith(value, '{') && _.endsWith(value, '}')) {
-		try {
-			val = JSON.parse(value);
-		} catch (err) {
-			val = value;
-		}
-	}
-
-	return { value: val, config, definitions };
-};*/
-
 const performAjvValidation = ({ value, config, definitions }) => {
 	// @ts-ignore
 	const ajv = new Ajv(AJV_OPTS);
@@ -100,7 +68,6 @@ const validateAndCoerce = ({ value, config, definitions }) => {
 
 const processParameter = ({ value, config, definitions }) =>
 	_fp.flow(
-		// attemptJsonParsing,
 		validateAndCoerce,
 		_fp.get('value')
 	)({
@@ -145,13 +112,22 @@ const mapReqToParameters = (req, res, parameters = [], definitions, contextFacto
 	}, []);
 };
 
-const makeHandlerFunction = (operation, controller, functionName, definitions, middlewaresMeta, contextFactory) => {
+const makeHandlerFunction = (operation, controller, functionName, definitions, contextFactory) => {
 	// @ts-ignore
 	const successCode = _.findKey(operation.responses, (obj, key) => +key >= 200 && +key < 400);
 
+	// get middlewares
+	const middlewaresMeta = Reflect.getMetadata('tsexpress:method-middleware', controller.constructor.prototype);
 	const methodMiddlewaresMeta = _.filter(middlewaresMeta, { handler: controller[functionName] });
 	const beforeMiddlewares = _.filter(methodMiddlewaresMeta, { stage: 'before' });
 	const afterMiddlewares = _.filter(methodMiddlewaresMeta, { stage: 'after' });
+
+	// get response headers
+	const responseHeadersMeta = Reflect.getMetadata(
+		'tsexpress:method-response-header',
+		controller.constructor.prototype
+	);
+	const methodResponseHeadersMeta = _.filter(responseHeadersMeta, { handler: controller[functionName] });
 
 	return [
 		..._.map(beforeMiddlewares, 'middlewareFunction'),
@@ -167,6 +143,12 @@ const makeHandlerFunction = (operation, controller, functionName, definitions, m
 					req.requestHandled = true;
 					req.result = result;
 					req.statusCode = successCode;
+
+					// @ts-ignore
+					methodResponseHeadersMeta.forEach(({ name, value }) => {
+						res.header(name, value);
+					});
+
 					next();
 				},
 				err => next(err)
@@ -184,7 +166,7 @@ const makeMethodName = operation => {
 	return operationName.split('#')[0];
 };
 
-export const createRouteHandlers = (controller, definition, middlewaresMeta?, contextFactory?) => {
+export const createRouteHandlers = (controller, definition, contextFactory?) => {
 	const routeHandlers = [];
 
 	// for each path
@@ -206,7 +188,6 @@ export const createRouteHandlers = (controller, definition, middlewaresMeta?, co
 				controller,
 				methodName,
 				definition.definitions,
-				middlewaresMeta,
 				contextFactory
 			);
 			routeHandlers.push({ method, path, handlers });
@@ -236,9 +217,6 @@ const createRouterAndSwaggerDoc = (Controller, rsName?, contextFactory?) => {
 	// create the controller from the supplied class
 	const controller = new Controller();
 
-	// get middlewares
-	const middlewaresMeta = Reflect.getMetadata('tsexpress:method-middleware', Controller.prototype);
-
 	// create the router
 	const router = express.Router();
 
@@ -259,7 +237,7 @@ const createRouterAndSwaggerDoc = (Controller, rsName?, contextFactory?) => {
 	};
 
 	// now process the swagger structure and get an array of method/path mappings to handlers
-	const routes = createRouteHandlers(controller, definition, middlewaresMeta, contextFactory);
+	const routes = createRouteHandlers(controller, definition, contextFactory);
 
 	// add them to the router
 	routes.forEach(route => {

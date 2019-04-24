@@ -1,6 +1,6 @@
 import express from 'express';
 const debug = require('debug')('of-base-api:example');
-const { createApp, createRouter } = require('../../');
+const { createApp, createRouter } = require('../../src');
 import CustomerController from './customer/customer.controller';
 import FileController from './file/file.controller';
 import { IOfBaseExpress } from '../../src';

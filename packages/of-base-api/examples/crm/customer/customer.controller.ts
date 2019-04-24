@@ -47,4 +47,10 @@ export default class CustomerController extends BaseController {
 	pathWithCustomMiddleware() {
 		return { result: 1 };
 	}
+
+	@get({ path: '/customHeader', summary: 'This is a method with custom header' })
+	@express.header('Content-Type', 'text/plan')
+	customHeader() {
+		return { result: 1 };
+	}
 }

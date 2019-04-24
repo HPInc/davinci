@@ -56,7 +56,7 @@ export const configureExpress = (app, runMiddlewares?) => {
 	});
 	app.use(responseHandler());
 	app.use(notFoundHandler());
-	app.use(errorHandler({}));
+	app.use(errorHandler());
 };
 
 export const createApp = async (...args): Promise<IOfBaseExpress> => {
@@ -64,17 +64,17 @@ export const createApp = async (...args): Promise<IOfBaseExpress> => {
 	const [app, options, addMiddlewares] = processArgs(...args);
 
 	app.start = async () => {
-		// run the boot executions
+		debug('run the boot executions');
 		await execBootScripts(app, options);
 
-		// configure the express app
+		debug('configure the express app');
 		await configureExpress(app, addMiddlewares);
 
-		// run the listener
+		debug('run the listener');
 		const server = http.createServer(app);
 		await new Promise(resolve =>
 			server.listen(config.PORT, () => {
-				debug(`Server listening on ${config.PORT}`);
+				console.log(`Server listening on ${config.PORT}`);
 				resolve();
 			})
 		);
