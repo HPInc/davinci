@@ -6,6 +6,10 @@ import { context, express, route } from '../../../src';
 const { get, controller, query } = route;
 
 @controller({ basepath: '/api/customer', resourceSchema: CustomerSchema, excludedMethods: ['deleteById'] })
+@express.middleware.before((_req, _res, next) => {
+	console.log('controller before middleware');
+	next();
+})
 export default class CustomerController extends BaseController {
 	constructor() {
 		super(model);

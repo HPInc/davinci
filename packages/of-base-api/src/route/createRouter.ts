@@ -112,15 +112,25 @@ const mapReqToParameters = (req, res, parameters = [], definitions, contextFacto
 	}, []);
 };
 
+const wrapMiddleware = middlewareFn => (req, res, next) => {
+	if (req.requestHandled) return next();
+
+	return middlewareFn(req, res, next);
+};
+
 const makeHandlerFunction = (operation, controller, functionName, definitions, contextFactory) => {
 	// @ts-ignore
 	const successCode = _.findKey(operation.responses, (obj, key) => +key >= 200 && +key < 400);
 
 	// get middlewares
-	const middlewaresMeta = Reflect.getMetadata('tsexpress:method-middleware', controller.constructor.prototype);
-	const methodMiddlewaresMeta = _.filter(middlewaresMeta, { handler: controller[functionName] });
-	const beforeMiddlewares = _.filter(methodMiddlewaresMeta, { stage: 'before' });
-	const afterMiddlewares = _.filter(methodMiddlewaresMeta, { stage: 'after' });
+	const methodMiddlewaresMeta = _.filter(
+		Reflect.getMetadata('tsexpress:method-middleware', controller.constructor.prototype),
+		{ handler: controller[functionName] }
+	);
+	const controllerMiddlewaresMeta = Reflect.getMetadata('tsexpress:method-middleware', controller.constructor) || [];
+	const allMiddlewaresMeta = [...controllerMiddlewaresMeta, ...methodMiddlewaresMeta];
+	const beforeMiddlewares = allMiddlewaresMeta.filter(m => m.stage === 'before');
+	const afterMiddlewares = allMiddlewaresMeta.filter(m => m.stage === 'after');
 
 	// get response headers
 	const responseHeadersMeta = Reflect.getMetadata(
@@ -130,7 +140,7 @@ const makeHandlerFunction = (operation, controller, functionName, definitions, c
 	const methodResponseHeadersMeta = _.filter(responseHeadersMeta, { handler: controller[functionName] });
 
 	return [
-		..._.map(beforeMiddlewares, 'middlewareFunction'),
+		..._.map(beforeMiddlewares, ({ middlewareFunction }) => wrapMiddleware(middlewareFunction)),
 		(req, res, next) => {
 			if (req.requestHandled) return next();
 			// need a custom middleware to set the context ID
@@ -140,7 +150,6 @@ const makeHandlerFunction = (operation, controller, functionName, definitions, c
 			// coerce the controller return value to be a promise
 			return Promise.try(() => controller[functionName](...parameterList)).then(
 				result => {
-					req.requestHandled = true;
 					req.result = result;
 					req.statusCode = successCode;
 
@@ -154,7 +163,11 @@ const makeHandlerFunction = (operation, controller, functionName, definitions, c
 				err => next(err)
 			);
 		},
-		..._.map(afterMiddlewares, 'middlewareFunction')
+		..._.map(afterMiddlewares, ({ middlewareFunction }) => wrapMiddleware(middlewareFunction)),
+		(req, _res, next) => {
+			req.requestHandled = true;
+			next();
+		}
 	];
 };
 
