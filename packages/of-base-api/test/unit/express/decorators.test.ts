@@ -65,6 +65,22 @@ describe('express decorators', () => {
 				middlewareFunction: middlewareFn
 			});
 		});
+
+		it('should decorate correctly a controller', () => {
+			const MyClass = class {
+				myMethod() {}
+			};
+
+			const middlewareFn = () => {};
+			express.middleware(middlewareFn)(MyClass);
+			const methodMiddlewareMeta = Reflect.getMetadata('tsexpress:method-middleware', MyClass);
+
+			should(methodMiddlewareMeta).have.length(1);
+			should(methodMiddlewareMeta[0]).be.deepEqual({
+				stage: 'before',
+				middlewareFunction: middlewareFn
+			});
+		});
 	});
 
 	describe('@middleware.before()', () => {
@@ -105,6 +121,27 @@ describe('express decorators', () => {
 				stage: 'after',
 				handler: MyClass.prototype.myMethod,
 				middlewareFunction: middlewareFn
+			});
+		});
+	});
+
+	describe('@header()', () => {
+		it('should decorate correctly', () => {
+			const MyClass = class {
+				myMethod() {}
+			};
+
+			const name = 'Content-Type';
+			const value = 'text/plan';
+
+			express.header(name, value)(MyClass.prototype, 'myMethod');
+			const methodParameters = Reflect.getMetadata('tsexpress:method-response-header', MyClass.prototype);
+
+			should(methodParameters).have.length(1);
+			should(methodParameters[0]).be.deepEqual({
+				handler: MyClass.prototype.myMethod,
+				name,
+				value
 			});
 		});
 	});

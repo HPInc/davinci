@@ -20,15 +20,15 @@ const AJV_OPTS = {
 	removeAdditional: 'all'
 };
 
-export interface RequestCustom extends Request {
+export interface IRequestCustom extends Request {
 	context?: any;
 	accountId?: any;
 }
 
-type ContextFactoryArgs = {
-	req?: RequestCustom;
+interface IContextFactoryArgs {
+	req?: IRequestCustom;
 	res?: Response;
-};
+}
 
 const performAjvValidation = ({ value, config, definitions }) => {
 	// @ts-ignore
@@ -76,7 +76,7 @@ const processParameter = ({ value, config, definitions }) =>
 		definitions
 	});
 
-const defaultContextFactory = ({ req }: ContextFactoryArgs) => ({
+const defaultContextFactory = ({ req }: IContextFactoryArgs) => ({
 	body: req.body,
 	params: req.params,
 	query: req.query,

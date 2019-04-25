@@ -34,17 +34,23 @@ export const req = createReqResExpressDecorator('req');
  */
 export const res = createReqResExpressDecorator('res');
 
+type Stage = 'before' | 'after';
+
 /**
  * Decorator that allow to specify middlewares per controller or controller method basis
  * @param middlewareFunction
  * @param stage
  */
-const middleware = (middlewareFunction, stage: 'before' | 'after' = 'before'): Function => {
+const middleware = (middlewareFunction, stage: Stage = 'before'): Function => {
 	return function(target: Object | Function, methodName: string | symbol) {
 		// get the existing metadata props
 		const methods = Reflect.getMetadata('tsexpress:method-middleware', target) || [];
-		const handler = target[methodName];
-		methods.unshift({ middlewareFunction, handler, stage });
+		const args: { middlewareFunction: Function; stage: Stage; handler?: Function } = { middlewareFunction, stage };
+		if (target[methodName]) {
+			args.handler = target[methodName];
+		} // else, the target is a controller class
+
+		methods.unshift(args);
 		// define new metadata methods
 		Reflect.defineMetadata('tsexpress:method-middleware', methods, target);
 
