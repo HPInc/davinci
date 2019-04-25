@@ -164,6 +164,7 @@ const makeHandlerFunction = (operation, controller, functionName, definitions, c
 			);
 		},
 		..._.map(afterMiddlewares, ({ middlewareFunction }) => wrapMiddleware(middlewareFunction)),
+		// tslint:disable-next-line:variable-name
 		(req, _res, next) => {
 			req.requestHandled = true;
 			next();
