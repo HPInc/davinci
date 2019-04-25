@@ -12,8 +12,8 @@ export const checkAndAssignBootDir = options => {
 	const paths = [];
 
 	// start with the bootDirPath passed in
-	if (options && options.bootDirPath) {
-		paths.push(path.join(process.cwd(), options.bootDirPath));
+	if (options && options.dirPath) {
+		paths.push(path.join(process.cwd(), options.dirPath));
 	}
 	// add some standard paths
 	paths.push(path.join(process.cwd(), 'boot'));

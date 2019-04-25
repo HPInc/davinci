@@ -98,7 +98,7 @@ describe('createApp', () => {
 			const middlewares = app => {
 				should(app).have.property('use');
 			};
-			const myOptions = { boot: 'dir' };
+			const myOptions = {};
 			app = await createApp(myApp, myOptions, middlewares);
 			await app.start();
 			should(app.server).have.property('listen');

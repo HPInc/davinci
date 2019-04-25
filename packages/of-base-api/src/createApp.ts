@@ -1,6 +1,9 @@
 import Debug from 'debug';
-import express from 'express';
+import express, { Express } from 'express';
 import http from 'http';
+// import merge from 'lodash/merge';
+import bluebird from 'bluebird';
+import { createTerminus, TerminusOptions } from '@godaddy/terminus';
 import responseHandler from './responseHandler';
 import errorHandler from './errorHandler';
 import notFoundHandler from './notFoundHandler';
@@ -10,6 +13,31 @@ import * as docs from './route/swagger/openapiDocs';
 import { IOfBaseExpress } from './types';
 
 const debug = Debug('of-base-api');
+
+/*
+const createOptions = (app, opts: IOptions): IOptions => {
+	const options: IOptions = merge(
+		{},
+		{ healthChecks: { livenessEndpoint: '/.ah/live', readynessEndpoint: '/.ah/ready' } },
+		opts
+	);
+	const terminusOptions: TerminusOptions = {};
+};
+*/
+
+interface IOptionsHealthChecks {
+	livenessEndpoint?: string;
+	readynessEndpoint?: string;
+}
+
+interface IOptions {
+	boot?: {
+		dirPath?: string;
+	};
+	healthChecks?: IOptionsHealthChecks;
+}
+
+type CreateAppArgs = [] | [Function] | [Express, Function] | [Express, IOptions, Function];
 
 export const processArgs = (...args) => {
 	/*
@@ -59,26 +87,59 @@ export const configureExpress = (app, runMiddlewares?) => {
 	app.use(errorHandler());
 };
 
-export const createApp = async (...args): Promise<IOfBaseExpress> => {
+export const configureTerminus = (app, healthChecks: IOptionsHealthChecks = {}) => {
+	const terminusOptions: TerminusOptions = {
+		onSignal: async () => {
+			const jobs = app.locals.onSignalJobs || [];
+			return bluebird.map<Function, any>(jobs, c => c());
+		}
+	};
+
+	if (healthChecks.readynessEndpoint) {
+		terminusOptions.healthChecks = {
+			[healthChecks.readynessEndpoint]: async () => {
+				const checks = app.locals.readynessChecks || [];
+				return bluebird.map<Function, any>(checks, c => c());
+			}
+		};
+	}
+
+	if (healthChecks.livenessEndpoint) {
+		terminusOptions.healthChecks = {
+			[healthChecks.livenessEndpoint]: async () => {
+				const checks = app.locals.livenessChecks || [];
+				return bluebird.map<Function, any>(checks, c => c());
+			}
+		};
+	}
+
+	return createTerminus(app.server, terminusOptions);
+};
+
+export const createApp = async (...args: CreateAppArgs): Promise<IOfBaseExpress> => {
 	// process the arguments
 	const [app, options, addMiddlewares] = processArgs(...args);
 
 	app.start = async () => {
 		debug('run the boot executions');
-		await execBootScripts(app, options);
+		await execBootScripts(app, options.boot);
 
 		debug('configure the express app');
 		await configureExpress(app, addMiddlewares);
 
-		debug('run the listener');
+		debug('create the server');
 		const server = http.createServer(app);
+		app.server = server;
+
+		debug('configure terminus');
+		await configureTerminus(app, options.healthChecks);
+
 		await new Promise(resolve =>
 			server.listen(config.PORT, () => {
 				console.log(`Server listening on ${config.PORT}`);
 				resolve();
 			})
 		);
-		app.server = server;
 
 		return { app, server };
 	};
@@ -89,6 +150,21 @@ export const createApp = async (...args): Promise<IOfBaseExpress> => {
 		}
 
 		console.warn('Server not initialised, ignoring');
+	};
+
+	app.registerReadynessCheck = fn => {
+		app.locals.readynessChecks = app.locals.readynessChecks || [];
+		app.locals.readynessChecks.push(fn);
+	};
+
+	app.registerLivenessCheck = fn => {
+		app.locals.livenessChecks = app.locals.livenessChecks || [];
+		app.locals.livenessChecks.push(fn);
+	};
+
+	app.registerOnSignalJob = fn => {
+		app.locals.onSignalJobs = app.locals.onSignalJobs || [];
+		app.locals.onSignalJobs.push(fn);
 	};
 
 	return app;

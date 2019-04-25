@@ -1,17 +1,26 @@
 import express from 'express';
-const debug = require('debug')('of-base-api:example');
-const { createApp, createRouter } = require('../../src');
+import Debug from 'debug';
+import { createApp, createRouter, IOfBaseExpress } from '../../src';
 import CustomerController from './customer/customer.controller';
 import FileController from './file/file.controller';
-import { IOfBaseExpress } from '../../src';
+
+const debug = Debug('of-base-api:example');
 // const FileController = require('./files/FileController');
 // const SearchController = require('./search/search.controller');
 
-const bootOptions: { bootDirPath?: string } = {};
-bootOptions.bootDirPath = './build/examples/crm/boot';
+const options = {
+	boot: {
+		dirPath: './build/examples/crm/boot'
+	},
+	healthChecks: {
+		readynessEndpoint: '/.ah/ready',
+		livenessEndpoint: '/.ah/live'
+	}
+};
+
 const expressApp = express();
 
-createApp(expressApp, bootOptions, app => {
+createApp(expressApp, options, app => {
 	// add some middleware
 	app.use((req, _res, next) => {
 		debug('logger', req.hostname, req.method, req.path);
