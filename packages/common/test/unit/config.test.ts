@@ -1,5 +1,5 @@
 import should from 'should';
-import { config } from '@of-base-api/common';
+import config from '../../src/config';
 
 describe('config', () => {
 	it('should create a correct config', () => {

@@ -1,6 +1,5 @@
 import should from 'should';
 import createPathsDefinition from '../../../src/swagger/createPaths';
-import { context } from '../../../../core/src/context';
 import { route } from '../../../src';
 
 describe('createPathsDefinition', () => {
@@ -20,7 +19,6 @@ describe('createPathsDefinition', () => {
 			'find'
 		);
 		route.param({ name: 'query', in: 'query', schema: { type: 'string' } })(MyClass.prototype, 'find', 0);
-		context()(MyClass.prototype, 'find', 1);
 
 		const paths = createPathsDefinition(MyClass);
 		should(paths).be.deepEqual({
@@ -29,10 +27,7 @@ describe('createPathsDefinition', () => {
 					summary: 'List',
 					description: 'My find method',
 					operationId: 'find',
-					parameters: [
-						{ name: 'query', in: 'query', schema: { type: 'string' } },
-						{ schema: { type: 'context' } }
-					],
+					parameters: [{ name: 'query', in: 'query', schema: { type: 'string' } }],
 					responses: { '200': {} }
 				}
 			}

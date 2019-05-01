@@ -3,8 +3,8 @@ import should from 'should';
 import Sinon from 'sinon';
 import BaseController from '../../../extra/src/BaseController';
 import createRouter, { createRouteHandlers } from '../../src/createRouter';
-import { route } from '../../../core/src';
-import * as utils from '../../../core/test/support/utils';
+import { route } from '../../src';
+import * as utils from '../support/utils';
 import createPathsDefinition from '../../src/swagger/createPaths';
 
 const sinon = Sinon.createSandbox();

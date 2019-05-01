@@ -1,7 +1,7 @@
 import should from 'should';
 import mongoose from 'mongoose';
 import Sinon from 'sinon';
-import { mgoose } from '../../../../mongoose/src';
+import { mgoose } from '../../src';
 
 const { beforeRead, afterRead, beforeWrite, afterWrite, beforeDelete, afterDelete } = mgoose;
 

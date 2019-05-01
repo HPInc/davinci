@@ -1,15 +1,15 @@
 {
-	"name": "@of-base-api/extra",
+	"name": "@of-base-api/mongoose",
 	"version": "0.0.0",
 	"description": "> TODO: description",
 	"author": "Piero Maltese <maltesepiero@gmail.com>",
 	"homepage": "",
 	"license": "ISC",
+	"main": "build/index.js",
+	"types": "build/index.d.ts",
 	"publishConfig": {
 		"access": "public"
 	},
-	"main": "build/index.js",
-	"types": "build/index.d.ts",
 	"scripts": {
 		"build": "tsc -p ./tsconfig.release.json",
 		"tslint": "tslint -t stylish --project \"tsconfig.json\" '{src,test}/**/*{.ts,.tsx}'",
@@ -19,13 +19,9 @@
 		"cover": "nyc npm test"
 	},
 	"dependencies": {
-		"@of-base-api/common": "^0.0.0",
-		"@of-base-api/core": "1.0.0-beta.0",
-		"@of-base-api/route": "^0.0.0",
-		"@types/mocha": "^5.2.6",
-		"bluebird": "3.5.4",
 		"debug": "^4.1.1",
 		"lodash": "^4.17.11",
+		"mongoose": "5.5.5",
 		"reflect-metadata": "^0.1.13"
 	}
 }

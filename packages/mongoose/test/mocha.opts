@@ -6,4 +6,5 @@
 --globals sinon,_
 --require ts-node/register
 --require source-map-support/register
+--require test/support/env.ts
 test/**/*.{js,ts}

@@ -1,6 +1,5 @@
 import should from 'should';
-import feathersErrors from 'feathers-errors';
-import * as errors from '../../../common/src/errors';
+import { errors } from '@of-base-api/common';
 import errorHandler from '../../src/errorHandler';
 
 class ResMock {
@@ -70,15 +69,5 @@ describe('errorHandler', () => {
 
 		should(res.json).match({ code: 404, name: 'NotFound', message: 'nope' });
 		should(res.json).not.have.property('stack');
-	});
-
-	it('should support feathers-mongoose errors', async () => {
-		const handler = errorHandler({ exposeStack: true });
-		const routeError = new feathersErrors.BadRequest('feathers!', { errors: { foo: 'bar' } });
-		const res = new ResMock();
-
-		handler(routeError, null, res, () => {});
-
-		should(res.json).match({ code: 400, name: 'BadRequest', message: 'feathers!', errors: { foo: 'bar' } });
 	});
 });

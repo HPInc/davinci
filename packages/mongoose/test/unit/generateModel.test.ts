@@ -1,6 +1,6 @@
 import should from 'should';
 import { Model } from 'mongoose';
-import { mgoose } from '../../../../mongoose/src';
+import { mgoose } from '../../src';
 
 const { getSchemaDefinition, generateSchema, generateModel, prop, index, method } = mgoose;
 

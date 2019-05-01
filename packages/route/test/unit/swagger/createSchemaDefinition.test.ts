@@ -1,6 +1,6 @@
 import should from 'should';
 import createSchemaDefinition from '../../../src/swagger/createSchemaDefinition';
-import { swagger } from '../../../../core/src';
+import { swagger } from '../../../src';
 
 describe('createSchemaDefinition', () => {
 	it('Given a decorated class, it should create a schema definition', () => {

@@ -85,7 +85,8 @@ const processParameter = ({ value, config, definitions }) =>
 	accountId: req.accountId
 });*/
 
-const defaultContextFactory = _ignored => ({});
+// @ts-ignore
+const defaultContextFactory = ({ req, res }) => ({});
 
 const mapReqToParameters = (req, res, parameters = [], definitions, contextFactory = defaultContextFactory) => {
 	const context = contextFactory({ req, res });

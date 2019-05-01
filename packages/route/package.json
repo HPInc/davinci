@@ -1,13 +1,10 @@
 {
-	"name": "@of-base-api/extra",
+	"name": "@of-base-api/route",
 	"version": "0.0.0",
 	"description": "> TODO: description",
 	"author": "Piero Maltese <maltesepiero@gmail.com>",
 	"homepage": "",
 	"license": "ISC",
-	"publishConfig": {
-		"access": "public"
-	},
 	"main": "build/index.js",
 	"types": "build/index.d.ts",
 	"scripts": {
@@ -19,13 +16,15 @@
 		"cover": "nyc npm test"
 	},
 	"dependencies": {
+		"@godaddy/terminus": "4.1.0",
 		"@of-base-api/common": "^0.0.0",
-		"@of-base-api/core": "1.0.0-beta.0",
-		"@of-base-api/route": "^0.0.0",
 		"@types/mocha": "^5.2.6",
-		"bluebird": "3.5.4",
+		"ajv": "6.2.1",
+		"bluebird": "3.5.0",
 		"debug": "^4.1.1",
-		"lodash": "^4.17.11",
-		"reflect-metadata": "^0.1.13"
+		"express": "^4.16.4",
+		"lodash": "4.17.11",
+		"reflect-metadata": "0.1.13",
+		"require-dir": "0.3.2"
 	}
 }
