@@ -7,7 +7,7 @@ import config from '../../config';
 
 const debug = Debug('of-base-api');
 
-const swaggerUiAssetPath = path.resolve(path.join(__dirname, 'explorer'));
+const swaggerUiAssetPath = path.resolve(path.join(process.cwd(), './explorer'));
 
 const SWAGGER_VERSION = '2.0';
 
