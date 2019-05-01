@@ -4,12 +4,12 @@ import http from 'http';
 // import merge from 'lodash/merge';
 import bluebird from 'bluebird';
 import { createTerminus, TerminusOptions } from '@godaddy/terminus';
+import { config } from '@of-base-api/common';
+import { openapiDocs as docs } from '@of-base-api/route';
 import responseHandler from './responseHandler';
 import errorHandler from './errorHandler';
 import notFoundHandler from './notFoundHandler';
-import config from './config';
 import { execBootScripts } from './boot';
-import * as docs from './route/swagger/openapiDocs';
 import { IOfBaseExpress } from './types';
 
 const debug = Debug('of-base-api');

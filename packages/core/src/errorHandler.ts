@@ -1,6 +1,5 @@
-
 // import Debug from 'debug';
-import * as errors from './errors';
+import { errors } from '@of-base-api/common';
 
 // const debug = Debug('of-base-api');
 

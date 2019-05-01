@@ -1,6 +1,6 @@
 import should from 'should';
 import feathersErrors from 'feathers-errors';
-import * as errors from '../../src/errors';
+import * as errors from '../../../common/src/errors';
 import errorHandler from '../../src/errorHandler';
 
 class ResMock {

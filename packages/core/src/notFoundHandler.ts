@@ -1,4 +1,4 @@
-import * as errors from './errors';
+import { errors } from '@of-base-api/common';
 
 export default () => {
 	// @ts-ignore

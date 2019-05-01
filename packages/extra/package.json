@@ -1,0 +1,30 @@
+{
+	"name": "@of-base-api/extra",
+	"version": "0.0.0",
+	"description": "> TODO: description",
+	"author": "Piero Maltese <maltesepiero@gmail.com>",
+	"homepage": "",
+	"license": "ISC",
+	"publishConfig": {
+		"access": "public"
+	},
+	"main": "build/index.js",
+	"types": "build/index.d.ts",
+	"scripts": {
+		"build": "tsc -p ./tsconfig.release.json"
+	},
+	"devDependencies": {
+		"@types/node": "^11.13.8",
+		"tslib": "^1.9.3",
+		"typescript": "^3.4.5"
+	},
+	"dependencies": {
+		"@of-base-api/common": "^0.0.0",
+		"@of-base-api/core": "1.0.0-beta.0",
+		"@of-base-api/route": "^0.0.0",
+		"bluebird": "3.5.4",
+		"debug": "^4.1.1",
+		"lodash": "^4.17.11",
+		"reflect-metadata": "^0.1.13"
+	}
+}

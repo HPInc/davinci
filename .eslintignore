@@ -1,0 +1,4 @@
+packages/*/coverage/
+packages/*/src/rest/explorer/
+packages/*/test/
+packages/*/wallaby.js
