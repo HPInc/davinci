@@ -13,14 +13,10 @@ jobs:
 #            - v2-npm-deps-{{ .Branch }}
 #            - v2-npm-deps-
       - run:
-         name: install lerna
-         command: |
-            npm -g i lerna
-      - run:
           name: install NPM dependencies
           command: |
             echo -e "//registry.npmjs.org/:_authToken=$NPM_TOKEN\nscope=@oneflow" > .npmrc
-            lerna bootstrap
+            npx lerna bootstrap
 #      - save_cache:
 #          key: v2-npm-deps-{{ .Branch }}-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
 #          paths:
@@ -28,14 +24,14 @@ jobs:
       - run:
           name: test
           command: |
-           lerna run test
+           npx lerna run test
 #      - run:
 #          name: upload coverage report
 #          command: bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
       - run:
           name: build
           command: |
-            lerna run build
+            npx lerna run build
       - save_cache:
           key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
           paths:
@@ -51,7 +47,7 @@ jobs:
           name: publish
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              lerna publish
+              npx lerna publish
             fi
 
   bump_version:
