@@ -6,32 +6,32 @@ jobs:
       - image: circleci/mongo:3.6-jessie
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - v2-npm-deps-{{ .Branch }}-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
-            - v2-npm-deps-{{ .Branch }}-{{ checksum "package.json" }}
-            - v2-npm-deps-{{ .Branch }}
-            - v2-npm-deps-
+#      - restore_cache:
+#          keys:
+#            - v2-npm-deps-{{ .Branch }}-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
+#            - v2-npm-deps-{{ .Branch }}-{{ checksum "package.json" }}
+#            - v2-npm-deps-{{ .Branch }}
+#            - v2-npm-deps-
       - run:
           name: install NPM dependencies
           command: |
             echo -e "//registry.npmjs.org/:_authToken=$NPM_TOKEN\nscope=@oneflow" > .npmrc
-            npm install
-      - save_cache:
-          key: v2-npm-deps-{{ .Branch }}-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
-          paths:
-            - node_modules
+            lerna bootstrap
+#      - save_cache:
+#          key: v2-npm-deps-{{ .Branch }}-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
+#          paths:
+#            - node_modules
       - run:
           name: test
           command: |
-           npm run test
-      - run:
-          name: upload coverage report
-          command: bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
+           lerna run test
+#      - run:
+#          name: upload coverage report
+#          command: bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
       - run:
           name: build
           command: |
-            npm run build
+            lerna run build
       - save_cache:
           key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
           paths:
@@ -46,11 +46,8 @@ jobs:
       - run:
           name: publish
           command: |
-            if [ "${CIRCLE_BRANCH}" == "refactor/typescript" ]; then
-              npm version --no-git-tag-version 1.0.0-beta.$CIRCLE_BUILD_NUM
-              npm publish --tag next
-            elif [ "${CIRCLE_BRANCH}" == "master" ]; then
-              npm publish
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              lerna publish
             fi
 
   bump_version:
@@ -97,8 +94,7 @@ workflows:
           filters:
             branches:
               only:
-                - master
-                - refactor/typescript
+                - masterDISABLED
       - bump_version:
           context: oneflow
           requires:
@@ -106,5 +102,4 @@ workflows:
           filters:
             branches:
               only:
-                - master
-                - refactor/typescript
+                - masterDISABLED

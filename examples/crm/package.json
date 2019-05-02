@@ -11,7 +11,7 @@
 	"license": "ISC",
 	"dependencies": {
 		"@of-base-api/common": "^0.0.0",
-		"@of-base-api/core": "1.0.0-beta.0",
+		"@of-base-api/core": "0.0.1-beta.0",
 		"@of-base-api/express": "^0.0.0",
 		"@of-base-api/extra": "^0.0.0",
 		"@of-base-api/mongoose": "^0.0.0",
