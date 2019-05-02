@@ -26,5 +26,9 @@
 		"lodash": "4.17.11",
 		"reflect-metadata": "0.1.13",
 		"require-dir": "0.3.2"
+	},
+	"devDependencies": {
+		"tsc": "^1.20150623.0",
+		"tslib": "^1.9.3"
 	}
 }

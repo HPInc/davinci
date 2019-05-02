@@ -29,5 +29,9 @@
 	},
 	"peerDependencies": {
 		"mongoose": "5.4.13"
+	},
+	"devDependencies": {
+		"tsc": "^1.20150623.0",
+		"tslib": "^1.9.3"
 	}
 }
