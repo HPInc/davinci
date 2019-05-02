@@ -12,7 +12,7 @@ jobs:
 #            - v2-npm-deps-{{ .Branch }}-{{ checksum "package.json" }}
 #            - v2-npm-deps-{{ .Branch }}
 #            - v2-npm-deps-
-    - run:
+      - run:
          name: install lerna
          command: |
             npm -g i lerna
