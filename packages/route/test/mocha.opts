@@ -1,9 +1,0 @@
---reporter spec
---ui bdd
---recursive
---bail
---check-leaks
---globals sinon,_
---require ts-node/register
---require source-map-support/register
-test/**/*.{js,ts}

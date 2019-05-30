@@ -10,12 +10,8 @@
 	"author": "Piero Maltese <maltesepiero@gmail.com>",
 	"license": "ISC",
 	"dependencies": {
-		"@of-base-api/common": "^0.0.0",
-		"@of-base-api/core": "0.0.1-beta.0",
-		"@of-base-api/express": "^0.0.0",
-		"@of-base-api/extra": "^0.0.0",
-		"@of-base-api/mongoose": "^0.0.0",
-		"@of-base-api/route": "^0.0.0",
+		"@substrate/core": "^0.0.1-beta.0",
+		"@substrate/mongoose": "^0.0.0",
 		"debug": "^4.1.1",
 		"express": "4.16.4",
 		"lodash": "^4.17.11",
@@ -28,7 +24,6 @@
 		"mocha": "^6.1.4",
 		"should": "^13.2.3",
 		"ts-node": "^8.1.0",
-		"tsc": "^1.20150623.0",
 		"tslib": "^1.9.3",
 		"tslint": "^5.16.0",
 		"typescript": "^3.4.5"

@@ -1,7 +1,9 @@
 import 'reflect-metadata';
-export * from './context';
+import { Express } from 'express';
+import { Server } from 'http';
+
+import * as httpErrors from './errors/httpErrors';
 import { createApp } from './createApp';
-import { IOfBaseExpress } from './types';
 
 /**
  * This is only here to assist people when upgrading their API.
@@ -13,4 +15,12 @@ const boot = () => {
 	process.exit(-1);
 };
 
-export { boot, createApp, IOfBaseExpress };
+export interface IOfBaseExpress extends Express {
+	server: Server;
+	start: Function;
+	close: Function;
+}
+
+export * from './route';
+export * from './express';
+export { boot, createApp, httpErrors };

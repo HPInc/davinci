@@ -1,10 +1,10 @@
 import { Schema } from 'mongoose';
-import { mgoose } from '@of-base-api/mongoose';
-import { swagger } from '@of-base-api/route';
+import { mgoose } from '@substrate/mongoose';
+import { openapi } from '@substrate/core';
 
 class CustomerPhone {
 	@mgoose.prop()
-	@swagger.prop()
+	@openapi.prop()
 	number: string;
 	@mgoose.prop()
 	isPrimary: boolean;
@@ -12,48 +12,48 @@ class CustomerPhone {
 
 class BirthType {
 	@mgoose.prop()
-	@swagger.prop()
+	@openapi.prop()
 	city: string;
 }
 
 @mgoose.index({ firstname: 1, lastname: 1 })
-@swagger.definition({ title: 'Customer' })
+@openapi.definition({ title: 'Customer' })
 export default class Customer {
 	@mgoose.prop()
-	@swagger.prop()
+	@openapi.prop()
 	firstname: string;
 
 	@mgoose.prop()
-	@swagger.prop()
+	@openapi.prop()
 	lastname: string;
 
 	@mgoose.prop()
-	@swagger.prop()
+	@openapi.prop()
 	age: number;
 
 	@mgoose.prop()
-	@swagger.prop()
+	@openapi.prop()
 	weight: number;
 
 	@mgoose.prop({ type: [CustomerPhone] })
-	@swagger.prop({ type: [CustomerPhone] })
+	@openapi.prop({ type: [CustomerPhone] })
 	phones: CustomerPhone[];
 
 	@mgoose.prop({ type: Schema.Types.ObjectId })
-	@swagger.prop()
+	@openapi.prop()
 	accountId: number;
 
 	@mgoose.prop({ type: Date })
-	@swagger.prop({ type: Date })
+	@openapi.prop({ type: Date })
 	startDate: string;
 
 	@mgoose.prop()
-	@swagger.prop()
+	@openapi.prop()
 	birth: BirthType;
 
 	@mgoose.prop({ type: Schema.Types.ObjectId })
 	@mgoose.populate({ name: 'file', opts: { ref: 'File', foreignField: '_id', justOne: true } })
-	@swagger.prop()
+	@openapi.prop()
 	fileId: string;
 
 	@mgoose.method()

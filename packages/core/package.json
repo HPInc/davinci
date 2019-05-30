@@ -1,5 +1,5 @@
 {
-	"name": "@of-base-api/core",
+	"name": "@substrate/core",
 	"version": "0.0.1-beta.0",
 	"description": "Framework for rapid and consistent API development",
 	"main": "build/index.js",
@@ -12,12 +12,10 @@
 		"test": "mocha --exit",
 		"cover": "nyc npm test"
 	},
-	"author": "Nigel Watson <nigel.watson@oneflowcloud.com> (http://www.oneflowsystems.com/)",
+	"author": "Oneflow Systems (http://www.oneflowsystems.com/)",
 	"license": "ISC",
 	"dependencies": {
 		"@godaddy/terminus": "4.1.0",
-		"@of-base-api/common": "^0.0.0",
-		"@of-base-api/route": "^0.0.0",
 		"@types/mocha": "^5.2.6",
 		"ajv": "6.2.1",
 		"bluebird": "3.5.0",
@@ -31,7 +29,6 @@
 		"mongoose": "5.4.13"
 	},
 	"devDependencies": {
-		"tsc": "^1.20150623.0",
 		"tslib": "^1.9.3",
 		"tslint": "^5.16.0",
 		"typescript": "^3.4.5"

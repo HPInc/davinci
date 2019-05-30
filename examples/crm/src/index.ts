@@ -1,14 +1,15 @@
 import express, { Express } from 'express';
 import Debug from 'debug';
-import { createApp, IOfBaseExpress } from '@of-base-api/core';
-import { createRouter } from '@of-base-api/route';
+import { createApp, createRouter, IOfBaseExpress } from '@substrate/core';
 import CustomerController from './customer/customer.controller';
+import packageJson = require('../package.json');
 
 const debug = Debug('of-base-api:example');
 // const FileController = require('./files/FileController');
 // const SearchController = require('./search/search.controller');
 
 const options = {
+	version: packageJson.version,
 	boot: {
 		dirPath: './build/examples/crm/boot'
 	},

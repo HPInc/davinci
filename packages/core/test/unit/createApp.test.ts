@@ -55,18 +55,25 @@ describe('createApp', () => {
 	});
 
 	describe('configureExpress', () => {
-		it('Should successfully configure an express app with no middleware', () => {
+		it('Should successfully configure an express app with no options and no middleware', () => {
 			const app = makeApp();
 			configureExpress(app);
+			should(app).have.property('use');
+		});
+		it('Should successfully configure an express app with no middleware', () => {
+			const app = makeApp();
+			const options = { version: '1.1.1' };
+			configureExpress(app, options);
 			should(app).have.property('use');
 		});
 
 		it('Should successfully configure an express app with added middleware', () => {
 			const app = makeApp();
+			const options = { version: '1.1.1' };
 			const middlewares = app => {
 				should(app).have.property('use');
 			};
-			configureExpress(app, middlewares);
+			configureExpress(app, options, middlewares);
 			should(app).have.property('use');
 		});
 	});

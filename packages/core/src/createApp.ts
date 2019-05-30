@@ -4,13 +4,14 @@ import http from 'http';
 // import merge from 'lodash/merge';
 import bluebird from 'bluebird';
 import { createTerminus, TerminusOptions } from '@godaddy/terminus';
-import { config } from '@of-base-api/common';
-import { openapiDocs as docs } from '@of-base-api/route';
-import responseHandler from './responseHandler';
-import errorHandler from './errorHandler';
-import notFoundHandler from './notFoundHandler';
-import { execBootScripts } from './boot';
-import { IOfBaseExpress } from './types';
+
+import config from './config';
+import * as docs from './route/openapi/openapiDocs';
+import responseHandler from './express/middlewares/responseHandler';
+import errorHandler from './express/middlewares/errorHandler';
+import notFoundHandler from './express/middlewares/notFoundHandler';
+import { execBootScripts } from './express/boot';
+import { IOfBaseExpress } from './index';
 
 const debug = Debug('of-base-api');
 
@@ -68,7 +69,7 @@ export const processArgs = (...args) => {
 	return [app, options, runMiddlewares];
 };
 
-export const configureExpress = (app, runMiddlewares?) => {
+export const configureExpress = (app, options: any = {}, runMiddlewares?) => {
 	// this is at the start
 	app.use(express.json({ limit: '1mb' }));
 	app.use(express.urlencoded({ extended: true }));
@@ -76,10 +77,10 @@ export const configureExpress = (app, runMiddlewares?) => {
 	// middlewares
 	if (runMiddlewares) runMiddlewares(app);
 
-	// add the swagger routes
+	// add the openapi routes
 	docs.explorer(app, {
 		discoveryUrl: '/api-doc.json',
-		version: '1.0', // read from package.json
+		version: options.version || '1.0.0',
 		basePath: '/api'
 	});
 	app.use(responseHandler());
@@ -125,7 +126,7 @@ export const createApp = async (...args: CreateAppArgs): Promise<IOfBaseExpress>
 		await execBootScripts(app, options.boot);
 
 		debug('configure the express app');
-		await configureExpress(app, addMiddlewares);
+		await configureExpress(app, options, addMiddlewares);
 
 		debug('create the server');
 		const server = http.createServer(app);

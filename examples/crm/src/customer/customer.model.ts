@@ -1,5 +1,5 @@
 import { model } from 'mongoose';
-import { mgoose } from '@of-base-api/mongoose';
+import { mgoose } from '@substrate/mongoose';
 import CustomerSchema from './customer.schema';
 
 const { generateSchema, beforeRead, beforeWrite, beforeDelete } = mgoose;

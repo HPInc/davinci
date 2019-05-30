@@ -1,7 +1,5 @@
-import { BaseController } from '@of-base-api/extra';
-import { context } from '@of-base-api/core';
-import { express } from '@of-base-api/express';
-import { route } from '@of-base-api/route';
+import { context, express, route } from '@substrate/core';
+import { MongooseController } from '@substrate/mongoose';
 import model from './customer.model';
 import CustomerSchema from './customer.schema';
 
@@ -12,7 +10,7 @@ const { get, controller, query } = route;
 	console.log('controller before middleware');
 	next();
 })
-export default class CustomerController extends BaseController {
+export default class CustomerController extends MongooseController {
 	constructor() {
 		super(model);
 	}
