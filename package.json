@@ -9,7 +9,7 @@
 		"test": "lerna run test",
 		"bootstrap": "lerna bootstrap",
 		"bump": "lerna publish",
-		"semantic-release": "lerna version --conventional-commits --github-release -y && lerna publish from-git"
+		"semantic-release": "lerna version --conventional-commits --github-release -y && lerna publish from-package"
 	},
 	"devDependencies": {
 		"@types/bluebird": "3.5.25",
