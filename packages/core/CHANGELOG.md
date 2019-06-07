@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.1](https://github.com/Oneflow/substrate/compare/v0.1.0...v0.1.1) (2019-06-07)
+
+
+### Bug Fixes
+
+* allow multiple health checks ([#4](https://github.com/Oneflow/substrate/issues/4)) ([682676f](https://github.com/Oneflow/substrate/commit/682676f))
+
+
+
+
+
 # 0.1.0 (2019-06-07)
 
 
