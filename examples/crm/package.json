@@ -1,6 +1,7 @@
 {
 	"name": "crm",
-	"version": "0.0.1-beta.0",
+	"version": "0.0.3",
+	"private": true,
 	"description": "",
 	"main": "index.js",
 	"scripts": {
@@ -10,8 +11,8 @@
 	"author": "Piero Maltese <maltesepiero@gmail.com>",
 	"license": "ISC",
 	"dependencies": {
-		"@substrate/core": "^0.0.1-beta.0",
-		"@substrate/mongoose": "^0.0.0",
+		"@oneflow/substrate-core": "^0.0.3",
+		"@oneflow/substrate-mongoose": "^0.0.3",
 		"debug": "^4.1.1",
 		"express": "4.16.4",
 		"lodash": "^4.17.11",

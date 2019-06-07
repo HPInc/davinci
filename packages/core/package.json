@@ -1,6 +1,6 @@
 {
-	"name": "@substrate/core",
-	"version": "0.0.1-beta.0",
+	"name": "@oneflow/substrate-core",
+	"version": "0.0.3",
 	"description": "Framework for rapid and consistent API development",
 	"main": "build/index.js",
 	"types": "build/index.d.ts",

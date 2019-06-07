@@ -15,7 +15,6 @@ jobs:
       - run:
           name: install NPM dependencies
           command: |
-            echo -e "//registry.npmjs.org/:_authToken=$NPM_TOKEN\nscope=@substrate" > .npmrc
             npm install
 #      - save_cache:
 #          key: v2-npm-deps-{{ .Branch }}-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
@@ -43,19 +42,6 @@ jobs:
     steps:
       - restore_cache:
           key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
-      - run:
-          name: publish
-          command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              npx lerna publish
-            fi
-
-  bump_version:
-    docker:
-      - image: circleci/node:8-stretch
-    steps:
-      - restore_cache:
-          key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
       - add_ssh_keys
       - run:
           name: Add github to known_hosts
@@ -63,24 +49,11 @@ jobs:
             mkdir -p ~/.ssh
             ssh-keyscan github.com >> ~/.ssh/known_hosts
       - run:
-          name: tag and patch version
+          name: publish
           command: |
             git config --global user.email "circleci@oneflowsystems.com"
             git config --global user.name "Circle CI"
-            git reset --hard HEAD
-            git tag "v`grep '"version"' package.json | egrep -o "[0-9]+.[0-9]+.[0-9]+"`"
-            git push --tags
-            # checkout development and bump the version
-            git checkout -b circle-ci-version-bump origin/development
-            git pull
-            npm --no-git-tag-version version patch
-            git add package.json package-lock.json
-            git commit -m "`grep '"version"' package.json | egrep -o "[0-9]+.[0-9]+.[0-9]+"`"
-            git push -u origin circle-ci-version-bump:development --follow-tags
-            # checkout master again and delete our local branch
-            git checkout master
-            git branch -D circle-ci-version-bump
-
+            npm run semantic-release
 workflows:
   version: 2
   build_and_publish:
@@ -94,12 +67,4 @@ workflows:
           filters:
             branches:
               only:
-                - masterDISABLED
-      - bump_version:
-          context: oneflow
-          requires:
-            - publish
-          filters:
-            branches:
-              only:
-                - masterDISABLED
+                - master

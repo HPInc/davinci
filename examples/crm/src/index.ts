@@ -1,6 +1,6 @@
 import express, { Express } from 'express';
 import Debug from 'debug';
-import { createApp, createRouter, IOfBaseExpress } from '@substrate/core';
+import { createApp, createRouter, IOfBaseExpress } from '@oneflow/substrate-core';
 import CustomerController from './customer/customer.controller';
 import packageJson = require('../package.json');
 

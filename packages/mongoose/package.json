@@ -1,6 +1,6 @@
 {
-	"name": "@substrate/mongoose",
-	"version": "0.0.0",
+	"name": "@oneflow/substrate-mongoose",
+	"version": "0.0.3",
 	"description": "> TODO: description",
 	"author": "Piero Maltese <maltesepiero@gmail.com>",
 	"homepage": "",
@@ -19,7 +19,7 @@
 		"cover": "nyc npm test"
 	},
 	"dependencies": {
-		"@substrate/core": "^0.0.1-beta.0",
+		"@oneflow/substrate-core": "^0.0.3",
 		"debug": "^4.1.1",
 		"lodash": "^4.17.11",
 		"mongoose": "5.5.5",

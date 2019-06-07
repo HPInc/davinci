@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import bluebird from 'bluebird';
-import { context, route, httpErrors as errors } from '@substrate/core';
+import { context, route, httpErrors as errors } from '@oneflow/substrate-core';
 
 interface IParsedMongooseFilters {
 	limit?: number;

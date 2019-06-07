@@ -1,5 +1,5 @@
-import { context, express, route } from '@substrate/core';
-import { MongooseController } from '@substrate/mongoose';
+import { context, express, route } from '@oneflow/substrate-core';
+import { MongooseController } from '@oneflow/substrate-mongoose';
 import model from './customer.model';
 import CustomerSchema from './customer.schema';
 
