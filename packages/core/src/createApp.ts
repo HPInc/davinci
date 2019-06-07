@@ -96,21 +96,19 @@ export const configureTerminus = (app, healthChecks: IOptionsHealthChecks = {}) 
 		}
 	};
 
+	terminusOptions.healthChecks = {};
+
 	if (healthChecks.readynessEndpoint) {
-		terminusOptions.healthChecks = {
-			[healthChecks.readynessEndpoint]: async () => {
-				const checks = app.locals.readynessChecks || [];
-				return bluebird.map<Function, any>(checks, c => c());
-			}
+		terminusOptions.healthChecks[healthChecks.readynessEndpoint] = async () => {
+			const checks = app.locals.readynessChecks || [];
+			return bluebird.map<Function, any>(checks, c => c());
 		};
 	}
 
 	if (healthChecks.livenessEndpoint) {
-		terminusOptions.healthChecks = {
-			[healthChecks.livenessEndpoint]: async () => {
-				const checks = app.locals.livenessChecks || [];
-				return bluebird.map<Function, any>(checks, c => c());
-			}
+		terminusOptions.healthChecks[healthChecks.livenessEndpoint] = async () => {
+			const checks = app.locals.livenessChecks || [];
+			return bluebird.map<Function, any>(checks, c => c());
 		};
 	}
 
