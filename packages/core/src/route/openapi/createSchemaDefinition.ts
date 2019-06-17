@@ -1,8 +1,9 @@
 import _fp from 'lodash/fp';
 import { ISwaggerDefinitions } from '../types/openapi';
 
-const getSchemaDefinition = (theClass: Function, definitions = {}): ISwaggerDefinitions => {
+export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwaggerDefinitions => {
 	const makeSchema = (typeOrClass, key?) => {
+		// it's a primitive type, simple case
 		if ([String, Number, Boolean, Date].includes(typeOrClass)) {
 			if (typeOrClass === Date) {
 				return { type: 'string', format: 'date' };
@@ -11,6 +12,7 @@ const getSchemaDefinition = (theClass: Function, definitions = {}): ISwaggerDefi
 			return { type: typeOrClass.name.toLowerCase() };
 		}
 
+		// it's an array => recursively call makeSchema on the first array element
 		if (Array.isArray(typeOrClass)) {
 			return {
 				type: 'array',
@@ -18,39 +20,53 @@ const getSchemaDefinition = (theClass: Function, definitions = {}): ISwaggerDefi
 			};
 		}
 
+		// it's an object (but not a definition) => recursively call makeSchema on the properties
 		if (typeof typeOrClass === 'object') {
+			const properties = _fp.map((value, key) => ({ [key]: makeSchema(value) }), typeOrClass);
 			return {
 				type: 'object',
-				properties: _fp.map((value, key) => ({ [key]: makeSchema(value) }), typeOrClass)
+				properties: _fp.isEmpty(properties) ? undefined : properties
 			};
 		}
 
+		// it's a class => create a definition nad recursively call makeSchema on the properties
 		if (typeof typeOrClass === 'function') {
 			const definitionMetadata = Reflect.getMetadata('tsopenapi:definition', typeOrClass);
 			const hasDefinitionDecoration = !!definitionMetadata;
-			const title: string = hasDefinitionDecoration ? definitionMetadata.title : key || typeOrClass.name;
 			const definitionObj = {
 				...(definitionMetadata || {}),
-				title,
 				type: 'object'
 			};
 
+			const title: string = hasDefinitionDecoration ? definitionMetadata.title : key || typeOrClass.name;
+			if (title.toLowerCase() !== 'object') {
+				definitionObj.title = title;
+			}
+
 			const props = Reflect.getMetadata('tsopenapi:props', typeOrClass.prototype) || [];
-			definitionObj.properties = props.reduce((acc, { key, opts }) => {
+			const properties = props.reduce((acc, { key, opts }) => {
 				const type = (opts && opts.type) || Reflect.getMetadata('design:type', typeOrClass.prototype, key);
 				acc[key] = makeSchema(type, key);
 				return acc;
 			}, {});
 
-			definitionObj.required = _fp.flow(
+			if (!_fp.isEmpty(properties)) {
+				definitionObj.properties = properties;
+			}
+
+			const required = _fp.flow(
 				_fp.filter({ opts: { required: true } }),
 				_fp.map('key')
 			)(props);
 
+			if (!_fp.isEmpty(required)) {
+				definitionObj.required = required;
+			}
+
 			if (hasDefinitionDecoration) {
 				definitions[title] = definitionObj;
 				return {
-					$ref: title
+					$ref: `#/definitions/${title }`
 				};
 			}
 
@@ -58,13 +74,17 @@ const getSchemaDefinition = (theClass: Function, definitions = {}): ISwaggerDefi
 		}
 	};
 
-	makeSchema(theClass);
+	const schema = makeSchema(theClass);
 
-	return definitions;
+	return { schema, definitions };
 };
 
 export const createSchemaDefinition = (theClass: Function) => {
-	return theClass ? getSchemaDefinition(theClass) : {};
+	if (theClass) {
+		const { definitions } = getSchemaDefinition(theClass);
+		return definitions;
+	}
+	return {};
 };
 
 export default createSchemaDefinition;

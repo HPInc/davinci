@@ -1,5 +1,5 @@
 import { model } from 'mongoose';
-import { mgoose } from '@oneflow/substrate-mongoose';
+import { mgoose, ModelType } from '@oneflow/substrate-mongoose';
 import CustomerSchema from './customer.schema';
 
 const { generateSchema, beforeRead, beforeWrite, beforeDelete } = mgoose;
@@ -19,6 +19,6 @@ beforeDelete(schema, (...args) => {
 	console.log(...args);
 });
 
-const Customer = model('Customer', schema, 'customers');
+const Customer = model('Customer', schema, 'customers') as CustomerSchema & ModelType<typeof CustomerSchema>;
 
 export default Customer;

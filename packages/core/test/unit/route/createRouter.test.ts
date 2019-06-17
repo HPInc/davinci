@@ -157,7 +157,7 @@ describe('createRouter', () => {
 			const model = {};
 			const MockClass = utils.makeMockControllerClass(model, TestController);
 			const definition = {
-				paths: createPathsDefinition(MockClass)
+				paths: (createPathsDefinition(MockClass)).paths
 			};
 			const routeHandlers = createRouteHandlers(new MockClass(), definition);
 			// @ts-ignore
@@ -179,7 +179,7 @@ describe('createRouter', () => {
 			const model = {};
 			const MockClass = utils.makeMockControllerClass(model, TestController);
 			const definition = {
-				paths: createPathsDefinition(MockClass)
+				paths: (createPathsDefinition(MockClass)).paths
 			};
 			const routeHandlers = createRouteHandlers(new MockClass(), definition);
 			// @ts-ignore

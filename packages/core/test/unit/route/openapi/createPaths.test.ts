@@ -20,7 +20,7 @@ describe('createPathsDefinition', () => {
 		);
 		route.param({ name: 'query', in: 'query', schema: { type: 'string' } })(MyClass.prototype, 'find', 0);
 
-		const paths = createPathsDefinition(MyClass);
+		const paths = createPathsDefinition(MyClass).paths;
 		should(paths).be.deepEqual({
 			'/': {
 				get: {

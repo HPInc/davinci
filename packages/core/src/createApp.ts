@@ -32,10 +32,14 @@ interface IOptionsHealthChecks {
 }
 
 interface IOptions {
+	version?: string | number;
 	boot?: {
 		dirPath?: string;
 	};
 	healthChecks?: IOptionsHealthChecks;
+	openapi?: {
+		basePath?: string;
+	};
 }
 
 type CreateAppArgs = [] | [Function] | [Express, Function] | [Express, IOptions, Function];
@@ -69,23 +73,25 @@ export const processArgs = (...args) => {
 	return [app, options, runMiddlewares];
 };
 
-export const configureExpress = (app, options: any = {}, runMiddlewares?) => {
+export const configureExpress = async (app, options: IOptions = {}, runMiddlewares?) => {
 	// this is at the start
 	app.use(express.json({ limit: '1mb' }));
 	app.use(express.urlencoded({ extended: true }));
 
 	// middlewares
-	if (runMiddlewares) runMiddlewares(app);
+	if (runMiddlewares) await runMiddlewares(app);
 
 	// add the openapi routes
 	docs.explorer(app, {
 		discoveryUrl: '/api-doc.json',
 		version: options.version || '1.0.0',
-		basePath: '/api'
+		basePath: options.openapi ? options.openapi.basePath : undefined
 	});
 	app.use(responseHandler());
 	app.use(notFoundHandler());
 	app.use(errorHandler());
+
+	return app;
 };
 
 export const configureTerminus = (app, healthChecks: IOptionsHealthChecks = {}) => {
@@ -115,16 +121,13 @@ export const configureTerminus = (app, healthChecks: IOptionsHealthChecks = {}) 
 	return createTerminus(app.server, terminusOptions);
 };
 
-export const createApp = async (...args: CreateAppArgs): Promise<IOfBaseExpress> => {
+export const createApp = (...args: CreateAppArgs): Promise<IOfBaseExpress> => {
 	// process the arguments
 	const [app, options, addMiddlewares] = processArgs(...args);
 
 	app.start = async () => {
 		debug('run the boot executions');
 		await execBootScripts(app, options.boot);
-
-		debug('configure the express app');
-		await configureExpress(app, options, addMiddlewares);
 
 		debug('create the server');
 		const server = http.createServer(app);
@@ -166,5 +169,6 @@ export const createApp = async (...args: CreateAppArgs): Promise<IOfBaseExpress>
 		app.locals.onSignalJobs.push(fn);
 	};
 
-	return app;
+	debug('configure the express app');
+	return configureExpress(app, options, addMiddlewares);
 };

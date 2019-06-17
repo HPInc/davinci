@@ -2,15 +2,17 @@ import _ from 'lodash';
 import { ISwaggerDefinitions, PathsDefinition } from '../types/openapi';
 
 class Resource {
-	basePath: string;
+	resourceName: string;
 	paths: PathsDefinition;
 	definitions: ISwaggerDefinitions;
 	parameters: object;
-	constructor(basePath, doc) {
-		this.basePath = basePath;
+	basePath: string;
+	constructor(resourceName, doc, basePath?) {
+		this.resourceName = resourceName;
 		this.paths = doc.paths;
 		this.definitions = doc.definitions;
 		this.parameters = doc.parameters;
+		this.basePath = basePath || this.resourceName;
 
 		_.each(this.paths, path => {
 			_.each(path, operation => {
@@ -24,15 +26,10 @@ class Resource {
 
 				// tags
 				if (!operation.tags || operation.tags.length === 0) {
-					operation.tags = [_.capitalize(this.basePath)];
+					operation.tags = [_.capitalize(this.resourceName)];
 				}
 				// operations
 				if (!operation.responses) operation.responses = {};
-				if (!operation.responses['200'] && !operation.responses[200]) {
-					operation.responses['200'] = {
-						description: `List of ${basePath} results`
-					};
-				}
 			});
 		});
 	}

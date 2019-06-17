@@ -17,10 +17,10 @@ export function prop(opts?: SchemaTypeOpts<any>) {
  * It decorates classes
  * @param index
  */
-export function index(index) {
+export function index(index, options?: any) {
 	return function(target: Object) {
 		const indexes = Reflect.getMetadata('tsmongoose:indexes', target) || [];
-		indexes.push(index);
+		indexes.push({ index, options });
 		Reflect.defineMetadata('tsmongoose:indexes', indexes, target);
 	};
 }

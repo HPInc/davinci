@@ -13,10 +13,10 @@ const SWAGGER_VERSION = '2.0';
 
 export const resources = [];
 
-export const addResource = (resourceName, doc) => {
+export const addResource = (resourceName, doc, basepath?) => {
 	debug(`adding ${resourceName} resource`);
 	// create the resource from the doc
-	const resource = new Resource(resourceName, doc);
+	const resource = new Resource(resourceName, doc, basepath);
 	// add it to the registry
 	resources.push(resource);
 };
@@ -77,8 +77,9 @@ export const generateFullSwagger = ({ protocol, basePath, host }, opts?) => {
 
 		// add paths
 		_.each(resource.paths, (resourcePath, pathName) => {
-			let fullPath = `/${resource.basePath}${pathName}`;
-			if (pathName === '/') fullPath = `/${resource.basePath}`;
+			const trimmedBasePath = _.trim(resource.basePath, '/');
+			let fullPath = `/${trimmedBasePath}${pathName}`;
+			if (pathName === '/') fullPath = `/${trimmedBasePath}`;
 			fullSwagger.paths[fullPath] = sanitiseResourcePath(resourcePath);
 		});
 	});
@@ -93,7 +94,7 @@ export const createApiDocs = (app, opts?: any) => {
 	const makeHandler = () => {
 		return (req, res) => {
 			const protocol = req.get('X-Forwarded-Protocol') || options.protocol || config.PROTOCOL;
-			const basePath = options.basePath || `${protocol}://${req.headers.host}/api`;
+			const basePath = options.basePath;
 			const host = req.headers.host;
 			const fullSwagger = generateFullSwagger({ protocol, basePath, host }, opts);
 			res.json(fullSwagger);

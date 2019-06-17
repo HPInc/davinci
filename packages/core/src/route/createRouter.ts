@@ -230,12 +230,15 @@ const createRouterAndSwaggerDoc = (Controller, rsName?, contextFactory?): Router
 		[]
 	);
 
+	const { paths, definitions: pathDefinitions } = createPaths(Controller);
+
 	const definition = {
 		definitions: {
 			...mainDefinition,
-			...additionalDefinitions
+			...additionalDefinitions,
+			...pathDefinitions
 		},
-		paths: createPaths(Controller)
+		paths
 	};
 
 	// now process the swagger structure and get an array of method/path mappings to handlers
@@ -247,7 +250,7 @@ const createRouterAndSwaggerDoc = (Controller, rsName?, contextFactory?): Router
 		return router[route.method](routePath, ...route.handlers);
 	});
 
-	openapiDocs.addResource(resourceName, definition);
+	openapiDocs.addResource(resourceName, definition, basepath);
 
 	return router;
 };

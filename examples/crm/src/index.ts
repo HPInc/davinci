@@ -2,14 +2,12 @@ import express, { Express } from 'express';
 import Debug from 'debug';
 import { createApp, createRouter, IOfBaseExpress } from '@oneflow/substrate-core';
 import CustomerController from './customer/customer.controller';
-import packageJson = require('../package.json');
+// import packageJson = require('../package.json');
 
 const debug = Debug('of-base-api:example');
-// const FileController = require('./files/FileController');
-// const SearchController = require('./search/search.controller');
 
 const options = {
-	version: packageJson.version,
+	// version: packageJson.version,
 	boot: {
 		dirPath: './build/examples/crm/boot'
 	},

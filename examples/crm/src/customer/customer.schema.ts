@@ -16,15 +16,15 @@ class BirthType {
 	city: string;
 }
 
-@mgoose.index({ firstname: 1, lastname: 1 })
+@mgoose.index({ firstname: 1, lastname: 1 }, { unique: true })
 @openapi.definition({ title: 'Customer' })
 export default class Customer {
-	@mgoose.prop()
-	@openapi.prop()
+	@mgoose.prop({ required: true })
+	@openapi.prop({ required: true })
 	firstname: string;
 
-	@mgoose.prop()
-	@openapi.prop()
+	@mgoose.prop({ required: true })
+	@openapi.prop({ required: true })
 	lastname: string;
 
 	@mgoose.prop()
@@ -52,7 +52,7 @@ export default class Customer {
 	birth: BirthType;
 
 	@mgoose.prop({ type: Schema.Types.ObjectId })
-	@mgoose.populate({ name: 'file', opts: { ref: 'File', foreignField: '_id', justOne: true } })
+	// @mgoose.populate({ name: 'file', opts: { ref: 'File', foreignField: '_id', justOne: true } })
 	@openapi.prop()
 	fileId: string;
 

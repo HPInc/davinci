@@ -1,25 +1,32 @@
 import _ from 'lodash';
 import _fp from 'lodash/fp';
-import { IMethodParameter, PathsDefinition } from '../types/openapi';
+import { IMethodParameter, PathsDefinition, ISwaggerDefinitions } from '../types/openapi';
 import { IControllerDecoratorArgs } from '../decorators/route';
+import { getSchemaDefinition } from './createSchemaDefinition';
 
 const getParameterDefinition = methodParameterConfig => {
 	const options: IMethodParameter = methodParameterConfig.options;
-	const definition = { ...options };
+	const paramDefinition = { ...options };
 	// handling special parameters
 	if (['context', 'req', 'res'].includes(methodParameterConfig.type)) {
-		definition.schema = { type: methodParameterConfig.type };
+		paramDefinition.schema = { type: methodParameterConfig.type };
 	} else {
 		const schema = _.get(methodParameterConfig, 'options.schema');
-		definition.schema = {
-			type: _.get(methodParameterConfig, 'type.name', '').toLowerCase(),
-			...schema
-		};
+		if (schema) {
+			paramDefinition.schema = {
+				...schema
+			};
+		} else {
+			const { schema, definitions } = getSchemaDefinition(methodParameterConfig.type);
+			paramDefinition.schema = schema;
+
+			return { paramDefinition, definitions };
+		}
 	}
-	return definition;
+	return { paramDefinition };
 };
 
-const createPathsDefinition = (theClass: Function): PathsDefinition => {
+const createPathsDefinition = (theClass: Function): { paths: PathsDefinition; definitions: ISwaggerDefinitions } => {
 	const controllerMetadata: IControllerDecoratorArgs = Reflect.getMetadata('tsopenapi:controller', theClass) || {};
 	// if (!controllerMetadata) throw new Error('Invalid Class. It must be decorated as controller');
 	const { excludedMethods = [] } = controllerMetadata;
@@ -37,19 +44,36 @@ const createPathsDefinition = (theClass: Function): PathsDefinition => {
 		methods,
 		(acc, method) => {
 			const { methodName, path, verb, summary, description, responses } = method;
-			const parameters = _.filter(methodParameters, { methodName }).map(getParameterDefinition);
+			const parameters = _.filter(methodParameters, { methodName })
+				.map(getParameterDefinition)
+				.map(({ paramDefinition, definitions = {} }) => {
+					acc.definitions = { ...acc.definitions, ...definitions };
+					return paramDefinition;
+				});
 
-			_.set(acc, `${path}.${verb}`, {
+			const resps = responses
+				? _.mapValues(responses, response => {
+						if (typeof response === 'function') {
+							const { definitions: defs, schema } = getSchemaDefinition(response);
+							acc.definitions = { ...acc.definitions, ...defs };
+							return { schema };
+						}
+
+						return response;
+				  })
+				: { 200: { description: 'Success' } };
+
+			_.set(acc.paths, `${path}.${verb}`, {
 				summary,
 				description,
 				operationId: methodName,
 				parameters,
-				responses
+				responses: resps
 			});
 
 			return acc;
 		},
-		{}
+		{ paths: {}, definitions: {} }
 	);
 };
 

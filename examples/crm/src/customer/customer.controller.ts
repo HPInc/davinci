@@ -1,37 +1,23 @@
 import { context, express, route } from '@oneflow/substrate-core';
-import { MongooseController } from '@oneflow/substrate-mongoose';
+import { createMongooseController } from '@oneflow/substrate-mongoose';
 import model from './customer.model';
 import CustomerSchema from './customer.schema';
 
 const { get, controller, query } = route;
 
-@controller({ basepath: '/api/customer', resourceSchema: CustomerSchema, excludedMethods: ['deleteById'] })
+@controller({
+	basepath: '/api/customer',
+	excludedMethods: ['deleteById']
+})
 @express.middleware.before((_req, _res, next) => {
 	console.log('controller before middleware');
 	next();
 })
-export default class CustomerController extends MongooseController {
-	constructor() {
-		super(model);
-	}
-
-	@get({ path: '/', summary: 'List' })
-	find(@query('query') query: string, @context() context) {
-		return super.find(query, context);
-	}
-
+export default class CustomerController extends createMongooseController(model, CustomerSchema) {
 	@get({ path: '/hello', summary: 'That is a hello method' })
-	hello(
-		@query('firstname') firstname: string,
-		@query('age') age: number,
-		@query({
-			name: 'customerObj',
-			required: true
-		})
-		customerObj: object
-	) {
-		console.log(firstname, age);
-		return customerObj;
+	hello(@query('firstname') firstname: string, @query('age') age: number, @context() context) {
+		console.log(firstname, age, context);
+		return firstname;
 	}
 
 	@get({ path: '/customResponse', summary: 'That is a custom response method' })

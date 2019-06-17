@@ -256,7 +256,11 @@ describe('route decorators', () => {
 			};
 			sinon.stub(Reflect, 'defineMetadata');
 
-			const decoratorArg = { basepath: '/thebasepath', excludedMethods: ['testMethod'] };
+			const decoratorArg = {
+				basepath: '/thebasepath',
+				additionalSchemas: [MyClass],
+				excludedMethods: ['testMethod']
+			};
 			route.controller(decoratorArg)(MyClass);
 
 			// @ts-ignore

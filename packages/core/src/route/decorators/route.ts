@@ -7,7 +7,7 @@ interface IMethodResponseOutput {
 }
 
 interface IMethodResponses {
-	[key: number]: IMethodResponseOutput | ((string) => IMethodResponseOutput);
+	[key: number]: Function | IMethodResponseOutput | ((string) => IMethodResponseOutput);
 }
 
 interface IMethodDecoratorOptions {
@@ -26,7 +26,13 @@ export const createRouteMethodDecorator = verb =>
 		return function(target: Object, methodName: string | symbol) {
 			// get the existing metadata props
 			const methods = Reflect.getMetadata('tsopenapi:methods', target) || [];
-			methods.unshift({ path, verb, methodName, summary, description, responses, handler: target[methodName] });
+			const meta = { path, verb, methodName, summary, description, responses, handler: target[methodName] };
+			const methodIndex = _.findIndex(methods, { methodName });
+			if (methodIndex && methodIndex > -1) {
+				methods[methodIndex] = meta;
+			} else {
+				methods.unshift(meta);
+			}
 			// define new metadata methods
 			Reflect.defineMetadata('tsopenapi:methods', methods, target);
 		};
@@ -48,10 +54,7 @@ export function param(options: IMethodParameter): Function {
 		// get the existing metadata props
 		const methodParameters = Reflect.getMetadata('tsopenapi:method-parameters', target) || [];
 		const paramtypes = Reflect.getMetadata('design:paramtypes', target, methodName);
-		const isAlreadySet = !!_.find(methodParameters, { methodName, index });
-		if (isAlreadySet) return;
-
-		methodParameters.unshift({
+		const meta = {
 			target,
 			methodName,
 			index,
@@ -63,7 +66,15 @@ export function param(options: IMethodParameter): Function {
 				TODO: find a better solution
 			 */
 			type: paramtypes && paramtypes[index]
-		});
+		};
+
+		const methodParameterIndex = _.findIndex(methodParameters, { methodName, index });
+		if (methodParameterIndex && methodParameterIndex > -1) {
+			methodParameters[methodParameterIndex] = meta;
+		} else {
+			methodParameters.unshift(meta);
+		}
+
 		Reflect.defineMetadata('tsopenapi:method-parameters', methodParameters, target);
 	};
 }
@@ -93,6 +104,7 @@ export interface IControllerDecoratorArgs {
 	basepath?: string;
 	excludedMethods?: string[];
 	resourceSchema?: Function;
+	additionalSchemas?: Function[];
 }
 
 /**

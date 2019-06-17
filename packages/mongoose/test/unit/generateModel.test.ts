@@ -103,6 +103,7 @@ describe('typed mongoose', () => {
 			prop({ type: String, index: true })(Customer.prototype, 'firstname');
 			prop({ type: String })(Customer.prototype, 'lastname');
 			index({ firstname: 1, lastname: 1 })(Customer);
+			index({ lastname: 1 }, { unique: true })(Customer);
 			const schema = generateSchema(Customer);
 			should(schema.indexes()).be.deepEqual([
 				[
@@ -114,14 +115,21 @@ describe('typed mongoose', () => {
 					}
 				],
 				[
-					[
-						{
-							firstname: 1,
-							lastname: 1
-						}
-					],
+					{
+						firstname: 1,
+						lastname: 1
+					},
 					{
 						background: true
+					}
+				],
+				[
+					{
+						lastname: 1
+					},
+					{
+						background: true,
+						unique: true
 					}
 				]
 			]);

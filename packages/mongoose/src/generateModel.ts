@@ -1,4 +1,5 @@
 import { model, Schema, SchemaTypeOpts, SchemaOptions } from 'mongoose';
+import { ModelType } from './types';
 
 /**
  * Utility function that given a class passed as parameter,
@@ -22,7 +23,8 @@ export const getSchemaDefinition = (theClass: Function) => {
 		}
 
 		const isFunction =
-			![String, Number, Object, Boolean, Date, Schema.Types.ObjectId].includes(type) && typeof type === 'function';
+			![String, Number, Object, Boolean, Date, Schema.Types.ObjectId].includes(type) &&
+			typeof type === 'function';
 
 		// if the type is a function, we need to recursively get the schema definition
 		if (isFunction) {
@@ -96,7 +98,7 @@ export const generateSchema = (
 	schema.methods = methods;
 	schema.statics = statics;
 	if (indexes.length > 0) {
-		schema.index(indexes);
+		indexes.forEach(({ index, options }) => schema.index(index, options));
 	}
 	virtuals.forEach(({ name, handler }) => schema.virtual(name, handler));
 	populates.forEach(({ name, options }) => schema.virtual(name, options));
@@ -111,12 +113,12 @@ export const generateSchema = (
  * @param collectionName
  * @param options
  */
-export const generateModel = (
+export function generateModel<T>(
 	theClass: Function,
 	modelName = theClass.name,
 	collectionName?,
 	options?: SchemaOptions
-) => {
+) {
 	const schema = generateSchema(theClass, options);
-	return model(modelName, schema, collectionName);
-};
+	return model(modelName, schema, collectionName) as T & ModelType<T>;
+}

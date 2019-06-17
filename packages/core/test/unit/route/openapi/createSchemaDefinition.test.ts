@@ -35,8 +35,7 @@ describe('createSchemaDefinition', () => {
 					lastname: {
 						type: 'string'
 					}
-				},
-				required: []
+				}
 			}
 		});
 	});
@@ -90,11 +89,9 @@ describe('createSchemaDefinition', () => {
 							isPrimary: {
 								type: 'boolean'
 							}
-						},
-						required: []
+						}
 					}
-				},
-				required: []
+				}
 			}
 		});
 	});
@@ -146,18 +143,16 @@ describe('createSchemaDefinition', () => {
 					isPrimary: {
 						type: 'boolean'
 					}
-				},
-				required: []
+				}
 			},
 			Customer: {
 				title: 'Customer',
 				type: 'object',
 				properties: {
 					phone: {
-						$ref: 'CustomerPhone'
+						$ref: '#/definitions/CustomerPhone'
 					}
-				},
-				required: []
+				}
 			}
 		});
 	});
@@ -190,8 +185,7 @@ describe('createSchemaDefinition', () => {
 							type: 'string'
 						}
 					}
-				},
-				required: []
+				}
 			}
 		});
 	});
@@ -247,12 +241,10 @@ describe('createSchemaDefinition', () => {
 								isPrimary: {
 									type: 'boolean'
 								}
-							},
-							required: []
+							}
 						}
 					}
-				},
-				required: []
+				}
 			}
 		});
 	});
@@ -304,8 +296,7 @@ describe('createSchemaDefinition', () => {
 					isPrimary: {
 						type: 'boolean'
 					}
-				},
-				required: []
+				}
 			},
 			Customer: {
 				title: 'Customer',
@@ -314,11 +305,10 @@ describe('createSchemaDefinition', () => {
 					phone: {
 						type: 'array',
 						items: {
-							$ref: 'CustomerPhone'
+							$ref: '#/definitions/CustomerPhone'
 						}
 					}
-				},
-				required: []
+				}
 			}
 		});
 	});
