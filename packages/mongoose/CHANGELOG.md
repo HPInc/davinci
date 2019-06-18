@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.4](https://github.com/Oneflow/substrate/compare/v0.1.3...v0.1.4) (2019-06-18)
+
+
+### Bug Fixes
+
+* fixed mongoose controller findById ([#10](https://github.com/Oneflow/substrate/issues/10)) ([dc1e52e](https://github.com/Oneflow/substrate/commit/dc1e52e))
+
+
+
+
+
 ## [0.1.3](https://github.com/Oneflow/substrate/compare/v0.1.2...v0.1.3) (2019-06-18)
 
 
