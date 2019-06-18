@@ -27,7 +27,8 @@ export const createRouteMethodDecorator = verb =>
 			// get the existing metadata props
 			const methods = Reflect.getMetadata('tsopenapi:methods', target) || [];
 			const meta = { path, verb, methodName, summary, description, responses, handler: target[methodName] };
-			const methodIndex = _.findIndex(methods, { methodName });
+			let methodIndex = _.findIndex(methods, { methodName });
+			methodIndex = methodIndex > -1 ? methodIndex : _.findIndex(methods, { path, verb });
 			if (methodIndex && methodIndex > -1) {
 				methods[methodIndex] = meta;
 			} else {
