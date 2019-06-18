@@ -149,7 +149,7 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 		) {
 			if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 
-			return this.findOne({ ...query, _id: id }, { context });
+			return this.findOne({ ...query, _id: id }, context);
 		}
 
 		@route.post({ path: '/', summary: 'Create', responses: { 200: RSchema } })

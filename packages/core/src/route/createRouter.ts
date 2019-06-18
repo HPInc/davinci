@@ -22,7 +22,33 @@ const AJV_OPTS = {
 	removeAdditional: 'all'
 };
 
-const performAjvValidation = ({ value, config, definitions }) => {
+const convertRefPaths = schema => {
+	if (Array.isArray(schema)) {
+		return schema.map(convertRefPaths);
+	}
+
+	if (typeof schema === 'object') {
+		return _.reduce(
+			schema,
+			(acc, value, key) => {
+				if (key === '$ref') {
+					acc[key] = (value || '').replace(/#\/definitions\//, '');
+				} else {
+					acc[key] = convertRefPaths(value);
+				}
+
+				return acc;
+			},
+			{}
+		);
+	}
+
+	return schema;
+};
+
+const performAjvValidation = ({ value, config: cfg, definitions }) => {
+	// TODO: find a better solution
+	const config = convertRefPaths(cfg);
 	// @ts-ignore
 	const ajv = new Ajv(AJV_OPTS);
 	const schema = {
@@ -32,7 +58,10 @@ const performAjvValidation = ({ value, config, definitions }) => {
 	};
 	const data = { [config.name]: value };
 
-	_.forEach(definitions, (schema, name) => ajv.addSchema(schema, name));
+	_.forEach(definitions, (schema, name) => {
+		const parsedSchema = convertRefPaths(schema);
+		ajv.addSchema(parsedSchema, name);
+	});
 
 	let errors;
 	const valid = ajv.addSchema({ ...schema }, 'schema').validate('schema', data);

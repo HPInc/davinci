@@ -1,13 +1,10 @@
 import express, { Express } from 'express';
-import Debug from 'debug';
 import { createApp, createRouter, IOfBaseExpress } from '@oneflow/substrate-core';
 import CustomerController from './customer/customer.controller';
-// import packageJson = require('../package.json');
-
-const debug = Debug('of-base-api:example');
+import packageJson = require('../package.json');
 
 const options = {
-	// version: packageJson.version,
+	version: packageJson.version,
 	boot: {
 		dirPath: './build/examples/crm/boot'
 	},
@@ -19,22 +16,10 @@ const options = {
 
 const expressApp: Express = express();
 
+const createContext = ({ req }) => ({ accountId: req.headers['x-oneflow-accountid'] });
+
 createApp(expressApp, options, app => {
-	// add some middleware
-	app.use((req, _res, next) => {
-		debug('logger', req.hostname, req.method, req.path);
-		req.contextId = '5992c4e74219261300661ccc';
-		next();
-	});
-
-	// add a custom route
-	app.get('/hello-world', (_req, res) => {
-		res.send({
-			message: 'Hello World'
-		});
-	});
-
-	app.use(createRouter(CustomerController));
+	app.use(createRouter(CustomerController, 'Customer', createContext));
 });
 
 if (require.main === module) {
