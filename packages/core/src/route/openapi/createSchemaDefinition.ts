@@ -39,6 +39,16 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 			};
 
 			const title: string = hasDefinitionDecoration ? definitionMetadata.title : key || typeOrClass.name;
+			if (hasDefinitionDecoration) {
+				if (definitions[title]) {
+					return {
+						$ref: `#/definitions/${title}`
+					};
+				}
+
+				definitions[title] = definitionObj;
+			}
+
 			if (title.toLowerCase() !== 'object') {
 				definitionObj.title = title;
 			}
@@ -70,7 +80,11 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 				};
 			}
 
-			return definitionObj;
+			return hasDefinitionDecoration
+				? {
+						$ref: `#/definitions/${title}`
+				  }
+				: definitionObj;
 		}
 	};
 

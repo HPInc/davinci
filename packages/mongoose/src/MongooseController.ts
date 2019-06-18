@@ -25,6 +25,39 @@ export interface IMongooseController {
 	updateById(id: string, data: any, context: object): Promise<any>;
 }
 
+@openapi.definition({ title: 'PopulateQueryParameter' })
+class PopulateQueryParameter {
+	@openapi.prop()
+	path: string;
+
+	@openapi.prop()
+	$limit?: number;
+
+	@openapi.prop()
+	$skip?: number;
+
+	@openapi.prop()
+	$where?: object;
+
+	@openapi.prop()
+	$populate?: PopulateQueryParameter;
+}
+
+@openapi.definition({ title: 'QueryParameters' })
+export class QueryParameters {
+	@openapi.prop({ type: PopulateQueryParameter })
+	$populate?: PopulateQueryParameter;
+
+	@openapi.prop()
+	$limit?: number;
+
+	@openapi.prop()
+	$skip?: number;
+
+	@openapi.prop()
+	$where?: object;
+}
+
 /**
  * We use a factory to pass Model and ResourceSchema.
  * This allow us to use ResourceSchema to define some request types, and build the openaapi specification
@@ -42,7 +75,7 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 	class RSchema extends ResourceSchema {}
 
 	// This is the response type of a find request
-	@openapi.definition({ title: 'ListResponse' })
+	@openapi.definition({ title: `${Model.modelName}ListResponse` })
 	class ListResponseSchema {
 		@openapi.prop({ type: [RSchema] })
 		data: RSchema[];
@@ -70,7 +103,7 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 		}
 
 		@route.get({ path: '/', summary: 'List', responses: { 200: ListResponseSchema } })
-		public async find(@route.param({ name: 'query', in: 'query' }) query, @context() context) {
+		public async find(@route.param({ name: 'query', in: 'query' }) query: QueryParameters, @context() context) {
 			if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 			const { limit, skip, sort, select, populate, where } = this.parseQuery(query, context);
 			const mQuery = this.model.find(where, select, { limit, skip, sort, context });
@@ -111,7 +144,7 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 				in: 'path'
 			})
 			id: string,
-			@route.param({ name: 'query', in: 'query' }) query,
+			@route.param({ name: 'query', in: 'query' }) query: QueryParameters,
 			@context() context
 		) {
 			if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
@@ -225,9 +258,9 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 			return populates.reduce((acc, pop) => {
 				const populateArgs: any = {};
 				let query = {};
-				if (pop === 'string') {
+				if (typeof pop === 'string') {
 					populateArgs.path = pop;
-				} else if (pop === 'object') {
+				} else if (typeof pop === 'object') {
 					query = _.pick(pop, ['$limit', '$skip', '$sort', '$select', '$populate', '$where']);
 					populateArgs.path = pop.path;
 				}
