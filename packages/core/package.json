@@ -26,7 +26,7 @@
 		"require-dir": "0.3.2"
 	},
 	"peerDependencies": {
-		"mongoose": "5.4.13"
+		"mongoose": "5.5.5"
 	},
 	"devDependencies": {
 		"tslib": "^1.9.3",

@@ -72,6 +72,28 @@ const performAjvValidation = ({ value, config: cfg, definitions }) => {
 	return { value: data[config.name], errors };
 };
 
+const attemptJsonParsing = ({ value, config, definitions }) => {
+	if (_.startsWith(value, '{') && _.endsWith(value, '}')) {
+		try {
+			return {
+				value: JSON.parse(value),
+				config,
+
+				definitions
+			};
+		} catch (err) {
+			return {
+				value,
+				config,
+
+				definitions
+			};
+		}
+	}
+
+	return { value, config, definitions };
+};
+
 const validateAndCoerce = ({ value, config, definitions }) => {
 	const isUndefinedButNotRequired = !config.required && typeof value === 'undefined';
 	if (config.schema && !isUndefinedButNotRequired) {
@@ -89,6 +111,7 @@ const validateAndCoerce = ({ value, config, definitions }) => {
 
 const processParameter = ({ value, config, definitions }) =>
 	_fp.flow(
+		attemptJsonParsing,
 		validateAndCoerce,
 		_fp.get('value')
 	)({
@@ -189,40 +212,29 @@ const makeHandlerFunction = (operation, controller, functionName, definitions, c
 	];
 };
 
-const makeMethodName = operation => {
-	// this allows for namespaced operationId names
-	// TODO is this required anymore?
-	const operationParts = operation.operationId.split('.');
-	const operationName = operationParts[operationParts.length - 1];
-	return operationName.split('#')[0];
-};
-
 export const createRouteHandlers = (controller, definition, contextFactory?) => {
 	const routeHandlers = [];
+	const methods = Reflect.getMetadata('tsopenapi:methods', controller.constructor.prototype) || [];
 
 	// for each path
-	_.each(definition.paths, (swaggerPath, pathName) => {
+	_.each(methods, method => {
+		const operation = definition.paths[method.path][method.verb];
+
+		// only add it if the controller method exists, otherwise ignore it
+		if (!controller[method.methodName] || !operation) return;
+
 		// convert it from swagger {param} format to express :param format
-		const path = pathName.replace(/{(.*?)}/gi, ':$1');
+		const path = method.path.replace(/{(.*?)}/gi, ':$1');
 
-		// for each path/method
-		_.each(swaggerPath, (operation, method) => {
-			// get the method name for the controller
-			const methodName = makeMethodName(operation);
-
-			// only add it if the controller method exists, otherwise ignore it
-			if (!controller[methodName]) return;
-
-			// create the handler function
-			const handlers = makeHandlerFunction(
-				operation,
-				controller,
-				methodName,
-				definition.definitions,
-				contextFactory
-			);
-			routeHandlers.push({ method, path, handlers });
-		});
+		// create the handler function
+		const handlers = makeHandlerFunction(
+			operation,
+			controller,
+			method.methodName,
+			definition.definitions,
+			contextFactory
+		);
+		routeHandlers.push({ method: method.verb, path, handlers });
 	});
 	return routeHandlers;
 };

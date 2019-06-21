@@ -30,10 +30,9 @@ export const createRouteMethodDecorator = verb =>
 			let methodIndex = _.findIndex(methods, { methodName });
 			methodIndex = methodIndex > -1 ? methodIndex : _.findIndex(methods, { path, verb });
 			if (methodIndex && methodIndex > -1) {
-				methods[methodIndex] = meta;
-			} else {
-				methods.unshift(meta);
+				methods.splice(methodIndex, 1);
 			}
+			methods.unshift(meta);
 			// define new metadata methods
 			Reflect.defineMetadata('tsopenapi:methods', methods, target);
 		};

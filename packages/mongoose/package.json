@@ -18,14 +18,17 @@
 		"test": "mocha --exit",
 		"cover": "nyc npm test"
 	},
+	"peerDependencies": {
+		"mongoose": "5.5.5"
+	},
 	"dependencies": {
 		"@oneflow/substrate-core": "^0.1.5",
 		"debug": "^4.1.1",
 		"lodash": "^4.17.11",
-		"mongoose": "5.5.5",
 		"reflect-metadata": "^0.1.13"
 	},
 	"devDependencies": {
+		"mongoose": "5.5.5",
 		"tslib": "^1.9.3",
 		"tslint": "^5.16.0",
 		"typescript": "^3.4.5"
