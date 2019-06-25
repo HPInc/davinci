@@ -1,6 +1,6 @@
 {
 	"name": "crm",
-	"version": "0.1.6",
+	"version": "0.1.7",
 	"private": true,
 	"description": "",
 	"main": "index.js",
@@ -12,7 +12,7 @@
 	"license": "ISC",
 	"dependencies": {
 		"@oneflow/substrate-core": "^0.1.6",
-		"@oneflow/substrate-mongoose": "^0.1.6",
+		"@oneflow/substrate-mongoose": "^0.1.7",
 		"debug": "^4.1.1",
 		"express": "4.16.4",
 		"lodash": "^4.17.11",

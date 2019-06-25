@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.7](https://github.com/Oneflow/substrate/compare/v0.1.6...v0.1.7) (2019-06-25)
+
+
+### Bug Fixes
+
+* loose check on ObjectId schema type ([#13](https://github.com/Oneflow/substrate/issues/13)) ([f25645d](https://github.com/Oneflow/substrate/commit/f25645d))
+
+
+
+
+
 ## [0.1.6](https://github.com/Oneflow/substrate/compare/v0.1.5...v0.1.6) (2019-06-21)
 
 **Note:** Version bump only for package crm
