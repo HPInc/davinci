@@ -27,7 +27,7 @@ export const getSchemaDefinition = (theClass: Function) => {
 			typeof type === 'function';
 
 		// if the type is a function, we need to recursively get the schema definition
-		if (isFunction) {
+		if (isFunction && type.name !== 'ObjectId') {
 			type = getSchemaDefinition(type);
 		}
 

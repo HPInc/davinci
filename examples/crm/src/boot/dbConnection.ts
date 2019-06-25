@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 module.exports = async app => {
 	mongoose.Promise = global.Promise;
