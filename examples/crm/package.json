@@ -12,8 +12,8 @@
 	"author": "Piero Maltese <maltesepiero@gmail.com>",
 	"license": "ISC",
 	"dependencies": {
-		"@oneflow/substrate-core": "^0.2.1",
-		"@oneflow/substrate-mongoose": "^0.2.1",
+		"@davinci/core": "^0.2.1",
+		"@davinci/mongoose": "^0.2.1",
 		"debug": "^4.1.1",
 		"express": "4.16.4",
 		"lodash": "^4.17.11",

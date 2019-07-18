@@ -1,5 +1,5 @@
 import express, { Express } from 'express';
-import { createApp, createRouter, IOfBaseExpress } from '@oneflow/substrate-core';
+import { createApp, createRouter, IOfBaseExpress } from '@davinci/core';
 import CustomerController from './customer/customer.controller';
 import packageJson = require('../package.json');
 

@@ -1,5 +1,5 @@
 import { model } from 'mongoose';
-import { mgoose, ModelType } from '@oneflow/substrate-mongoose';
+import { mgoose, ModelType } from '@davinci/mongoose';
 import CustomerSchema from './customer.schema';
 
 const { generateSchema, beforeRead, beforeWrite, beforeDelete } = mgoose;
