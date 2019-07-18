@@ -1,6 +1,6 @@
 import { Schema } from 'mongoose';
-import { mgoose } from '@oneflow/substrate-mongoose';
-import { openapi } from '@oneflow/substrate-core';
+import { mgoose } from '@davinci/mongoose';
+import { openapi } from '@davinci/core';
 
 class CustomerPhone {
 	@mgoose.prop()
