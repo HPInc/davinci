@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.2.0](https://github.com/Oneflow/substrate/compare/v0.1.7...v0.2.0) (2019-07-18)
+
+
+### Features
+
+* add 'statusCode' (assigned same as 'code') ([fd4dcf4](https://github.com/Oneflow/substrate/commit/fd4dcf4))
+
+
+
+
+
 ## [0.1.6](https://github.com/Oneflow/substrate/compare/v0.1.5...v0.1.6) (2019-06-21)
 
 **Note:** Version bump only for package @oneflow/substrate-core
