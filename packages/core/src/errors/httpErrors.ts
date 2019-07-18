@@ -5,9 +5,11 @@ export class HttpError extends Error {
 	// tslint:disable-next-line variable-name
 	__proto__: Error;
 	code: number;
+	statusCode: number;
 	className?: string;
 	data: any;
 	errors: [any];
+
 	/**
 	 * Create an HttpError instance
 	 *
@@ -24,7 +26,7 @@ export class HttpError extends Error {
 		this.__proto__ = trueProto;
 
 		this.name = name || 'Error';
-		this.code = code;
+		this.code = this.statusCode = code;
 		this.className = className;
 
 		const clonedData: any = _.clone(data);
@@ -46,6 +48,7 @@ export class HttpError extends Error {
 			name: this.name,
 			message: this.message,
 			code: this.code,
+			statusCode: this.statusCode,
 			className: this.className,
 			data: this.data,
 			errors: this.errors,
