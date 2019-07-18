@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.3.0](https://github.com/Oneflow/davinci/compare/v0.2.1...v0.3.0) (2019-07-18)
+
+
+### Features
+
+* davinci ([3e477ff](https://github.com/Oneflow/davinci/commit/3e477ff))
+* merged with master ([327c2da](https://github.com/Oneflow/davinci/commit/327c2da))
+
+
+
+
+
 ## [0.2.1](https://github.com/Oneflow/substrate/compare/v0.2.0...v0.2.1) (2019-07-18)
 
 
