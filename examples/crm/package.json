@@ -5,13 +5,14 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"build": "tsc -p ./tsconfig.release.json"
+		"build": "tsc -p ./tsconfig.release.json",
+		"dev": "DEBUG=* ts-node ./src/index.ts"
 	},
 	"keywords": [],
 	"author": "Piero Maltese <maltesepiero@gmail.com>",
 	"license": "ISC",
 	"dependencies": {
-		"@oneflow/substrate-core": "^0.1.6",
+		"@oneflow/substrate-core": "file:../../packages/core",
 		"@oneflow/substrate-mongoose": "^0.1.7",
 		"debug": "^4.1.1",
 		"express": "4.16.4",

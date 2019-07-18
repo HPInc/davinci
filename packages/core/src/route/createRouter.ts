@@ -218,7 +218,10 @@ export const createRouteHandlers = (controller, definition, contextFactory?) => 
 
 	// for each path
 	_.each(methods, method => {
-		const operation = definition.paths[method.path][method.verb];
+		const operation =
+			definition.paths[method.path] && [method.verb]
+				? definition.paths[method.path][method.verb]
+				: null;
 
 		// only add it if the controller method exists, otherwise ignore it
 		if (!controller[method.methodName] || !operation) return;
