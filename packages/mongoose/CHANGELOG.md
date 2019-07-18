@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.1](https://github.com/Oneflow/substrate/compare/v0.2.0...v0.2.1) (2019-07-18)
+
+
+### Bug Fixes
+
+* handle excluded methods properly in createRouter ([e9e2997](https://github.com/Oneflow/substrate/commit/e9e2997))
+
+
+
+
+
 # [0.2.0](https://github.com/Oneflow/substrate/compare/v0.1.7...v0.2.0) (2019-07-18)
 
 **Note:** Version bump only for package @oneflow/substrate-mongoose
