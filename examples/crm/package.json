@@ -5,7 +5,8 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"build": "tsc -p ./tsconfig.release.json"
+		"build": "tsc -p ./tsconfig.release.json",
+		"dev": "DEBUG=* ts-node ./src/index.ts"
 	},
 	"keywords": [],
 	"author": "Piero Maltese <maltesepiero@gmail.com>",

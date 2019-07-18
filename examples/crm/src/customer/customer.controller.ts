@@ -7,7 +7,7 @@ const { get, controller, query } = route;
 
 @controller({
 	basepath: '/api/customer',
-	excludedMethods: ['deleteById']
+	excludedMethods: ['create', 'findById']
 })
 @express.middleware.before((_req, _res, next) => {
 	console.log('controller before middleware');
