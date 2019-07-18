@@ -12,7 +12,7 @@
 	"author": "Piero Maltese <maltesepiero@gmail.com>",
 	"license": "ISC",
 	"dependencies": {
-		"@oneflow/substrate-core": "file:../../packages/core",
+		"@oneflow/substrate-core": "^0.1.6",
 		"@oneflow/substrate-mongoose": "^0.1.7",
 		"debug": "^4.1.1",
 		"express": "4.16.4",
