@@ -1,5 +1,5 @@
 {
-	"name": "@oneflow/substrate-mongoose",
+	"name": "@davinci/mongoose",
 	"version": "0.1.6",
 	"description": "> TODO: description",
 	"author": "Piero Maltese <maltesepiero@gmail.com>",
@@ -22,7 +22,7 @@
 		"mongoose": "5.5.5"
 	},
 	"dependencies": {
-		"@oneflow/substrate-core": "^0.1.6",
+		"@davinci/core": "^0.1.6",
 		"debug": "^4.1.1",
 		"lodash": "^4.17.11",
 		"reflect-metadata": "^0.1.13"

@@ -1,5 +1,5 @@
-import { context, express, route } from '@oneflow/substrate-core';
-import { createMongooseController } from '@oneflow/substrate-mongoose';
+import { context, express, route } from '@davinci/core';
+import { createMongooseController } from '@davinci/mongoose';
 import model from './customer.model';
 import CustomerSchema from './customer.schema';
 

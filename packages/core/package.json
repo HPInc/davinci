@@ -1,5 +1,5 @@
 {
-	"name": "@oneflow/substrate-core",
+	"name": "@davinci/core",
 	"version": "0.1.6",
 	"description": "Framework for rapid and consistent API development",
 	"main": "build/index.js",

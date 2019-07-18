@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import bluebird from 'bluebird';
-import { context, route, httpErrors as errors, openapi } from '@oneflow/substrate-core';
+import { context, route, httpErrors as errors, openapi } from '@davinci/core';
 
 export interface Constructor<T> {
 	new (...args: any[]): T;
