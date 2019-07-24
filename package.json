@@ -5,8 +5,8 @@
 	},
 	"scripts": {
 		"postinstall": "npm run bootstrap",
-		"build": "lerna run build",
-		"test": "lerna run test",
+		"build": "lerna run build --parallel",
+		"test": "lerna run test --parallel",
 		"bootstrap": "lerna bootstrap",
 		"bump": "lerna publish",
 		"semantic-release": "lerna version --conventional-commits --github-release -y && lerna publish from-package -y"

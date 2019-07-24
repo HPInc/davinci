@@ -6,43 +6,17 @@ describe('openapiDocs', () => {
 		// @ts-ignore
 		openapiDocs.resources = [];
 	});
-	// const makeDef = () => {};
-	const makeApp = done => {
-		return {
-			// @ts-ignore
-			get: (url, middleware) => {
-				const req = {
-					headers: {
-						'X-Forwarded-Protocol': null,
-						host: 'localhost'
-					},
-					get: () => {
-						return 'http';
-					}
-				};
-				const res = {
-					json: () => {
-						done();
-					}
-				};
-				// app.middleware = middleware;
-				middleware(req, res);
-			}
-		};
-	};
 
-	it('should add a resource using a swagger document', done => {
-		const app = makeApp(done);
-		openapiDocs.createApiDocs(app, {
+	it('should add a resource using a swagger document', () => {
+		openapiDocs.generateFullSwagger({
 			discoveryUrl: '/api-doc.json',
 			version: '1.0', // read from package.json
 			basePath: '/api'
 		});
 	});
 
-	it('should add a resource using a swagger document', done => {
-		const app = makeApp(done);
-		openapiDocs.createApiDocs(app, {
+	it('should add a resource using a swagger document', () => {
+		openapiDocs.generateFullSwagger({
 			discoveryUrl: '/api-doc.json',
 			version: '1.0', // read from package.json
 			basePath: '/api',
@@ -50,9 +24,8 @@ describe('openapiDocs', () => {
 		});
 	});
 
-	it('should add a resource using a swagger document', done => {
-		const app = makeApp(done);
-		openapiDocs.createApiDocs(app, {
+	it('should add a resource using a swagger document', () => {
+		openapiDocs.generateFullSwagger({
 			discoveryUrl: '/api-doc.json',
 			version: '1.0', // read from package.json
 			basePath: '/api',
@@ -60,9 +33,8 @@ describe('openapiDocs', () => {
 		});
 	});
 
-	it('should add a resource using a swagger document', done => {
-		const app = makeApp(done);
-		openapiDocs.createApiDocs(app, {
+	it('should add a resource using a swagger document', () => {
+		openapiDocs.generateFullSwagger({
 			discoveryUrl: '/api-doc.json',
 			version: '1.0', // read from package.json
 			basePath: null,
@@ -89,18 +61,16 @@ describe('openapiDocs', () => {
 					}
 				}
 			});
-			const swagger = openapiDocs.generateFullSwagger({ basePath: '/api', host: 'localhost', protocol: 'http' });
-			should(swagger).be.deepEqual({
+			const swagger = openapiDocs.generateFullSwagger({
+				basePath: '/api',
+				info: { version: '1.0.0', title: 'API' }
+			});
+			should(swagger).be.match({
 				swagger: '2.0',
 				info: {
 					version: '1.0.0',
 					title: 'API'
 				},
-				schemes: 'http',
-				basePath: '/api',
-				host: 'localhost',
-				externalDocs: null,
-				securityDefinitions: null,
 				paths: {
 					'/customer': {
 						get: {
@@ -159,7 +129,10 @@ describe('openapiDocs', () => {
 					}
 				}
 			});
-			const swagger = openapiDocs.generateFullSwagger({ basePath: '/api', host: 'localhost', protocol: 'http' });
+			const swagger = openapiDocs.generateFullSwagger({
+				basePath: '/api',
+				info: { version: '1.0.0', title: 'API' }
+			});
 			should(swagger.paths['/customer'].get.parameters).have.length(2);
 			should(swagger.paths['/customer'].get.parameters).be.deepEqual([
 				{ name: 'theQuery', in: 'query', schema: { type: 'string' } },

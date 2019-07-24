@@ -1,13 +1,8 @@
 import Debug from 'debug';
-import express from 'express';
 import _ from 'lodash';
-import path from 'path';
-import config from '../../config';
 import Resource from './Resource';
 
 const debug = Debug('of-base-api');
-
-const swaggerUiAssetPath = path.resolve(path.join(__dirname, '../../explorer'));
 
 const SWAGGER_VERSION = '2.0';
 
@@ -36,32 +31,13 @@ export const sanitiseResourcePath = resourcePaths => {
 	});
 };
 
-export const generateFullSwagger = ({ protocol, basePath, host }, opts?) => {
-	const options = opts || {};
-
-	const fullSwagger = {
+export const generateFullSwagger = (opts?) => {
+	const fullSwagger = _.merge({}, opts, {
 		swagger: SWAGGER_VERSION,
-		info: {
-			version: options.version || '1.0.0',
-			title: options.title || 'API'
-		},
-		schemes: protocol,
-		basePath,
-		host,
 		paths: {},
-		securityDefinitions: null,
 		definitions: {},
-		parameters: {},
-		externalDocs: null
-	};
-
-	if (options.securityDefinitions) {
-		fullSwagger.securityDefinitions = options.securityDefinitions;
-	}
-
-	if (options.externalDocs) {
-		fullSwagger.externalDocs = options.externalDocs;
-	}
+		parameters: {}
+	});
 
 	resources.forEach(resource => {
 		// add definitions
@@ -85,31 +61,4 @@ export const generateFullSwagger = ({ protocol, basePath, host }, opts?) => {
 	});
 
 	return fullSwagger;
-};
-
-export const createApiDocs = (app, opts?: any) => {
-	const options = opts || {};
-	debug(`setting up swagger docs on ${options.discoveryUrl}`);
-
-	const makeHandler = () => {
-		return (req, res) => {
-			const protocol = req.get('X-Forwarded-Protocol') || options.protocol || config.PROTOCOL;
-			const basePath = options.basePath;
-			const host = req.headers.host;
-			const fullSwagger = generateFullSwagger({ protocol, basePath, host }, opts);
-			res.json(fullSwagger);
-		};
-	};
-
-	app.get(options.discoveryUrl, makeHandler());
-
-	// return app;
-};
-
-export const explorer = (app, opts) => {
-	// add the swagger explorer page
-	app.use('/explorer', express.static(swaggerUiAssetPath));
-
-	// add the swagger api docs
-	createApiDocs(app, opts);
 };
