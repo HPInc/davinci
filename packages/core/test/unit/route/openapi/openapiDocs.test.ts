@@ -61,8 +61,11 @@ describe('openapiDocs', () => {
 					}
 				}
 			});
-			const swagger = openapiDocs.generateFullSwagger({ basePath: '/api', host: 'localhost', protocol: 'http' });
-			should(swagger).match({
+			const swagger = openapiDocs.generateFullSwagger({
+				basePath: '/api',
+				info: { version: '1.0.0', title: 'API' }
+			});
+			should(swagger).be.match({
 				swagger: '2.0',
 				info: {
 					version: '1.0.0',
@@ -126,7 +129,10 @@ describe('openapiDocs', () => {
 					}
 				}
 			});
-			const swagger = openapiDocs.generateFullSwagger({ basePath: '/api', host: 'localhost', protocol: 'http' });
+			const swagger = openapiDocs.generateFullSwagger({
+				basePath: '/api',
+				info: { version: '1.0.0', title: 'API' }
+			});
 			should(swagger.paths['/customer'].get.parameters).have.length(2);
 			should(swagger.paths['/customer'].get.parameters).be.deepEqual([
 				{ name: 'theQuery', in: 'query', schema: { type: 'string' } },
