@@ -62,7 +62,7 @@ describe('openapiDocs', () => {
 				}
 			});
 			const swagger = openapiDocs.generateFullSwagger({ basePath: '/api', host: 'localhost', protocol: 'http' });
-			should(swagger).be.deepEqual({
+			should(swagger).match({
 				swagger: '2.0',
 				info: {
 					version: '1.0.0',

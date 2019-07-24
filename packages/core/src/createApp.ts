@@ -4,7 +4,6 @@ import http from 'http';
 import get from 'lodash/get';
 import bluebird from 'bluebird';
 import { createTerminus, TerminusOptions } from '@godaddy/terminus';
-import swaggerUi from 'swagger-ui-express';
 
 import config from './config';
 import * as docs from './route/openapi/openapiDocs';
@@ -87,6 +86,7 @@ export const configureExpress = async (app, options: IOptions = {}, runMiddlewar
 
 		const { path: swaggerUIPath, options: swaggerUIOpts } = get(options, 'openapi.docs', {});
 		if (swaggerUIPath) {
+			const swaggerUi = require('swagger-ui-express');
 			app.use('/explorer', swaggerUi.serve, swaggerUi.setup(fullSwaggerDoc, swaggerUIOpts));
 		}
 	}
