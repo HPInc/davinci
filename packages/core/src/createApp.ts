@@ -1,9 +1,10 @@
 import Debug from 'debug';
 import express, { Express } from 'express';
 import http from 'http';
-// import merge from 'lodash/merge';
+import get from 'lodash/get';
 import bluebird from 'bluebird';
 import { createTerminus, TerminusOptions } from '@godaddy/terminus';
+import swaggerUi from 'swagger-ui-express';
 
 import config from './config';
 import * as docs from './route/openapi/openapiDocs';
@@ -14,17 +15,6 @@ import { execBootScripts } from './express/boot';
 import { IOfBaseExpress } from './index';
 
 const debug = Debug('of-base-api');
-
-/*
-const createOptions = (app, opts: IOptions): IOptions => {
-	const options: IOptions = merge(
-		{},
-		{ healthChecks: { livenessEndpoint: '/.ah/live', readynessEndpoint: '/.ah/ready' } },
-		opts
-	);
-	const terminusOptions: TerminusOptions = {};
-};
-*/
 
 interface IOptionsHealthChecks {
 	livenessEndpoint?: string;
@@ -38,7 +28,16 @@ interface IOptions {
 	};
 	healthChecks?: IOptionsHealthChecks;
 	openapi?: {
-		basePath?: string;
+		docs?: {
+			path: string;
+			options?: {
+				basePath?: string;
+			};
+		};
+		ui: {
+			path: string;
+			options?: any;
+		};
 	};
 }
 
@@ -81,12 +80,19 @@ export const configureExpress = async (app, options: IOptions = {}, runMiddlewar
 	// middlewares
 	if (runMiddlewares) await runMiddlewares(app);
 
-	// add the openapi routes
-	docs.explorer(app, {
-		discoveryUrl: '/api-doc.json',
-		version: options.version || '1.0.0',
-		basePath: options.openapi ? options.openapi.basePath : undefined
-	});
+	// swaggern
+	const { path: openapiDocsPath, options: openapiDocsOpts } = get(options, 'openapi.docs', {});
+	if (openapiDocsPath) {
+		const fullSwaggerDoc = docs.generateFullSwagger(openapiDocsOpts);
+		// tslint:disable-next-line:variable-name
+		app.get(openapiDocsPath, (_req, res) => res.json(fullSwaggerDoc));
+
+		const { path: swaggerUIPath, options: swaggerUIOpts } = get(options, 'openapi.docs', {});
+		if (swaggerUIPath) {
+			app.use('/explorer', swaggerUi.serve, swaggerUi.setup(fullSwaggerDoc, swaggerUIOpts));
+		}
+	}
+
 	app.use(responseHandler());
 	app.use(notFoundHandler());
 	app.use(errorHandler());

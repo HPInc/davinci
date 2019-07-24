@@ -11,6 +11,14 @@ const options = {
 	healthChecks: {
 		readynessEndpoint: '/.ah/ready',
 		livenessEndpoint: '/.ah/live'
+	},
+	openapi: {
+		docs: {
+			path: '/api-doc.json'
+		},
+		ui: {
+			path: '/explorer'
+		}
 	}
 };
 

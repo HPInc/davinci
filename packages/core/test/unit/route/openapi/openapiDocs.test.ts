@@ -6,43 +6,17 @@ describe('openapiDocs', () => {
 		// @ts-ignore
 		openapiDocs.resources = [];
 	});
-	// const makeDef = () => {};
-	const makeApp = done => {
-		return {
-			// @ts-ignore
-			get: (url, middleware) => {
-				const req = {
-					headers: {
-						'X-Forwarded-Protocol': null,
-						host: 'localhost'
-					},
-					get: () => {
-						return 'http';
-					}
-				};
-				const res = {
-					json: () => {
-						done();
-					}
-				};
-				// app.middleware = middleware;
-				middleware(req, res);
-			}
-		};
-	};
 
-	it('should add a resource using a swagger document', done => {
-		const app = makeApp(done);
-		openapiDocs.createApiDocs(app, {
+	it('should add a resource using a swagger document', () => {
+		openapiDocs.generateFullSwagger({
 			discoveryUrl: '/api-doc.json',
 			version: '1.0', // read from package.json
 			basePath: '/api'
 		});
 	});
 
-	it('should add a resource using a swagger document', done => {
-		const app = makeApp(done);
-		openapiDocs.createApiDocs(app, {
+	it('should add a resource using a swagger document', () => {
+		openapiDocs.generateFullSwagger({
 			discoveryUrl: '/api-doc.json',
 			version: '1.0', // read from package.json
 			basePath: '/api',
@@ -50,9 +24,8 @@ describe('openapiDocs', () => {
 		});
 	});
 
-	it('should add a resource using a swagger document', done => {
-		const app = makeApp(done);
-		openapiDocs.createApiDocs(app, {
+	it('should add a resource using a swagger document', () => {
+		openapiDocs.generateFullSwagger({
 			discoveryUrl: '/api-doc.json',
 			version: '1.0', // read from package.json
 			basePath: '/api',
@@ -60,9 +33,8 @@ describe('openapiDocs', () => {
 		});
 	});
 
-	it('should add a resource using a swagger document', done => {
-		const app = makeApp(done);
-		openapiDocs.createApiDocs(app, {
+	it('should add a resource using a swagger document', () => {
+		openapiDocs.generateFullSwagger({
 			discoveryUrl: '/api-doc.json',
 			version: '1.0', // read from package.json
 			basePath: null,
