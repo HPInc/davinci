@@ -30,9 +30,7 @@ interface IOptions {
 	openapi?: {
 		docs?: {
 			path: string;
-			options?: {
-				basePath?: string;
-			};
+			options?: any;
 		};
 		ui: {
 			path: string;

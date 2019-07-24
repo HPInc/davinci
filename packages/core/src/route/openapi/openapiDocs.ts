@@ -32,18 +32,12 @@ export const sanitiseResourcePath = resourcePaths => {
 };
 
 export const generateFullSwagger = (opts?) => {
-	const options = opts || {};
-
-	const fullSwagger = {
+	const fullSwagger = _.merge({}, opts, {
 		swagger: SWAGGER_VERSION,
-		info: {
-			version: options.version || '1.0.0',
-			title: options.title || 'API'
-		},
 		paths: {},
 		definitions: {},
 		parameters: {}
-	};
+	});
 
 	resources.forEach(resource => {
 		// add definitions

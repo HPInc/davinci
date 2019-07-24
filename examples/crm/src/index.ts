@@ -14,7 +14,14 @@ const options = {
 	},
 	openapi: {
 		docs: {
-			path: '/api-doc.json'
+			path: '/api-doc.json',
+			options: {
+				info: {
+					name: 'CRM',
+					version: packageJson.version
+				},
+				securityDefinitions: { Bearer: { type: 'apiKey', name: 'Authorization', in: 'header' } }
+			}
 		},
 		ui: {
 			path: '/explorer'
