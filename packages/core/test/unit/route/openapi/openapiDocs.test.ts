@@ -68,11 +68,6 @@ describe('openapiDocs', () => {
 					version: '1.0.0',
 					title: 'API'
 				},
-				schemes: 'http',
-				basePath: '/api',
-				host: 'localhost',
-				externalDocs: null,
-				securityDefinitions: null,
 				paths: {
 					'/customer': {
 						get: {
