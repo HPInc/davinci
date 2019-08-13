@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.1](https://github.com/Oneflow/davinci/compare/v0.4.0...v0.4.1) (2019-08-13)
+
+
+### Bug Fixes
+
+* better model type inference ([57c25d7](https://github.com/Oneflow/davinci/commit/57c25d7))
+
+
+
+
+
 # [0.4.0](https://github.com/Oneflow/davinci/compare/v0.3.0...v0.4.0) (2019-07-24)
 
 
