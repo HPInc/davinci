@@ -1,5 +1,5 @@
-import { model } from 'mongoose';
-import { mgoose, ModelType } from '@davinci/mongoose';
+import { Document, model } from 'mongoose';
+import { mgoose } from '@davinci/mongoose';
 import CustomerSchema from './customer.schema';
 
 const { generateSchema, beforeRead, beforeWrite, beforeDelete } = mgoose;
@@ -12,13 +12,15 @@ beforeRead(schema, (mQuery, context) => {
 });
 
 beforeWrite(schema, (doc, context) => {
-	doc.accountId = context.accountId;
+	if (context) {
+		doc.accountId = context.accountId;
+	}
 });
 
 beforeDelete(schema, (...args) => {
 	console.log(...args);
 });
 
-const Customer = model('Customer', schema, 'customers') as CustomerSchema & ModelType<typeof CustomerSchema>;
+const Customer = model<CustomerSchema & Document>('Customer', schema, 'customers');
 
 export default Customer;
