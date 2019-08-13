@@ -7,9 +7,6 @@
 	"license": "ISC",
 	"main": "build/index.js",
 	"types": "build/index.d.ts",
-	"publishConfig": {
-		"access": "public"
-	},
 	"scripts": {
 		"build": "tsc -p ./tsconfig.release.json",
 		"tslint": "tslint -t stylish --project \"tsconfig.json\" '{src,test}/**/*{.ts,.tsx}'",
