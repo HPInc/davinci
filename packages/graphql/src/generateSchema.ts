@@ -1,4 +1,4 @@
-import { GraphQLObjectType, GraphQLString, GraphQLFloat, GraphQLBoolean, GraphQLList } from 'graphql';
+import { GraphQLObjectType, GraphQLString, GraphQLFloat, GraphQLBoolean, GraphQLList, GraphQLNonNull } from 'graphql';
 import _fp from 'lodash/fp';
 
 const scalarDict = {
@@ -7,15 +7,22 @@ const scalarDict = {
 	boolean: GraphQLBoolean
 };
 
-export const getSchema = (theClass: Function, definitions = {}) => {
+export const getSchema = (theClass: any, schemas = {}) => {
 	const makeSchema = (typeOrClass, key?) => {
+		const fieldsMetadata = typeOrClass.prototype
+			? Reflect.getMetadata('tsgraphql:fields', typeOrClass.prototype)
+			: [];
+		const metadata = _fp.find({ key }, fieldsMetadata) || ({} as any);
+
 		// it's a primitive type, simple case
 		if ([String, Number, Boolean, Date].includes(typeOrClass)) {
 			if (typeOrClass === Date) {
 				return { type: 'string', format: 'date' };
 			}
 
-			return scalarDict[typeOrClass.name.toLowerCase()];
+			const type = scalarDict[typeOrClass.name.toLowerCase()];
+
+			return metadata.opts && metadata.opts.required ? GraphQLNonNull(type) : type;
 		}
 
 		// it's an array => recursively call makeSchema on the first array element
@@ -25,52 +32,43 @@ export const getSchema = (theClass: Function, definitions = {}) => {
 
 		// it's a class => create a definition nad recursively call makeSchema on the properties
 		if (typeof typeOrClass === 'function' || typeof typeOrClass === 'object') {
-			const metadata = Reflect.getMetadata('tsgraphql:object', typeOrClass);
-			const hasMetadata = !!metadata;
+			const name: string = metadata.name || typeOrClass.name || key;
 
-			const name: string = hasMetadata ? metadata.name : key || typeOrClass.name;
+			// already exists
+			if (schemas[name]) return schemas[name];
+
 			const definitionObj = {
+				...metadata.opts,
 				name,
 				fields: {}
-				/*
-				...(metadata || {}),
-				type: 'object'
-			*/
 			};
-			if (hasMetadata) {
-				if (definitions[name]) {
-					return name;
-				}
-			}
 
-			const props = Reflect.getMetadata('tsgraphql:props', typeOrClass.prototype) || [];
-			const fields = props.reduce((acc, { key, opts }) => {
+			definitionObj.fields = fieldsMetadata.reduce((acc, { key, opts }) => {
 				const type = (opts && opts.type) || Reflect.getMetadata('design:type', typeOrClass.prototype, key);
 				acc[key] = makeSchema(type, key);
 				return acc;
 			}, {});
 
-			if (!_fp.isEmpty(fields)) {
-				definitionObj.fields = fields;
-			}
-
 			// todo: required check
 
-			definitions[name] = new GraphQLObjectType(definitionObj);
+			schemas[name] =
+				metadata.opts && metadata.opts.required
+					? GraphQLNonNull(new GraphQLObjectType(definitionObj))
+					: new GraphQLObjectType(definitionObj);
 
-			return definitions[name];
+			return schemas[name];
 		}
 	};
 
 	const schema = makeSchema(theClass);
 
-	return { schema, definitions };
+	return { schema, schemas };
 };
 
 export const generateSchema = (theClass: Function) => {
 	if (theClass) {
-		const { definitions } = getSchema(theClass);
-		return definitions;
+		const { schemas } = getSchema(theClass);
+		return schemas;
 	}
 	return {};
 };

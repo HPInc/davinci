@@ -1,7 +1,8 @@
 import should from 'should';
+import { GraphQLObjectType, GraphQLString } from 'graphql';
 import { graphql } from '../../src';
 
-const { prop, getSchema } = graphql;
+const { field, getSchema } = graphql;
 
 describe('typed grapqhl', () => {
 	describe('#getSchema', () => {
@@ -11,13 +12,13 @@ describe('typed grapqhl', () => {
 				age: number;
 				isActive: boolean;
 			}
-			prop({
+			field({
 				type: String
 			})(Customer.prototype, 'firstname');
-			prop({
+			field({
 				type: Number
 			})(Customer.prototype, 'age');
-			prop({
+			field({
 				type: Boolean
 			})(Customer.prototype, 'isActive');
 			const { schema } = getSchema(Customer);
@@ -27,6 +28,9 @@ describe('typed grapqhl', () => {
 				.equal('Customer');
 			const fields = schema.getFields();
 			should(Object.keys(fields)).be.deepEqual(['firstname', 'age', 'isActive']);
+			should(fields.firstname.description).containEql('String');
+			should(fields.age.description).containEql('Float');
+			should(fields.isActive.description).containEql('Boolean');
 		});
 
 		it('supports nested classes', () => {
@@ -38,64 +42,63 @@ describe('typed grapqhl', () => {
 				birth: CustomerBirth;
 			}
 
-			prop({
+			field({
 				type: CustomerBirth
 			})(Customer.prototype, 'birth');
-			prop({
+			field({
 				type: String
 			})(CustomerBirth.prototype, 'place');
-			const schema = getSchema(Customer);
+			const { schemas } = getSchema(Customer);
 
-			should(schema).be.deepEqual({
-				birth: {
-					place: {
-						type: String
-					}
-				}
-			});
+			should(schemas)
+				.have.property('CustomerBirth')
+				.instanceOf(GraphQLObjectType);
+			should(schemas)
+				.have.property('Customer')
+				.instanceOf(GraphQLObjectType);
+
+			// @ts-ignore
+			const { Customer: C, CustomerBirth: CB } = schemas;
+			should(C.getFields()).have.property('birth');
+			// @ts-ignore
+			should(CB.getFields()).have.property('place');
 		});
 
 		it('supports arrays', () => {
-			class CustomerBirth {
-				place: string;
+			class CustomerPhone {
+				number: string;
 			}
 
 			class Customer {
-				birth: CustomerBirth[];
+				birth: CustomerPhone[];
 				tags: string[];
 			}
 
-			prop({
-				type: [CustomerBirth]
-			})(Customer.prototype, 'birth');
-			prop({
+			field({
+				type: [CustomerPhone]
+			})(Customer.prototype, 'phones');
+			field({
 				type: [String]
 			})(Customer.prototype, 'tags');
-			prop({
+			field({
 				type: String
-			})(CustomerBirth.prototype, 'place');
-			const schema = getSchema(Customer);
+			})(CustomerPhone.prototype, 'number');
+			const { schemas } = getSchema(Customer);
 
-			should(schema).be.deepEqual({
-				birth: [
-					{
-						place: {
-							type: String
-						}
-					}
-				],
-				tags: [{ type: String }]
-			});
+			// @ts-ignore
+			const { Customer: C, CustomerPhone: CB } = schemas;
+			should(Object.keys(C.getFields())).be.deepEqual(['phones', 'tags']);
+			should(Object.keys(CB.getFields())).be.deepEqual(['number']);
+
+			should(C.getFields().tags)
+				.have.property('ofType')
+				.equal(GraphQLString);
+
+			should(C.getFields().phones)
+				.have.property('ofType')
+				.instanceOf(GraphQLObjectType)
+				.have.property('name')
+				.equal('CustomerPhone');
 		});
 	});
-
-	/*describe('#generateModel', () => {
-		it('should generate a mongoose model', () => {
-			class Customer {
-				firstname: string;
-			}
-			const CustomerModel = generateModel(Customer);
-			should(CustomerModel.prototype).be.instanceOf(Model);
-		});
-	});*/
 });

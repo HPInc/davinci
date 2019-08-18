@@ -1,30 +1,32 @@
 import _ from 'lodash';
+import { ReturnTypeFunc, ReturnTypeFuncValue } from '../types';
 
 /**
  * It annotates a variable as schema prop
  * @param opts
  */
-export function prop(opts?: { type?: any; required?: boolean }) {
+export function field(opts?: { type?: any; required?: boolean }) {
 	// this is the decorator factory
 	return function(target: Object, key: string | symbol): void {
 		// this is the decorator
 
 		// get the existing metadata props
-		const props = Reflect.getMetadata('tsgraphql:props', target) || [];
+		const props = Reflect.getMetadata('tsgraphql:fields', target) || [];
 		props.push({ key, opts });
 		// define new metadata props
-		Reflect.defineMetadata('tsgraphql:props', props, target);
+		Reflect.defineMetadata('tsgraphql:fields', props, target);
 	};
 }
 
 /**
  * Decorator that annotate a query method
  * @param name
+ * @param returnType
  */
-export const Query = (name): Function => {
+export const query = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: string): Function => {
 	return function(target: Object, methodName: string | symbol) {
 		const queries = Reflect.getMetadata('tsgraphql:queries', target) || [];
-		queries.unshift({ name, methodName, handler: target[methodName] });
+		queries.unshift({ name, methodName, returnType, handler: target[methodName] });
 
 		Reflect.defineMetadata('tsgraphql:queries', queries, target);
 	};
@@ -34,7 +36,7 @@ export const Query = (name): Function => {
  * Decorator that annotate a mutation method
  * @param name
  */
-export const Mutation = (name): Function => {
+export const mutation = (name): Function => {
 	return function(target: Object, methodName: string | symbol) {
 		const queries = Reflect.getMetadata('tsgraphql:queries', target) || [];
 		queries.unshift({ name, methodName, handler: target[methodName] });
@@ -45,12 +47,12 @@ export const Mutation = (name): Function => {
 
 /**
  * Decorator that annotate a method parameter
- * @param options
+ * @param name
  */
-export function arg(options): Function {
+export function arg(name): Function {
 	return function(target: Object, methodName: string, index) {
 		// get the existing metadata props
-		const methodParameters = Reflect.getMetadata('tsgraphql:method-parameters', target) || [];
+		const methodParameters = Reflect.getMetadata('tsgraphql:args', target) || [];
 		const paramtypes = Reflect.getMetadata('design:paramtypes', target, methodName);
 		const isAlreadySet = !!_.find(methodParameters, { methodName, index });
 		if (isAlreadySet) return;
@@ -59,7 +61,7 @@ export function arg(options): Function {
 			target,
 			methodName,
 			index,
-			options,
+			name,
 			handler: target[methodName],
 			/*
 				The method: Reflect.getMetadata('design:paramtypes', target, methodName);
@@ -68,7 +70,7 @@ export function arg(options): Function {
 			 */
 			type: paramtypes && paramtypes[index]
 		});
-		Reflect.defineMetadata('tsgraphql:method-parameters', methodParameters, target);
+		Reflect.defineMetadata('tsgraphql:args', methodParameters, target);
 	};
 }
 
