@@ -1,0 +1,31 @@
+{
+	"name": "@davinci/graphql",
+	"version": "0.4.0",
+	"description": "Framework for rapid and consistent API development",
+	"main": "build/index.js",
+	"types": "build/index.d.ts",
+	"scripts": {
+		"build": "tsc -p ./tsconfig.release.json",
+		"tslint": "tslint -t stylish --project \"tsconfig.json\" '{src,test}/**/*{.ts,.tsx}'",
+		"tslintfix": "tslint --fix -c ../../tslint.json '{src,test}/**/*{.ts,.tsx}'",
+		"pretest": "npm run tslint && npm run build",
+		"test": "mocha --exit",
+		"cover": "nyc npm test"
+	},
+	"author": "Oneflow Systems (http://www.oneflowsystems.com/)",
+	"license": "ISC",
+	"dependencies": {
+		"bluebird": "3.5.0",
+		"debug": "^4.1.1",
+		"graphql": "14.4.2",
+		"lodash": "4.17.11",
+		"reflect-metadata": "0.1.13"
+	},
+	"devDependencies": {
+		"@types/graphql": "14.2.3",
+		"@types/mocha": "^5.2.6",
+		"tslib": "^1.9.3",
+		"tslint": "^5.16.0",
+		"typescript": "^3.4.5"
+	}
+}
