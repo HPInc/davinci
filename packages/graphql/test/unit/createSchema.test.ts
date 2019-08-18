@@ -1,6 +1,5 @@
 import should from 'should';
 import { graphql } from '../../src';
-import { print } from 'graphql';
 
 const { prop, getSchema } = graphql;
 
@@ -23,20 +22,11 @@ describe('typed grapqhl', () => {
 			})(Customer.prototype, 'isActive');
 			const { schema } = getSchema(Customer);
 
-			const schemaLanguage = print(schema);
-			console.log(schemaLanguage);
-
-			should(schema).be.deepEqual({
-				firstname: {
-					type: String
-				},
-				age: {
-					type: Number
-				},
-				isActive: {
-					type: Boolean
-				}
-			});
+			should(schema)
+				.have.property('name')
+				.equal('Customer');
+			const fields = schema.getFields();
+			should(Object.keys(fields)).be.deepEqual(['firstname', 'age', 'isActive']);
 		});
 
 		it('supports nested classes', () => {

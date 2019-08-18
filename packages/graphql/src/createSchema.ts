@@ -44,14 +44,14 @@ export const getSchema = (theClass: Function, definitions = {}) => {
 			}
 
 			const props = Reflect.getMetadata('tsgraphql:props', typeOrClass.prototype) || [];
-			const properties = props.reduce((acc, { key, opts }) => {
+			const fields = props.reduce((acc, { key, opts }) => {
 				const type = (opts && opts.type) || Reflect.getMetadata('design:type', typeOrClass.prototype, key);
 				acc[key] = makeSchema(type, key);
 				return acc;
 			}, {});
 
-			if (!_fp.isEmpty(properties)) {
-				definitionObj.fields = properties;
+			if (!_fp.isEmpty(fields)) {
+				definitionObj.fields = fields;
 			}
 
 			// todo: required check
