@@ -25,3 +25,4 @@ describe('createQueriesAndResolvers', () => {
 
 	console.log(queries);
 });
+

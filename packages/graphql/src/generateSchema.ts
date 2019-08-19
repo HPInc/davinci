@@ -13,21 +13,23 @@ export const getSchema = (theClass: any, schemas = {}) => {
 			? Reflect.getMetadata('tsgraphql:fields', typeOrClass.prototype)
 			: [];
 		const metadata = _fp.find({ key }, fieldsMetadata) || ({} as any);
+		const isRequired = metadata.opts && metadata.opts.required;
 
 		// it's a primitive type, simple case
 		if ([String, Number, Boolean, Date].includes(typeOrClass)) {
 			if (typeOrClass === Date) {
-				return { type: 'string', format: 'date' };
+				// TODO
+				// return { type: 'string', format: 'date', resolve: resolverFn };
 			}
 
-			const type = scalarDict[typeOrClass.name.toLowerCase()];
-
-			return metadata.opts && metadata.opts.required ? GraphQLNonNull(type) : type;
+			const gqlType = scalarDict[typeOrClass.name.toLowerCase()];
+			return isRequired ? GraphQLNonNull(gqlType) : gqlType;
 		}
 
 		// it's an array => recursively call makeSchema on the first array element
 		if (Array.isArray(typeOrClass)) {
-			return GraphQLList(makeSchema(typeOrClass[0], key));
+			const gqlType = GraphQLList(makeSchema(typeOrClass[0], key));
+			return isRequired ? GraphQLNonNull(gqlType) : gqlType;
 		}
 
 		// it's a class => create a definition nad recursively call makeSchema on the properties
@@ -40,12 +42,15 @@ export const getSchema = (theClass: any, schemas = {}) => {
 			const definitionObj = {
 				...metadata.opts,
 				name,
-				fields: {}
+				type: null
 			};
 
 			definitionObj.fields = fieldsMetadata.reduce((acc, { key, opts }) => {
+				const isResolver = typeof theClass.prototype[key] === 'function';
 				const type = (opts && opts.type) || Reflect.getMetadata('design:type', typeOrClass.prototype, key);
-				acc[key] = makeSchema(type, key);
+				const gqlType = makeSchema(type, key);
+				acc[key] = { type: gqlType, resolve: isResolver ? theClass.prototype[key] : null };
+
 				return acc;
 			}, {});
 
