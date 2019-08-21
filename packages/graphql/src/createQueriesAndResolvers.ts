@@ -1,44 +1,55 @@
 import _fp from 'lodash/fp';
 import _ from 'lodash';
+import { GraphQLNonNull } from 'graphql';
 import { getSchema } from './generateSchema';
 
-export const createQueriesAndResolvers = Controller => {
-	const queriesMetadata = Reflect.getMetadata('tsgraphql:queries', Controller.prototype) || [];
+export const createResolver = Controller => {
+	const { queries, schemas: queriesSchemas } = createResolversAndSchemas(Controller, 'queries', {});
+	const { mutations, schemas } = createResolversAndSchemas(Controller, 'mutations', queriesSchemas);
+
+	return { queries, mutations, schemas };
+};
+
+export const createResolversAndSchemas = (Controller, resolversType: 'queries' | 'mutations', schemas?) => {
+	const resolversMetadata = Reflect.getMetadata(`tsgraphql:${resolversType}`, Controller.prototype) || [];
 	const controllerArgs = _fp.flow(
 		_fp.sortBy('index'),
 		_fp.compact
 	)(Reflect.getMetadata('tsgraphql:args', Controller.prototype) || []);
 
-	const allSchemas = {};
+	const allSchemas = schemas || {};
 	const controller = new Controller();
 
-	const queries = queriesMetadata.reduce((acc, query) => {
+	const resolvers = resolversMetadata.reduce((acc, query) => {
 		const { methodName, name, returnType } = query;
-		const queryArgsMetadata = _.filter(controllerArgs, { methodName });
+		const resolverArgsMetadata = _.filter(controllerArgs, { methodName });
 		const { schema: graphqlReturnType, schemas } = getSchema(returnType, allSchemas);
-		Object.assign(allSchemas, schemas);
+		_.merge(allSchemas, schemas);
 
-		const { queryArgs, handlerArgsDefinition } = queryArgsMetadata.reduce(
+		const { resolverArgs, handlerArgsDefinition } = resolverArgsMetadata.reduce(
 			(acc, arg: any) => {
-				const { type, name } = arg;
+				const { type, name, opts } = arg;
+
+				const { required = false } = opts || {};
 				let graphqlArgType = type;
 				if (type === 'context') {
 					acc.handlerArgsDefinition.push({ name, isContext: true });
 					return acc;
 				}
 
-				const { schema: gArgType } = getSchema(type);
-				graphqlArgType = gArgType;
+				const { schema: gArgType } = getSchema(type, allSchemas, { isInput: true });
+				graphqlArgType = required ? GraphQLNonNull(gArgType) : gArgType;
 
-				acc.queryArgs[name] = { type: graphqlArgType };
+				acc.resolverArgs[name] = { type: graphqlArgType };
+				acc.handlerArgsDefinition.push({ name });
 				return acc;
 			},
-			{ queryArgs: {}, handlerArgsDefinition: [] }
+			{ resolverArgs: {}, handlerArgsDefinition: [] }
 		);
 
 		acc[name || methodName] = {
 			type: graphqlReturnType,
-			args: queryArgs,
+			args: resolverArgs,
 			resolve(_, args, context) {
 				const handlerArgs = handlerArgsDefinition.map(({ name, isContext }) => {
 					if (isContext) return context;
@@ -52,7 +63,7 @@ export const createQueriesAndResolvers = Controller => {
 		return acc;
 	}, {});
 
-	return { queries, schemas: allSchemas };
+	return { [resolversType]: resolvers, schemas: allSchemas };
 };
 
-export default createQueriesAndResolvers;
+export default createResolver;

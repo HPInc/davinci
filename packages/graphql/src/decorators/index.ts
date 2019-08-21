@@ -35,21 +35,23 @@ export const query = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: s
 /**
  * Decorator that annotate a mutation method
  * @param name
+ * @param returnType
  */
-export const mutation = (name): Function => {
+export const mutation = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: string): Function => {
 	return function(target: Object, methodName: string | symbol) {
-		const queries = Reflect.getMetadata('tsgraphql:queries', target) || [];
-		queries.unshift({ name, methodName, handler: target[methodName] });
+		const mutations = Reflect.getMetadata('tsgraphql:mutations', target) || [];
+		mutations.unshift({ name, methodName, returnType, handler: target[methodName] });
 
-		Reflect.defineMetadata('tsgraphql:queries', queries, target);
+		Reflect.defineMetadata('tsgraphql:mutations', mutations, target);
 	};
 };
 
 /**
  * Decorator that annotate a method parameter
  * @param name
+ * @param opts
  */
-export function arg(name): Function {
+export function arg(name, opts?): Function {
 	return function(target: Object, methodName: string, index) {
 		// get the existing metadata props
 		const methodParameters = Reflect.getMetadata('tsgraphql:args', target) || [];
@@ -62,6 +64,7 @@ export function arg(name): Function {
 			methodName,
 			index,
 			name,
+			opts,
 			handler: target[methodName],
 			/*
 				The method: Reflect.getMetadata('design:paramtypes', target, methodName);

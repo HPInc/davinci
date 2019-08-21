@@ -1,5 +1,15 @@
-import { GraphQLObjectType, GraphQLString, GraphQLFloat, GraphQLBoolean, GraphQLList, GraphQLNonNull } from 'graphql';
+import {
+	GraphQLObjectType,
+	GraphQLString,
+	GraphQLFloat,
+	GraphQLBoolean,
+	GraphQLList,
+	GraphQLNonNull,
+	GraphQLInputObjectType
+} from 'graphql';
+import { GraphQLDateTime } from 'graphql-iso-date';
 import _fp from 'lodash/fp';
+import _ from 'lodash';
 
 const scalarDict = {
 	number: GraphQLFloat,
@@ -7,8 +17,16 @@ const scalarDict = {
 	boolean: GraphQLBoolean
 };
 
-export const getSchema = (theClass: any, schemas = {}) => {
+const defaultOptions = {
+	isInput: false
+};
+
+export const getSchema = (theClass: any, schemas = {}, options?) => {
+	const { isInput } = _.merge({}, defaultOptions, options);
+	const ObjectType = isInput ? GraphQLInputObjectType : GraphQLObjectType;
+
 	const makeSchema = (typeOrClass, key?) => {
+		// maybe it's a decorated class, let's try to get the fields metadata
 		const fieldsMetadata = typeOrClass.prototype
 			? Reflect.getMetadata('tsgraphql:fields', typeOrClass.prototype)
 			: [];
@@ -17,12 +35,7 @@ export const getSchema = (theClass: any, schemas = {}) => {
 
 		// it's a primitive type, simple case
 		if ([String, Number, Boolean, Date].includes(typeOrClass)) {
-			if (typeOrClass === Date) {
-				// TODO
-				// return { type: 'string', format: 'date', resolve: resolverFn };
-			}
-
-			const gqlType = scalarDict[typeOrClass.name.toLowerCase()];
+			const gqlType = typeOrClass === Date ? GraphQLDateTime : scalarDict[typeOrClass.name.toLowerCase()];
 			return isRequired ? GraphQLNonNull(gqlType) : gqlType;
 		}
 
@@ -34,8 +47,12 @@ export const getSchema = (theClass: any, schemas = {}) => {
 
 		// it's a class => create a definition nad recursively call makeSchema on the properties
 		if (typeof typeOrClass === 'function' || typeof typeOrClass === 'object') {
-			const name: string = metadata.name || typeOrClass.name || key;
+			const suffix = isInput ? 'Input' : '';
+			const name: string = `${metadata.name || typeOrClass.name || key}${suffix}`;
 
+			if (name === '$and') {
+				console.log('asd');
+			}
 			// already exists
 			if (schemas[name]) return schemas[name];
 
@@ -45,11 +62,15 @@ export const getSchema = (theClass: any, schemas = {}) => {
 				type: null
 			};
 
-			definitionObj.fields = fieldsMetadata.reduce((acc, { key, opts }) => {
-				const isResolver = typeof theClass.prototype[key] === 'function';
+			definitionObj.fields = () => fieldsMetadata.reduce((acc, { key, opts }) => {
+				const isResolver = theClass.prototype && typeof theClass.prototype[key] === 'function';
 				const type = (opts && opts.type) || Reflect.getMetadata('design:type', typeOrClass.prototype, key);
 				const gqlType = makeSchema(type, key);
-				acc[key] = { type: gqlType, resolve: isResolver ? theClass.prototype[key] : null };
+				acc[key] = { type: gqlType };
+
+				if (isResolver && !isInput) {
+					acc[key].resolve = theClass.prototype[key];
+				}
 
 				return acc;
 			}, {});
@@ -58,8 +79,8 @@ export const getSchema = (theClass: any, schemas = {}) => {
 
 			schemas[name] =
 				metadata.opts && metadata.opts.required
-					? GraphQLNonNull(new GraphQLObjectType(definitionObj))
-					: new GraphQLObjectType(definitionObj);
+					? GraphQLNonNull(new ObjectType(definitionObj))
+					: new ObjectType(definitionObj);
 
 			return schemas[name];
 		}
