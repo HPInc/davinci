@@ -10,6 +10,7 @@ import {
 import { GraphQLDateTime } from 'graphql-iso-date';
 import _fp from 'lodash/fp';
 import _ from 'lodash';
+import { IFieldDecoratorMetadata } from './types';
 
 const scalarDict = {
 	number: GraphQLFloat,
@@ -27,10 +28,10 @@ export const getSchema = (theClass: any, schemas = {}, options?) => {
 
 	const makeSchema = (typeOrClass, key?) => {
 		// maybe it's a decorated class, let's try to get the fields metadata
-		const fieldsMetadata = typeOrClass.prototype
+		const fieldsMetadata: IFieldDecoratorMetadata[] = typeOrClass.prototype
 			? Reflect.getMetadata('tsgraphql:fields', typeOrClass.prototype)
 			: [];
-		const metadata = _fp.find({ key }, fieldsMetadata) || ({} as any);
+		const metadata = (_fp.find({ key }, fieldsMetadata) || {}) as IFieldDecoratorMetadata;
 		const isRequired = metadata.opts && metadata.opts.required;
 
 		// it's a primitive type, simple case
@@ -48,32 +49,33 @@ export const getSchema = (theClass: any, schemas = {}, options?) => {
 		// it's a class => create a definition nad recursively call makeSchema on the properties
 		if (typeof typeOrClass === 'function' || typeof typeOrClass === 'object') {
 			const suffix = isInput ? 'Input' : '';
-			const name: string = `${metadata.name || typeOrClass.name || key}${suffix}`;
+			const name: string = `${metadata.key || typeOrClass.name || key}${suffix}`;
 
-			if (name === '$and') {
-				console.log('asd');
-			}
 			// already exists
 			if (schemas[name]) return schemas[name];
 
-			const definitionObj = {
+			const definitionObj: any = {
 				...metadata.opts,
 				name,
-				type: null
+				fields: () =>
+					fieldsMetadata.reduce((acc, { key, opts }) => {
+						const type =
+							(opts && opts.type) || Reflect.getMetadata('design:type', typeOrClass.prototype, key);
+						const gqlType = makeSchema(type, key);
+						acc[key] = { type: gqlType };
+
+						const typeClass = Array.isArray(theClass) ? theClass[0] : theClass;
+						const isResolver = typeClass.prototype && typeof typeClass.prototype[key] === 'function';
+
+						if (isResolver && !isInput) {
+							acc[key].resolve = typeClass.prototype[key];
+						}
+
+						return acc;
+					}, {})
 			};
 
-			definitionObj.fields = () => fieldsMetadata.reduce((acc, { key, opts }) => {
-				const isResolver = theClass.prototype && typeof theClass.prototype[key] === 'function';
-				const type = (opts && opts.type) || Reflect.getMetadata('design:type', typeOrClass.prototype, key);
-				const gqlType = makeSchema(type, key);
-				acc[key] = { type: gqlType };
-
-				if (isResolver && !isInput) {
-					acc[key].resolve = theClass.prototype[key];
-				}
-
-				return acc;
-			}, {});
+			// definitionObj.;
 
 			// todo: required check
 

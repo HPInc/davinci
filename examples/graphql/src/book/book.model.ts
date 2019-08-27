@@ -1,10 +1,10 @@
 import { Document, model } from 'mongoose';
 import { mgoose } from '@davinci/mongoose';
-import CustomerSchema from './customer.schema';
+import BookSchema from './book.schema';
 
 const { generateSchema, beforeRead, beforeWrite, beforeDelete } = mgoose;
 
-const schema = generateSchema(CustomerSchema);
+const schema = generateSchema(BookSchema);
 
 beforeRead(schema, (mQuery, context) => {
 	const currentQuery = mQuery.getQuery();
@@ -23,6 +23,6 @@ beforeDelete(schema, (...args) => {
 	console.log(...args);
 });
 
-const Customer = model<CustomerSchema & Document>('Customer', schema, 'customers');
+const Book = model<BookSchema & Document>('Book', schema, 'books');
 
-export default Customer;
+export default Book;

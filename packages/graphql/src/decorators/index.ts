@@ -1,17 +1,17 @@
 import _ from 'lodash';
-import { ReturnTypeFunc, ReturnTypeFuncValue } from '../types';
+import { ReturnTypeFunc, ReturnTypeFuncValue, IFieldDecoratorOptions, IFieldDecoratorMetadata } from '../types';
 
 /**
  * It annotates a variable as schema prop
  * @param opts
  */
-export function field(opts?: { type?: any; required?: boolean }) {
+export function field(opts?: IFieldDecoratorOptions) {
 	// this is the decorator factory
 	return function(target: Object, key: string | symbol): void {
 		// this is the decorator
 
 		// get the existing metadata props
-		const props = Reflect.getMetadata('tsgraphql:fields', target) || [];
+		const props: IFieldDecoratorMetadata[] = Reflect.getMetadata('tsgraphql:fields', target) || [];
 		props.push({ key, opts });
 		// define new metadata props
 		Reflect.defineMetadata('tsgraphql:fields', props, target);
@@ -49,9 +49,9 @@ export const mutation = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?
 /**
  * Decorator that annotate a method parameter
  * @param name
- * @param opts
+ * @param options
  */
-export function arg(name, opts?): Function {
+export function arg(name, options?: { required?: boolean }): Function {
 	return function(target: Object, methodName: string, index) {
 		// get the existing metadata props
 		const methodParameters = Reflect.getMetadata('tsgraphql:args', target) || [];
@@ -64,7 +64,7 @@ export function arg(name, opts?): Function {
 			methodName,
 			index,
 			name,
-			opts,
+			opts: options,
 			handler: target[methodName],
 			/*
 				The method: Reflect.getMetadata('design:paramtypes', target, methodName);

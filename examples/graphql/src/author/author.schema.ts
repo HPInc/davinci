@@ -2,7 +2,7 @@ import { Schema } from 'mongoose';
 import { mgoose } from '@davinci/mongoose';
 import { graphql } from '@davinci/graphql';
 
-class CustomerPhone {
+class AuthorPhone {
 	@mgoose.prop()
 	@graphql.field()
 	number: string;
@@ -17,7 +17,7 @@ class BirthType {
 }
 
 @mgoose.index({ firstname: 1, lastname: 1 }, { unique: true })
-export default class Customer {
+export default class Author {
 	@graphql.field()
 	id: string;
 
@@ -35,11 +35,11 @@ export default class Customer {
 
 	@mgoose.prop()
 	@graphql.field()
-	weight: number;
+	weight: string;
 
-	@mgoose.prop({ type: [CustomerPhone] })
-	@graphql.field({ type: [CustomerPhone] })
-	phones: CustomerPhone[];
+	@mgoose.prop({ type: [AuthorPhone] })
+	@graphql.field({ type: [AuthorPhone] })
+	phones: AuthorPhone[];
 
 	@mgoose.prop({ type: Schema.Types.ObjectId })
 	@graphql.field()
@@ -65,7 +65,7 @@ export default class Customer {
 	getPrototypeSomething() {}
 }
 
-export class CustomerQuery extends Customer {
-	@graphql.field({ type: [Customer] })
-	and: [Customer];
+export class AuthorQuery extends Author {
+	@graphql.field({ type: [Author] })
+	and: [Author];
 }

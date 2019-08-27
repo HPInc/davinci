@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 module.exports = async app => {
 	mongoose.Promise = global.Promise;
-	const mongodbUrl = process.env.MONGODB_URL || 'mongodb://localhost:27017/customer-api';
+	const mongodbUrl = process.env.MONGODB_URL || 'mongodb://localhost:27017/author-api';
 	await mongoose.connect(
 		mongodbUrl,
 		{ useNewUrlParser: true }

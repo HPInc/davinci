@@ -1,21 +1,30 @@
 import { GraphQLSchema, GraphQLObjectType } from 'graphql';
 import { ApolloServer } from 'apollo-server-express';
 import _ from 'lodash';
-import { createResolver } from './createQueriesAndResolvers';
+import { createControllerSchemas } from './createResolversAndSchemas';
+import { ClassType } from './types';
 
-export const createApolloServer = (app, { controllers }) => {
-	const { queries: queryFields, mutations: mutationsFields } = (controllers || []).reduce(
+export interface ICreateApolloServerArgs {
+	controllers: ClassType[];
+	context?: Function | object;
+}
+
+export const createApolloServer = (app, { controllers, context }: ICreateApolloServerArgs) => {
+	const { queries: queryFields, mutations: mutationsFields, schemas: allSchemas } = (controllers || []).reduce(
 		(acc, controller) => {
-			const { queries, mutations } = createResolver(controller);
+			const { queries, mutations, schemas } = createControllerSchemas(controller, allSchemas);
 			if (queries) {
 				acc.queries = _.merge({}, acc.queries || {}, queries);
 			}
 			if (mutations) {
 				acc.mutations = _.merge(acc.mutations || {}, mutations);
 			}
+			if (schemas) {
+				acc.schemas = _.merge(acc.schemas || {}, schemas);
+			}
 			return acc;
 		},
-		{ queries: null, mutations: null }
+		{ queries: null, mutations: null, schemas: null }
 	);
 
 	const schema = new GraphQLSchema({
@@ -36,7 +45,10 @@ export const createApolloServer = (app, { controllers }) => {
 			  })
 			: null
 	});
-	const server = new ApolloServer({ schema });
+	const server = new ApolloServer({
+		schema,
+		context
+	});
 
 	server.applyMiddleware({ app });
 

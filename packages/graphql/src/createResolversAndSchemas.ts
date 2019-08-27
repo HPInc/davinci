@@ -3,16 +3,25 @@ import _ from 'lodash';
 import { GraphQLNonNull } from 'graphql';
 import { getSchema } from './generateSchema';
 
-export const createResolver = Controller => {
-	const { queries, schemas: queriesSchemas } = createResolversAndSchemas(Controller, 'queries', {});
+const DEFAULT_VALUE = { queries: {}, mutations: {}, schemas: {} };
+
+/**
+ *
+ * @param Controller
+ * @param {queries, mutations, schemas}
+ */
+export const createControllerSchemas = (Controller, { queries: q, mutations: m, schemas: s } = DEFAULT_VALUE) => {
+	const { queries, schemas: queriesSchemas } = createResolversAndSchemas(Controller, 'queries', s);
 	const { mutations, schemas } = createResolversAndSchemas(Controller, 'mutations', queriesSchemas);
 
-	return { queries, mutations, schemas };
+	return { queries: { ...q, ...queries }, mutations: { ...m, ...mutations }, schemas };
 };
 
 export const createResolversAndSchemas = (Controller, resolversType: 'queries' | 'mutations', schemas?) => {
 	const resolversMetadata = Reflect.getMetadata(`tsgraphql:${resolversType}`, Controller.prototype) || [];
+	const contextMetadata = Reflect.getMetadata('tscontroller:context', Controller.prototype);
 	const controllerArgs = _fp.flow(
+		_fp.concat(contextMetadata),
 		_fp.sortBy('index'),
 		_fp.compact
 	)(Reflect.getMetadata('tsgraphql:args', Controller.prototype) || []);
@@ -50,7 +59,9 @@ export const createResolversAndSchemas = (Controller, resolversType: 'queries' |
 		acc[name || methodName] = {
 			type: graphqlReturnType,
 			args: resolverArgs,
-			resolve(_, args, context) {
+			resolve(_, args, context, info) {
+				console.log(info.nothing);
+
 				const handlerArgs = handlerArgsDefinition.map(({ name, isContext }) => {
 					if (isContext) return context;
 
@@ -66,4 +77,4 @@ export const createResolversAndSchemas = (Controller, resolversType: 'queries' |
 	return { [resolversType]: resolvers, schemas: allSchemas };
 };
 
-export default createResolver;
+export default createControllerSchemas;

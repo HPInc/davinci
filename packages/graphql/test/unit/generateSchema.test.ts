@@ -47,9 +47,6 @@ describe('schema generation', () => {
 			const { schemas } = getSchema(Customer);
 
 			should(schemas)
-				.have.property('CustomerBirth')
-				.instanceOf(GraphQLObjectType);
-			should(schemas)
 				.have.property('Customer')
 				.instanceOf(GraphQLObjectType);
 
