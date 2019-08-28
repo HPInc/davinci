@@ -1,4 +1,3 @@
-// import 'reflect-metadata';
 import { Reflector } from '@davinci/reflector';
 import find from 'lodash/find';
 
