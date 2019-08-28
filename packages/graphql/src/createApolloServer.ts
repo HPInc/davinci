@@ -1,5 +1,6 @@
 import { GraphQLSchema, GraphQLObjectType } from 'graphql';
 import { ApolloServer } from 'apollo-server-express';
+import { IOfBaseExpress } from '@davinci/core';
 import _ from 'lodash';
 import { createControllerSchemas } from './createResolversAndSchemas';
 import { ClassType } from './types';
@@ -9,7 +10,7 @@ export interface ICreateApolloServerArgs {
 	context?: Function | object;
 }
 
-export const createApolloServer = (app, { controllers, context }: ICreateApolloServerArgs) => {
+export const createApolloServer = (app: IOfBaseExpress, { controllers, context }: ICreateApolloServerArgs) => {
 	const { queries: queryFields, mutations: mutationsFields, schemas: allSchemas } = (controllers || []).reduce(
 		(acc, controller) => {
 			const { queries, mutations, schemas } = createControllerSchemas(controller, allSchemas);

@@ -20,8 +20,8 @@ export function field(opts?: IFieldDecoratorOptions) {
 
 /**
  * Decorator that annotate a query method
- * @param name
- * @param returnType
+ * @param returnType - The return type or class of the resolver
+ * @param name - Optional name
  */
 export const query = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: string): Function => {
 	return function(target: Object, methodName: string | symbol) {
@@ -34,8 +34,8 @@ export const query = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: s
 
 /**
  * Decorator that annotate a mutation method
- * @param name
- * @param returnType
+ * @param returnType - The return type or class of the resolver
+ * @param name - Optional name
  */
 export const mutation = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: string): Function => {
 	return function(target: Object, methodName: string | symbol) {
