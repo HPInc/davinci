@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { Reflector } from '@davinci/reflector';
 import { IMethodParameter, IMethodParameterBase } from '../types/openapi';
 
 interface IMethodResponseOutput {
@@ -25,7 +26,7 @@ export const createRouteMethodDecorator = verb =>
 	function({ path, summary, description, responses }: IMethodDecoratorOptions): Function {
 		return function(target: Object, methodName: string | symbol) {
 			// get the existing metadata props
-			const methods = Reflect.getMetadata('tsopenapi:methods', target) || [];
+			const methods = Reflector.getMetadata('tsopenapi:methods', target) || [];
 			const meta = { path, verb, methodName, summary, description, responses, handler: target[methodName] };
 			let methodIndex = _.findIndex(methods, { methodName });
 			methodIndex = methodIndex > -1 ? methodIndex : _.findIndex(methods, { path, verb });
@@ -34,7 +35,7 @@ export const createRouteMethodDecorator = verb =>
 			}
 			methods.unshift(meta);
 			// define new metadata methods
-			Reflect.defineMetadata('tsopenapi:methods', methods, target);
+			Reflector.defineMetadata('tsopenapi:methods', methods, target);
 		};
 	};
 
@@ -52,8 +53,8 @@ export const head = createRouteMethodDecorator('head');
 export function param(options: IMethodParameter): Function {
 	return function(target: Object, methodName: string, index) {
 		// get the existing metadata props
-		const methodParameters = Reflect.getMetadata('tsopenapi:method-parameters', target) || [];
-		const paramtypes = Reflect.getMetadata('design:paramtypes', target, methodName);
+		const methodParameters = Reflector.getMetadata('tsopenapi:method-parameters', target) || [];
+		const paramtypes = Reflector.getMetadata('design:paramtypes', target, methodName);
 		const meta = {
 			target,
 			methodName,
@@ -75,7 +76,7 @@ export function param(options: IMethodParameter): Function {
 			methodParameters.unshift(meta);
 		}
 
-		Reflect.defineMetadata('tsopenapi:method-parameters', methodParameters, target);
+		Reflector.defineMetadata('tsopenapi:method-parameters', methodParameters, target);
 	};
 }
 
@@ -115,6 +116,6 @@ export interface IControllerDecoratorArgs {
 export function controller(args?: IControllerDecoratorArgs): Function {
 	return function(target: Object) {
 		// define new metadata props
-		Reflect.defineMetadata('tsopenapi:controller', args, target);
+		Reflector.defineMetadata('tsopenapi:controller', args, target);
 	};
 }

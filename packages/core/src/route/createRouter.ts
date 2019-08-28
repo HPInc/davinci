@@ -5,6 +5,7 @@ import _ from 'lodash';
 import _fp from 'lodash/fp';
 import Promise from 'bluebird';
 import path from 'path';
+import { Reflector } from '@davinci/reflector';
 
 import * as errors from '../errors/httpErrors';
 import * as openapiDocs from './openapi/openapiDocs';
@@ -164,16 +165,16 @@ const makeHandlerFunction = (operation, controller, functionName, definitions, c
 
 	// get middlewares
 	const methodMiddlewaresMeta = _.filter(
-		Reflect.getMetadata('tsexpress:method-middleware', controller.constructor.prototype),
+		Reflector.getMetadata('tsexpress:method-middleware', controller.constructor.prototype),
 		{ handler: controller[functionName] }
 	);
-	const controllerMiddlewaresMeta = Reflect.getMetadata('tsexpress:method-middleware', controller.constructor) || [];
+	const controllerMiddlewaresMeta = Reflector.getMetadata('tsexpress:method-middleware', controller.constructor) || [];
 	const allMiddlewaresMeta = [...controllerMiddlewaresMeta, ...methodMiddlewaresMeta];
 	const beforeMiddlewares = allMiddlewaresMeta.filter(m => m.stage === 'before');
 	const afterMiddlewares = allMiddlewaresMeta.filter(m => m.stage === 'after');
 
 	// get response headers
-	const responseHeadersMeta = Reflect.getMetadata(
+	const responseHeadersMeta = Reflector.getMetadata(
 		'tsexpress:method-response-header',
 		controller.constructor.prototype
 	);
@@ -214,14 +215,13 @@ const makeHandlerFunction = (operation, controller, functionName, definitions, c
 
 export const createRouteHandlers = (controller, definition, contextFactory?) => {
 	const routeHandlers = [];
-	const methods = Reflect.getMetadata('tsopenapi:methods', controller.constructor.prototype) || [];
+	const methods = Reflector.getMetadata('tsopenapi:methods', controller.constructor.prototype) || [];
 
 	// for each path
 	_.each(methods, method => {
-		const operation =
-			definition.paths[method.path] && [method.verb]
-				? definition.paths[method.path][method.verb]
-				: null;
+		const operation = definition.paths[method.path] && [method.verb]
+			? definition.paths[method.path][method.verb]
+			: null;
 
 		// only add it if the controller method exists, otherwise ignore it
 		if (!controller[method.methodName] || !operation) return;
@@ -255,7 +255,7 @@ const createRouterAndSwaggerDoc = (Controller, rsName?, contextFactory?): Router
 	const resourceName = rsName || Controller.name.replace(/Controller$/, '').toLowerCase();
 
 	// get controller metadata
-	const metadata = Reflect.getMetadata('tsopenapi:controller', Controller) || {};
+	const metadata = Reflector.getMetadata('tsopenapi:controller', Controller) || {};
 	const basepath = metadata.basepath || '';
 	const resourceSchema = metadata.resourceSchema;
 	const additionalSchemas = metadata.additionalSchemas;

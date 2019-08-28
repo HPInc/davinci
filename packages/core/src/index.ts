@@ -1,4 +1,4 @@
-import 'reflect-metadata';
+// import 'reflect-metadata';
 import { Express } from 'express';
 import { Server } from 'http';
 

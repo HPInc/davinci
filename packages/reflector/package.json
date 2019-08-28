@@ -1,7 +1,7 @@
 {
-	"name": "@davinci/core",
+	"name": "@davinci/reflector",
 	"version": "0.4.0",
-	"description": "Framework for rapid and consistent API development",
+	"description": "Utility module used for metedata reflection",
 	"main": "build/index.js",
 	"types": "build/index.d.ts",
 	"scripts": {
@@ -15,22 +15,10 @@
 	"author": "Oneflow Systems (http://www.oneflowsystems.com/)",
 	"license": "ISC",
 	"dependencies": {
-		"@davinci/reflector": "^0.4.0",
-		"@godaddy/terminus": "4.1.0",
-		"@types/mocha": "^5.2.6",
-		"ajv": "6.2.1",
-		"bluebird": "3.5.0",
-		"debug": "^4.1.1",
-		"express": "^4.16.4",
-		"lodash": "4.17.11",
-		"reflect-metadata": "0.1.13",
-		"require-dir": "0.3.2",
-		"swagger-ui-express": "^4.0.7"
-	},
-	"peerDependencies": {
-		"mongoose": "5.5.5"
+		"reflect-metadata": "0.1.13"
 	},
 	"devDependencies": {
+		"@types/mocha": "^5.2.6",
 		"tslib": "^1.9.3",
 		"tslint": "^5.16.0",
 		"typescript": "^3.4.5"
