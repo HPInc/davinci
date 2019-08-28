@@ -31,4 +31,14 @@ describe('Reflector', () => {
 
 		should(metadataValue).be.deepEqual(['secondValue', 'firstValue']);
 	});
+
+	it('should return the function parameter names', () => {
+		const myFunction = (first, second, third) => {
+			return [first, second, third];
+		};
+
+		const parameterNames = Reflector.getParameterNames(myFunction);
+
+		should(parameterNames).be.deepEqual(['first', 'second', 'third']);
+	});
 });

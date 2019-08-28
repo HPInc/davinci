@@ -55,6 +55,10 @@ export function param(options: IMethodParameter): Function {
 		// get the existing metadata props
 		const methodParameters = Reflector.getMetadata('tsopenapi:method-parameters', target) || [];
 		const paramtypes = Reflector.getMetadata('design:paramtypes', target, methodName);
+		if (!options.name) {
+			const methodParameterNames = Reflector.getParameterNames(target[methodName]);
+			options.name = methodParameterNames[index];
+		}
 		const meta = {
 			target,
 			methodName,
@@ -85,7 +89,7 @@ type CreateParamDecoratorFunctionArg = IMethodParameterBase | ParameterName;
 
 // TODO: use openApi 3 requestBody for 'body'
 export const createParamDecorator = (inKey: 'path' | 'query' | 'body') => (
-	opts: CreateParamDecoratorFunctionArg
+	opts?: CreateParamDecoratorFunctionArg
 ): Function => {
 	let options;
 	if (typeof opts === 'string') {

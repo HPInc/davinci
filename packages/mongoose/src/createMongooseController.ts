@@ -103,7 +103,7 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 		}
 
 		@route.get({ path: '/', summary: 'List', responses: { 200: ListResponseSchema } })
-		public async find(@route.param({ name: 'query', in: 'query' }) query: QueryParameters, @context() context) {
+		public async find(@route.query() query: QueryParameters, @context() context) {
 			if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 			const { limit, skip, sort, select, populate, where } = this.parseQuery(query, context);
 			const mQuery = this.model.find(where, select, { limit, skip, sort, context });
@@ -121,7 +121,7 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 			};
 		}
 
-		public async findOne(@route.param({ name: 'query', in: 'query' }) query, @context() context) {
+		public async findOne(@route.query() query, @context() context) {
 			if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 			const { sort, select, populate, where } = this.parseQuery(query);
 			const mQuery = this.model.findOne(where, select, { sort, context });
@@ -139,10 +139,7 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 
 		@route.get({ path: '/:id', summary: 'Fetch by id', responses: { 200: RSchema } })
 		public async findById(
-			@route.param({
-				name: 'id',
-				in: 'path'
-			})
+			@route.path()
 			id: string,
 			@route.param({ name: 'query', in: 'query' }) query: QueryParameters,
 			@context() context
@@ -153,7 +150,7 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 		}
 
 		@route.post({ path: '/', summary: 'Create', responses: { 200: RSchema } })
-		public async create(@route.param({ name: 'data', in: 'body' }) data: RSchema, @context() context) {
+		public async create(@route.body() data: RSchema, @context() context) {
 			if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 			const [record] = await this.model.create([data], { context });
 
@@ -162,12 +159,9 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 
 		@route.patch({ path: '/:id', summary: 'Update', responses: { 200: RSchema } })
 		public async updateById(
-			@route.param({
-				name: 'id',
-				in: 'path'
-			})
+			@route.path()
 			id: string,
-			@route.param({ name: 'data', in: 'body' }) data: RSchema,
+			@route.body() data: RSchema,
 			@context() context
 		) {
 			if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
@@ -186,7 +180,7 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 		}
 
 		@route.del({ path: '/:id', summary: 'Delete', responses: { 200: RSchema } })
-		public async deleteById(@route.param({ name: 'id', in: 'path' }) id: string, @context() context) {
+		public async deleteById(@route.path() id: string, @context() context) {
 			if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 			const removed = await this.model.findOneAndDelete({ _id: id }, { context });
 
