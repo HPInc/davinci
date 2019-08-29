@@ -2,7 +2,7 @@
 	"name": "@davinci/mongoose",
 	"version": "0.4.2",
 	"description": "> TODO: description",
-	"author": "Piero Maltese <maltesepiero@gmail.com>",
+	"author": "HP",
 	"homepage": "",
 	"license": "ISC",
 	"main": "build/index.js",

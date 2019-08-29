@@ -9,7 +9,7 @@
 		"dev": "DEBUG=* ts-node ./src/index.ts"
 	},
 	"keywords": [],
-	"author": "Piero Maltese <maltesepiero@gmail.com>",
+	"author": "HP",
 	"license": "ISC",
 	"dependencies": {
 		"@davinci/core": "^0.4.0",

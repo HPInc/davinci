@@ -1,7 +1,7 @@
 {
 	"name": "@davinci/reflector",
 	"version": "0.4.0",
-	"description": "Utility module used for metedata reflection",
+	"description": "Utility module used for metadata reflection",
 	"main": "build/index.js",
 	"types": "build/index.d.ts",
 	"scripts": {
@@ -12,7 +12,7 @@
 		"test": "mocha --exit",
 		"cover": "nyc npm test"
 	},
-	"author": "Oneflow Systems (http://www.oneflowsystems.com/)",
+	"author": "HP",
 	"license": "ISC",
 	"dependencies": {
 		"reflect-metadata": "0.1.13"

@@ -168,7 +168,8 @@ const makeHandlerFunction = (operation, controller, functionName, definitions, c
 		Reflector.getMetadata('tsexpress:method-middleware', controller.constructor.prototype),
 		{ handler: controller[functionName] }
 	);
-	const controllerMiddlewaresMeta = Reflector.getMetadata('tsexpress:method-middleware', controller.constructor) || [];
+	const controllerMiddlewaresMeta =
+		Reflector.getMetadata('tsexpress:method-middleware', controller.constructor) || [];
 	const allMiddlewaresMeta = [...controllerMiddlewaresMeta, ...methodMiddlewaresMeta];
 	const beforeMiddlewares = allMiddlewaresMeta.filter(m => m.stage === 'before');
 	const afterMiddlewares = allMiddlewaresMeta.filter(m => m.stage === 'after');
@@ -219,9 +220,10 @@ export const createRouteHandlers = (controller, definition, contextFactory?) => 
 
 	// for each path
 	_.each(methods, method => {
-		const operation = definition.paths[method.path] && [method.verb]
-			? definition.paths[method.path][method.verb]
-			: null;
+		const operation =
+			definition.paths[method.path] && definition.paths[method.path][method.verb]
+				? definition.paths[method.path][method.verb]
+				: null;
 
 		// only add it if the controller method exists, otherwise ignore it
 		if (!controller[method.methodName] || !operation) return;

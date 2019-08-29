@@ -12,7 +12,7 @@
 		"test": "mocha --exit",
 		"cover": "nyc npm test"
 	},
-	"author": "Oneflow Systems (http://www.oneflowsystems.com/)",
+	"author": "HP",
 	"license": "ISC",
 	"dependencies": {
 		"@davinci/reflector": "^0.4.0",
