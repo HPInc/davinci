@@ -93,7 +93,7 @@ export const getSchema = (theClass: any, schemas = {}, options?) => {
 	return { schema, schemas };
 };
 
-export const generateSchema = (theClass: Function) => {
+const generateSchema = (theClass: Function) => {
 	if (theClass) {
 		const { schemas } = getSchema(theClass);
 		return schemas;
