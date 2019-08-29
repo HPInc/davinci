@@ -15,7 +15,7 @@ const { get, controller, query } = route;
 })
 export default class CustomerController extends createMongooseController(model, CustomerSchema) {
 	@get({ path: '/hello', summary: 'That is a hello method' })
-	hello(@query('firstname') firstname: string, @query('age') age: number, @context() context) {
+	hello(@query() firstname: string, @query() age: number, @context() context) {
 		console.log(firstname, age, context);
 		return firstname;
 	}

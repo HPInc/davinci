@@ -1,4 +1,5 @@
 import _fp from 'lodash/fp';
+import { Reflector } from '@davinci/reflector';
 import { ISwaggerDefinitions } from '../types/openapi';
 
 export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwaggerDefinitions => {
@@ -31,7 +32,7 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 
 		// it's a class => create a definition nad recursively call makeSchema on the properties
 		if (typeof typeOrClass === 'function') {
-			const definitionMetadata = Reflect.getMetadata('tsopenapi:definition', typeOrClass);
+			const definitionMetadata = Reflector.getMetadata('tsopenapi:definition', typeOrClass);
 			const hasDefinitionDecoration = !!definitionMetadata;
 			const definitionObj = {
 				...(definitionMetadata || {}),
@@ -53,9 +54,9 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 				definitionObj.title = title;
 			}
 
-			const props = Reflect.getMetadata('tsopenapi:props', typeOrClass.prototype) || [];
+			const props = Reflector.getMetadata('tsopenapi:props', typeOrClass.prototype) || [];
 			const properties = props.reduce((acc, { key, opts }) => {
-				const type = (opts && opts.type) || Reflect.getMetadata('design:type', typeOrClass.prototype, key);
+				const type = (opts && opts.type) || Reflector.getMetadata('design:type', typeOrClass.prototype, key);
 				acc[key] = makeSchema(type, key);
 				return acc;
 			}, {});
@@ -76,7 +77,7 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 			if (hasDefinitionDecoration) {
 				definitions[title] = definitionObj;
 				return {
-					$ref: `#/definitions/${title }`
+					$ref: `#/definitions/${title}`
 				};
 			}
 

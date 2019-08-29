@@ -1,4 +1,4 @@
-import 'reflect-metadata';
+import { Reflector } from '@davinci/reflector';
 import find from 'lodash/find';
 
 /**
@@ -6,7 +6,7 @@ import find from 'lodash/find';
  */
 export const context = (): Function => {
 	return function(target: Object, methodName: string | symbol, index) {
-		const contextParameters = Reflect.getMetadata('tscontroller:context', target) || [];
+		const contextParameters = Reflector.getMetadata('tscontroller:context', target) || [];
 		const isAlreadySet = !!find(contextParameters, { methodName, index });
 		if (isAlreadySet) return;
 
@@ -18,6 +18,6 @@ export const context = (): Function => {
 			type: 'context'
 		});
 
-		Reflect.defineMetadata('tscontroller:context', contextParameters, target);
+		Reflector.defineMetadata('tscontroller:context', contextParameters, target);
 	};
 };

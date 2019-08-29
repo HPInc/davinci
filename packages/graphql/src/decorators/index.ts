@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { Reflector } from '@davinci/reflector';
 import { ReturnTypeFunc, ReturnTypeFuncValue, IFieldDecoratorOptions, IFieldDecoratorMetadata } from '../types';
 
 /**
@@ -6,15 +7,9 @@ import { ReturnTypeFunc, ReturnTypeFuncValue, IFieldDecoratorOptions, IFieldDeco
  * @param opts
  */
 export function field(opts?: IFieldDecoratorOptions) {
-	// this is the decorator factory
 	return function(target: Object, key: string | symbol): void {
-		// this is the decorator
-
-		// get the existing metadata props
-		const props: IFieldDecoratorMetadata[] = Reflect.getMetadata('tsgraphql:fields', target) || [];
-		props.push({ key, opts });
-		// define new metadata props
-		Reflect.defineMetadata('tsgraphql:fields', props, target);
+		const metadata: IFieldDecoratorMetadata = { key, opts };
+		Reflector.pushMetadata('tsgraphql:fields', metadata, target);
 	};
 }
 
@@ -25,10 +20,8 @@ export function field(opts?: IFieldDecoratorOptions) {
  */
 export const query = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: string): Function => {
 	return function(target: Object, methodName: string | symbol) {
-		const queries = Reflect.getMetadata('tsgraphql:queries', target) || [];
-		queries.unshift({ name, methodName, returnType, handler: target[methodName] });
-
-		Reflect.defineMetadata('tsgraphql:queries', queries, target);
+		const metadata = { name, methodName, returnType, handler: target[methodName] };
+		Reflector.pushMetadata('tsgraphql:queries', metadata, target);
 	};
 };
 
@@ -39,10 +32,8 @@ export const query = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: s
  */
 export const mutation = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: string): Function => {
 	return function(target: Object, methodName: string | symbol) {
-		const mutations = Reflect.getMetadata('tsgraphql:mutations', target) || [];
-		mutations.unshift({ name, methodName, returnType, handler: target[methodName] });
-
-		Reflect.defineMetadata('tsgraphql:mutations', mutations, target);
+		const metadata = { name, methodName, returnType, handler: target[methodName] };
+		Reflector.pushMetadata('tsgraphql:mutations', metadata, target);
 	};
 };
 
@@ -54,8 +45,8 @@ export const mutation = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?
 export function arg(name, options?: { required?: boolean }): Function {
 	return function(target: Object, methodName: string, index) {
 		// get the existing metadata props
-		const methodParameters = Reflect.getMetadata('tsgraphql:args', target) || [];
-		const paramtypes = Reflect.getMetadata('design:paramtypes', target, methodName);
+		const methodParameters = Reflector.getMetadata('tsgraphql:args', target) || [];
+		const paramtypes = Reflector.getMetadata('design:paramtypes', target, methodName);
 		const isAlreadySet = !!_.find(methodParameters, { methodName, index });
 		if (isAlreadySet) return;
 
@@ -67,13 +58,13 @@ export function arg(name, options?: { required?: boolean }): Function {
 			opts: options,
 			handler: target[methodName],
 			/*
-				The method: Reflect.getMetadata('design:paramtypes', target, methodName);
+				The method: Reflector.getMetadata('design:paramtypes', target, methodName);
 				doesn't seem to be working in the test environment, so the paramtypes array is always undefined
 				TODO: find a better solution
 			 */
 			type: paramtypes && paramtypes[index]
 		});
-		Reflect.defineMetadata('tsgraphql:args', methodParameters, target);
+		Reflector.defineMetadata('tsgraphql:args', methodParameters, target);
 	};
 }
 
@@ -90,6 +81,6 @@ export interface IResolverDecoratorArgs {
 export function resolver(args?: IResolverDecoratorArgs): Function {
 	return function(target: Object) {
 		// define new metadata props
-		Reflect.defineMetadata('tsgraphql:resolver', args, target);
+		Reflector.defineMetadata('tsgraphql:resolver', args, target);
 	};
 }
