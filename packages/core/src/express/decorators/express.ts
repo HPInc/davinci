@@ -1,3 +1,4 @@
+import { Reflector } from '@davinci/reflector';
 import _ from 'lodash';
 
 /**
@@ -10,7 +11,7 @@ export const createReqResExpressDecorator = (reqOrRes: 'req' | 'res') => () => (
 	index
 ) => {
 	// get the existing metadata props
-	const methodParameters = Reflect.getMetadata('tsopenapi:method-parameters', target) || [];
+	const methodParameters = Reflector.getMetadata('tsopenapi:method-parameters', target) || [];
 	const isAlreadySet = !!_.find(methodParameters, { methodName, index });
 	if (isAlreadySet) return;
 
@@ -21,7 +22,7 @@ export const createReqResExpressDecorator = (reqOrRes: 'req' | 'res') => () => (
 		handler: target[methodName],
 		type: reqOrRes
 	});
-	Reflect.defineMetadata('tsopenapi:method-parameters', methodParameters, target);
+	Reflector.defineMetadata('tsopenapi:method-parameters', methodParameters, target);
 };
 
 /**
@@ -43,16 +44,13 @@ type Stage = 'before' | 'after';
  */
 const middleware = (middlewareFunction, stage: Stage = 'before'): Function => {
 	return function(target: Object | Function, methodName: string | symbol) {
-		// get the existing metadata props
-		const methods = Reflect.getMetadata('tsexpress:method-middleware', target) || [];
 		const args: { middlewareFunction: Function; stage: Stage; handler?: Function } = { middlewareFunction, stage };
 		if (target[methodName]) {
 			args.handler = target[methodName];
 		} // else, the target is a controller class
 
-		methods.unshift(args);
 		// define new metadata methods
-		Reflect.defineMetadata('tsexpress:method-middleware', methods, target);
+		Reflector.unshiftMetadata('tsexpress:method-middleware', args, target);
 
 		return target;
 	};
@@ -79,10 +77,8 @@ export { middleware };
  */
 export const header = (name: string, value: string) => {
 	return function(target: Object, methodName: string | symbol) {
-		// get the existing metadata props
-		const methods = Reflect.getMetadata('tsexpress:method-response-header', target) || [];
-		methods.unshift({ name, value, handler: target[methodName] });
+		const meta = { name, value, handler: target[methodName] };
 		// define new metadata methods
-		Reflect.defineMetadata('tsexpress:method-response-header', methods, target);
+		Reflector.unshiftMetadata('tsexpress:method-response-header', meta, target);
 	};
 };

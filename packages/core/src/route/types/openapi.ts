@@ -20,7 +20,7 @@ export interface ISchema {
 }
 
 export interface IMethodParameterBase {
-	name: string;
+	name?: string;
 	description?: string;
 	required?: boolean;
 	schema?: ISchema;

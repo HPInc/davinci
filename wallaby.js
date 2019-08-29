@@ -16,9 +16,9 @@ module.exports = function () {
 		},
 
 		workers: {
-		  initial: 1,
-		  regular: 1,
-		  recycle: true
+			initial: 1,
+			regular: 1,
+			recycle: true
 		},
 
 		setup: function () {
