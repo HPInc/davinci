@@ -2,7 +2,7 @@ import { GraphQLSchema, GraphQLObjectType } from 'graphql';
 import { ApolloServer } from 'apollo-server-express';
 import { IOfBaseExpress } from '@davinci/core';
 import _ from 'lodash';
-import { createControllerSchemas } from './createResolversAndSchemas';
+import { createControllerSchemas } from './createControllerSchemas';
 import { ClassType } from './types';
 
 export interface ICreateApolloServerArgs {
@@ -11,6 +11,7 @@ export interface ICreateApolloServerArgs {
 }
 
 export const createApolloServer = (app: IOfBaseExpress, { controllers, context }: ICreateApolloServerArgs) => {
+	console.time('create app mutations schemas');
 	const { queries: queryFields, mutations: mutationsFields, schemas: allSchemas } = (controllers || []).reduce(
 		(acc, controller) => {
 			const { queries, mutations, schemas } = createControllerSchemas(controller, allSchemas);
@@ -46,12 +47,19 @@ export const createApolloServer = (app: IOfBaseExpress, { controllers, context }
 			  })
 			: null
 	});
+
+	console.timeEnd('create app mutations schemas');
+
+	console.time('instanciate apolloserver');
 	const server = new ApolloServer({
 		schema,
 		context
 	});
+	console.timeEnd('instanciate apolloserver');
 
+	console.time('apply apollo middleware');
 	server.applyMiddleware({ app });
+	console.timeEnd('apply apollo middleware');
 
 	return app;
 };

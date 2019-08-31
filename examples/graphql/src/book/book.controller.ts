@@ -3,7 +3,7 @@ import { context } from '@davinci/core';
 import model from './book.model';
 import BookSchema, { BookQuery } from './book.schema';
 
-const { query, mutation, arg } = graphql;
+const { query, mutation, arg, info, selectionSet } = graphql;
 
 export default class BookController {
 	model = model;
@@ -14,7 +14,8 @@ export default class BookController {
 	}
 
 	@query([BookSchema], 'books')
-	findBooks(@arg('query') query: BookQuery, @context() context: any) {
+	findBooks(@arg('query') query: BookQuery, @context() context: any, @info() info, @selectionSet() selectionSet) {
+		console.log(info, selectionSet);
 		return this.model.find(query, {}, { context });
 	}
 
@@ -27,10 +28,7 @@ export default class BookController {
 	}
 
 	@mutation(BookSchema)
-	updateBookById(
-		@arg('id', { required: true }) id: string,
-		@arg('data', { required: true }) data: BookSchema
-	) {
+	updateBookById(@arg('id', { required: true }) id: string, @arg('data', { required: true }) data: BookSchema) {
 		return this.model.findByIdAndUpdate(id, data, { new: true });
 	}
 }

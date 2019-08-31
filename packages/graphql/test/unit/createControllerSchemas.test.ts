@@ -1,5 +1,5 @@
 import should from 'should';
-import { createControllerSchemas } from '../../src/createResolversAndSchemas';
+import { createControllerSchemas } from '../../src/createControllerSchemas';
 import { graphql } from '../../src';
 import { GraphQLInputObjectType, GraphQLObjectType, GraphQLScalarType } from 'graphql';
 import { mutation } from '../../src/decorators';

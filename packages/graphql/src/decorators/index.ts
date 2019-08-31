@@ -42,7 +42,7 @@ export const mutation = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?
  * @param name
  * @param options
  */
-export function arg(name, options?: { required?: boolean }): Function {
+export function arg(name?, options?: { required?: boolean }): Function {
 	return function(target: Object, methodName: string, index) {
 		// get the existing metadata props
 		const methodParameters = Reflector.getMetadata('tsgraphql:args', target) || [];
@@ -63,6 +63,42 @@ export function arg(name, options?: { required?: boolean }): Function {
 				TODO: find a better solution
 			 */
 			type: paramtypes && paramtypes[index]
+		});
+		Reflector.defineMetadata('tsgraphql:args', methodParameters, target);
+	};
+}
+
+export function info() {
+	return function(target: Object, methodName: string, index) {
+		// get the existing metadata props
+		const methodParameters = Reflector.getMetadata('tsgraphql:args', target) || [];
+		const isAlreadySet = !!_.find(methodParameters, { methodName, index });
+		if (isAlreadySet) return;
+
+		methodParameters.unshift({
+			target,
+			methodName,
+			index,
+			handler: target[methodName],
+			type: 'info'
+		});
+		Reflector.defineMetadata('tsgraphql:args', methodParameters, target);
+	};
+}
+
+export function selectionSet() {
+	return function(target: Object, methodName: string, index) {
+		// get the existing metadata props
+		const methodParameters = Reflector.getMetadata('tsgraphql:args', target) || [];
+		const isAlreadySet = !!_.find(methodParameters, { methodName, index });
+		if (isAlreadySet) return;
+
+		methodParameters.unshift({
+			target,
+			methodName,
+			index,
+			handler: target[methodName],
+			type: 'selectionSet'
 		});
 		Reflector.defineMetadata('tsgraphql:args', methodParameters, target);
 	};

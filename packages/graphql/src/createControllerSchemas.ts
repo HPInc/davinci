@@ -1,9 +1,30 @@
 import _fp from 'lodash/fp';
 import _ from 'lodash';
-import { GraphQLNonNull } from 'graphql';
+import { GraphQLList, GraphQLNonNull } from 'graphql';
 import { getSchema } from './generateSchema';
 
 const DEFAULT_VALUE = { queries: {}, mutations: {}, schemas: {} };
+
+/**
+ * Returns a flatten list of fields
+ * @param fieldASTs
+ * @param returnType
+ * @param basePath
+ */
+export function getProjection(fieldASTs, returnType, basePath?: string) {
+	const { selections } = fieldASTs.selectionSet;
+	return selections.reduce((projs, selection) => {
+		const fieldName = selection.name.value;
+		const isParentList = returnType instanceof GraphQLList;
+		const fieldReturnType = (returnType.ofType || returnType).getFields()[fieldName].type;
+		const pathSuffix = isParentList ? '[]' : '';
+		const fieldPath = _.compact([`${basePath || ''}${pathSuffix}`, fieldName]).join('.');
+		if (selection.selectionSet) {
+			return [...projs, ...getProjection(selection, fieldReturnType, fieldPath)];
+		}
+		return [...projs, fieldPath];
+	}, []);
+}
 
 /**
  *
@@ -45,6 +66,14 @@ export const createResolversAndSchemas = (Controller, resolversType: 'queries' |
 					acc.handlerArgsDefinition.push({ name, isContext: true });
 					return acc;
 				}
+				if (type === 'info') {
+					acc.handlerArgsDefinition.push({ name, isInfo: true });
+					return acc;
+				}
+				if (type === 'selectionSet') {
+					acc.handlerArgsDefinition.push({ name, isSelectionSet: true });
+					return acc;
+				}
 
 				const { schema: gArgType } = getSchema(type, allSchemas, { isInput: true });
 				graphqlArgType = required ? GraphQLNonNull(gArgType) : gArgType;
@@ -60,10 +89,12 @@ export const createResolversAndSchemas = (Controller, resolversType: 'queries' |
 			type: graphqlReturnType,
 			args: resolverArgs,
 			resolve(_, args, context, info) {
-				console.log(info.nothing);
-
-				const handlerArgs = handlerArgsDefinition.map(({ name, isContext }) => {
+				const handlerArgs = handlerArgsDefinition.map(({ name, isContext, isInfo, isSelectionSet }) => {
 					if (isContext) return context;
+					if (isInfo) return info;
+					if (isSelectionSet) {
+						return getProjection(info.operation.selectionSet.selections[0], info.returnType.ofType);
+					}
 
 					return (args || {})[name];
 				});
