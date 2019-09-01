@@ -18,7 +18,7 @@ export default class Book {
 	@mgoose.prop({ type: Schema.Types.ObjectId })
 	// @mgoose.populate({ name: 'file', opts: { ref: 'File', foreignField: '_id', justOne: true } })
 	@graphql.field()
-	authorId: String;
+	authorIds: string;
 
 	@graphql.field({ type: [AuthorSchema] })
 	authors: [AuthorSchema];

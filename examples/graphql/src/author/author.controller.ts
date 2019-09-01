@@ -2,8 +2,9 @@ import { graphql } from '@davinci/graphql';
 import { context } from '@davinci/core';
 import model from './author.model';
 import AuthorSchema, { AuthorQuery } from './author.schema';
+import BookSchema from '../book/book.schema';
 
-const { query, mutation, arg } = graphql;
+const { query, parent, mutation, fieldResolver, arg } = graphql;
 
 export default class AuthorController {
 	model = model;
@@ -27,10 +28,14 @@ export default class AuthorController {
 	}
 
 	@mutation(AuthorSchema)
-	updateAuthorById(
-		@arg('id', { required: true }) id: string,
-		@arg('data', { required: true }) data: AuthorSchema
-	) {
+	updateAuthorById(@arg('id', { required: true }) id: string, @arg('data', { required: true }) data: AuthorSchema) {
 		return this.model.findByIdAndUpdate(id, data, { new: true });
+	}
+
+	@fieldResolver<BookSchema>(BookSchema, 'authors', [AuthorSchema])
+	getBookAuthors(@parent() book: BookSchema, @arg('query') query: AuthorQuery, @context() context: any) {
+		console.log(query);
+		// @ts-ignore
+		return this.findAuthors({ ...query, _id: { $in: book.authorIds } }, context);
 	}
 }

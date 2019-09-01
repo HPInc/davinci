@@ -11,9 +11,11 @@ export interface ICreateApolloServerArgs {
 }
 
 export const createApolloServer = (app: IOfBaseExpress, { controllers, context }: ICreateApolloServerArgs) => {
+	const allSchemas = { queries: {}, mutations: {}, schemas: {} };
 	console.time('create app mutations schemas');
-	const { queries: queryFields, mutations: mutationsFields, schemas: allSchemas } = (controllers || []).reduce(
+	const { queries: queryFields, mutations: mutationsFields, schemas: controllerSchemas } = (controllers || []).reduce(
 		(acc, controller) => {
+			_.merge(allSchemas, controllerSchemas);
 			const { queries, mutations, schemas } = createControllerSchemas(controller, allSchemas);
 			if (queries) {
 				acc.queries = _.merge({}, acc.queries || {}, queries);

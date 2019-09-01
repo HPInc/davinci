@@ -10,7 +10,9 @@ import {
 import { GraphQLDateTime } from 'graphql-iso-date';
 import _fp from 'lodash/fp';
 import _ from 'lodash';
+import { Reflector } from '@davinci/reflector';
 import { IFieldDecoratorMetadata } from './types';
+import { createExecutableSchema } from './createControllerSchemas';
 
 const scalarDict = {
 	number: GraphQLFloat,
@@ -29,7 +31,7 @@ export const getSchema = (theClass: any, schemas = {}, options?) => {
 	const makeSchema = (typeOrClass, key?) => {
 		// maybe it's a decorated class, let's try to get the fields metadata
 		const fieldsMetadata: IFieldDecoratorMetadata[] = typeOrClass.prototype
-			? Reflect.getMetadata('tsgraphql:fields', typeOrClass.prototype)
+			? Reflector.getMetadata('tsgraphql:fields', typeOrClass.prototype) || []
 			: [];
 		const metadata = (_fp.find({ key }, fieldsMetadata) || {}) as IFieldDecoratorMetadata;
 		const isRequired = metadata.opts && metadata.opts.required;
@@ -54,25 +56,62 @@ export const getSchema = (theClass: any, schemas = {}, options?) => {
 			// already exists
 			if (schemas[name]) return schemas[name];
 
+			const typeClass = Array.isArray(theClass) ? theClass[0] : theClass;
+			const externalFieldsResolvers =
+				Reflector.getMetadata('tsgraphql:field-resolvers', typeClass.prototype) || [];
+
 			const definitionObj: any = {
 				...metadata.opts,
 				name,
-				fields: () =>
-					fieldsMetadata.reduce((acc, { key, opts }) => {
+				fields: () => {
+					const fields = fieldsMetadata.reduce((acc, { key, opts }) => {
 						const type =
-							(opts && opts.type) || Reflect.getMetadata('design:type', typeOrClass.prototype, key);
+							(opts && opts.type) || Reflector.getMetadata('design:type', typeOrClass.prototype, key);
 						const gqlType = makeSchema(type, key);
 						acc[key] = { type: gqlType };
 
-						const typeClass = Array.isArray(theClass) ? theClass[0] : theClass;
-						const isResolver = typeClass.prototype && typeof typeClass.prototype[key] === 'function';
+						const hasResolverFunction =
+							typeClass.prototype && typeof typeClass.prototype[key] === 'function';
 
-						if (isResolver && !isInput) {
+						if (hasResolverFunction && !isInput) {
 							acc[key].resolve = typeClass.prototype[key];
 						}
 
 						return acc;
-					}, {})
+					}, {});
+
+					/**
+					 * {
+					  "target": {},
+					  "methodName": "getAuthors",
+					  "index": {
+						"writable": true,
+						"enumerable": true,
+						"configurable": true
+					  },
+					  "fieldName": "authors",
+					  "returnType": [
+						null
+					  ]
+					}
+					 */
+					const fieldsWithExternalResolver = isInput
+						? {}
+						: externalFieldsResolvers.reduce((acc, fieldMeta) => {
+								const { target, fieldName } = fieldMeta;
+								const { schema, schemas: s } = createExecutableSchema(
+									target.constructor,
+									fieldMeta,
+									schemas
+								);
+								_.merge(schemas, s);
+
+								acc[fieldName] = schema;
+								return acc;
+						  }, {});
+
+					return { ...fields, ...fieldsWithExternalResolver };
+				}
 			};
 
 			// definitionObj.;

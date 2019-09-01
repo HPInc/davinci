@@ -1,6 +1,12 @@
 import _ from 'lodash';
 import { Reflector } from '@davinci/reflector';
-import { ReturnTypeFunc, ReturnTypeFuncValue, IFieldDecoratorOptions, IFieldDecoratorMetadata } from '../types';
+import {
+	ReturnTypeFunc,
+	ReturnTypeFuncValue,
+	IFieldDecoratorOptions,
+	IFieldDecoratorMetadata,
+	ClassType
+} from '../types';
 
 /**
  * It annotates a variable as schema prop
@@ -68,6 +74,36 @@ export function arg(name?, options?: { required?: boolean }): Function {
 	};
 }
 
+// resolverOf BookSchema,
+// returnType [AuthorSchema]
+export function fieldResolver<T = {}>(
+	resolverOf: ClassType,
+	fieldName: keyof T,
+	returnType: ClassType | ClassType[]
+): Function {
+	return function(target: Object, methodName: string, index) {
+		// get the existing metadata props
+		const methodParameters = Reflector.getMetadata('tsgraphql:field-resolvers', resolverOf.prototype) || [];
+		const paramtypes = Reflector.getMetadata('design:paramtypes', target, methodName);
+		const isAlreadySet = !!_.find(methodParameters, { methodName, index });
+		if (isAlreadySet) return;
+
+		methodParameters.unshift({
+			target,
+			methodName,
+			resolverOf,
+			index,
+			fieldName,
+			returnType,
+			// name,
+			// opts: options,
+			handler: target[methodName],
+			type: paramtypes && paramtypes[index]
+		});
+		Reflector.defineMetadata('tsgraphql:field-resolvers', methodParameters, resolverOf.prototype);
+	};
+}
+
 export function info() {
 	return function(target: Object, methodName: string, index) {
 		// get the existing metadata props
@@ -99,6 +135,24 @@ export function selectionSet() {
 			index,
 			handler: target[methodName],
 			type: 'selectionSet'
+		});
+		Reflector.defineMetadata('tsgraphql:args', methodParameters, target);
+	};
+}
+
+export function parent() {
+	return function(target: Object, methodName: string, index) {
+		// get the existing metadata props
+		const methodParameters = Reflector.getMetadata('tsgraphql:args', target) || [];
+		const isAlreadySet = !!_.find(methodParameters, { methodName, index });
+		if (isAlreadySet) return;
+
+		methodParameters.unshift({
+			target,
+			methodName,
+			index,
+			handler: target[methodName],
+			type: 'parent'
 		});
 		Reflector.defineMetadata('tsgraphql:args', methodParameters, target);
 	};
