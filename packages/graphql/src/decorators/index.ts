@@ -43,12 +43,17 @@ export const mutation = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?
 	};
 };
 
+export interface IArgOptions {
+	required?: boolean;
+	enum?: { [key: string]: string };
+}
+
 /**
  * Decorator that annotate a method parameter
  * @param name
  * @param options
  */
-export function arg(name?, options?: { required?: boolean }): Function {
+export function arg(name?, options?: IArgOptions): Function {
 	return function(target: Object, methodName: string, index) {
 		// get the existing metadata props
 		const methodParameters = Reflector.getMetadata('tsgraphql:args', target) || [];
@@ -63,11 +68,6 @@ export function arg(name?, options?: { required?: boolean }): Function {
 			name,
 			opts: options,
 			handler: target[methodName],
-			/*
-				The method: Reflector.getMetadata('design:paramtypes', target, methodName);
-				doesn't seem to be working in the test environment, so the paramtypes array is always undefined
-				TODO: find a better solution
-			 */
 			type: paramtypes && paramtypes[index]
 		});
 		Reflector.defineMetadata('tsgraphql:args', methodParameters, target);

@@ -19,11 +19,8 @@ export default class AuthorController {
 		return this.model.find(query, {}, { context });
 	}
 
-	@mutation(AuthorSchema, 'createAuthor')
-	createAuthor(
-		@arg('data', { required: true })
-		data: AuthorSchema
-	) {
+	@mutation(AuthorSchema)
+	createAuthor(@arg('data', { required: true }) data: AuthorSchema) {
 		return this.model.create(data);
 	}
 

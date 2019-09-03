@@ -1,6 +1,7 @@
 import should from 'should';
 import { GraphQLBoolean, GraphQLFloat, GraphQLList, GraphQLObjectType, GraphQLString } from 'graphql';
 import { graphql } from '../../src';
+import { fieldResolver } from '../../src/decorators/index';
 
 const { field, getSchema } = graphql;
 
@@ -83,6 +84,31 @@ describe('schema generation', () => {
 			should(somethingArray.type).be.instanceOf(GraphQLList);
 			should(somethingArray.type.ofType).be.equal(GraphQLFloat);
 			should(somethingArray.resolve).be.equal(Customer.prototype.somethingArray);
+		});
+
+		it('should create an external resolver', () => {
+			class Book {}
+			class Author {
+				@field()
+				title: string;
+			}
+
+			class AuthorController {
+				@fieldResolver(Book, 'authors', [Author])
+				getBookAuthors() {}
+			}
+			console.log(AuthorController);
+
+			const { schema } = getSchema(Book);
+
+			should(schema).be.instanceOf(GraphQLObjectType);
+
+			// @ts-ignore
+			const { authors } = schema.getFields();
+
+			should(authors.type).be.instanceOf(GraphQLList);
+			should(authors.type.ofType).be.instanceOf(GraphQLObjectType);
+			should(authors.resolve).be.type('function');
 		});
 
 		it('supports arrays', () => {

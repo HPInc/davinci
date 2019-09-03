@@ -10,11 +10,15 @@ export type TypeValue = ClassType | GraphQLScalarType | Function | object | symb
 export type ReturnTypeFuncValue = TypeValue | RecursiveArray<TypeValue>;
 export type ReturnTypeFunc = (returns?: void) => ReturnTypeFuncValue;
 
+export type TypeValueFactory = (type?: void) => TypeValue;
+export type ClassTypeResolver = (of?: void) => ClassType;
+
 /**
  * @param type - The type of the field. Only Required for complex objects: Classes, Arrays, Objects
  */
 export interface IFieldDecoratorOptions {
-	type?: any;
+	type?: TypeValue;
+	typeFactory?: TypeValueFactory;
 	required?: boolean;
 	description?: string;
 }

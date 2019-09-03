@@ -1,6 +1,7 @@
 import { Schema } from 'mongoose';
 import { mgoose } from '@davinci/mongoose';
 import { graphql } from '@davinci/graphql';
+import BookSchema from '../book/book.schema';
 
 class AuthorPhone {
 	@mgoose.prop()
@@ -58,6 +59,9 @@ export default class Author {
 	@graphql.field()
 	fileId: string;
 
+	@graphql.field({ typeFactory: () => [BookSchema] })
+	books: BookSchema[];
+
 	@mgoose.method()
 	static getSomething() {}
 
@@ -66,6 +70,6 @@ export default class Author {
 }
 
 export class AuthorQuery extends Author {
-	@graphql.field({ type: [Author] })
+	@graphql.field({ typeFactory: () => [Author] })
 	and: [Author];
 }

@@ -65,8 +65,15 @@ export const getSchema = (theClass: any, schemas = {}, options?) => {
 				name,
 				fields: () => {
 					const fields = fieldsMetadata.reduce((acc, { key, opts }) => {
-						const type =
-							(opts && opts.type) || Reflector.getMetadata('design:type', typeOrClass.prototype, key);
+						let type;
+						if (opts && typeof opts.typeFactory === 'function') {
+							type = opts.typeFactory();
+						} else if (opts && opts.type) {
+							type = opts.type;
+						} else {
+							type = Reflector.getMetadata('design:type', typeOrClass.prototype, key);
+						}
+
 						const gqlType = makeSchema(type, key);
 						acc[key] = { type: gqlType };
 
@@ -80,21 +87,6 @@ export const getSchema = (theClass: any, schemas = {}, options?) => {
 						return acc;
 					}, {});
 
-					/**
-					 * {
-					  "target": {},
-					  "methodName": "getAuthors",
-					  "index": {
-						"writable": true,
-						"enumerable": true,
-						"configurable": true
-					  },
-					  "fieldName": "authors",
-					  "returnType": [
-						null
-					  ]
-					}
-					 */
 					const fieldsWithExternalResolver = isInput
 						? {}
 						: externalFieldsResolvers.reduce((acc, fieldMeta) => {
@@ -113,10 +105,6 @@ export const getSchema = (theClass: any, schemas = {}, options?) => {
 					return { ...fields, ...fieldsWithExternalResolver };
 				}
 			};
-
-			// definitionObj.;
-
-			// todo: required check
 
 			schemas[name] =
 				metadata.opts && metadata.opts.required

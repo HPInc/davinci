@@ -1,6 +1,6 @@
 import _fp from 'lodash/fp';
 import _ from 'lodash';
-import { GraphQLList, GraphQLNonNull } from 'graphql';
+import { GraphQLEnumType, GraphQLList, GraphQLNonNull } from 'graphql';
 import { Reflector } from '@davinci/reflector';
 import { getSchema } from './generateSchema';
 
@@ -80,7 +80,7 @@ export const createExecutableSchema = (theClass, resolverMetadata, schemas?) => 
 		(acc, arg: any) => {
 			const { type, name, opts } = arg;
 
-			const { required = false } = opts || {};
+			const options = opts || {};
 			let graphqlArgType = type;
 			if (type === 'context') {
 				acc.handlerArgsDefinition.push({ name, isContext: true });
@@ -99,8 +99,23 @@ export const createExecutableSchema = (theClass, resolverMetadata, schemas?) => 
 				return acc;
 			}
 
-			const { schema: gArgType } = getSchema(type, allSchemas, { isInput: true });
-			graphqlArgType = required ? GraphQLNonNull(gArgType) : gArgType;
+			let gqlArgType;
+			if (options.enum) {
+				if (schemas[name]) {
+					gqlArgType = schemas[name];
+				} else {
+					schemas[name] = new GraphQLEnumType({
+						name,
+						values: _.mapValues(options.enum, value => ({ value }))
+					});
+					gqlArgType = schemas[name];
+				}
+			} else {
+				const { schema } = getSchema(type, allSchemas, { isInput: true });
+				gqlArgType = schema;
+			}
+
+			graphqlArgType = options.required ? GraphQLNonNull(gqlArgType) : gqlArgType;
 
 			acc.resolverArgs[name] = { type: graphqlArgType };
 			acc.handlerArgsDefinition.push({ name });

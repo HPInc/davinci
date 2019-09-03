@@ -20,11 +20,11 @@ export default class Book {
 	@graphql.field()
 	authorIds: string;
 
-	@graphql.field({ type: [AuthorSchema] })
-	authors: [AuthorSchema];
+	@graphql.field({ typeFactory: () => [AuthorSchema] })
+	authors: AuthorSchema[];
 }
 
 export class BookQuery extends Book {
-	@graphql.field({ type: [Book] })
+	@graphql.field({ typeFactory: () => [Book] })
 	and: [Book];
 }
