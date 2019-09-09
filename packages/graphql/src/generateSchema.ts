@@ -20,7 +20,7 @@ const scalarDict = {
 	boolean: GraphQLBoolean
 };
 
-interface IGetGQLSchemaArgs {
+interface IGenerateGQLSchemaArgs {
 	type: any;
 	parentType?: any;
 	key?: any;
@@ -36,7 +36,7 @@ export const generateGQLSchema = ({
 	schemas = {},
 	isInput,
 	transformMetadata = _.identity
-}: IGetGQLSchemaArgs) => {
+}: IGenerateGQLSchemaArgs) => {
 	// grab meta infos
 	// maybe it's a decorated class, let's try to get the fields metadata
 	const parentFieldsMetadata: IFieldDecoratorMetadata[] =
@@ -70,64 +70,13 @@ export const generateGQLSchema = ({
 			return { schema: schemas[name], schemas };
 		}
 
-		const ObjectType = isInput ? GraphQLInputObjectType : GraphQLObjectType;
-		const parentType = type;
-
-		const fieldsMetadata: IFieldDecoratorMetadata[] =
-			Reflector.getMetadata('tsgraphql:fields', parentType.prototype) || [];
-
-		const externalFieldsResolvers = Reflector.getMetadata('tsgraphql:field-resolvers', type.prototype) || [];
-
 		const objTypeConfig: any = {
 			...metadata.opts,
 			name,
-			fields: () => {
-				const fields = fieldsMetadata.reduce((acc, { key, opts }) => {
-					let type;
-					if (opts && typeof opts.typeFactory === 'function') {
-						type = opts.typeFactory();
-					} else if (opts && opts.type) {
-						type = opts.type;
-					}
-
-					const gqlSchema = generateGQLSchema({
-						type,
-						key,
-						isInput,
-						parentType,
-						schemas,
-						transformMetadata
-					});
-					acc[key] = { type: gqlSchema.schema };
-					_.merge(schemas, gqlSchema.schemas);
-
-					const hasResolverFunction = parentType.prototype && typeof parentType.prototype[key] === 'function';
-
-					if (hasResolverFunction && !isInput) {
-						acc[key].resolve = parentType.prototype[key];
-					}
-
-					return acc;
-				}, {});
-
-				const fieldsWithExternalResolver = isInput
-					? {}
-					: externalFieldsResolvers.reduce((acc, fieldMeta) => {
-							const { target, fieldName } = fieldMeta;
-							const { schema, schemas: s } = createExecutableSchema(
-								target.constructor,
-								fieldMeta,
-								schemas
-							);
-							_.merge(schemas, s);
-
-							acc[fieldName] = schema;
-							return acc;
-					  }, {});
-
-				return { ...fields, ...fieldsWithExternalResolver };
-			}
+			fields: createObjectFields({ parentType: type, schemas, isInput, transformMetadata })
 		};
+
+		const ObjectType = isInput ? GraphQLInputObjectType : GraphQLObjectType;
 
 		schemas[name] =
 			metadata.opts && metadata.opts.required
@@ -136,6 +85,68 @@ export const generateGQLSchema = ({
 
 		return { schema: schemas[name], schemas };
 	}
+};
+
+interface ICreateObjectFieldsArgs {
+	parentType: any;
+	isInput?: boolean;
+	schemas?: { [key: string]: any };
+	transformMetadata?: Function;
+}
+
+const createObjectFields = ({
+	parentType,
+	schemas = {},
+	isInput,
+	transformMetadata = _.identity
+}: ICreateObjectFieldsArgs) => {
+	const fieldsMetadata: IFieldDecoratorMetadata[] =
+		Reflector.getMetadata('tsgraphql:fields', parentType.prototype) || [];
+
+	const externalFieldsResolvers = Reflector.getMetadata('tsgraphql:field-resolvers', parentType.prototype) || [];
+
+	return () => {
+		const fields = fieldsMetadata.reduce((acc, { key, opts }) => {
+			let type;
+			if (opts && typeof opts.typeFactory === 'function') {
+				type = opts.typeFactory();
+			} else if (opts && opts.type) {
+				type = opts.type;
+			}
+
+			const gqlSchema = generateGQLSchema({
+				type,
+				key,
+				isInput,
+				parentType,
+				schemas,
+				transformMetadata
+			});
+			acc[key] = { type: gqlSchema.schema };
+			_.merge(schemas, gqlSchema.schemas);
+
+			const hasResolverFunction = parentType.prototype && typeof parentType.prototype[key] === 'function';
+
+			if (hasResolverFunction && !isInput) {
+				acc[key].resolve = parentType.prototype[key];
+			}
+
+			return acc;
+		}, {});
+
+		const fieldsWithExternalResolver = isInput
+			? {}
+			: externalFieldsResolvers.reduce((acc, fieldMeta) => {
+					const { target, fieldName } = fieldMeta;
+					const { schema, schemas: s } = createExecutableSchema(target.constructor, fieldMeta, schemas);
+					_.merge(schemas, s);
+
+					acc[fieldName] = schema;
+					return acc;
+			  }, {});
+
+		return { ...fields, ...fieldsWithExternalResolver };
+	};
 };
 
 export default generateGQLSchema;
