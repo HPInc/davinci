@@ -14,7 +14,11 @@ import {
  */
 export function field(opts?: IFieldDecoratorOptions) {
 	return function(target: Object, key: string | symbol): void {
-		const metadata: IFieldDecoratorMetadata = { key, opts };
+		const options = { ...opts };
+		if (!options.type && !options.typeFactory) {
+			options.type = Reflector.getMetadata('design:type', target, key);
+		}
+		const metadata: IFieldDecoratorMetadata = { key, opts: { ...options } };
 		Reflector.pushMetadata('tsgraphql:fields', metadata, target);
 	};
 }

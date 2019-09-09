@@ -1,4 +1,4 @@
-export { default as generateSchema } from './generateSchema';
+export { default as generateSchema, generateGQLSchema } from './generateSchema';
 // import * as createQueries from './createQueries';
 import * as decorators from './decorators';
 
