@@ -2,7 +2,7 @@ import _fp from 'lodash/fp';
 import _ from 'lodash';
 import { GraphQLEnumType, GraphQLList, GraphQLNonNull } from 'graphql';
 import { Reflector } from '@davinci/reflector';
-import { getSchema } from './generateSchema';
+import generateSchema from './generateSchema';
 
 /**
  * Returns a flatten list of fields
@@ -73,7 +73,7 @@ export const createExecutableSchema = (theClass, resolverMetadata, schemas?) => 
 	const controller = new theClass();
 
 	/////
-	const { schema: graphqlReturnType, schemas: s } = getSchema(returnType, allSchemas);
+	const { schema: graphqlReturnType, schemas: s } = generateSchema({ type: returnType, schemas: allSchemas });
 	_.merge(allSchemas, s);
 
 	const { resolverArgs, handlerArgsDefinition } = resolverArgsMetadata.reduce(
@@ -111,8 +111,10 @@ export const createExecutableSchema = (theClass, resolverMetadata, schemas?) => 
 					gqlArgType = schemas[name];
 				}
 			} else {
-				const { schema } = getSchema(type, allSchemas, { isInput: true });
+				const { schema, schemas } = generateSchema({ type, schemas: allSchemas, isInput: true });
 				gqlArgType = schema;
+
+				_.merge(allSchemas, schemas);
 			}
 
 			graphqlArgType = options.required ? GraphQLNonNull(gqlArgType) : gqlArgType;

@@ -40,7 +40,7 @@ export const createApolloServer = (app: IOfBaseExpress, { controllers, context }
 					}
 			  })
 			: null,
-		mutation: mutationsFields
+		mutation: !_.isEmpty(mutationsFields)
 			? new GraphQLObjectType({
 					name: 'Mutation',
 					fields: {

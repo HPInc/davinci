@@ -1,12 +1,12 @@
 import should from 'should';
 import { GraphQLBoolean, GraphQLFloat, GraphQLList, GraphQLObjectType, GraphQLString } from 'graphql';
-import { graphql } from '../../src';
-import { fieldResolver } from '../../src/decorators/index';
+import { graphql, generateGQLSchema } from '../../src';
+import { fieldResolver } from '../../src/decorators';
 
-const { field, getSchema } = graphql;
+const { field } = graphql;
 
 describe('schema generation', () => {
-	describe('#getSchema', () => {
+	describe('#generateGQLSchema', () => {
 		it('supports primitive types', () => {
 			class Customer {
 				@field()
@@ -20,7 +20,7 @@ describe('schema generation', () => {
 				something() {}
 			}
 
-			const { schema } = getSchema(Customer);
+			const { schema } = generateGQLSchema({ type: Customer });
 
 			should(schema)
 				.have.property('name')
@@ -45,7 +45,7 @@ describe('schema generation', () => {
 				birth: CustomerBirth;
 			}
 
-			const { schemas } = getSchema(Customer);
+			const { schemas } = generateGQLSchema({ type: Customer });
 
 			should(schemas)
 				.have.property('Customer')
@@ -72,7 +72,7 @@ describe('schema generation', () => {
 				}
 			}
 
-			const { schema } = getSchema(Customer);
+			const { schema } = generateGQLSchema({ type: Customer });
 
 			should(schema).be.instanceOf(GraphQLObjectType);
 
@@ -99,7 +99,7 @@ describe('schema generation', () => {
 			}
 			console.log(AuthorController);
 
-			const { schema } = getSchema(Book);
+			const { schema } = generateGQLSchema({ type: Book });
 
 			should(schema).be.instanceOf(GraphQLObjectType);
 
@@ -124,7 +124,7 @@ describe('schema generation', () => {
 				tags: string[];
 			}
 
-			const schemas: any = getSchema(Customer).schemas;
+			const schemas: any = generateGQLSchema({ type: Customer }).schemas;
 
 			should(Object.keys(schemas.Customer.getFields())).be.deepEqual(['phones', 'tags']);
 			should(Object.keys(schemas.CustomerPhone.getFields())).be.deepEqual(['number']);
