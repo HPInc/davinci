@@ -12,7 +12,6 @@ export interface ICreateApolloServerArgs {
 
 export const createApolloServer = (app: IOfBaseExpress, { controllers, context }: ICreateApolloServerArgs) => {
 	const allSchemas = { queries: {}, mutations: {}, schemas: {} };
-	console.time('create app mutations schemas');
 	const { queries: queryFields, mutations: mutationsFields, schemas: controllerSchemas } = (controllers || []).reduce(
 		(acc, controller) => {
 			_.merge(allSchemas, controllerSchemas);
@@ -50,18 +49,12 @@ export const createApolloServer = (app: IOfBaseExpress, { controllers, context }
 			: null
 	});
 
-	console.timeEnd('create app mutations schemas');
-
-	console.time('instanciate apolloserver');
 	const server = new ApolloServer({
 		schema,
 		context
 	});
-	console.timeEnd('instanciate apolloserver');
 
-	console.time('apply apollo middleware');
 	server.applyMiddleware({ app });
-	console.timeEnd('apply apollo middleware');
 
 	return app;
 };

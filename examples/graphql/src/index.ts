@@ -1,4 +1,3 @@
-console.time('whole thing');
 import 'reflect-metadata';
 import express, { Express } from 'express';
 import { createApp, IOfBaseExpress } from '@davinci/core';
@@ -16,28 +15,17 @@ const options = {
 	}
 };
 
-console.time('create express');
 const expressApp: Express = express();
-console.timeEnd('create express');
 
 const context = ({ req }) => ({ accountId: req.headers['x-oneflow-accountid'] });
 
-console.time('createApp');
 createApp(expressApp, options, app => {
-	console.timeEnd('createApp');
-	console.time('createApolloServer');
 	createApolloServer(app, { controllers: [AuthorController, BookController], context });
-	console.timeEnd('createApolloServer');
 });
 
 if (require.main === module) {
 	// this module was run directly from the command line as in node xxx.js
-	(async () => {
-		console.time('start app');
-		await (expressApp as IOfBaseExpress).start();
-		console.timeEnd('start app');
-		console.timeEnd('whole thing');
-	})()
+	(expressApp as IOfBaseExpress).start();
 }
 
 export default expressApp;
