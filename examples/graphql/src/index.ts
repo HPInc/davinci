@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import express, { Express } from 'express';
 import { createApp, IOfBaseExpress } from '@davinci/core';
 import { createApolloServer } from '@davinci/graphql';
