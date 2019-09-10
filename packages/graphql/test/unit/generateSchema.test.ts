@@ -1,5 +1,6 @@
 import should from 'should';
 import { GraphQLBoolean, GraphQLFloat, GraphQLList, GraphQLObjectType, GraphQLString } from 'graphql';
+import _fp from 'lodash/fp';
 import { graphql, generateGQLSchema } from '../../src';
 import { fieldResolver } from '../../src/decorators';
 
@@ -140,6 +141,32 @@ describe('schema generation', () => {
 				.be.instanceOf(GraphQLList)
 				.have.property('ofType')
 				.equal(schemas.CustomerPhone);
+		});
+
+		it('if transformMetadata is supplied, it should transform the metadata', () => {
+			class Customer {
+				@field()
+				firstname: string;
+			}
+
+			const transformMetadata = (metadata, { type: t, parentType }) => {
+				const type = _fp.get('opts.type', metadata) || t;
+
+				if (type === String && parentType.name !== 'Query') {
+					class Query {
+						@field()
+						EQ: string;
+					}
+					return _fp.set('opts.type', Query, metadata);
+				}
+
+				return metadata;
+			};
+
+			const schemas: any = generateGQLSchema({ type: Customer, transformMetadata }).schemas;
+			const fields = schemas.Customer.getFields();
+			should(fields.firstname.type).be.instanceOf(GraphQLObjectType);
+			should(fields.firstname.type.getFields()).have.property('EQ');
 		});
 	});
 });

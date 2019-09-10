@@ -41,7 +41,8 @@ export const generateGQLSchema = ({
 	// maybe it's a decorated class, let's try to get the fields metadata
 	const parentFieldsMetadata: IFieldDecoratorMetadata[] =
 		parentType && parentType.prototype ? Reflector.getMetadata('tsgraphql:fields', parentType.prototype) || [] : [];
-	const metadata = (_fp.find({ key }, parentFieldsMetadata) || {}) as IFieldDecoratorMetadata;
+	const meta = _fp.find({ key }, parentFieldsMetadata) || ({} as IFieldDecoratorMetadata);
+	const metadata = transformMetadata(meta, { isInput, type, parentType, schemas });
 	const isRequired = metadata.opts && metadata.opts.required;
 
 	// it's a primitive type, simple case
@@ -106,7 +107,8 @@ const createObjectFields = ({
 	const externalFieldsResolvers = Reflector.getMetadata('tsgraphql:field-resolvers', parentType.prototype) || [];
 
 	return () => {
-		const fields = fieldsMetadata.reduce((acc, { key, opts }) => {
+		const fields = fieldsMetadata.reduce((acc, meta) => {
+			const { key, opts } = transformMetadata(meta, { isInput, parentType, schemas });
 			let type;
 			if (opts && typeof opts.typeFactory === 'function') {
 				type = opts.typeFactory();
@@ -122,6 +124,7 @@ const createObjectFields = ({
 				schemas,
 				transformMetadata
 			});
+
 			acc[key] = { type: gqlSchema.schema };
 			_.merge(schemas, gqlSchema.schemas);
 
