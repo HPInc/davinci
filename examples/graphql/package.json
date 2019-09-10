@@ -12,9 +12,9 @@
 	"author": "Piero Maltese <maltesepiero@gmail.com>",
 	"license": "ISC",
 	"dependencies": {
-		"@davinci/core": "^0.4.0",
-		"@davinci/graphql": "^0.4.0",
-		"@davinci/mongoose": "^0.4.2",
+		"@davinci/core": "^0.5.0",
+		"@davinci/graphql": "^0.5.0",
+		"@davinci/mongoose": "^0.5.0",
 		"debug": "^4.1.1",
 		"express": "4.16.4",
 		"lodash": "^4.17.11",
