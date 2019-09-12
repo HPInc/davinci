@@ -16,6 +16,14 @@ export type ClassTypeResolver = (of?: void) => ClassType;
 /**
  * @param type - The type of the field. Only Required for complex objects: Classes, Arrays, Objects
  */
+export interface ITypeDecoratorOptions {
+	name?: string;
+	description?: string;
+}
+
+/**
+ * @param type - The type of the field. Only Required for complex objects: Classes, Arrays, Objects
+ */
 export interface IFieldDecoratorOptions {
 	type?: TypeValue;
 	typeFactory?: TypeValueFactory;

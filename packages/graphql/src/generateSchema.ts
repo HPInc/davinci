@@ -40,7 +40,9 @@ export const generateGQLSchema = ({
 	// grab meta infos
 	// maybe it's a decorated class, let's try to get the fields metadata
 	const parentFieldsMetadata: IFieldDecoratorMetadata[] =
-		parentType && parentType.prototype ? Reflector.getMetadata('tsgraphql:fields', parentType.prototype) || [] : [];
+		parentType && parentType.prototype
+			? Reflector.getMetadata('tsgraphql:fields', parentType.prototype.constructor) || []
+			: [];
 	const meta = _fp.find({ key }, parentFieldsMetadata) || ({} as IFieldDecoratorMetadata);
 	const metadata = transformMetadata(meta, { isInput, type, parentType, schemas });
 	const isRequired = metadata.opts && metadata.opts.required;
@@ -64,7 +66,8 @@ export const generateGQLSchema = ({
 	// it's a complex type => create nested types
 	if (typeof type === 'function' || typeof type === 'object') {
 		const suffix = isInput ? 'Input' : '';
-		const name: string = `${type.name || key}${suffix}`;
+		const typeMetadata = Reflector.getMetadata('tsgraphql:types', type) || {};
+		const name: string = `${typeMetadata.name || type.name || key}${suffix}`;
 
 		// existing type, let's return it
 		if (schemas[name]) {
@@ -102,9 +105,10 @@ const createObjectFields = ({
 	transformMetadata = _.identity
 }: ICreateObjectFieldsArgs) => {
 	const fieldsMetadata: IFieldDecoratorMetadata[] =
-		Reflector.getMetadata('tsgraphql:fields', parentType.prototype) || [];
+		Reflector.getMetadata('tsgraphql:fields', parentType.prototype.constructor) || [];
 
-	const externalFieldsResolvers = Reflector.getMetadata('tsgraphql:field-resolvers', parentType.prototype) || [];
+	const externalFieldsResolvers =
+		Reflector.getMetadata('tsgraphql:field-resolvers', parentType.prototype.constructor) || [];
 
 	return () => {
 		const fields = fieldsMetadata.reduce((acc, meta) => {

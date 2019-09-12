@@ -3,6 +3,7 @@ import { Reflector } from '@davinci/reflector';
 import {
 	ReturnTypeFunc,
 	ReturnTypeFuncValue,
+	ITypeDecoratorOptions,
 	IFieldDecoratorOptions,
 	IFieldDecoratorMetadata,
 	ClassType
@@ -10,16 +11,27 @@ import {
 
 /**
  * It annotates a variable as schema prop
+ * @param options
+ */
+export function type(options?: ITypeDecoratorOptions) {
+	return function(target: Object): void {
+		const metadata: ITypeDecoratorOptions = options;
+		Reflector.defineMetadata('tsgraphql:types', metadata, target);
+	};
+}
+
+/**
+ * It annotates a variable as schema prop
  * @param opts
  */
 export function field(opts?: IFieldDecoratorOptions) {
-	return function(target: Object, key: string | symbol): void {
+	return function(prototype: Object, key: string | symbol): void {
 		const options = { ...opts };
 		if (!options.type && !options.typeFactory) {
-			options.type = Reflector.getMetadata('design:type', target, key);
+			options.type = Reflector.getMetadata('design:type', prototype, key);
 		}
 		const metadata: IFieldDecoratorMetadata = { key, opts: { ...options } };
-		Reflector.pushMetadata('tsgraphql:fields', metadata, target);
+		Reflector.pushMetadata('tsgraphql:fields', metadata, prototype.constructor);
 	};
 }
 
@@ -87,7 +99,7 @@ export function fieldResolver<T = {}>(
 ): Function {
 	return function(target: Object, methodName: string, index) {
 		// get the existing metadata props
-		const methodParameters = Reflector.getMetadata('tsgraphql:field-resolvers', resolverOf.prototype) || [];
+		const methodParameters = Reflector.getMetadata('tsgraphql:field-resolvers', resolverOf.prototype.constructor) || [];
 		const paramtypes = Reflector.getMetadata('design:paramtypes', target, methodName);
 		const isAlreadySet = !!_.find(methodParameters, { methodName, index });
 		if (isAlreadySet) return;
@@ -104,7 +116,7 @@ export function fieldResolver<T = {}>(
 			handler: target[methodName],
 			type: paramtypes && paramtypes[index]
 		});
-		Reflector.defineMetadata('tsgraphql:field-resolvers', methodParameters, resolverOf.prototype);
+		Reflector.defineMetadata('tsgraphql:field-resolvers', methodParameters, resolverOf.prototype.constructor);
 	};
 }
 
