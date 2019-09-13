@@ -14,7 +14,7 @@ describe('@context()', () => {
 			}
 		}
 
-		const contextMetadata = Reflector.getMetadata('tscontroller:context', MyClass.prototype.constructor);
+		const contextMetadata = Reflector.getMetadata('davinci:context', MyClass.prototype.constructor);
 
 		should(contextMetadata).have.length(2);
 		// the array is reversed because the items are added with Array.prototype.unshift

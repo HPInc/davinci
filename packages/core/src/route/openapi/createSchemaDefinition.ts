@@ -32,7 +32,7 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 
 		// it's a class => create a definition nad recursively call makeSchema on the properties
 		if (typeof typeOrClass === 'function') {
-			const definitionMetadata = Reflector.getMetadata('tsopenapi:definition', typeOrClass.prototype.constructor);
+			const definitionMetadata = Reflector.getMetadata('davinci:openapi:definition', typeOrClass.prototype.constructor);
 			const hasDefinitionDecoration = !!definitionMetadata;
 			const definitionObj = {
 				...(definitionMetadata || {}),
@@ -54,7 +54,7 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 				definitionObj.title = title;
 			}
 
-			const props = Reflector.getMetadata('tsopenapi:props', typeOrClass.prototype.constructor) || [];
+			const props = Reflector.getMetadata('davinci:openapi:props', typeOrClass.prototype.constructor) || [];
 			const properties = props.reduce((acc, { key, opts }) => {
 				const type = (opts && opts.type) || Reflector.getMetadata('design:type', typeOrClass.prototype, key);
 				acc[key] = makeSchema(type, key);

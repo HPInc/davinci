@@ -165,7 +165,7 @@ const makeHandlerFunction = (operation, controller, functionName, definitions, c
 
 	// get middlewares
 	const allMiddlewaresMeta = (
-		Reflector.getMetadata('tsexpress:method-middleware', controller.constructor) || []
+		Reflector.getMetadata('davinci:express:method-middleware', controller.constructor) || []
 	).filter(metadata => metadata.handler === controller[functionName] || metadata.isControllerMw);
 
 	const beforeMiddlewares = allMiddlewaresMeta.filter(m => m.stage === 'before');
@@ -173,7 +173,7 @@ const makeHandlerFunction = (operation, controller, functionName, definitions, c
 
 	// get response headers
 	const responseHeadersMeta = Reflector.getMetadata(
-		'tsexpress:method-response-header',
+		'davinci:express:method-response-header',
 		controller.constructor.prototype
 	);
 	const methodResponseHeadersMeta = _.filter(responseHeadersMeta, { handler: controller[functionName] });
@@ -213,7 +213,7 @@ const makeHandlerFunction = (operation, controller, functionName, definitions, c
 
 export const createRouteHandlers = (controller, definition, contextFactory?) => {
 	const routeHandlers = [];
-	const methods = Reflector.getMetadata('tsopenapi:methods', controller.constructor) || [];
+	const methods = Reflector.getMetadata('davinci:openapi:methods', controller.constructor) || [];
 
 	// for each path
 	_.each(methods, method => {
@@ -254,7 +254,7 @@ const createRouterAndSwaggerDoc = (Controller, rsName?, contextFactory?): Router
 	const resourceName = rsName || Controller.name.replace(/Controller$/, '').toLowerCase();
 
 	// get controller metadata
-	const metadata = Reflector.getMetadata('tsopenapi:controller', Controller) || {};
+	const metadata = Reflector.getMetadata('davinci:openapi:controller', Controller) || {};
 	const basepath = metadata.basepath || '';
 	const resourceSchema = metadata.resourceSchema;
 	const additionalSchemas = metadata.additionalSchemas;

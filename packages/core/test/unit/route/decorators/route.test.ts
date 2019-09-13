@@ -43,7 +43,7 @@ describe('route decorators', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('get');
 
 				// @ts-ignore
-				should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('tsopenapi:methods');
+				should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('davinci:openapi:methods');
 				// @ts-ignore
 				should(Reflector.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
 					path: decoratorArgs.path,
@@ -62,7 +62,7 @@ describe('route decorators', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('post');
 
 				// @ts-ignore
-				should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('tsopenapi:methods');
+				should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('davinci:openapi:methods');
 				// @ts-ignore
 				should(Reflector.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
 					path: decoratorArgs.path,
@@ -81,7 +81,7 @@ describe('route decorators', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('put');
 
 				// @ts-ignore
-				should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('tsopenapi:methods');
+				should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('davinci:openapi:methods');
 				// @ts-ignore
 				should(Reflector.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
 					path: decoratorArgs.path,
@@ -100,7 +100,7 @@ describe('route decorators', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('patch');
 
 				// @ts-ignore
-				should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('tsopenapi:methods');
+				should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('davinci:openapi:methods');
 				// @ts-ignore
 				should(Reflector.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
 					path: decoratorArgs.path,
@@ -119,7 +119,7 @@ describe('route decorators', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('delete');
 
 				// @ts-ignore
-				should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('tsopenapi:methods');
+				should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('davinci:openapi:methods');
 				// @ts-ignore
 				should(Reflector.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
 					path: decoratorArgs.path,
@@ -138,7 +138,7 @@ describe('route decorators', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('head');
 
 				// @ts-ignore
-				should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('tsopenapi:methods');
+				should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('davinci:openapi:methods');
 				// @ts-ignore
 				should(Reflector.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
 					path: decoratorArgs.path,
@@ -172,7 +172,7 @@ describe('route decorators', () => {
 			route.param({ name: 'query', in: 'query' })(MyClass.prototype, 'myMethod', 0);
 
 			// @ts-ignore
-			should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('tsopenapi:method-parameters');
+			should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('davinci:openapi:method-parameters');
 			// @ts-ignore
 			should(Reflector.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
 				handler: MyClass.prototype.myMethod,
@@ -219,7 +219,7 @@ describe('route decorators', () => {
 				}
 			}
 
-			const metadata = Reflector.getMetadata('tsopenapi:method-parameters', MyClass.prototype.constructor);
+			const metadata = Reflector.getMetadata('davinci:openapi:method-parameters', MyClass.prototype.constructor);
 			// @ts-ignore
 			should(metadata[0]).be.deepEqual({
 				handler: MyClass.prototype.myMethod,
@@ -251,7 +251,7 @@ describe('route decorators', () => {
 			}
 
 			// @ts-ignore
-			should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('tsopenapi:controller');
+			should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('davinci:openapi:controller');
 			// @ts-ignore
 			should(Reflector.defineMetadata.getCall(0).args[1]).be.deepEqual(decoratorArg);
 		});

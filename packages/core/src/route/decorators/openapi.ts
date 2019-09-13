@@ -6,7 +6,7 @@ import { Reflector } from '@davinci/reflector';
  */
 export function prop(opts?: { type?: any; required?: boolean }) {
 	return function(prototype: Object, key: string | symbol): void {
-		Reflector.pushMetadata('tsopenapi:props', { key, opts }, prototype.constructor);
+		Reflector.pushMetadata('davinci:openapi:props', { key, opts }, prototype.constructor);
 	};
 }
 
@@ -17,6 +17,6 @@ export function prop(opts?: { type?: any; required?: boolean }) {
  */
 export function definition(definition?: { title }) {
 	return function(target: Function): void {
-		Reflector.defineMetadata('tsopenapi:definition', definition, target);
+		Reflector.defineMetadata('davinci:openapi:definition', definition, target);
 	};
 }

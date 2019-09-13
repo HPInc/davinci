@@ -26,7 +26,7 @@ export const createRouteMethodDecorator = verb =>
 	function({ path, summary, description, responses }: IMethodDecoratorOptions): Function {
 		return function(prototype: Object, methodName: string | symbol) {
 			// get the existing metadata props
-			const methods = Reflector.getMetadata('tsopenapi:methods', prototype.constructor) || [];
+			const methods = Reflector.getMetadata('davinci:openapi:methods', prototype.constructor) || [];
 			const meta = { path, verb, methodName, summary, description, responses, handler: prototype[methodName] };
 			let methodIndex = _.findIndex(methods, { methodName });
 			methodIndex = methodIndex > -1 ? methodIndex : _.findIndex(methods, { path, verb });
@@ -35,7 +35,7 @@ export const createRouteMethodDecorator = verb =>
 			}
 			methods.unshift(meta);
 			// define new metadata methods
-			Reflector.defineMetadata('tsopenapi:methods', methods, prototype.constructor);
+			Reflector.defineMetadata('davinci:openapi:methods', methods, prototype.constructor);
 		};
 	};
 
@@ -53,7 +53,7 @@ export const head = createRouteMethodDecorator('head');
 export function param(options: IMethodParameter): Function {
 	return function(prototype: Object, methodName: string, index) {
 		// get the existing metadata props
-		const methodParameters = Reflector.getMetadata('tsopenapi:method-parameters', prototype.constructor) || [];
+		const methodParameters = Reflector.getMetadata('davinci:openapi:method-parameters', prototype.constructor) || [];
 		const paramtypes = Reflector.getMetadata('design:paramtypes', prototype, methodName);
 		if (!options.name) {
 			const methodParameterNames = Reflector.getParameterNames(prototype[methodName]);
@@ -74,7 +74,7 @@ export function param(options: IMethodParameter): Function {
 			methodParameters.unshift(meta);
 		}
 
-		Reflector.defineMetadata('tsopenapi:method-parameters', methodParameters, prototype.constructor);
+		Reflector.defineMetadata('davinci:openapi:method-parameters', methodParameters, prototype.constructor);
 	};
 }
 
@@ -114,6 +114,6 @@ export interface IControllerDecoratorArgs {
 export function controller(args?: IControllerDecoratorArgs): Function {
 	return function(target: Function) {
 		// define new metadata props
-		Reflector.defineMetadata('tsopenapi:controller', args, target);
+		Reflector.defineMetadata('davinci:openapi:controller', args, target);
 	};
 }

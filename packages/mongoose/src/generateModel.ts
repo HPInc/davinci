@@ -8,7 +8,7 @@ import { ModelType } from './types';
  * @param theClass
  */
 export const getSchemaDefinition = (theClass: Function) => {
-	const props = Reflector.getMetadata('tsmongoose:props', theClass.prototype.constructor) || [];
+	const props = Reflector.getMetadata('davinci:mongoose:props', theClass.prototype.constructor) || [];
 
 	// loop over the variable decorated as props
 	return props.reduce((acc, { key, opts = {} }: { key: string; opts: SchemaTypeOpts<any> }) => {
@@ -76,7 +76,7 @@ export const generateSchema = (
 	// get schema
 	const schemaDef = getSchemaDefinition(theClass);
 
-	const allMethods = Reflector.getMetadata('tsmongoose:methods', theClass.prototype.constructor) || [];
+	const allMethods = Reflector.getMetadata('davinci:mongoose:methods', theClass.prototype.constructor) || [];
 
 	// get methods
 	const methods = allMethods
@@ -91,13 +91,13 @@ export const generateSchema = (
 		.reduce((acc, { name, handler }) => ({ ...acc, [name]: handler }), {});
 
 	// get indexes
-	const indexes = Reflector.getMetadata('tsmongoose:indexes', theClass) || [];
+	const indexes = Reflector.getMetadata('davinci:mongoose:indexes', theClass) || [];
 
 	// get virtual fields that allow population
-	const populates = Reflector.getMetadata('tsmongoose:populates', theClass.prototype.constructor) || [];
+	const populates = Reflector.getMetadata('davinci:mongoose:populates', theClass.prototype.constructor) || [];
 
 	// get virtual fields
-	const virtuals = Reflector.getMetadata('tsmongoose:virtuals', theClass.prototype.constructor) || [];
+	const virtuals = Reflector.getMetadata('davinci:mongoose:virtuals', theClass.prototype.constructor) || [];
 
 	const schema = new Schema(schemaDef, options);
 	schema.methods = methods;

@@ -10,7 +10,7 @@ describe('express decorators', () => {
 				}
 			}
 
-			const methodParameters = Reflect.getMetadata('tsopenapi:method-parameters', MyClass.prototype.constructor);
+			const methodParameters = Reflect.getMetadata('davinci:openapi:method-parameters', MyClass.prototype.constructor);
 
 			should(methodParameters).have.length(1);
 			should(methodParameters[0]).be.deepEqual({
@@ -30,7 +30,7 @@ describe('express decorators', () => {
 				}
 			}
 
-			const methodParameters = Reflect.getMetadata('tsopenapi:method-parameters', MyClass.prototype.constructor);
+			const methodParameters = Reflect.getMetadata('davinci:openapi:method-parameters', MyClass.prototype.constructor);
 
 			should(methodParameters).have.length(1);
 			should(methodParameters[0]).be.deepEqual({
@@ -53,7 +53,7 @@ describe('express decorators', () => {
 
 			function middlewareFn() {}
 			const methodMiddlewareMeta = Reflect.getMetadata(
-				'tsexpress:method-middleware',
+				'davinci:express:method-middleware',
 				MyClass.prototype.constructor
 			);
 
@@ -73,7 +73,7 @@ describe('express decorators', () => {
 
 			function middlewareFn() {}
 			const methodMiddlewareMeta = Reflect.getMetadata(
-				'tsexpress:method-middleware',
+				'davinci:express:method-middleware',
 				MyClass.prototype.constructor
 			);
 
@@ -97,7 +97,7 @@ describe('express decorators', () => {
 
 			function middlewareFn() {}
 			const methodMiddlewareMeta = Reflect.getMetadata(
-				'tsexpress:method-middleware',
+				'davinci:express:method-middleware',
 				MyClass.prototype.constructor
 			);
 
@@ -121,7 +121,7 @@ describe('express decorators', () => {
 
 			function middlewareFn() {}
 			const methodMiddlewareMeta = Reflect.getMetadata(
-				'tsexpress:method-middleware',
+				'davinci:express:method-middleware',
 				MyClass.prototype.constructor
 			);
 
@@ -144,7 +144,7 @@ describe('express decorators', () => {
 			}
 
 			const methodParameters = Reflect.getMetadata(
-				'tsexpress:method-response-header',
+				'davinci:express:method-response-header',
 				MyClass.prototype.constructor
 			);
 

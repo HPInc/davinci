@@ -43,7 +43,7 @@ describe('createMongooseController', () => {
 		const [Schema] = Reflector.getMetadata('design:paramtypes', MongooseController.prototype, 'create');
 		should(Schema.prototype).be.instanceOf(CustomerSchema);
 
-		const methodsMeta = Reflector.getMetadata('tsopenapi:methods', MongooseController.prototype.constructor);
+		const methodsMeta = Reflector.getMetadata('davinci:openapi:methods', MongooseController.prototype.constructor);
 		const findByIdMethod = methodsMeta.find(({ methodName }) => methodName === 'findById');
 		should(findByIdMethod.responses['200'].prototype).be.instanceof(CustomerSchema);
 	});

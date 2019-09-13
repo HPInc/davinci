@@ -11,7 +11,7 @@ export const createReqResExpressDecorator = (reqOrRes: 'req' | 'res') => () => (
 	index
 ) => {
 	// get the existing metadata props
-	const methodParameters = Reflector.getMetadata('tsopenapi:method-parameters', prototype.constructor) || [];
+	const methodParameters = Reflector.getMetadata('davinci:openapi:method-parameters', prototype.constructor) || [];
 	const isAlreadySet = !!_.find(methodParameters, { methodName, index });
 	if (isAlreadySet) return;
 
@@ -21,7 +21,7 @@ export const createReqResExpressDecorator = (reqOrRes: 'req' | 'res') => () => (
 		handler: prototype[methodName],
 		type: reqOrRes
 	});
-	Reflector.defineMetadata('tsopenapi:method-parameters', methodParameters, prototype.constructor);
+	Reflector.defineMetadata('davinci:openapi:method-parameters', methodParameters, prototype.constructor);
 };
 
 /**
@@ -56,7 +56,7 @@ const middleware = (middlewareFunction, stage: Stage = 'before'): Function => {
 		}
 
 		// define new metadata methods
-		Reflector.unshiftMetadata('tsexpress:method-middleware', args, realTarget);
+		Reflector.unshiftMetadata('davinci:express:method-middleware', args, realTarget);
 
 		return target;
 	};
@@ -85,6 +85,6 @@ export const header = (name: string, value: string) => {
 	return function(prototype: Object, methodName: string | symbol) {
 		const meta = { name, value, handler: prototype[methodName] };
 		// define new metadata methods
-		Reflector.unshiftMetadata('tsexpress:method-response-header', meta, prototype.constructor);
+		Reflector.unshiftMetadata('davinci:express:method-response-header', meta, prototype.constructor);
 	};
 };

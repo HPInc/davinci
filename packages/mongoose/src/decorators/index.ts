@@ -7,7 +7,7 @@ import { Reflector } from '@davinci/reflector';
  */
 export function prop(opts?: SchemaTypeOpts<any>) {
 	return function(prototype: Object, key: string | symbol) {
-		Reflector.pushMetadata('tsmongoose:props', { key, opts }, prototype.constructor);
+		Reflector.pushMetadata('davinci:mongoose:props', { key, opts }, prototype.constructor);
 	};
 }
 
@@ -19,7 +19,7 @@ export function prop(opts?: SchemaTypeOpts<any>) {
  */
 export function index(index, options?: any) {
 	return function(target: Function) {
-		Reflector.pushMetadata('tsmongoose:indexes', { index, options }, target);
+		Reflector.pushMetadata('davinci:mongoose:indexes', { index, options }, target);
 	};
 }
 
@@ -37,7 +37,7 @@ export function method() {
 		const handler = target[key];
 
 		Reflector.pushMetadata(
-			'tsmongoose:methods',
+			'davinci:mongoose:methods',
 			{ name: key, type, handler, isStatic, isPrototype },
 			realTarget
 		);
@@ -69,7 +69,7 @@ export interface IVirtualArgs {
 export function populate({ name, opts }: { name: string; opts: IVirtualArgs }) {
 	return function(target: Object, key: string) {
 		const options = { ...opts, localField: key };
-		Reflector.pushMetadata('tsmongoose:populates', { name, options }, target.constructor);
+		Reflector.pushMetadata('davinci:mongoose:populates', { name, options }, target.constructor);
 	};
 }
 
@@ -81,6 +81,6 @@ export function virtual() {
 	return function(target: Object, key: string) {
 		const handler = target[key];
 
-		Reflector.pushMetadata('tsmongoose:virtuals', { name: key, handler }, target.constructor);
+		Reflector.pushMetadata('davinci:mongoose:virtuals', { name: key, handler }, target.constructor);
 	};
 }
