@@ -1,4 +1,5 @@
 import { model, Schema, SchemaTypeOpts, SchemaOptions } from 'mongoose';
+import { Reflector } from '@davinci/reflector';
 import { ModelType } from './types';
 
 /**
@@ -7,7 +8,7 @@ import { ModelType } from './types';
  * @param theClass
  */
 export const getSchemaDefinition = (theClass: Function) => {
-	const props = Reflect.getMetadata('tsmongoose:props', theClass.prototype) || [];
+	const props = Reflector.getMetadata('tsmongoose:props', theClass.prototype.constructor) || [];
 
 	// loop over the variable decorated as props
 	return props.reduce((acc, { key, opts = {} }: { key: string; opts: SchemaTypeOpts<any> }) => {
@@ -16,7 +17,7 @@ export const getSchemaDefinition = (theClass: Function) => {
 		// the type can be retrieved with reflect-metadata, for example:
 		// - arrays: [string] or [object] or [MyClass]
 		// - objects
-		let type = opts.type || Reflect.getMetadata('design:type', theClass.prototype, key);
+		let type = opts.type || Reflector.getMetadata('design:type', theClass.prototype, key);
 		const isArray = Array.isArray(type) || type.name === 'Array';
 		if (isArray && type.length > 0) {
 			type = type[0];
@@ -75,24 +76,28 @@ export const generateSchema = (
 	// get schema
 	const schemaDef = getSchemaDefinition(theClass);
 
+	const allMethods = Reflector.getMetadata('tsmongoose:methods', theClass.prototype.constructor) || [];
+
 	// get methods
-	const methods = (Reflect.getMetadata('tsmongoose:methods', theClass.prototype) || [])
+	const methods = allMethods
+		.filter(({ isPrototype }) => isPrototype)
 		.filter(({ name }) => !EXCLUDED_INSTANCE_METHODS.includes(name))
 		.reduce((acc, { name, handler }) => ({ ...acc, [name]: handler }), {});
 
 	// get statics
-	const statics = (Reflect.getMetadata('tsmongoose:methods', theClass) || [])
+	const statics = allMethods
+		.filter(({ isStatic }) => isStatic)
 		.filter(({ name }) => !EXCLUDED_STATIC_METHODS.includes(name))
 		.reduce((acc, { name, handler }) => ({ ...acc, [name]: handler }), {});
 
 	// get indexes
-	const indexes = Reflect.getMetadata('tsmongoose:indexes', theClass) || [];
+	const indexes = Reflector.getMetadata('tsmongoose:indexes', theClass) || [];
 
 	// get virtual fields that allow population
-	const populates = Reflect.getMetadata('tsmongoose:populates', theClass.prototype) || [];
+	const populates = Reflector.getMetadata('tsmongoose:populates', theClass.prototype.constructor) || [];
 
 	// get virtual fields
-	const virtuals = Reflect.getMetadata('tsmongoose:virtuals', theClass.prototype) || [];
+	const virtuals = Reflector.getMetadata('tsmongoose:virtuals', theClass.prototype.constructor) || [];
 
 	const schema = new Schema(schemaDef, options);
 	schema.methods = methods;

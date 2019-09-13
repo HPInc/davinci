@@ -24,10 +24,10 @@ interface IMethodDecoratorOptions {
  */
 export const createRouteMethodDecorator = verb =>
 	function({ path, summary, description, responses }: IMethodDecoratorOptions): Function {
-		return function(target: Object, methodName: string | symbol) {
+		return function(prototype: Object, methodName: string | symbol) {
 			// get the existing metadata props
-			const methods = Reflector.getMetadata('tsopenapi:methods', target) || [];
-			const meta = { path, verb, methodName, summary, description, responses, handler: target[methodName] };
+			const methods = Reflector.getMetadata('tsopenapi:methods', prototype.constructor) || [];
+			const meta = { path, verb, methodName, summary, description, responses, handler: prototype[methodName] };
 			let methodIndex = _.findIndex(methods, { methodName });
 			methodIndex = methodIndex > -1 ? methodIndex : _.findIndex(methods, { path, verb });
 			if (methodIndex && methodIndex > -1) {
@@ -35,7 +35,7 @@ export const createRouteMethodDecorator = verb =>
 			}
 			methods.unshift(meta);
 			// define new metadata methods
-			Reflector.defineMetadata('tsopenapi:methods', methods, target);
+			Reflector.defineMetadata('tsopenapi:methods', methods, prototype.constructor);
 		};
 	};
 
@@ -51,36 +51,30 @@ export const head = createRouteMethodDecorator('head');
  * @param options
  */
 export function param(options: IMethodParameter): Function {
-	return function(target: Object, methodName: string, index) {
+	return function(prototype: Object, methodName: string, index) {
 		// get the existing metadata props
-		const methodParameters = Reflector.getMetadata('tsopenapi:method-parameters', target) || [];
-		const paramtypes = Reflector.getMetadata('design:paramtypes', target, methodName);
+		const methodParameters = Reflector.getMetadata('tsopenapi:method-parameters', prototype.constructor) || [];
+		const paramtypes = Reflector.getMetadata('design:paramtypes', prototype, methodName);
 		if (!options.name) {
-			const methodParameterNames = Reflector.getParameterNames(target[methodName]);
+			const methodParameterNames = Reflector.getParameterNames(prototype[methodName]);
 			options.name = methodParameterNames[index];
 		}
 		const meta = {
-			target,
 			methodName,
 			index,
 			options,
-			handler: target[methodName],
-			/*
-				The method: Reflect.getMetadata('design:paramtypes', target, methodName);
-				doesn't seem to be working in the test environment, so the paramtypes array is always undefined
-				TODO: find a better solution
-			 */
+			handler: prototype[methodName],
 			type: paramtypes && paramtypes[index]
 		};
 
 		const methodParameterIndex = _.findIndex(methodParameters, { methodName, index });
-		if (methodParameterIndex && methodParameterIndex > -1) {
+		if (methodParameterIndex > -1) {
 			methodParameters[methodParameterIndex] = meta;
 		} else {
 			methodParameters.unshift(meta);
 		}
 
-		Reflector.defineMetadata('tsopenapi:method-parameters', methodParameters, target);
+		Reflector.defineMetadata('tsopenapi:method-parameters', methodParameters, prototype.constructor);
 	};
 }
 
@@ -118,7 +112,7 @@ export interface IControllerDecoratorArgs {
  * @param args
  */
 export function controller(args?: IControllerDecoratorArgs): Function {
-	return function(target: Object) {
+	return function(target: Function) {
 		// define new metadata props
 		Reflector.defineMetadata('tsopenapi:controller', args, target);
 	};

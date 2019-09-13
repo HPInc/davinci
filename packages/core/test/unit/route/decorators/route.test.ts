@@ -1,5 +1,6 @@
 import should from 'should';
 import Sinon from 'sinon';
+import { Reflector } from '@davinci/reflector';
 import { createRouteMethodDecorator } from '../../../../src/route/decorators/route';
 import { route } from '../../../../src/route';
 
@@ -23,8 +24,8 @@ describe('route decorators', () => {
 			const MyClass = class {
 				myMethod() {}
 			};
-			sinon.stub(Reflect, 'defineMetadata');
-			sinon.stub(Reflect, 'getMetadata').returns([]);
+			sinon.stub(Reflector, 'defineMetadata');
+			sinon.stub(Reflector, 'getMetadata').returns([]);
 			const decoratorArgs = {
 				path: '/thepath',
 				description: 'My description',
@@ -42,9 +43,9 @@ describe('route decorators', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('get');
 
 				// @ts-ignore
-				should(Reflect.defineMetadata.getCall(0).args[0]).be.equal('tsopenapi:methods');
+				should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('tsopenapi:methods');
 				// @ts-ignore
-				should(Reflect.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
+				should(Reflector.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
 					path: decoratorArgs.path,
 					verb: 'get',
 					methodName: 'myMethod',
@@ -61,9 +62,9 @@ describe('route decorators', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('post');
 
 				// @ts-ignore
-				should(Reflect.defineMetadata.getCall(0).args[0]).be.equal('tsopenapi:methods');
+				should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('tsopenapi:methods');
 				// @ts-ignore
-				should(Reflect.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
+				should(Reflector.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
 					path: decoratorArgs.path,
 					verb: 'post',
 					methodName: 'myMethod',
@@ -80,9 +81,9 @@ describe('route decorators', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('put');
 
 				// @ts-ignore
-				should(Reflect.defineMetadata.getCall(0).args[0]).be.equal('tsopenapi:methods');
+				should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('tsopenapi:methods');
 				// @ts-ignore
-				should(Reflect.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
+				should(Reflector.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
 					path: decoratorArgs.path,
 					verb: 'put',
 					methodName: 'myMethod',
@@ -99,9 +100,9 @@ describe('route decorators', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('patch');
 
 				// @ts-ignore
-				should(Reflect.defineMetadata.getCall(0).args[0]).be.equal('tsopenapi:methods');
+				should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('tsopenapi:methods');
 				// @ts-ignore
-				should(Reflect.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
+				should(Reflector.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
 					path: decoratorArgs.path,
 					verb: 'patch',
 					methodName: 'myMethod',
@@ -118,9 +119,9 @@ describe('route decorators', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('delete');
 
 				// @ts-ignore
-				should(Reflect.defineMetadata.getCall(0).args[0]).be.equal('tsopenapi:methods');
+				should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('tsopenapi:methods');
 				// @ts-ignore
-				should(Reflect.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
+				should(Reflector.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
 					path: decoratorArgs.path,
 					verb: 'delete',
 					methodName: 'myMethod',
@@ -137,9 +138,9 @@ describe('route decorators', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('head');
 
 				// @ts-ignore
-				should(Reflect.defineMetadata.getCall(0).args[0]).be.equal('tsopenapi:methods');
+				should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('tsopenapi:methods');
 				// @ts-ignore
-				should(Reflect.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
+				should(Reflector.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
 					path: decoratorArgs.path,
 					verb: 'head',
 					methodName: 'myMethod',
@@ -161,20 +162,19 @@ describe('route decorators', () => {
 			};
 
 			sinon
-				.stub(Reflect, 'getMetadata')
+				.stub(Reflector, 'getMetadata')
 				.onFirstCall()
 				.returns([])
 				.onSecondCall()
 				.returns(['string']);
-			sinon.stub(Reflect, 'defineMetadata');
+			sinon.stub(Reflector, 'defineMetadata');
 
 			route.param({ name: 'query', in: 'query' })(MyClass.prototype, 'myMethod', 0);
 
 			// @ts-ignore
-			should(Reflect.defineMetadata.getCall(0).args[0]).be.equal('tsopenapi:method-parameters');
+			should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('tsopenapi:method-parameters');
 			// @ts-ignore
-			should(Reflect.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
-				target: MyClass.prototype,
+			should(Reflector.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
 				handler: MyClass.prototype.myMethod,
 				methodName: 'myMethod',
 				index: 0,
@@ -207,34 +207,21 @@ describe('route decorators', () => {
 		*/
 		it(`should ignore setting metadata on the method, if metadata already exists 
 				(example: it was defined by the extending class)`, () => {
-			const BaseClass = class {
-				myMethod(query) {
+			class BaseClass {
+				myMethod(@route.param({ name: 'wrongName', in: 'query' }) query: string) {
 					return query;
 				}
-			};
-			route.param({ name: 'wrongName', in: 'query' })(BaseClass.prototype, 'myMethod', 0);
+			}
 
-			const MyClass = class extends BaseClass {
-				myMethod(query) {
+			class MyClass extends BaseClass {
+				myMethod(@route.param({ name: 'correctName', in: 'query' }) query: string) {
 					return query;
 				}
-			};
+			}
 
-			sinon
-				.stub(Reflect, 'getMetadata')
-				.onFirstCall()
-				.returns([])
-				.onSecondCall()
-				.returns(['string']);
-			sinon.stub(Reflect, 'defineMetadata');
-
-			route.param({ name: 'correctName', in: 'query' })(MyClass.prototype, 'myMethod', 0);
-
+			const metadata = Reflector.getMetadata('tsopenapi:method-parameters', MyClass.prototype.constructor);
 			// @ts-ignore
-			should(Reflect.defineMetadata.getCall(0).args[0]).be.equal('tsopenapi:method-parameters');
-			// @ts-ignore
-			should(Reflect.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
-				target: MyClass.prototype,
+			should(metadata[0]).be.deepEqual({
 				handler: MyClass.prototype.myMethod,
 				methodName: 'myMethod',
 				index: 0,
@@ -242,31 +229,31 @@ describe('route decorators', () => {
 					name: 'correctName',
 					in: 'query'
 				},
-				type: 'string'
+				type: String
 			});
 		});
 	});
 
 	describe('@route.controller()', () => {
 		it('should define metadata correctly', () => {
-			const MyClass = class {
+			const decoratorArg = {
+				basepath: '/thebasepath',
+				excludedMethods: ['testMethod']
+			};
+
+			sinon.stub(Reflector, 'defineMetadata');
+			@route.controller(decoratorArg)
+			// @ts-ignore
+			class MyClass {
 				myMethod(query) {
 					return query;
 				}
-			};
-			sinon.stub(Reflect, 'defineMetadata');
-
-			const decoratorArg = {
-				basepath: '/thebasepath',
-				additionalSchemas: [MyClass],
-				excludedMethods: ['testMethod']
-			};
-			route.controller(decoratorArg)(MyClass);
+			}
 
 			// @ts-ignore
-			should(Reflect.defineMetadata.getCall(0).args[0]).be.equal('tsopenapi:controller');
+			should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('tsopenapi:controller');
 			// @ts-ignore
-			should(Reflect.defineMetadata.getCall(0).args[1]).be.deepEqual(decoratorArg);
+			should(Reflector.defineMetadata.getCall(0).args[1]).be.deepEqual(decoratorArg);
 		});
 	});
 });

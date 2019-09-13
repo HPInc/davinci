@@ -1,10 +1,10 @@
 import express, { Express } from 'express';
 import { createApp, createRouter, IOfBaseExpress } from '@davinci/core';
 import CustomerController from './customer/customer.controller';
-import packageJson = require('../package.json');
+// import packageJson = require('../package.json');
 
 const options = {
-	version: packageJson.version,
+	// version: packageJson.version,
 	boot: {
 		dirPath: './build/examples/crm/boot'
 	},
@@ -18,7 +18,7 @@ const options = {
 			options: {
 				info: {
 					name: 'CRM',
-					version: packageJson.version
+					// version: packageJson.version
 				},
 				securityDefinitions: { Bearer: { type: 'apiKey', name: 'Authorization', in: 'header' } }
 			}

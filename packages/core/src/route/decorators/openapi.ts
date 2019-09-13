@@ -5,8 +5,8 @@ import { Reflector } from '@davinci/reflector';
  * @param opts
  */
 export function prop(opts?: { type?: any; required?: boolean }) {
-	return function(target: Object, key: string | symbol): void {
-		Reflector.pushMetadata('tsopenapi:props', { key, opts }, target);
+	return function(prototype: Object, key: string | symbol): void {
+		Reflector.pushMetadata('tsopenapi:props', { key, opts }, prototype.constructor);
 	};
 }
 
@@ -16,7 +16,7 @@ export function prop(opts?: { type?: any; required?: boolean }) {
  * @param definition
  */
 export function definition(definition?: { title }) {
-	return function(target: Object): void {
+	return function(target: Function): void {
 		Reflector.defineMetadata('tsopenapi:definition', definition, target);
 	};
 }

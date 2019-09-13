@@ -164,13 +164,10 @@ const makeHandlerFunction = (operation, controller, functionName, definitions, c
 	const successCode = _.findKey(operation.responses, (obj, key) => +key >= 200 && +key < 400);
 
 	// get middlewares
-	const methodMiddlewaresMeta = _.filter(
-		Reflector.getMetadata('tsexpress:method-middleware', controller.constructor.prototype),
-		{ handler: controller[functionName] }
-	);
-	const controllerMiddlewaresMeta =
-		Reflector.getMetadata('tsexpress:method-middleware', controller.constructor) || [];
-	const allMiddlewaresMeta = [...controllerMiddlewaresMeta, ...methodMiddlewaresMeta];
+	const allMiddlewaresMeta = (
+		Reflector.getMetadata('tsexpress:method-middleware', controller.constructor) || []
+	).filter(metadata => metadata.handler === controller[functionName] || metadata.isControllerMw);
+
 	const beforeMiddlewares = allMiddlewaresMeta.filter(m => m.stage === 'before');
 	const afterMiddlewares = allMiddlewaresMeta.filter(m => m.stage === 'after');
 
@@ -216,7 +213,7 @@ const makeHandlerFunction = (operation, controller, functionName, definitions, c
 
 export const createRouteHandlers = (controller, definition, contextFactory?) => {
 	const routeHandlers = [];
-	const methods = Reflector.getMetadata('tsopenapi:methods', controller.constructor.prototype) || [];
+	const methods = Reflector.getMetadata('tsopenapi:methods', controller.constructor) || [];
 
 	// for each path
 	_.each(methods, method => {

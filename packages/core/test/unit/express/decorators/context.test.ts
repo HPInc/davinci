@@ -1,35 +1,32 @@
 import should from 'should';
-import { context } from '../../../../src/express/decorators/context';
+import { Reflector } from '@davinci/reflector';
+import { context } from '../../../../src/express';
 
 describe('@context()', () => {
 	it('should decorate correctly', () => {
-		const MyClass = class {
-			myMethod(context) {
+		class MyClass {
+			myMethod(@context() context) {
 				return context;
 			}
 
-			myOtherMethod(context) {
+			myOtherMethod(@context() context) {
 				return context;
 			}
-		};
+		}
 
-		context()(MyClass.prototype, 'myMethod', 0);
-		context()(MyClass.prototype, 'myOtherMethod', 1);
-		const contextMetadata = Reflect.getMetadata('tscontroller:context', MyClass.prototype);
+		const contextMetadata = Reflector.getMetadata('tscontroller:context', MyClass.prototype.constructor);
 
 		should(contextMetadata).have.length(2);
 		// the array is reversed because the items are added with Array.prototype.unshift
 		should(contextMetadata[0]).be.deepEqual({
 			handler: MyClass.prototype.myOtherMethod,
-			target: MyClass.prototype,
 			methodName: 'myOtherMethod',
-			index: 1,
+			index: 0,
 			type: 'context'
 		});
 
 		should(contextMetadata[1]).be.deepEqual({
 			handler: MyClass.prototype.myMethod,
-			target: MyClass.prototype,
 			methodName: 'myMethod',
 			index: 0,
 			type: 'context'
