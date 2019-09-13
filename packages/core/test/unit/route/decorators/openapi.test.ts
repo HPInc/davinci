@@ -19,7 +19,7 @@ describe('openapi decorators', () => {
 			openapi.prop({ required: false })(Customer.prototype, 'myMethod');
 
 			// @ts-ignore
-			should(Reflect.defineMetadata.getCall(0).args[0]).be.equal('tsopenapi:props');
+			should(Reflect.defineMetadata.getCall(0).args[0]).be.equal('davinci:openapi:props');
 			// @ts-ignore
 			should(Reflect.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
 				key: 'myMethod',
@@ -35,7 +35,7 @@ describe('openapi decorators', () => {
 			openapi.definition({ title: 'MyCustomer' })(Customer);
 
 			// @ts-ignore
-			should(Reflect.defineMetadata.getCall(0).args[0]).be.equal('tsopenapi:definition');
+			should(Reflect.defineMetadata.getCall(0).args[0]).be.equal('davinci:openapi:definition');
 			// @ts-ignore
 			should(Reflect.defineMetadata.getCall(0).args[1]).be.deepEqual({ title: 'MyCustomer' });
 		});

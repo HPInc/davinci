@@ -6,23 +6,22 @@ import _ from 'lodash';
  * @param reqOrRes
  */
 export const createReqResExpressDecorator = (reqOrRes: 'req' | 'res') => () => (
-	target: Object,
+	prototype: Object,
 	methodName: string,
 	index
 ) => {
 	// get the existing metadata props
-	const methodParameters = Reflector.getMetadata('tsopenapi:method-parameters', target) || [];
+	const methodParameters = Reflector.getMetadata('davinci:openapi:method-parameters', prototype.constructor) || [];
 	const isAlreadySet = !!_.find(methodParameters, { methodName, index });
 	if (isAlreadySet) return;
 
 	methodParameters.unshift({
-		target,
 		methodName,
 		index,
-		handler: target[methodName],
+		handler: prototype[methodName],
 		type: reqOrRes
 	});
-	Reflector.defineMetadata('tsopenapi:method-parameters', methodParameters, target);
+	Reflector.defineMetadata('davinci:openapi:method-parameters', methodParameters, prototype.constructor);
 };
 
 /**
@@ -44,13 +43,20 @@ type Stage = 'before' | 'after';
  */
 const middleware = (middlewareFunction, stage: Stage = 'before'): Function => {
 	return function(target: Object | Function, methodName: string | symbol) {
-		const args: { middlewareFunction: Function; stage: Stage; handler?: Function } = { middlewareFunction, stage };
-		if (target[methodName]) {
+		const args: { middlewareFunction: Function; stage: Stage; handler?: Function; isControllerMw?: boolean } = {
+			middlewareFunction,
+			stage
+		};
+		let realTarget = target;
+		if (typeof target === 'object' && target[methodName]) {
 			args.handler = target[methodName];
-		} // else, the target is a controller class
+			realTarget = target.constructor;
+		} else {
+			args.isControllerMw = true;
+		}
 
 		// define new metadata methods
-		Reflector.unshiftMetadata('tsexpress:method-middleware', args, target);
+		Reflector.unshiftMetadata('davinci:express:method-middleware', args, realTarget);
 
 		return target;
 	};
@@ -76,9 +82,9 @@ export { middleware };
  * @param value
  */
 export const header = (name: string, value: string) => {
-	return function(target: Object, methodName: string | symbol) {
-		const meta = { name, value, handler: target[methodName] };
+	return function(prototype: Object, methodName: string | symbol) {
+		const meta = { name, value, handler: prototype[methodName] };
 		// define new metadata methods
-		Reflector.unshiftMetadata('tsexpress:method-response-header', meta, target);
+		Reflector.unshiftMetadata('davinci:express:method-response-header', meta, prototype.constructor);
 	};
 };

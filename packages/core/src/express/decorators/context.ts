@@ -6,18 +6,17 @@ import find from 'lodash/find';
  */
 export const context = (): Function => {
 	return function(target: Object, methodName: string | symbol, index) {
-		const contextParameters = Reflector.getMetadata('tscontroller:context', target) || [];
+		const contextParameters = Reflector.getMetadata('davinci:context', target.constructor) || [];
 		const isAlreadySet = !!find(contextParameters, { methodName, index });
 		if (isAlreadySet) return;
 
 		contextParameters.unshift({
-			target,
 			methodName,
 			index,
 			handler: target[methodName],
 			type: 'context'
 		});
 
-		Reflector.defineMetadata('tscontroller:context', contextParameters, target);
+		Reflector.defineMetadata('davinci:context', contextParameters, target.constructor);
 	};
 };

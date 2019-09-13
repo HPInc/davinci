@@ -8,13 +8,14 @@ describe('typed mongoose', () => {
 	describe('#getSchemaDefinition', () => {
 		it('supports primitive types', () => {
 			class Customer {
+				@prop()
 				firstname: string;
+				@prop()
 				age: number;
+				@prop()
 				isActive: boolean;
 			}
-			prop({ type: String })(Customer.prototype, 'firstname');
-			prop({ type: Number })(Customer.prototype, 'age');
-			prop({ type: Boolean })(Customer.prototype, 'isActive');
+
 			const schema = getSchemaDefinition(Customer);
 
 			should(schema).be.deepEqual({
@@ -32,15 +33,15 @@ describe('typed mongoose', () => {
 
 		it('supports nested classes', () => {
 			class CustomerBirth {
+				@prop()
 				place: string;
 			}
 
 			class Customer {
+				@prop()
 				birth: CustomerBirth;
 			}
 
-			prop({ type: CustomerBirth })(Customer.prototype, 'birth');
-			prop({ type: String })(CustomerBirth.prototype, 'place');
 			const schema = getSchemaDefinition(Customer);
 
 			should(schema).be.deepEqual({
@@ -54,17 +55,18 @@ describe('typed mongoose', () => {
 
 		it('supports arrays', () => {
 			class CustomerBirth {
+				@prop()
 				place: string;
 			}
 
 			class Customer {
+				@prop({ type: [CustomerBirth] })
 				birth: CustomerBirth[];
+
+				@prop({ type: [String] })
 				tags: string[];
 			}
 
-			prop({ type: [CustomerBirth] })(Customer.prototype, 'birth');
-			prop({ type: [String] })(Customer.prototype, 'tags');
-			prop({ type: String })(CustomerBirth.prototype, 'place');
 			const schema = getSchemaDefinition(Customer);
 
 			should(schema).be.deepEqual({
@@ -78,32 +80,61 @@ describe('typed mongoose', () => {
 				tags: [{ type: String }]
 			});
 		});
+
+		it('supports class inheritance', () => {
+			class BaseSchema {
+				@prop()
+				createdAt: string;
+				@prop()
+				updatedAt: number;
+			}
+
+			class MyClass1 extends BaseSchema {
+				@prop()
+				otherProp1: string;
+			}
+
+			class MyClass2 extends BaseSchema {
+				@prop()
+				otherProp2: string;
+			}
+
+			const schema1 = getSchemaDefinition(MyClass1);
+			const schema2 = getSchemaDefinition(MyClass2);
+			const baseSchema = getSchemaDefinition(BaseSchema);
+
+			should(Object.keys(schema1)).be.deepEqual(['createdAt', 'updatedAt', 'otherProp1']);
+			should(Object.keys(schema2)).be.deepEqual(['createdAt', 'updatedAt', 'otherProp2']);
+			should(Object.keys(baseSchema)).be.deepEqual(['createdAt', 'updatedAt']);
+		});
 	});
 
 	describe('#generateSchema', () => {
 		it('attach statics and model methods', () => {
 			class Customer {
+				@method()
 				static myStaticMethod() {}
+
+				@method()
 				myMethod() {}
 			}
 
-			method()(Customer, 'myStaticMethod');
-			method()(Customer.prototype, 'myMethod');
 			const schema = generateSchema(Customer);
 			should(schema.statics.myStaticMethod).be.equal(Customer.myStaticMethod);
 			should(schema.methods.myMethod).be.equal(Customer.prototype.myMethod);
 		});
 
 		it('should add the indexes', () => {
+			@index({ firstname: 1, lastname: 1 })
+			@index({ lastname: 1, unique: true })
 			class Customer {
+				@prop({ index: true })
 				firstname: string;
+
+				@prop()
 				lastname: string;
 			}
 
-			prop({ type: String, index: true })(Customer.prototype, 'firstname');
-			prop({ type: String })(Customer.prototype, 'lastname');
-			index({ firstname: 1, lastname: 1 })(Customer);
-			index({ lastname: 1 }, { unique: true })(Customer);
 			const schema = generateSchema(Customer);
 			should(schema.indexes()).be.deepEqual([
 				[
@@ -116,8 +147,8 @@ describe('typed mongoose', () => {
 				],
 				[
 					{
-						firstname: 1,
-						lastname: 1
+						lastname: 1,
+						unique: true
 					},
 					{
 						background: true
@@ -125,11 +156,11 @@ describe('typed mongoose', () => {
 				],
 				[
 					{
+						firstname: 1,
 						lastname: 1
 					},
 					{
-						background: true,
-						unique: true
+						background: true
 					}
 				]
 			]);

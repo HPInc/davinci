@@ -28,18 +28,22 @@ const getParameterDefinition = methodParameterConfig => {
 };
 
 const createPathsDefinition = (theClass: Function): { paths: PathsDefinition; definitions: ISwaggerDefinitions } => {
-	const controllerMetadata: IControllerDecoratorArgs = Reflector.getMetadata('tsopenapi:controller', theClass) || {};
+	const controllerMetadata: IControllerDecoratorArgs = 
+		Reflector.getMetadata('davinci:openapi:controller', theClass) || {};
 	// if (!controllerMetadata) throw new Error('Invalid Class. It must be decorated as controller');
 	const { excludedMethods = [] } = controllerMetadata;
-	const methods = (Reflector.getMetadata('tsopenapi:methods', theClass.prototype) || []).filter(
+	const methods = (Reflector.getMetadata('davinci:openapi:methods', theClass.prototype.constructor) || []).filter(
 		({ methodName }) => !excludedMethods.includes(methodName)
 	);
-	const contextMetadata: IControllerDecoratorArgs = Reflector.getMetadata('tscontroller:context', theClass.prototype);
+	const contextMetadata: IControllerDecoratorArgs = Reflector.getMetadata(
+		'davinci:context',
+		theClass.prototype.constructor
+	);
 	const methodParameters = _fp.flow(
 		_fp.concat(contextMetadata),
 		_fp.sortBy('index'),
 		_fp.compact
-	)(Reflector.getMetadata('tsopenapi:method-parameters', theClass.prototype) || []);
+	)(Reflector.getMetadata('davinci:openapi:method-parameters', theClass.prototype.constructor) || []);
 
 	return _.reduce(
 		methods,

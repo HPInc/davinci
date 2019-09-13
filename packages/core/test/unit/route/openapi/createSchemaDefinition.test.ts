@@ -4,14 +4,13 @@ import { openapi } from '../../../../src/route';
 
 describe('createSchemaDefinition', () => {
 	it('Given a decorated class, it should create a schema definition', () => {
-		const Customer = class {
+		@openapi.definition({ title: 'Customer' })
+		class Customer {
+			@openapi.prop()
 			firstname: string;
+			@openapi.prop()
 			lastname: string;
-		};
-
-		openapi.definition({ title: 'Customer' })(Customer);
-		openapi.prop({ type: String })(Customer.prototype, 'firstname');
-		openapi.prop({ type: String })(Customer.prototype, 'lastname');
+		}
 		/**
 		 * This is equivalent to:
 		 *
@@ -46,9 +45,9 @@ describe('createSchemaDefinition', () => {
 			isPrimary: boolean;
 		}
 
-		const Customer = class {
+		class Customer {
 			phone: CustomerPhone;
-		};
+		}
 
 		openapi.definition({ title: 'Customer' })(Customer);
 		openapi.prop({ type: CustomerPhone })(Customer.prototype, 'phone');
@@ -102,9 +101,9 @@ describe('createSchemaDefinition', () => {
 			isPrimary: boolean;
 		}
 
-		const Customer = class {
+		class Customer {
 			phone: CustomerPhone;
-		};
+		}
 
 		openapi.definition({ title: 'Customer' })(Customer);
 		openapi.prop({ type: CustomerPhone })(Customer.prototype, 'phone');
@@ -158,9 +157,9 @@ describe('createSchemaDefinition', () => {
 	});
 
 	it('supports arrays', () => {
-		const Customer = class {
+		class Customer {
 			groups: string[];
-		};
+		}
 
 		openapi.definition({ title: 'Customer' })(Customer);
 		openapi.prop({ type: [String] })(Customer.prototype, 'groups');
@@ -196,9 +195,9 @@ describe('createSchemaDefinition', () => {
 			isPrimary: boolean;
 		}
 
-		const Customer = class {
+		class Customer {
 			phone: CustomerPhone[];
-		};
+		}
 
 		openapi.definition({ title: 'Customer' })(Customer);
 		openapi.prop({ type: [CustomerPhone] })(Customer.prototype, 'phone');
@@ -255,9 +254,9 @@ describe('createSchemaDefinition', () => {
 			isPrimary: boolean;
 		}
 
-		const Customer = class {
+		class Customer {
 			phone: CustomerPhone[];
-		};
+		}
 
 		openapi.definition({ title: 'Customer' })(Customer);
 		openapi.prop({ type: [CustomerPhone] })(Customer.prototype, 'phone');
@@ -314,10 +313,10 @@ describe('createSchemaDefinition', () => {
 	});
 
 	it('should populate the required array', () => {
-		const Customer = class {
+		class Customer {
 			firstname: string;
 			lastname: string;
-		};
+		}
 
 		openapi.definition({ title: 'Customer' })(Customer);
 		openapi.prop({ type: String, required: true })(Customer.prototype, 'firstname');
