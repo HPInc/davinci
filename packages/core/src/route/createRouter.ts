@@ -164,19 +164,16 @@ const makeHandlerFunction = (operation, controller, functionName, definitions, c
 	const successCode = _.findKey(operation.responses, (obj, key) => +key >= 200 && +key < 400);
 
 	// get middlewares
-	const methodMiddlewaresMeta = _.filter(
-		Reflector.getMetadata('tsexpress:method-middleware', controller.constructor.prototype),
-		{ handler: controller[functionName] }
-	);
-	const controllerMiddlewaresMeta =
-		Reflector.getMetadata('tsexpress:method-middleware', controller.constructor) || [];
-	const allMiddlewaresMeta = [...controllerMiddlewaresMeta, ...methodMiddlewaresMeta];
+	const allMiddlewaresMeta = (
+		Reflector.getMetadata('davinci:express:method-middleware', controller.constructor) || []
+	).filter(metadata => metadata.handler === controller[functionName] || metadata.isControllerMw);
+
 	const beforeMiddlewares = allMiddlewaresMeta.filter(m => m.stage === 'before');
 	const afterMiddlewares = allMiddlewaresMeta.filter(m => m.stage === 'after');
 
 	// get response headers
 	const responseHeadersMeta = Reflector.getMetadata(
-		'tsexpress:method-response-header',
+		'davinci:express:method-response-header',
 		controller.constructor.prototype
 	);
 	const methodResponseHeadersMeta = _.filter(responseHeadersMeta, { handler: controller[functionName] });
@@ -216,7 +213,7 @@ const makeHandlerFunction = (operation, controller, functionName, definitions, c
 
 export const createRouteHandlers = (controller, definition, contextFactory?) => {
 	const routeHandlers = [];
-	const methods = Reflector.getMetadata('tsopenapi:methods', controller.constructor.prototype) || [];
+	const methods = Reflector.getMetadata('davinci:openapi:methods', controller.constructor) || [];
 
 	// for each path
 	_.each(methods, method => {
@@ -257,7 +254,7 @@ const createRouterAndSwaggerDoc = (Controller, rsName?, contextFactory?): Router
 	const resourceName = rsName || Controller.name.replace(/Controller$/, '').toLowerCase();
 
 	// get controller metadata
-	const metadata = Reflector.getMetadata('tsopenapi:controller', Controller) || {};
+	const metadata = Reflector.getMetadata('davinci:openapi:controller', Controller) || {};
 	const basepath = metadata.basepath || '';
 	const resourceSchema = metadata.resourceSchema;
 	const additionalSchemas = metadata.additionalSchemas;

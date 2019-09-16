@@ -7,8 +7,10 @@ const { generateSchema, beforeRead, beforeWrite, beforeDelete } = mgoose;
 const schema = generateSchema(CustomerSchema);
 
 beforeRead(schema, (mQuery, context) => {
-	const currentQuery = mQuery.getQuery();
-	mQuery.setQuery({ ...currentQuery, accountId: context.accountId });
+	if (context) {
+		const currentQuery = mQuery.getQuery();
+		mQuery.setQuery({ ...currentQuery, accountId: context.accountId });
+	}
 });
 
 beforeWrite(schema, (doc, context) => {

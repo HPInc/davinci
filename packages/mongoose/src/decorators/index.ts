@@ -1,14 +1,13 @@
 import { SchemaTypeOpts } from 'mongoose';
+import { Reflector } from '@davinci/reflector';
 
 /**
  * Decorate a props as mongoose schema property
  * @param opts
  */
 export function prop(opts?: SchemaTypeOpts<any>) {
-	return function(target: Object, key: string | symbol) {
-		const props = Reflect.getMetadata('tsmongoose:props', target) || [];
-		props.push({ key, opts });
-		Reflect.defineMetadata('tsmongoose:props', props, target);
+	return function(prototype: Object, key: string | symbol) {
+		Reflector.pushMetadata('davinci:mongoose:props', { key, opts }, prototype.constructor);
 	};
 }
 
@@ -16,12 +15,11 @@ export function prop(opts?: SchemaTypeOpts<any>) {
  * Gives the ability to add compound indexes to a schema.
  * It decorates classes
  * @param index
+ * @param options
  */
 export function index(index, options?: any) {
-	return function(target: Object) {
-		const indexes = Reflect.getMetadata('tsmongoose:indexes', target) || [];
-		indexes.push({ index, options });
-		Reflect.defineMetadata('tsmongoose:indexes', indexes, target);
+	return function(target: Function) {
+		Reflector.pushMetadata('davinci:mongoose:indexes', { index, options }, target);
 	};
 }
 
@@ -34,13 +32,15 @@ export function method() {
 	return function(target: Function | Object, key: string) {
 		const isPrototype = typeof target === 'object' && typeof target.constructor === 'function';
 		const isStatic = typeof target === 'function' && typeof target.prototype === 'object';
+		const realTarget = isPrototype ? target.constructor : target;
 		const type = (isPrototype && 'prototype') || (isStatic && 'static');
 		const handler = target[key];
 
-		const methods = Reflect.getMetadata('tsmongoose:methods', target) || [];
-		methods.push({ name: key, type, handler });
-
-		Reflect.defineMetadata('tsmongoose:methods', methods, target);
+		Reflector.pushMetadata(
+			'davinci:mongoose:methods',
+			{ name: key, type, handler, isStatic, isPrototype },
+			realTarget
+		);
 	};
 }
 
@@ -69,10 +69,7 @@ export interface IVirtualArgs {
 export function populate({ name, opts }: { name: string; opts: IVirtualArgs }) {
 	return function(target: Object, key: string) {
 		const options = { ...opts, localField: key };
-
-		const populates = Reflect.getMetadata('tsmongoose:populates', target) || [];
-		populates.push({ name, options });
-		Reflect.defineMetadata('tsmongoose:populates', populates, target);
+		Reflector.pushMetadata('davinci:mongoose:populates', { name, options }, target.constructor);
 	};
 }
 
@@ -83,9 +80,7 @@ export function populate({ name, opts }: { name: string; opts: IVirtualArgs }) {
 export function virtual() {
 	return function(target: Object, key: string) {
 		const handler = target[key];
-		const virtuals = Reflect.getMetadata('tsmongoose:virtuals', target) || [];
-		virtuals.push({ name: key, handler });
 
-		Reflect.defineMetadata('tsmongoose:virtuals', virtuals, target);
+		Reflector.pushMetadata('davinci:mongoose:virtuals', { name: key, handler }, target.constructor);
 	};
 }
