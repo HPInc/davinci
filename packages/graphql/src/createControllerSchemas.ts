@@ -35,13 +35,18 @@ export const createControllerSchemas = (
 	{ queries: q, mutations: m, schemas: s } = { queries: {}, mutations: {}, schemas: {} }
 ) => {
 	const { queries, schemas: queriesSchemas } = createResolversAndSchemas(Controller, 'queries', s);
-	const { mutations, schemas: allSchemas } = createResolversAndSchemas(Controller, 'mutations', queriesSchemas);
+	const { mutations, schemas: allSchemas } = createResolversAndSchemas(
+		Controller,
+		'mutations',
+		queriesSchemas
+	);
 
 	return { queries: { ...q, ...queries }, mutations: { ...m, ...mutations }, schemas: allSchemas };
 };
 
 export const createResolversAndSchemas = (Controller, resolversType: 'queries' | 'mutations', schemas?) => {
-	const resolversMetadata = Reflector.getMetadata(`tsgraphql:${resolversType}`, Controller.prototype) || [];
+	const resolversMetadata =
+		Reflector.getMetadata(`davinci:graphql:${resolversType}`, Controller.prototype.constructor) || [];
 
 	const allSchemas = schemas || {};
 
@@ -61,19 +66,22 @@ export const createResolversAndSchemas = (Controller, resolversType: 'queries' |
 
 export const createExecutableSchema = (theClass, resolverMetadata, schemas?) => {
 	const { methodName, returnType } = resolverMetadata;
-	const contextMetadata = Reflector.getMetadata('tscontroller:context', theClass.prototype);
+	const contextMetadata = Reflector.getMetadata('tscontroller:context', theClass.prototype.constructor);
 	const resolverArgsMetadata = _fp.flow(
 		_fp.concat(contextMetadata),
 		_fp.filter({ methodName }),
 		_fp.sortBy('index'),
 		_fp.compact
-	)(Reflector.getMetadata('tsgraphql:args', theClass.prototype) || []);
+	)(Reflector.getMetadata('davinci:graphql:args', theClass.prototype.constructor) || []);
 
 	const allSchemas = schemas || {};
 	const controller = new theClass();
 
 	/////
-	const { schema: graphqlReturnType, schemas: s } = generateSchema({ type: returnType, schemas: allSchemas });
+	const { schema: graphqlReturnType, schemas: s } = generateSchema({
+		type: returnType,
+		schemas: allSchemas
+	});
 	_.merge(allSchemas, s);
 
 	const { resolverArgs, handlerArgsDefinition } = resolverArgsMetadata.reduce(
@@ -135,7 +143,10 @@ export const createExecutableSchema = (theClass, resolverMetadata, schemas?) => 
 				if (isContext) return context;
 				if (isInfo) return info;
 				if (isSelectionSet) {
-					return getFieldsSelection(info.operation.selectionSet.selections[0], info.returnType.ofType);
+					return getFieldsSelection(
+						info.operation.selectionSet.selections[0],
+						info.returnType.ofType
+					);
 				}
 				if (isParent) return root;
 

@@ -14,9 +14,9 @@ import {
  * @param options
  */
 export function type(options?: ITypeDecoratorOptions) {
-	return function(target: Object): void {
+	return function(target: Function): void {
 		const metadata: ITypeDecoratorOptions = options;
-		Reflector.defineMetadata('tsgraphql:types', metadata, target);
+		Reflector.defineMetadata('davinci:graphql:types', metadata, target);
 	};
 }
 
@@ -31,7 +31,7 @@ export function field(opts?: IFieldDecoratorOptions) {
 			options.type = Reflector.getMetadata('design:type', prototype, key);
 		}
 		const metadata: IFieldDecoratorMetadata = { key, opts: { ...options } };
-		Reflector.pushMetadata('tsgraphql:fields', metadata, prototype.constructor);
+		Reflector.pushMetadata('davinci:graphql:fields', metadata, prototype.constructor);
 	};
 }
 
@@ -41,9 +41,9 @@ export function field(opts?: IFieldDecoratorOptions) {
  * @param name - Optional name
  */
 export const query = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: string): Function => {
-	return function(target: Object, methodName: string | symbol) {
-		const metadata = { name, methodName, returnType, handler: target[methodName] };
-		Reflector.pushMetadata('tsgraphql:queries', metadata, target);
+	return function(prototype: Object, methodName: string | symbol) {
+		const metadata = { name, methodName, returnType, handler: prototype[methodName] };
+		Reflector.pushMetadata('davinci:graphql:queries', metadata, prototype.constructor);
 	};
 };
 
@@ -53,9 +53,9 @@ export const query = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: s
  * @param name - Optional name
  */
 export const mutation = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: string): Function => {
-	return function(target: Object, methodName: string | symbol) {
-		const metadata = { name, methodName, returnType, handler: target[methodName] };
-		Reflector.pushMetadata('tsgraphql:mutations', metadata, target);
+	return function(prototype: Object, methodName: string | symbol) {
+		const metadata = { name, methodName, returnType, handler: prototype[methodName] };
+		Reflector.pushMetadata('davinci:graphql:mutations', metadata, prototype.constructor);
 	};
 };
 
@@ -70,23 +70,22 @@ export interface IArgOptions {
  * @param options
  */
 export function arg(name?, options?: IArgOptions): Function {
-	return function(target: Object, methodName: string, index) {
+	return function(prototype: Object, methodName: string, index) {
 		// get the existing metadata props
-		const methodParameters = Reflector.getMetadata('tsgraphql:args', target) || [];
-		const paramtypes = Reflector.getMetadata('design:paramtypes', target, methodName);
+		const methodParameters = Reflector.getMetadata('davinci:graphql:args', prototype.constructor) || [];
+		const paramtypes = Reflector.getMetadata('design:paramtypes', prototype, methodName);
 		const isAlreadySet = !!_.find(methodParameters, { methodName, index });
 		if (isAlreadySet) return;
 
 		methodParameters.unshift({
-			target,
 			methodName,
 			index,
 			name,
 			opts: options,
-			handler: target[methodName],
+			handler: prototype[methodName],
 			type: paramtypes && paramtypes[index]
 		});
-		Reflector.defineMetadata('tsgraphql:args', methodParameters, target);
+		Reflector.defineMetadata('davinci:graphql:args', methodParameters, prototype.constructor);
 	};
 }
 
@@ -97,15 +96,16 @@ export function fieldResolver<T = {}>(
 	fieldName: keyof T,
 	returnType: ClassType | ClassType[]
 ): Function {
-	return function(target: Object, methodName: string, index) {
+	return function(prototype: Object, methodName: string, index) {
 		// get the existing metadata props
-		const methodParameters = Reflector.getMetadata('tsgraphql:field-resolvers', resolverOf.prototype.constructor) || [];
-		const paramtypes = Reflector.getMetadata('design:paramtypes', target, methodName);
+		const methodParameters =
+			Reflector.getMetadata('davinci:graphql:field-resolvers', resolverOf.prototype.constructor) || [];
+		const paramtypes = Reflector.getMetadata('design:paramtypes', prototype, methodName);
 		const isAlreadySet = !!_.find(methodParameters, { methodName, index });
 		if (isAlreadySet) return;
 
 		methodParameters.unshift({
-			target,
+			prototype,
 			methodName,
 			resolverOf,
 			index,
@@ -113,64 +113,65 @@ export function fieldResolver<T = {}>(
 			returnType,
 			// name,
 			// opts: options,
-			handler: target[methodName],
+			handler: prototype[methodName],
 			type: paramtypes && paramtypes[index]
 		});
-		Reflector.defineMetadata('tsgraphql:field-resolvers', methodParameters, resolverOf.prototype.constructor);
+		Reflector.defineMetadata(
+			'davinci:graphql:field-resolvers',
+			methodParameters,
+			resolverOf.prototype.constructor
+		);
 	};
 }
 
 export function info() {
-	return function(target: Object, methodName: string, index) {
+	return function(prototype: Object, methodName: string, index) {
 		// get the existing metadata props
-		const methodParameters = Reflector.getMetadata('tsgraphql:args', target) || [];
+		const methodParameters = Reflector.getMetadata('davinci:graphql:args', prototype.constructor) || [];
 		const isAlreadySet = !!_.find(methodParameters, { methodName, index });
 		if (isAlreadySet) return;
 
 		methodParameters.unshift({
-			target,
 			methodName,
 			index,
-			handler: target[methodName],
+			handler: prototype[methodName],
 			type: 'info'
 		});
-		Reflector.defineMetadata('tsgraphql:args', methodParameters, target);
+		Reflector.defineMetadata('davinci:graphql:args', methodParameters, prototype.constructor);
 	};
 }
 
 export function selectionSet() {
-	return function(target: Object, methodName: string, index) {
+	return function(prototype: Object, methodName: string, index) {
 		// get the existing metadata props
-		const methodParameters = Reflector.getMetadata('tsgraphql:args', target) || [];
+		const methodParameters = Reflector.getMetadata('davinci:graphql:args', prototype.constructor) || [];
 		const isAlreadySet = !!_.find(methodParameters, { methodName, index });
 		if (isAlreadySet) return;
 
 		methodParameters.unshift({
-			target,
 			methodName,
 			index,
-			handler: target[methodName],
+			handler: prototype[methodName],
 			type: 'selectionSet'
 		});
-		Reflector.defineMetadata('tsgraphql:args', methodParameters, target);
+		Reflector.defineMetadata('davinci:graphql:args', methodParameters, prototype.constructor);
 	};
 }
 
 export function parent() {
-	return function(target: Object, methodName: string, index) {
+	return function(prototype: Object, methodName: string, index) {
 		// get the existing metadata props
-		const methodParameters = Reflector.getMetadata('tsgraphql:args', target) || [];
+		const methodParameters = Reflector.getMetadata('davinci:graphql:args', prototype.constructor) || [];
 		const isAlreadySet = !!_.find(methodParameters, { methodName, index });
 		if (isAlreadySet) return;
 
 		methodParameters.unshift({
-			target,
 			methodName,
 			index,
-			handler: target[methodName],
+			handler: prototype[methodName],
 			type: 'parent'
 		});
-		Reflector.defineMetadata('tsgraphql:args', methodParameters, target);
+		Reflector.defineMetadata('davinci:graphql:args', methodParameters, prototype.constructor);
 	};
 }
 
@@ -187,6 +188,6 @@ export interface IResolverDecoratorArgs {
 export function resolver(args?: IResolverDecoratorArgs): Function {
 	return function(target: Object) {
 		// define new metadata props
-		Reflector.defineMetadata('tsgraphql:resolver', args, target);
+		Reflector.defineMetadata('davinci:graphql:resolver', args, target);
 	};
 }

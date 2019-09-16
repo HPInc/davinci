@@ -41,7 +41,7 @@ export const generateGQLSchema = ({
 	// maybe it's a decorated class, let's try to get the fields metadata
 	const parentFieldsMetadata: IFieldDecoratorMetadata[] =
 		parentType && parentType.prototype
-			? Reflector.getMetadata('tsgraphql:fields', parentType.prototype.constructor) || []
+			? Reflector.getMetadata('davinci:graphql:fields', parentType.prototype.constructor) || []
 			: [];
 	const meta = _fp.find({ key }, parentFieldsMetadata) || ({} as IFieldDecoratorMetadata);
 	const metadata = transformMetadata(meta, { isInput, type, parentType, schemas });
@@ -66,7 +66,7 @@ export const generateGQLSchema = ({
 	// it's a complex type => create nested types
 	if (typeof type === 'function' || typeof type === 'object') {
 		const suffix = isInput ? 'Input' : '';
-		const typeMetadata = Reflector.getMetadata('tsgraphql:types', type) || {};
+		const typeMetadata = Reflector.getMetadata('davinci:graphql:types', type) || {};
 		const name: string = `${typeMetadata.name || type.name || key}${suffix}`;
 
 		// existing type, let's return it
@@ -105,10 +105,10 @@ const createObjectFields = ({
 	transformMetadata = _.identity
 }: ICreateObjectFieldsArgs) => {
 	const fieldsMetadata: IFieldDecoratorMetadata[] =
-		Reflector.getMetadata('tsgraphql:fields', parentType.prototype.constructor) || [];
+		Reflector.getMetadata('davinci:graphql:fields', parentType.prototype.constructor) || [];
 
 	const externalFieldsResolvers =
-		Reflector.getMetadata('tsgraphql:field-resolvers', parentType.prototype.constructor) || [];
+		Reflector.getMetadata('davinci:graphql:field-resolvers', parentType.prototype.constructor) || [];
 
 	return () => {
 		const fields = fieldsMetadata.reduce((acc, meta) => {
@@ -144,8 +144,8 @@ const createObjectFields = ({
 		const fieldsWithExternalResolver = isInput
 			? {}
 			: externalFieldsResolvers.reduce((acc, fieldMeta) => {
-					const { target, fieldName } = fieldMeta;
-					const { schema, schemas: s } = createExecutableSchema(target.constructor, fieldMeta, schemas);
+					const { prototype, fieldName } = fieldMeta;
+					const { schema, schemas: s } = createExecutableSchema(prototype.constructor, fieldMeta, schemas);
 					_.merge(schemas, s);
 
 					acc[fieldName] = schema;
