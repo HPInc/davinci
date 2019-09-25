@@ -1,20 +1,39 @@
 import { GraphQLSchema, GraphQLObjectType, printSchema } from 'graphql';
-import { ApolloServer } from 'apollo-server-express';
+import graphqlHTTP from 'express-graphql';
 import { IOfBaseExpress } from '@davinci/core';
 import fs from 'fs';
 import _ from 'lodash';
 import { createControllerSchemas } from './createControllerSchemas';
 import { ClassType } from './types';
+import playground from './pl';
 
-export interface ICreateApolloServerArgs {
+export interface ICreateApolloServerOptions {
 	controllers: ClassType[];
 	context?: Function | object;
+	graphqlEndpoint?: string;
+	graphqlOptions?: any;
+	playgroundEnabled?: boolean;
+	playgroundOptions?: any;
 }
 
-export const createApolloServer = (
-	app: IOfBaseExpress,
-	{ controllers, context }: ICreateApolloServerArgs
-) => {
+const DEFAULT_OPTIONS: ICreateApolloServerOptions = {
+	controllers: [],
+	graphqlEndpoint: '/graphql',
+	graphqlOptions: {},
+	playgroundEnabled: true,
+	playgroundOptions: { shareEnabled: true }
+};
+
+export const createGraphQLServer = (app: IOfBaseExpress, options: ICreateApolloServerOptions) => {
+	const {
+		controllers,
+		context,
+		graphqlEndpoint,
+		graphqlOptions,
+		playgroundEnabled,
+		playgroundOptions
+	} = _.merge({}, DEFAULT_OPTIONS, options);
+
 	const allSchemas = { queries: {}, mutations: {}, schemas: {} };
 	const { queries: queryFields, mutations: mutationsFields, schemas: controllerSchemas } = (
 		controllers || []
@@ -55,12 +74,25 @@ export const createApolloServer = (
 			: null
 	});
 
-	const server = new ApolloServer({
-		schema,
-		context
-	});
+	if (playgroundEnabled) {
+		// tslint:disable-next-line:variable-name
+		app.get(graphqlEndpoint, (_req, res) => res.send(playground(playgroundOptions)));
+	}
 
-	server.applyMiddleware({ app });
+	app.use(
+		graphqlEndpoint,
+		graphqlHTTP({
+			schema,
+			graphiql: false,
+			context,
+			...graphqlOptions
+		})
+	);
+	console.info(`--- 🚀 GraphQL running on ${graphqlEndpoint}`);
+
+	if (playgroundEnabled) {
+		console.info(`--- 🛹 GraphQL Playground on ${graphqlEndpoint}`);
+	}
 
 	const printSDL = () => printSchema(schema);
 
@@ -78,4 +110,4 @@ export const createApolloServer = (
 	return { app, schema, printSDL, writeSDLtoFile };
 };
 
-export default createApolloServer;
+export default createGraphQLServer;

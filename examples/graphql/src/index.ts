@@ -1,6 +1,6 @@
 import express, { Express } from 'express';
 import { createApp, IOfBaseExpress } from '@davinci/core';
-import { createApolloServer } from '@davinci/graphql';
+import { createGraphQLServer } from '@davinci/graphql';
 import AuthorController from './author/author.controller';
 import BookController from './book/book.controller';
 
@@ -19,7 +19,7 @@ const expressApp: Express = express();
 const context = ({ req }) => ({ accountId: req.headers['x-oneflow-accountid'] });
 
 createApp(expressApp, options, app => {
-	createApolloServer(app, { controllers: [AuthorController, BookController], context });
+	createGraphQLServer(app, { controllers: [AuthorController, BookController], context });
 });
 
 if (require.main === module) {
