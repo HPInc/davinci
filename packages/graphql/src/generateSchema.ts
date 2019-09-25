@@ -29,19 +29,32 @@ interface IGenerateGQLSchemaArgs {
 	transformMetadata?: Function;
 }
 
+const getFieldsMetadata = (target: Function, isInput: boolean): IFieldDecoratorMetadata[] => {
+	const fieldsMetadata = _.filter(
+		Reflector.getMetadata('davinci:graphql:fields', target) as IFieldDecoratorMetadata[],
+		isInput ? { opts: { asInput: true } } : _.identity
+	);
+
+	const inputFieldsMetadata = isInput
+		? (Reflector.getMetadata('davinci:graphql:input-fields', target) as IFieldDecoratorMetadata[])
+		: [];
+
+	return _.concat(fieldsMetadata, inputFieldsMetadata || []) as IFieldDecoratorMetadata[];
+};
+
 export const generateGQLSchema = ({
 	type,
 	parentType,
 	key,
 	schemas = {},
-	isInput,
+	isInput = false,
 	transformMetadata = _.identity
 }: IGenerateGQLSchemaArgs) => {
 	// grab meta infos
 	// maybe it's a decorated class, let's try to get the fields metadata
 	const parentFieldsMetadata: IFieldDecoratorMetadata[] =
 		parentType && parentType.prototype
-			? Reflector.getMetadata('davinci:graphql:fields', parentType.prototype.constructor) || []
+			? getFieldsMetadata(parentType.prototype.constructor, isInput)
 			: [];
 	const meta = _fp.find({ key }, parentFieldsMetadata) || ({} as IFieldDecoratorMetadata);
 	const metadata = transformMetadata(meta, { isInput, type, parentType, schemas });
@@ -56,7 +69,14 @@ export const generateGQLSchema = ({
 
 	// it's an array => recursively call makeSchema on the first array element
 	if (Array.isArray(type)) {
-		const gqlSchema = generateGQLSchema({ type: type[0], parentType, schemas, key, isInput, transformMetadata });
+		const gqlSchema = generateGQLSchema({
+			type: type[0],
+			parentType,
+			schemas,
+			key,
+			isInput,
+			transformMetadata
+		});
 		const gqlType = GraphQLList(gqlSchema.schema);
 		const schema = isRequired ? GraphQLNonNull(gqlType) : gqlType;
 
@@ -104,8 +124,10 @@ const createObjectFields = ({
 	isInput,
 	transformMetadata = _.identity
 }: ICreateObjectFieldsArgs) => {
-	const fieldsMetadata: IFieldDecoratorMetadata[] =
-		Reflector.getMetadata('davinci:graphql:fields', parentType.prototype.constructor) || [];
+	const fieldsMetadata: IFieldDecoratorMetadata[] = getFieldsMetadata(
+		parentType.prototype.constructor,
+		isInput
+	);
 
 	const externalFieldsResolvers =
 		Reflector.getMetadata('davinci:graphql:field-resolvers', parentType.prototype.constructor) || [];
@@ -132,7 +154,8 @@ const createObjectFields = ({
 			acc[key] = { type: gqlSchema.schema };
 			_.merge(schemas, gqlSchema.schemas);
 
-			const hasResolverFunction = parentType.prototype && typeof parentType.prototype[key] === 'function';
+			const hasResolverFunction =
+				parentType.prototype && typeof parentType.prototype[key] === 'function';
 
 			if (hasResolverFunction && !isInput) {
 				acc[key].resolve = parentType.prototype[key];
@@ -145,7 +168,11 @@ const createObjectFields = ({
 			? {}
 			: externalFieldsResolvers.reduce((acc, fieldMeta) => {
 					const { prototype, fieldName } = fieldMeta;
-					const { schema, schemas: s } = createExecutableSchema(prototype.constructor, fieldMeta, schemas);
+					const { schema, schemas: s } = createExecutableSchema(
+						prototype.constructor,
+						fieldMeta,
+						schemas
+					);
 					_.merge(schemas, s);
 
 					acc[fieldName] = schema;

@@ -29,6 +29,7 @@ export interface IFieldDecoratorOptions {
 	typeFactory?: TypeValueFactory;
 	required?: boolean;
 	description?: string;
+	asInput?: boolean;
 }
 
 export interface IFieldDecoratorMetadata {

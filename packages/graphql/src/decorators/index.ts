@@ -20,18 +20,37 @@ export function type(options?: ITypeDecoratorOptions) {
 	};
 }
 
+const DEFAULT_FIELD_OPTIONS = {
+	asInput: true
+};
+
 /**
  * It annotates a variable as schema prop
  * @param opts
  */
 export function field(opts?: IFieldDecoratorOptions) {
 	return function(prototype: Object, key: string | symbol): void {
-		const options = { ...opts };
+		const options = _.merge({}, DEFAULT_FIELD_OPTIONS, opts);
 		if (!options.type && !options.typeFactory) {
 			options.type = Reflector.getMetadata('design:type', prototype, key);
 		}
-		const metadata: IFieldDecoratorMetadata = { key, opts: { ...options } };
+		const metadata: IFieldDecoratorMetadata = { key, opts: options };
 		Reflector.pushMetadata('davinci:graphql:fields', metadata, prototype.constructor);
+	};
+}
+
+/**
+ * It annotates a variable as schema input prop
+ * @param opts
+ */
+export function inputField(opts?: IFieldDecoratorOptions) {
+	return function(prototype: Object, key: string | symbol): void {
+		const options = _.merge({}, DEFAULT_FIELD_OPTIONS, opts);
+		if (!options.type && !options.typeFactory) {
+			options.type = Reflector.getMetadata('design:type', prototype, key);
+		}
+		const metadata: IFieldDecoratorMetadata = { key, opts: options };
+		Reflector.pushMetadata('davinci:graphql:input-fields', metadata, prototype.constructor);
 	};
 }
 
