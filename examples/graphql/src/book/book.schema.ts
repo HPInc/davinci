@@ -9,7 +9,11 @@ export default class Book {
 	id: string;
 
 	@mgoose.prop({ required: true })
-	@graphql.field({ required: true })
+	@graphql.field(({ operationType }) => {
+		const required = operationType === 'mutation';
+
+		return { required };
+	})
 	title: string;
 
 	@graphql.field()

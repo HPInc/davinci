@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { GraphQLEnumType, GraphQLList, GraphQLNonNull } from 'graphql';
 import { Reflector } from '@davinci/reflector';
 import generateSchema from './generateSchema';
+import { OperationType } from './types';
 
 /**
  * Returns a flatten list of fields
@@ -49,10 +50,11 @@ export const createResolversAndSchemas = (Controller, resolversType: 'queries' |
 		Reflector.getMetadata(`davinci:graphql:${resolversType}`, Controller.prototype.constructor) || [];
 
 	const allSchemas = schemas || {};
+	const operationType = resolversType === 'queries' ? 'query' : 'mutation';
 
 	const resolvers = resolversMetadata.reduce((acc, query) => {
 		const { methodName, name } = query;
-		const { schema, schemas } = createExecutableSchema(Controller, query, allSchemas);
+		const { schema, schemas } = createExecutableSchema(Controller, query, allSchemas, operationType);
 		_.merge(allSchemas, schemas);
 		acc[name || methodName] = schema;
 
@@ -64,7 +66,7 @@ export const createResolversAndSchemas = (Controller, resolversType: 'queries' |
 
 ///// new function
 
-export const createExecutableSchema = (theClass, resolverMetadata, schemas?) => {
+export const createExecutableSchema = (theClass, resolverMetadata, schemas, operationType: OperationType) => {
 	const { methodName, returnType } = resolverMetadata;
 	const contextMetadata = Reflector.getMetadata('tscontroller:context', theClass.prototype.constructor);
 	const resolverArgsMetadata = _fp.flow(
@@ -80,7 +82,8 @@ export const createExecutableSchema = (theClass, resolverMetadata, schemas?) => 
 	/////
 	const { schema: graphqlReturnType, schemas: s } = generateSchema({
 		type: returnType,
-		schemas: allSchemas
+		schemas: allSchemas,
+		operationType
 	});
 	_.merge(allSchemas, s);
 
@@ -119,7 +122,12 @@ export const createExecutableSchema = (theClass, resolverMetadata, schemas?) => 
 					gqlArgType = schemas[name];
 				}
 			} else {
-				const { schema, schemas } = generateSchema({ type, schemas: allSchemas, isInput: true });
+				const { schema, schemas } = generateSchema({
+					type,
+					schemas: allSchemas,
+					isInput: true,
+					operationType
+				});
 				gqlArgType = schema;
 
 				_.merge(allSchemas, schemas);

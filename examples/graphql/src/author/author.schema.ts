@@ -24,12 +24,10 @@ export default class Author {
 
 	@mgoose.prop({ required: true })
 	@graphql.field({ required: true, asInput: false })
-	@graphql.inputField({ required: false })
 	firstname: string;
 
 	@mgoose.prop({ required: true })
 	@graphql.field({ required: true, asInput: false })
-	@graphql.inputField({ required: false })
 	lastname: string;
 
 	@mgoose.prop()

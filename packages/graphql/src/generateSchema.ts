@@ -11,7 +11,7 @@ import { GraphQLDateTime } from 'graphql-iso-date';
 import _fp from 'lodash/fp';
 import _ from 'lodash';
 import { Reflector } from '@davinci/reflector';
-import { IFieldDecoratorMetadata } from './types';
+import { IFieldDecoratorMetadata, OperationType } from './types';
 import { createExecutableSchema } from './createControllerSchemas';
 
 const scalarDict = {
@@ -25,21 +25,22 @@ interface IGenerateGQLSchemaArgs {
 	parentType?: any;
 	key?: any;
 	isInput?: boolean;
+	operationType?: OperationType;
 	schemas?: { [key: string]: any };
 	transformMetadata?: Function;
 }
 
-const getFieldsMetadata = (target: Function, isInput: boolean): IFieldDecoratorMetadata[] => {
-	const fieldsMetadata = _.filter(
+const getFieldsMetadata = (
+	target: Function,
+	isInput: boolean,
+	operationType?: OperationType
+): IFieldDecoratorMetadata[] => {
+	const fieldsMetadata = _.map(
 		Reflector.getMetadata('davinci:graphql:fields', target) as IFieldDecoratorMetadata[],
-		isInput ? { opts: { asInput: true } } : _.identity
+		({ key, optsFactory }) => ({ key, opts: optsFactory({ isInput, operationType }) })
 	);
 
-	const inputFieldsMetadata = isInput
-		? (Reflector.getMetadata('davinci:graphql:input-fields', target) as IFieldDecoratorMetadata[])
-		: [];
-
-	return _.concat(fieldsMetadata, inputFieldsMetadata || []) as IFieldDecoratorMetadata[];
+	return fieldsMetadata;
 };
 
 export const generateGQLSchema = ({
@@ -48,13 +49,14 @@ export const generateGQLSchema = ({
 	key,
 	schemas = {},
 	isInput = false,
+	operationType,
 	transformMetadata = _.identity
 }: IGenerateGQLSchemaArgs) => {
 	// grab meta infos
 	// maybe it's a decorated class, let's try to get the fields metadata
 	const parentFieldsMetadata: IFieldDecoratorMetadata[] =
 		parentType && parentType.prototype
-			? getFieldsMetadata(parentType.prototype.constructor, isInput)
+			? getFieldsMetadata(parentType.prototype.constructor, isInput, operationType)
 			: [];
 	const meta = _fp.find({ key }, parentFieldsMetadata) || ({} as IFieldDecoratorMetadata);
 	const metadata = transformMetadata(meta, { isInput, type, parentType, schemas });
@@ -75,6 +77,7 @@ export const generateGQLSchema = ({
 			schemas,
 			key,
 			isInput,
+			operationType,
 			transformMetadata
 		});
 		const gqlType = GraphQLList(gqlSchema.schema);
@@ -85,7 +88,7 @@ export const generateGQLSchema = ({
 
 	// it's a complex type => create nested types
 	if (typeof type === 'function' || typeof type === 'object') {
-		const suffix = isInput ? 'Input' : '';
+		const suffix = isInput ? [_.upperFirst(operationType || ''), 'Input'].join('') : '';
 		const typeMetadata = Reflector.getMetadata('davinci:graphql:types', type) || {};
 		const name: string = `${typeMetadata.name || type.name || key}${suffix}`;
 
@@ -97,7 +100,13 @@ export const generateGQLSchema = ({
 		const objTypeConfig: any = {
 			...metadata.opts,
 			name,
-			fields: createObjectFields({ parentType: type, schemas, isInput, transformMetadata })
+			fields: createObjectFields({
+				parentType: type,
+				schemas,
+				isInput,
+				operationType,
+				transformMetadata
+			})
 		};
 
 		const ObjectType = isInput ? GraphQLInputObjectType : GraphQLObjectType;
@@ -114,6 +123,7 @@ export const generateGQLSchema = ({
 interface ICreateObjectFieldsArgs {
 	parentType: any;
 	isInput?: boolean;
+	operationType?: OperationType;
 	schemas?: { [key: string]: any };
 	transformMetadata?: Function;
 }
@@ -122,11 +132,13 @@ const createObjectFields = ({
 	parentType,
 	schemas = {},
 	isInput,
+	operationType,
 	transformMetadata = _.identity
 }: ICreateObjectFieldsArgs) => {
 	const fieldsMetadata: IFieldDecoratorMetadata[] = getFieldsMetadata(
 		parentType.prototype.constructor,
-		isInput
+		isInput,
+		operationType
 	);
 
 	const externalFieldsResolvers =
@@ -146,6 +158,7 @@ const createObjectFields = ({
 				type,
 				key,
 				isInput,
+				operationType,
 				parentType,
 				schemas,
 				transformMetadata
@@ -171,7 +184,8 @@ const createObjectFields = ({
 					const { schema, schemas: s } = createExecutableSchema(
 						prototype.constructor,
 						fieldMeta,
-						schemas
+						schemas,
+						operationType
 					);
 					_.merge(schemas, s);
 

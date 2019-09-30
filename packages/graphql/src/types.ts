@@ -1,5 +1,7 @@
 import { GraphQLScalarType } from 'graphql';
 
+export type Maybe<T> = null | undefined | T;
+
 export interface ClassType<T = any> {
 	new (...args: any[]): T;
 }
@@ -12,6 +14,8 @@ export type ReturnTypeFunc = (returns?: void) => ReturnTypeFuncValue;
 
 export type TypeValueFactory = (type?: void) => TypeValue;
 export type ClassTypeResolver = (of?: void) => ClassType;
+
+export type OperationType = 'query' | 'mutation';
 
 /**
  * @param type - The type of the field. Only Required for complex objects: Classes, Arrays, Objects
@@ -32,7 +36,17 @@ export interface IFieldDecoratorOptions {
 	asInput?: boolean;
 }
 
+export interface IFieldDecoratorOptionsFactoryArgs {
+	isInput: boolean;
+	operationType: OperationType;
+}
+
+export type FieldDecoratorOptionsFactory = (
+	args: IFieldDecoratorOptionsFactoryArgs
+) => Maybe<IFieldDecoratorOptions>;
+
 export interface IFieldDecoratorMetadata {
 	key: any;
 	opts?: IFieldDecoratorOptions;
+	optsFactory?: FieldDecoratorOptionsFactory;
 }
