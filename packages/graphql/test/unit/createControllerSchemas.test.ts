@@ -58,7 +58,7 @@ describe('createControllerSchemas', () => {
 		should(mutations.createCustomer).have.property('args');
 		should(mutations.createCustomer.args).have.property('customer');
 		should(mutations.createCustomer.args.customer.type).be.instanceOf(GraphQLInputObjectType);
-		should(mutations.createCustomer.args.customer.type.name).be.equal('CustomerInput');
+		should(mutations.createCustomer.args.customer.type.name).be.equal('CustomerMutationInput');
 		should(mutations.createCustomer.type).be.instanceOf(GraphQLObjectType);
 		should(mutations.createCustomer.type.name).be.equal(Customer.name);
 		should(mutations.createCustomer.resolve).be.instanceOf(Function);
