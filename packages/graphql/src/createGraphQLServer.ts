@@ -26,10 +26,12 @@ const DEFAULT_OPTIONS: ICreateGraphQLServerOptions = {
  * @param app - Express app instance
  * @param controllers - Array of controllers
  * @param options
- * @param options.context - The context that will be passed to the request handlers if the context param decorator is used
+ * @param options.context - The context that will be passed to the request handlers
+ * if the context param decorator is used
  * @param options.graphqlEndpoint - The endpoint where the graphql server will be listening for new API requests
  * @param options.graphqlOptions - Additional options passed to the graphql server
- * @param options.playgroundEnabled - If true, the playground UI will be available to browser at the {graphqlEndpoint} address
+ * @param options.playgroundEnabled - If true, the playground UI will be available
+ * to browser at the {graphqlEndpoint} address
  * @param options.playgroundEnabled - Additional options passed to the playground UI
  */
 export const createGraphQLServer = (
