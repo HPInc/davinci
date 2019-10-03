@@ -8,7 +8,8 @@ import {
 	IFieldDecoratorMetadata,
 	FieldDecoratorOptionsFactory,
 	IFieldDecoratorOptionsFactoryArgs,
-	ClassType
+	ClassType,
+	IResolverDecoratorMetadata
 } from '../types';
 
 /**
@@ -54,8 +55,13 @@ export function field(opts?: IFieldDecoratorOptions | FieldDecoratorOptionsFacto
  * @param name - Optional name
  */
 export const query = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: string): Function => {
-	return function(prototype: Object, methodName: string | symbol) {
-		const metadata = { name, methodName, returnType, handler: prototype[methodName] };
+	return function(prototype: Object, methodName: string) {
+		const metadata: IResolverDecoratorMetadata = {
+			name,
+			methodName,
+			returnType,
+			handler: prototype[methodName]
+		};
 		Reflector.pushMetadata('davinci:graphql:queries', metadata, prototype.constructor);
 	};
 };
@@ -66,8 +72,13 @@ export const query = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: s
  * @param name - Optional name
  */
 export const mutation = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: string): Function => {
-	return function(prototype: Object, methodName: string | symbol) {
-		const metadata = { name, methodName, returnType, handler: prototype[methodName] };
+	return function(prototype: Object, methodName: string) {
+		const metadata: IResolverDecoratorMetadata = {
+			name,
+			methodName,
+			returnType,
+			handler: prototype[methodName]
+		};
 		Reflector.pushMetadata('davinci:graphql:mutations', metadata, prototype.constructor);
 	};
 };

@@ -50,3 +50,10 @@ export interface IFieldDecoratorMetadata {
 	opts?: IFieldDecoratorOptions;
 	optsFactory?: FieldDecoratorOptionsFactory;
 }
+
+export interface IResolverDecoratorMetadata {
+	name: string;
+	methodName: string;
+	returnType: any;
+	handler: Function;
+}

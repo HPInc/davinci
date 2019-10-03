@@ -2,6 +2,7 @@ import { Schema } from 'mongoose';
 import { mgoose } from '@davinci/mongoose';
 import { graphql } from '@davinci/graphql';
 import AuthorSchema from '../author/author.schema';
+import { requiredForMutations } from '../lib/schemaUtils';
 
 @mgoose.index({ isbn: 1 }, { unique: true })
 export default class Book {
@@ -9,18 +10,13 @@ export default class Book {
 	id: string;
 
 	@mgoose.prop({ required: true })
-	@graphql.field(({ operationType }) => {
-		const required = operationType === 'mutation';
-
-		return { required };
-	})
+	@graphql.field(requiredForMutations)
 	title: string;
 
 	@graphql.field()
 	isbn: string;
 
 	@mgoose.prop({ type: Schema.Types.ObjectId })
-	// @mgoose.populate({ name: 'file', opts: { ref: 'File', foreignField: '_id', justOne: true } })
 	@graphql.field()
 	authorIds: string;
 

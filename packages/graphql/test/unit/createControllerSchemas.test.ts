@@ -1,7 +1,7 @@
 import should from 'should';
 import { createControllerSchemas } from '../../src';
-import { graphql } from '../../src';
 import { GraphQLInputObjectType, GraphQLObjectType, GraphQLScalarType } from 'graphql';
+import { graphql } from '../../src';
 import { mutation } from '../../src/decorators';
 
 const { query, field, arg } = graphql;

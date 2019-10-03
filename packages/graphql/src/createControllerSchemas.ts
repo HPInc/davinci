@@ -3,7 +3,7 @@ import _ from 'lodash';
 import { GraphQLEnumType, GraphQLList, GraphQLNonNull } from 'graphql';
 import { Reflector } from '@davinci/reflector';
 import generateSchema from './generateSchema';
-import { OperationType } from './types';
+import { ClassType, IResolverDecoratorMetadata, OperationType } from './types';
 
 /**
  * Returns a flatten list of fields
@@ -27,12 +27,12 @@ export function getFieldsSelection(fieldASTs, returnType, basePath?: string) {
 }
 
 /**
- *
+ * Given a controller class it returns queries, mutations and type schemas
  * @param Controller
  * @param {queries, mutations, schemas}
  */
 export const createControllerSchemas = (
-	Controller,
+	Controller: ClassType,
 	{ queries: q, mutations: m, schemas: s } = { queries: {}, mutations: {}, schemas: {} }
 ) => {
 	const { queries, schemas: queriesSchemas } = createResolversAndSchemas(Controller, 'queries', s);
@@ -45,28 +45,19 @@ export const createControllerSchemas = (
 	return { queries: { ...q, ...queries }, mutations: { ...m, ...mutations }, schemas: allSchemas };
 };
 
-export const createResolversAndSchemas = (Controller, resolversType: 'queries' | 'mutations', schemas?) => {
-	const resolversMetadata =
-		Reflector.getMetadata(`davinci:graphql:${resolversType}`, Controller.prototype.constructor) || [];
-
-	const allSchemas = schemas || {};
-	const operationType = resolversType === 'queries' ? 'query' : 'mutation';
-
-	const resolvers = resolversMetadata.reduce((acc, query) => {
-		const { methodName, name } = query;
-		const { schema, schemas } = createExecutableSchema(Controller, query, allSchemas, operationType);
-		_.merge(allSchemas, schemas);
-		acc[name || methodName] = schema;
-
-		return acc;
-	}, {});
-
-	return { [resolversType]: resolvers, schemas: allSchemas };
-};
-
-///// new function
-
-export const createExecutableSchema = (theClass, resolverMetadata, schemas, operationType: OperationType) => {
+/**
+ * Given a controller class it returns queries, mutations and type schemas
+ * @param theClass
+ * @param resolverMetadata
+ * @param schemas
+ * @param operationType
+ */
+export const createExecutableSchema = (
+	theClass,
+	resolverMetadata: IResolverDecoratorMetadata,
+	schemas,
+	operationType: OperationType
+) => {
 	const { methodName, returnType } = resolverMetadata;
 	const contextMetadata = Reflector.getMetadata('tscontroller:context', theClass.prototype.constructor);
 	const resolverArgsMetadata = _fp.flow(
@@ -165,6 +156,29 @@ export const createExecutableSchema = (theClass, resolverMetadata, schemas, oper
 	};
 
 	return { schema, schemas: allSchemas };
+};
+
+export const createResolversAndSchemas = (
+	Controller: ClassType,
+	resolversType: 'queries' | 'mutations',
+	schemas?
+) => {
+	const resolversMetadata =
+		Reflector.getMetadata(`davinci:graphql:${resolversType}`, Controller.prototype.constructor) || [];
+
+	const allSchemas = schemas || {};
+	const operationType = resolversType === 'queries' ? 'query' : 'mutation';
+
+	const resolvers = resolversMetadata.reduce((acc, query) => {
+		const { methodName, name } = query;
+		const { schema, schemas } = createExecutableSchema(Controller, query, allSchemas, operationType);
+		_.merge(allSchemas, schemas);
+		acc[name || methodName] = schema;
+
+		return acc;
+	}, {});
+
+	return { [resolversType]: resolvers, schemas: allSchemas };
 };
 
 export default createControllerSchemas;

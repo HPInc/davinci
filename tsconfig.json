@@ -21,7 +21,7 @@
 		"watch": false,
 		"emitDecoratorMetadata": true,
 		"esModuleInterop": true,
-		"removeComments": true,
+		"removeComments": false,
 		"lib": ["es7"]
 	},
 	"include": ["packages/**/*", "examples/**/*"]

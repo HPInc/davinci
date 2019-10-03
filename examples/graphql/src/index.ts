@@ -19,7 +19,7 @@ const expressApp: Express = express();
 const context = ({ req }) => ({ accountId: req.headers['x-oneflow-accountid'] });
 
 createApp(expressApp, options, app => {
-	createGraphQLServer(app, { controllers: [AuthorController, BookController], context });
+	createGraphQLServer(app, [AuthorController, BookController], { context });
 });
 
 if (require.main === module) {

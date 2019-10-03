@@ -5,34 +5,43 @@ import fs from 'fs';
 import _ from 'lodash';
 import { createControllerSchemas } from './createControllerSchemas';
 import { ClassType } from './types';
-import playground from './pl';
+import playground from './playground-markup';
 
-export interface ICreateApolloServerOptions {
-	controllers: ClassType[];
+export interface ICreateGraphQLServerOptions {
 	context?: Function | object;
 	graphqlEndpoint?: string;
-	graphqlOptions?: any;
+	graphqlOptions?: graphqlHTTP.Options;
 	playgroundEnabled?: boolean;
 	playgroundOptions?: any;
 }
 
-const DEFAULT_OPTIONS: ICreateApolloServerOptions = {
-	controllers: [],
+const DEFAULT_OPTIONS: ICreateGraphQLServerOptions = {
 	graphqlEndpoint: '/graphql',
-	graphqlOptions: {},
 	playgroundEnabled: true,
 	playgroundOptions: { shareEnabled: true }
 };
 
-export const createGraphQLServer = (app: IOfBaseExpress, options: ICreateApolloServerOptions) => {
-	const {
-		controllers,
-		context,
-		graphqlEndpoint,
-		graphqlOptions,
-		playgroundEnabled,
-		playgroundOptions
-	} = _.merge({}, DEFAULT_OPTIONS, options);
+/**
+ * It adds a graphql server to an existing express app
+ * @param app - Express app instance
+ * @param controllers - Array of controllers
+ * @param options
+ * @param options.context - The context that will be passed to the request handlers if the context param decorator is used
+ * @param options.graphqlEndpoint - The endpoint where the graphql server will be listening for new API requests
+ * @param options.graphqlOptions - Additional options passed to the graphql server
+ * @param options.playgroundEnabled - If true, the playground UI will be available to browser at the {graphqlEndpoint} address
+ * @param options.playgroundEnabled - Additional options passed to the playground UI
+ */
+export const createGraphQLServer = (
+	app: IOfBaseExpress,
+	controllers: ClassType[],
+	options?: ICreateGraphQLServerOptions
+) => {
+	const { context, graphqlEndpoint, graphqlOptions, playgroundEnabled, playgroundOptions } = _.merge(
+		{},
+		DEFAULT_OPTIONS,
+		options
+	);
 
 	const allSchemas = { queries: {}, mutations: {}, schemas: {} };
 	const { queries: queryFields, mutations: mutationsFields, schemas: controllerSchemas } = (
@@ -85,7 +94,7 @@ export const createGraphQLServer = (app: IOfBaseExpress, options: ICreateApolloS
 			schema,
 			graphiql: false,
 			context,
-			...graphqlOptions
+			...(graphqlOptions || {})
 		})
 	);
 	console.info(`--- 🚀 GraphQL running on ${graphqlEndpoint}`);
