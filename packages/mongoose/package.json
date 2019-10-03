@@ -22,8 +22,7 @@
 		"@davinci/core": "^0.6.0",
 		"@davinci/reflector": "^0.6.0",
 		"debug": "^4.1.1",
-		"lodash": "^4.17.11",
-		"reflect-metadata": "^0.1.13"
+		"lodash": "^4.17.11"
 	},
 	"devDependencies": {
 		"mongoose": "5.5.5",

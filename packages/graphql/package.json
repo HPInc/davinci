@@ -1,6 +1,6 @@
 {
-	"name": "@davinci/core",
-	"version": "0.6.0",
+	"name": "@davinci/graphql",
+	"version": "0.5.0",
 	"description": "Framework for rapid and consistent API development",
 	"main": "build/index.js",
 	"types": "build/index.d.ts",
@@ -12,24 +12,21 @@
 		"test": "mocha --exit",
 		"cover": "nyc npm test"
 	},
-	"author": "HP",
+	"author": "Oneflow Systems (http://www.oneflowsystems.com/)",
 	"license": "ISC",
 	"dependencies": {
+		"@davinci/core": "^0.6.0",
 		"@davinci/reflector": "^0.6.0",
-		"@godaddy/terminus": "4.1.0",
-		"@types/mocha": "^5.2.6",
-		"ajv": "6.2.1",
 		"bluebird": "3.5.0",
 		"debug": "^4.1.1",
-		"express": "^4.16.4",
-		"lodash": "4.17.11",
-		"require-dir": "0.3.2",
-		"swagger-ui-express": "^4.0.7"
-	},
-	"peerDependencies": {
-		"mongoose": "5.5.5"
+		"express-graphql": "0.9.0",
+		"graphql": "14.4.2",
+		"graphql-iso-date": "3.6.1",
+		"lodash": "4.17.11"
 	},
 	"devDependencies": {
+		"@types/graphql": "14.2.3",
+		"@types/mocha": "^5.2.6",
 		"tslib": "^1.9.3",
 		"tslint": "^5.16.0",
 		"typescript": "^3.4.5"

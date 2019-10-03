@@ -142,7 +142,7 @@ export const createApp = (...args: CreateAppArgs): Promise<IOfBaseExpress> => {
 
 		await new Promise(resolve =>
 			server.listen(config.PORT, () => {
-				console.log(`Server listening on ${config.PORT}`);
+				console.log(`--- Server listening on ${config.PORT}`);
 				resolve();
 			})
 		);

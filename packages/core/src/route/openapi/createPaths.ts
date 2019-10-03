@@ -58,13 +58,13 @@ const createPathsDefinition = (theClass: Function): { paths: PathsDefinition; de
 
 			const resps = responses
 				? _.mapValues(responses, response => {
-						if (typeof response === 'function') {
-							const { definitions: defs, schema } = getSchemaDefinition(response);
-							acc.definitions = { ...acc.definitions, ...defs };
-							return { schema };
-						}
+					if (typeof response === 'function') {
+						const { definitions: defs, schema } = getSchemaDefinition(response);
+						acc.definitions = { ...acc.definitions, ...defs };
+						return { schema };
+					}
 
-						return response;
+					return response;
 				  })
 				: { 200: { description: 'Success' } };
 

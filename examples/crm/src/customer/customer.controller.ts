@@ -6,7 +6,7 @@ import CustomerSchema from './customer.schema';
 const { get, controller, query } = route;
 
 @controller({
-	basepath: '/api/customer',
+	basepath: '/api/customers',
 	excludedMethods: ['create', 'findById']
 })
 @express.middleware.before((_req, _res, next) => {
