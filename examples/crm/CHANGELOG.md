@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.7.0](https://github.com/Oneflow/davinci/compare/crm@0.6.0...crm@0.7.0) (2019-10-03)
+
+
+### Features
+
+* added apollo server creation logic, mutations, example ([1922911](https://github.com/Oneflow/davinci/commit/1922911))
+
+
+
+
+
 # 0.6.0 (2019-09-13)
 
 

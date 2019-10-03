@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.5.0 (2019-10-03)
+
+
+### Bug Fixes
+
+* PR review fixes ([0c7d94c](https://github.com/Oneflow/davinci/commit/0c7d94c))
+
+
+### Features
+
+* added apollo server creation logic, mutations, example ([1922911](https://github.com/Oneflow/davinci/commit/1922911))
+* added info and selectionSet decorators ([5bf051c](https://github.com/Oneflow/davinci/commit/5bf051c))
+* added inputField decorator ([77864f2](https://github.com/Oneflow/davinci/commit/77864f2))
+* added typeFactory for lazy loading types ([74bb11d](https://github.com/Oneflow/davinci/commit/74bb11d))
+* graphql.field not accept a factory function ([3cf28af](https://github.com/Oneflow/davinci/commit/3cf28af))
+* switched to express-graphql instead of apollo-server-express ([51e6548](https://github.com/Oneflow/davinci/commit/51e6548))
+
+
+
+
+
 ## [0.4.2](https://github.com/Oneflow/davinci/compare/v0.4.1...v0.4.2) (2019-08-13)
 
 **Note:** Version bump only for package crm

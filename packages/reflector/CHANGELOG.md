@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.1](https://github.com/Oneflow/davinci/compare/@davinci/reflector@0.6.0...@davinci/reflector@0.6.1) (2019-10-03)
+
+**Note:** Version bump only for package @davinci/reflector
+
+
+
+
+
 # 0.6.0 (2019-09-13)
 
 

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.7.0](https://github.com/Oneflow/davinci/compare/@davinci/core@0.6.0...@davinci/core@0.7.0) (2019-10-03)
+
+
+### Features
+
+* switched to express-graphql instead of apollo-server-express ([51e6548](https://github.com/Oneflow/davinci/commit/51e6548))
+
+
+
+
+
 # 0.6.0 (2019-09-13)
 
 
