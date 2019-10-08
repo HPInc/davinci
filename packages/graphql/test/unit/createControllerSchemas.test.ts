@@ -63,4 +63,116 @@ describe('createControllerSchemas', () => {
 		should(mutations.createCustomer.type.name).be.equal(Customer.name);
 		should(mutations.createCustomer.resolve).be.instanceOf(Function);
 	});
+
+	it('should propagate correctly the arguments to the decorators options factory functions #1', done => {
+		class Customer {
+			@field(({ isInput, operationType, resolverMetadata }) => {
+				should(isInput).be.True();
+				should(operationType).be.equal('query');
+				should(resolverMetadata).be.deepEqual({
+					methodName: 'fetchCustomers',
+					name: 'customers',
+					handler: Controller.prototype.fetchCustomers,
+					returnType: String
+				});
+				done();
+				return {};
+			})
+			firstname: string;
+		}
+
+		class Controller {
+			@query(String, 'customers')
+			fetchCustomers(@arg() customer: Customer) {
+				return customer.firstname;
+			}
+		}
+
+		createControllerSchemas(Controller);
+	});
+
+	it('should propagate correctly the arguments to the decorators options factory functions #2', done => {
+		class Customer {
+			@field(({ isInput, operationType, resolverMetadata }) => {
+				should(isInput).be.False();
+				should(operationType).be.equal('query');
+				should(resolverMetadata).be.deepEqual({
+					methodName: 'fetchCustomer',
+					name: 'customer',
+					handler: Controller.prototype.fetchCustomer,
+					returnType: Customer
+				});
+				done();
+				return {};
+			})
+			firstname: string;
+		}
+
+		class Controller {
+			@query(Customer, 'customer')
+			fetchCustomer(@arg() firstname: string) {
+				const customer = new Customer();
+				customer.firstname = firstname;
+				return customer;
+			}
+		}
+
+		createControllerSchemas(Controller);
+	});
+
+	it('should propagate correctly the arguments to the decorators options factory functions #3', done => {
+		class Customer {
+			@field(({ isInput, operationType, resolverMetadata }) => {
+				should(isInput).be.True();
+				should(operationType).be.equal('mutation');
+				should(resolverMetadata).be.deepEqual({
+					methodName: 'writeCustomers',
+					name: 'customers',
+					handler: Controller.prototype.writeCustomers,
+					returnType: String
+				});
+				done();
+				return {};
+			})
+			firstname: string;
+		}
+
+		class Controller {
+			@mutation(String, 'customers')
+			writeCustomers(@arg() customer: Customer) {
+				return customer.firstname;
+			}
+		}
+
+		createControllerSchemas(Controller);
+	});
+
+	it('should propagate correctly the arguments to the decorators options factory functions #4', done => {
+		class Customer {
+			@field(({ isInput, operationType, resolverMetadata }) => {
+				should(isInput).be.False();
+				should(operationType).be.equal('mutation');
+				should(resolverMetadata).be.deepEqual({
+					methodName: 'writeCustomer',
+					name: 'customer',
+					handler: Controller.prototype.writeCustomer,
+					returnType: Customer
+				});
+				done();
+				return {};
+			})
+			firstname: string;
+		}
+
+		class Controller {
+			@mutation(Customer, 'customer')
+			writeCustomer(@arg() firstname: string) {
+				const customer = new Customer();
+				customer.firstname = firstname;
+				return customer;
+			}
+		}
+
+		createControllerSchemas(Controller);
+	});
 });
