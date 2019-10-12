@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.1](https://github.com/Oneflow/davinci/compare/@davinci/example-graphql@0.5.0...@davinci/example-graphql@0.5.1) (2019-10-12)
+
+**Note:** Version bump only for package @davinci/example-graphql
+
+
+
+
+
 # 0.5.0 (2019-10-03)
 
 
