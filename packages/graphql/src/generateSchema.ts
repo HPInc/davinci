@@ -11,7 +11,7 @@ import { GraphQLDateTime } from 'graphql-iso-date';
 import _fp from 'lodash/fp';
 import _ from 'lodash';
 import { Reflector } from '@davinci/reflector';
-import { IFieldDecoratorMetadata, OperationType } from './types';
+import { IFieldDecoratorMetadata, IResolverDecoratorMetadata, OperationType } from './types';
 import { createExecutableSchema } from './createControllerSchemas';
 
 const scalarDict = {
@@ -26,6 +26,7 @@ interface IGenerateGQLSchemaArgs {
 	key?: any;
 	isInput?: boolean;
 	operationType?: OperationType;
+	resolverMetadata?: IResolverDecoratorMetadata;
 	schemas?: { [key: string]: any };
 	transformMetadata?: Function;
 }
@@ -33,11 +34,12 @@ interface IGenerateGQLSchemaArgs {
 const getFieldsMetadata = (
 	target: Function,
 	isInput: boolean,
-	operationType?: OperationType
+	operationType?: OperationType,
+	resolverMetadata?: IResolverDecoratorMetadata
 ): IFieldDecoratorMetadata[] => {
 	const fieldsMetadata = _.map(
 		Reflector.getMetadata('davinci:graphql:fields', target) as IFieldDecoratorMetadata[],
-		({ key, optsFactory }) => ({ key, opts: optsFactory({ isInput, operationType }) })
+		({ key, optsFactory }) => ({ key, opts: optsFactory({ isInput, operationType, resolverMetadata }) })
 	);
 
 	return fieldsMetadata;
@@ -50,13 +52,14 @@ export const generateGQLSchema = ({
 	schemas = {},
 	isInput = false,
 	operationType,
+	resolverMetadata,
 	transformMetadata = _.identity
 }: IGenerateGQLSchemaArgs) => {
 	// grab meta infos
 	// maybe it's a decorated class, let's try to get the fields metadata
 	const parentFieldsMetadata: IFieldDecoratorMetadata[] =
 		parentType && parentType.prototype
-			? getFieldsMetadata(parentType.prototype.constructor, isInput, operationType)
+			? getFieldsMetadata(parentType.prototype.constructor, isInput, operationType, resolverMetadata)
 			: [];
 	const meta = _fp.find({ key }, parentFieldsMetadata) || ({} as IFieldDecoratorMetadata);
 	const metadata = transformMetadata(meta, { isInput, type, parentType, schemas });
@@ -78,6 +81,7 @@ export const generateGQLSchema = ({
 			key,
 			isInput,
 			operationType,
+			resolverMetadata,
 			transformMetadata
 		});
 		const gqlType = GraphQLList(gqlSchema.schema);
@@ -105,6 +109,7 @@ export const generateGQLSchema = ({
 				schemas,
 				isInput,
 				operationType,
+				resolverMetadata,
 				transformMetadata
 			})
 		};
@@ -124,6 +129,7 @@ interface ICreateObjectFieldsArgs {
 	parentType: any;
 	isInput?: boolean;
 	operationType?: OperationType;
+	resolverMetadata?: IResolverDecoratorMetadata;
 	schemas?: { [key: string]: any };
 	transformMetadata?: Function;
 }
@@ -133,12 +139,14 @@ const createObjectFields = ({
 	schemas = {},
 	isInput,
 	operationType,
+	resolverMetadata,
 	transformMetadata = _.identity
 }: ICreateObjectFieldsArgs) => {
 	const fieldsMetadata: IFieldDecoratorMetadata[] = getFieldsMetadata(
 		parentType.prototype.constructor,
 		isInput,
-		operationType
+		operationType,
+		resolverMetadata
 	);
 
 	const externalFieldsResolvers =
@@ -159,6 +167,7 @@ const createObjectFields = ({
 				key,
 				isInput,
 				operationType,
+				resolverMetadata,
 				parentType,
 				schemas,
 				transformMetadata

@@ -39,6 +39,7 @@ export interface IFieldDecoratorOptions {
 export interface IFieldDecoratorOptionsFactoryArgs {
 	isInput: boolean;
 	operationType: OperationType;
+	resolverMetadata?: IResolverDecoratorMetadata;
 }
 
 export type FieldDecoratorOptionsFactory = (

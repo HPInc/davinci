@@ -74,7 +74,8 @@ export const createExecutableSchema = (
 	const { schema: graphqlReturnType, schemas: s } = generateSchema({
 		type: returnType,
 		schemas: allSchemas,
-		operationType
+		operationType,
+		resolverMetadata
 	});
 	_.merge(allSchemas, s);
 
@@ -117,7 +118,8 @@ export const createExecutableSchema = (
 					type,
 					schemas: allSchemas,
 					isInput: true,
-					operationType
+					operationType,
+					resolverMetadata
 				});
 				gqlArgType = schema;
 
