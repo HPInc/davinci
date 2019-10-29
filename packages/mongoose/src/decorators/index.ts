@@ -1,13 +1,22 @@
-import { SchemaTypeOpts } from 'mongoose';
 import { Reflector } from '@davinci/reflector';
+import { IPropDecoratorOptions, IPropDecoratorOptionsFactory, IPropDecoratorMetadata } from './types';
 
 /**
  * Decorate a props as mongoose schema property
  * @param opts
  */
-export function prop(opts?: SchemaTypeOpts<any>) {
-	return function(prototype: Object, key: string | symbol) {
-		Reflector.pushMetadata('davinci:mongoose:props', { key, opts }, prototype.constructor);
+export function prop(opts?: IPropDecoratorOptions | IPropDecoratorOptionsFactory) {
+	return function(prototype: Object, key: string) {
+		const optsFactory = () => {
+			const options = typeof opts === 'function' ? opts() : opts;
+			if (options && !options.type && !options.typeFactory) {
+				options.type = Reflector.getMetadata('design:type', prototype, key);
+			}
+
+			return options;
+		};
+		const metadata: IPropDecoratorMetadata = { key, optsFactory };
+		Reflector.pushMetadata('davinci:mongoose:props', metadata, prototype.constructor);
 	};
 }
 

@@ -1,14 +1,11 @@
 import _ from 'lodash';
-import { Reflector } from '@davinci/reflector';
+import { Reflector, ReturnTypeFunc, ReturnTypeFuncValue, ClassType } from '@davinci/reflector';
 import {
-	ReturnTypeFunc,
-	ReturnTypeFuncValue,
 	ITypeDecoratorOptions,
 	IFieldDecoratorOptions,
 	IFieldDecoratorMetadata,
 	FieldDecoratorOptionsFactory,
 	IFieldDecoratorOptionsFactoryArgs,
-	ClassType,
 	IResolverDecoratorMetadata
 } from '../types';
 

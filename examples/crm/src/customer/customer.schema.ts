@@ -7,6 +7,7 @@ class CustomerPhone {
 	@openapi.prop()
 	number: string;
 	@mgoose.prop()
+	@openapi.prop()
 	isPrimary: boolean;
 }
 
@@ -35,8 +36,10 @@ export default class Customer {
 	@openapi.prop()
 	weight: number;
 
-	@mgoose.prop({ type: [CustomerPhone] })
-	@openapi.prop({ type: [CustomerPhone] })
+	// typeFactory is useful in cases where schemas depends on each other (circular dependencies),
+	// because they will be evaluated lazily
+	@mgoose.prop({ typeFactory: () => [CustomerPhone] })
+	@openapi.prop({ typeFactory: () => [CustomerPhone] })
 	phones: CustomerPhone[];
 
 	@mgoose.prop({ type: Schema.Types.ObjectId })
