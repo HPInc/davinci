@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.8.0](https://github.com/Oneflow/davinci/compare/crm@0.7.0...crm@0.8.0) (2019-10-30)
+
+
+### Features
+
+* **decoratorFactory:** added factory functions to the openapi prop decorator ([fdc5cdf](https://github.com/Oneflow/davinci/commit/fdc5cdf))
+
+
+
+
+
 # [0.7.0](https://github.com/Oneflow/davinci/compare/crm@0.6.0...crm@0.7.0) (2019-10-03)
 
 
