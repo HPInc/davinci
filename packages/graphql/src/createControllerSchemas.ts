@@ -1,9 +1,9 @@
 import _fp from 'lodash/fp';
 import _ from 'lodash';
 import { GraphQLEnumType, GraphQLList, GraphQLNonNull } from 'graphql';
-import { Reflector } from '@davinci/reflector';
+import { Reflector, ClassType } from '@davinci/reflector';
 import generateSchema from './generateSchema';
-import { ClassType, IResolverDecoratorMetadata, OperationType } from './types';
+import { IResolverDecoratorMetadata, OperationType } from './types';
 
 /**
  * Returns a flatten list of fields

@@ -11,16 +11,6 @@ describe('createSchemaDefinition', () => {
 			@openapi.prop()
 			lastname: string;
 		}
-		/**
-		 * This is equivalent to:
-		 *
-		 * class Customer {
-		 * 		@openapi.prop()
-		 *  	firstname: string;
-		 * 		@openapi.prop()
-		 *  	lastname: string;
-		 *  };
-		 */
 
 		const definition = createSchemaDefinition(Customer);
 		should(definition).be.deepEqual({
@@ -41,36 +31,17 @@ describe('createSchemaDefinition', () => {
 
 	it('supports nested objects', () => {
 		class CustomerPhone {
+			@openapi.prop()
 			number: string;
+			@openapi.prop()
 			isPrimary: boolean;
 		}
 
+		@openapi.definition({ title: 'Customer' })
 		class Customer {
+			@openapi.prop()
 			phone: CustomerPhone;
 		}
-
-		openapi.definition({ title: 'Customer' })(Customer);
-		openapi.prop({ type: CustomerPhone })(Customer.prototype, 'phone');
-
-		openapi.prop({ type: String })(CustomerPhone.prototype, 'number');
-		openapi.prop({ type: Boolean })(CustomerPhone.prototype, 'isPrimary');
-
-		/**
-		 * This is equivalent to:
-		 *
-		 * class CustomerPhone {
-		 * 		@openapi.prop()
-		 *  	number: number;
-		 * 		@openapi.prop()
-		 *  	isPrimary: boolean;
-		 *  };
-		 *
-		 * @openapi.definition({ title: 'Customer'})
-		 * class Customer {
-		 * 		@openapi.prop()
-		 *  	phone: CustomerPhone;
-		 *  };
-		 */
 
 		const definition = createSchemaDefinition(Customer);
 		should(definition).be.deepEqual({
@@ -96,39 +67,20 @@ describe('createSchemaDefinition', () => {
 	});
 
 	it('supports nested definitions', () => {
+		@openapi.definition({ title: 'CustomerPhone' })
 		class CustomerPhone {
+			@openapi.prop()
 			number: string;
+
+			@openapi.prop()
 			isPrimary: boolean;
 		}
 
+		@openapi.definition({ title: 'Customer' })
 		class Customer {
+			@openapi.prop({ type: CustomerPhone })
 			phone: CustomerPhone;
 		}
-
-		openapi.definition({ title: 'Customer' })(Customer);
-		openapi.prop({ type: CustomerPhone })(Customer.prototype, 'phone');
-
-		openapi.definition({ title: 'CustomerPhone' })(CustomerPhone);
-		openapi.prop({ type: String })(CustomerPhone.prototype, 'number');
-		openapi.prop({ type: Boolean })(CustomerPhone.prototype, 'isPrimary');
-
-		/**
-		 * This is equivalent to:
-		 *
-		 * @openapi.definition({ title: 'CustomerPhone' })
-		 * class CustomerPhone {
-		 * 		@openapi.prop()
-		 *  	number: number;
-		 * 		@openapi.prop()
-		 *  	isPrimary: boolean;
-		 *  };
-		 *
-		 * @openapi.definition({ title: 'Customer' })
-		 * class Customer {
-		 * 		@openapi.prop()
-		 *  	phone: CustomerPhone;
-		 *  };
-		 */
 
 		const definition = createSchemaDefinition(Customer);
 		should(definition).be.deepEqual({
@@ -157,20 +109,11 @@ describe('createSchemaDefinition', () => {
 	});
 
 	it('supports arrays', () => {
+		@openapi.definition({ title: 'Customer' })
 		class Customer {
+			@openapi.prop({ type: [String] })
 			groups: string[];
 		}
-
-		openapi.definition({ title: 'Customer' })(Customer);
-		openapi.prop({ type: [String] })(Customer.prototype, 'groups');
-		/**
-		 * This is equivalent to:
-		 *
-		 * class Customer {
-		 * 		@openapi.prop()
-		 *  	groups: string[];
-		 *  };
-		 */
 
 		const definition = createSchemaDefinition(Customer);
 		should(definition).be.deepEqual({
@@ -191,36 +134,17 @@ describe('createSchemaDefinition', () => {
 
 	it('support array of objects', () => {
 		class CustomerPhone {
+			@openapi.prop()
 			number: string;
+			@openapi.prop()
 			isPrimary: boolean;
 		}
 
+		@openapi.definition({ title: 'Customer' })
 		class Customer {
+			@openapi.prop({ type: [CustomerPhone] })
 			phone: CustomerPhone[];
 		}
-
-		openapi.definition({ title: 'Customer' })(Customer);
-		openapi.prop({ type: [CustomerPhone] })(Customer.prototype, 'phone');
-
-		openapi.prop({ type: String })(CustomerPhone.prototype, 'number');
-		openapi.prop({ type: Boolean })(CustomerPhone.prototype, 'isPrimary');
-
-		/**
-		 * This is equivalent to:
-		 *
-		 * class CustomerPhone {
-		 * 		@openapi.prop()
-		 *  	number: number;
-		 * 		@openapi.prop()
-		 *  	isPrimary: boolean;
-		 *  };
-		 *
-		 * @openapi.definition({ title: 'Customer' })
-		 * class Customer {
-		 * 		@openapi.prop()
-		 *  	phone: CustomerPhone[];
-		 *  };
-		 */
 
 		const definition = createSchemaDefinition(Customer);
 		should(definition).be.deepEqual({
@@ -313,24 +237,13 @@ describe('createSchemaDefinition', () => {
 	});
 
 	it('should populate the required array', () => {
+		@openapi.definition({ title: 'Customer' })
 		class Customer {
+			@openapi.prop({ required: true })
 			firstname: string;
+			@openapi.prop()
 			lastname: string;
 		}
-
-		openapi.definition({ title: 'Customer' })(Customer);
-		openapi.prop({ type: String, required: true })(Customer.prototype, 'firstname');
-		openapi.prop({ type: String })(Customer.prototype, 'lastname');
-		/**
-		 * This is equivalent to:
-		 *
-		 * class Customer {
-		 * 		@openapi.prop({ required: true })
-		 *  	firstname: string;
-		 * 		@openapi.prop()
-		 *  	lastname: string;
-		 *  };
-		 */
 
 		const definition = createSchemaDefinition(Customer);
 		should(definition).be.deepEqual({

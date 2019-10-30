@@ -1,10 +1,10 @@
 import { GraphQLSchema, GraphQLObjectType, printSchema } from 'graphql';
 import graphqlHTTP from 'express-graphql';
+import { ClassType } from '@davinci/reflector';
 import { IOfBaseExpress } from '@davinci/core';
 import fs from 'fs';
 import _ from 'lodash';
 import { createControllerSchemas } from './createControllerSchemas';
-import { ClassType } from './types';
 import playground from './playground-markup';
 
 export interface ICreateGraphQLServerOptions {

@@ -1,6 +1,7 @@
-import { model, Schema, SchemaTypeOpts, SchemaOptions } from 'mongoose';
+import { model, Schema, SchemaOptions } from 'mongoose';
 import { Reflector } from '@davinci/reflector';
 import { ModelType } from './types';
+import { IPropDecoratorMetadata } from './decorators/types';
 
 /**
  * Utility function that given a class passed as parameter,
@@ -8,27 +9,36 @@ import { ModelType } from './types';
  * @param theClass
  */
 export const getSchemaDefinition = (theClass: Function) => {
-	const props = Reflector.getMetadata('davinci:mongoose:props', theClass.prototype.constructor) || [];
+	const props: IPropDecoratorMetadata[] =
+		Reflector.getMetadata('davinci:mongoose:props', theClass.prototype.constructor) || [];
 
 	// loop over the variable decorated as props
-	return props.reduce((acc, { key, opts = {} }: { key: string; opts: SchemaTypeOpts<any> }) => {
+	return props.reduce((acc, { key, optsFactory }) => {
+		const opts = optsFactory();
 		// the type can be explicitly passed as option, or can be inferred
 		// it's important to note that not in all the situations
 		// the type can be retrieved with reflect-metadata, for example:
 		// - arrays: [string] or [object] or [MyClass]
 		// - objects
-		let type = opts.type || Reflector.getMetadata('design:type', theClass.prototype, key);
+		let type =
+			opts && opts.type ? opts.type : Reflector.getMetadata('design:type', theClass.prototype, key);
+
+		if (opts && typeof opts.typeFactory === 'function') {
+			type = opts.typeFactory();
+		}
+
 		const isArray = Array.isArray(type) || type.name === 'Array';
 		if (isArray && type.length > 0) {
 			type = type[0];
 		}
 
 		const isFunction =
-			![String, Number, Object, Boolean, Date, Schema.Types.ObjectId].includes(type) &&
-			typeof type === 'function';
+			![String, Number, Object, Boolean, Date, Schema.Types.ObjectId, Schema.Types.Mixed].includes(
+				type
+			) && typeof type === 'function';
 
 		// if the type is a function, we need to recursively get the schema definition
-		if (isFunction && type.name !== 'ObjectId') {
+		if (isFunction && type.name !== 'ObjectId' && type.name !== 'Mixed') {
 			type = getSchemaDefinition(type);
 		}
 
@@ -76,7 +86,8 @@ export const generateSchema = (
 	// get schema
 	const schemaDef = getSchemaDefinition(theClass);
 
-	const allMethods = Reflector.getMetadata('davinci:mongoose:methods', theClass.prototype.constructor) || [];
+	const allMethods =
+		Reflector.getMetadata('davinci:mongoose:methods', theClass.prototype.constructor) || [];
 
 	// get methods
 	const methods = allMethods
@@ -94,7 +105,8 @@ export const generateSchema = (
 	const indexes = Reflector.getMetadata('davinci:mongoose:indexes', theClass) || [];
 
 	// get virtual fields that allow population
-	const populates = Reflector.getMetadata('davinci:mongoose:populates', theClass.prototype.constructor) || [];
+	const populates =
+		Reflector.getMetadata('davinci:mongoose:populates', theClass.prototype.constructor) || [];
 
 	// get virtual fields
 	const virtuals = Reflector.getMetadata('davinci:mongoose:virtuals', theClass.prototype.constructor) || [];

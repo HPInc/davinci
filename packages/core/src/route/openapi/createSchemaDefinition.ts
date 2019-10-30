@@ -1,6 +1,7 @@
 import _fp from 'lodash/fp';
 import { Reflector } from '@davinci/reflector';
 import { ISwaggerDefinitions } from '../types/openapi';
+import { IPropDecoratorMetadata } from '../decorators/types';
 
 export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwaggerDefinitions => {
 	const makeSchema = (typeOrClass, key?) => {
@@ -32,14 +33,19 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 
 		// it's a class => create a definition nad recursively call makeSchema on the properties
 		if (typeof typeOrClass === 'function') {
-			const definitionMetadata = Reflector.getMetadata('davinci:openapi:definition', typeOrClass.prototype.constructor);
+			const definitionMetadata = Reflector.getMetadata(
+				'davinci:openapi:definition',
+				typeOrClass.prototype.constructor
+			);
 			const hasDefinitionDecoration = !!definitionMetadata;
 			const definitionObj = {
 				...(definitionMetadata || {}),
 				type: 'object'
 			};
 
-			const title: string = hasDefinitionDecoration ? definitionMetadata.title : key || typeOrClass.name;
+			const title: string = hasDefinitionDecoration
+				? definitionMetadata.title
+				: key || typeOrClass.name;
 			if (hasDefinitionDecoration) {
 				if (definitions[title]) {
 					return {
@@ -54,9 +60,20 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 				definitionObj.title = title;
 			}
 
-			const props = Reflector.getMetadata('davinci:openapi:props', typeOrClass.prototype.constructor) || [];
-			const properties = props.reduce((acc, { key, opts }) => {
-				const type = (opts && opts.type) || Reflector.getMetadata('design:type', typeOrClass.prototype, key);
+			const props: IPropDecoratorMetadata[] =
+				Reflector.getMetadata('davinci:openapi:props', typeOrClass.prototype.constructor) || [];
+
+			const properties = props.reduce((acc, { key, optsFactory }) => {
+				const opts = optsFactory();
+				let type =
+					opts && opts.type
+						? opts.type
+						: Reflector.getMetadata('design:type', typeOrClass.prototype, key);
+
+				if (opts && typeof opts.typeFactory === 'function') {
+					type = opts.typeFactory();
+				}
+
 				acc[key] = makeSchema(type, key);
 				return acc;
 			}, {});
@@ -66,7 +83,10 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 			}
 
 			const required = _fp.flow(
-				_fp.filter({ opts: { required: true } }),
+				_fp.filter(({ optsFactory }: IPropDecoratorMetadata) => {
+					const options = optsFactory() || {};
+					return options.required;
+				}),
 				_fp.map('key')
 			)(props);
 
@@ -83,7 +103,7 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 
 			return hasDefinitionDecoration
 				? {
-					$ref: `#/definitions/${title}`
+						$ref: `#/definitions/${title}`
 				  }
 				: definitionObj;
 		}
