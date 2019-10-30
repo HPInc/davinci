@@ -8,7 +8,7 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 		// it's a primitive type, simple case
 		if ([String, Number, Boolean, Date].includes(typeOrClass)) {
 			if (typeOrClass === Date) {
-				return { type: 'string', format: 'date' };
+				return { type: 'string', format: 'date-time' };
 			}
 
 			return { type: typeOrClass.name.toLowerCase() };
