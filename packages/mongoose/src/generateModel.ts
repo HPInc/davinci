@@ -33,11 +33,12 @@ export const getSchemaDefinition = (theClass: Function) => {
 		}
 
 		const isFunction =
-			![String, Number, Object, Boolean, Date, Schema.Types.ObjectId].includes(type) &&
-			typeof type === 'function';
+			![String, Number, Object, Boolean, Date, Schema.Types.ObjectId, Schema.Types.Mixed].includes(
+				type
+			) && typeof type === 'function';
 
 		// if the type is a function, we need to recursively get the schema definition
-		if (isFunction && type.name !== 'ObjectId') {
+		if (isFunction && type.name !== 'ObjectId' && type.name !== 'Mixed') {
 			type = getSchemaDefinition(type);
 		}
 
