@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.1](https://github.com/Oneflow/davinci/compare/@davinci/core@0.8.0...@davinci/core@0.8.1) (2019-10-30)
+
+
+### Bug Fixes
+
+* using correct ajv format for `Dates` ([868c397](https://github.com/Oneflow/davinci/commit/868c397))
+
+
+
+
+
 # [0.8.0](https://github.com/Oneflow/davinci/compare/@davinci/core@0.7.0...@davinci/core@0.8.0) (2019-10-30)
 
 

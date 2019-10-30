@@ -1,6 +1,6 @@
 {
 	"name": "crm",
-	"version": "0.8.0",
+	"version": "0.8.1",
 	"private": true,
 	"description": "",
 	"main": "index.js",
@@ -12,8 +12,8 @@
 	"author": "HP",
 	"license": "ISC",
 	"dependencies": {
-		"@davinci/core": "^0.8.0",
-		"@davinci/mongoose": "^0.7.0",
+		"@davinci/core": "^0.8.1",
+		"@davinci/mongoose": "^0.7.1",
 		"debug": "^4.1.1",
 		"express": "4.16.4",
 		"lodash": "^4.17.11",
