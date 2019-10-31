@@ -1,5 +1,6 @@
 import { Reflector } from '@davinci/reflector';
 import _ from 'lodash';
+import { IHeaderDecoratorMetadata } from '../types';
 
 /**
  * Factory function that generates a `req` or `res` decorator
@@ -11,7 +12,8 @@ export const createReqResExpressDecorator = (reqOrRes: 'req' | 'res') => () => (
 	index
 ) => {
 	// get the existing metadata props
-	const methodParameters = Reflector.getMetadata('davinci:openapi:method-parameters', prototype.constructor) || [];
+	const methodParameters =
+		Reflector.getMetadata('davinci:openapi:method-parameters', prototype.constructor) || [];
 	const isAlreadySet = !!_.find(methodParameters, { methodName, index });
 	if (isAlreadySet) return;
 
@@ -43,7 +45,12 @@ type Stage = 'before' | 'after';
  */
 const middleware = (middlewareFunction, stage: Stage = 'before'): Function => {
 	return function(target: Object | Function, methodName: string | symbol) {
-		const args: { middlewareFunction: Function; stage: Stage; handler?: Function; isControllerMw?: boolean } = {
+		const args: {
+			middlewareFunction: Function;
+			stage: Stage;
+			handler?: Function;
+			isControllerMw?: boolean;
+		} = {
 			middlewareFunction,
 			stage
 		};
@@ -83,7 +90,7 @@ export { middleware };
  */
 export const header = (name: string, value: string) => {
 	return function(prototype: Object, methodName: string | symbol) {
-		const meta = { name, value, handler: prototype[methodName] };
+		const meta: IHeaderDecoratorMetadata = { name, value, handler: prototype[methodName] };
 		// define new metadata methods
 		Reflector.unshiftMetadata('davinci:express:method-response-header', meta, prototype.constructor);
 	};

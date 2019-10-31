@@ -1,27 +1,23 @@
 import Ajv from 'ajv';
 import Debug from 'debug';
-import express, { Router } from 'express';
+import express, { NextFunction, Response, Router } from 'express';
 import _ from 'lodash';
 import _fp from 'lodash/fp';
 import Promise from 'bluebird';
 import path from 'path';
-import { Reflector } from '@davinci/reflector';
+import { ClassType, Reflector } from '@davinci/reflector';
+import { DaVinciRequest } from '../express/types';
 
 import * as errors from '../errors/httpErrors';
 import * as openapiDocs from './openapi/openapiDocs';
 import createPaths from './openapi/createPaths';
 import createSchemaDefinition from './openapi/createSchemaDefinition';
+import { IControllerDecoratorArgs } from './decorators/route';
+import { IHeaderDecoratorMetadata } from '../express/types';
 
 const { NotImplemented, BadRequest } = errors;
 
 const debug = Debug('of-base-api');
-
-const AJV_OPTS = {
-	allErrors: true,
-	coerceTypes: true,
-	useDefaults: true,
-	removeAdditional: 'all'
-};
 
 const convertRefPaths = schema => {
 	if (Array.isArray(schema)) {
@@ -48,10 +44,13 @@ const convertRefPaths = schema => {
 };
 
 const performAjvValidation = ({ value, config: cfg, definitions }) => {
-	// TODO: find a better solution
 	const config = convertRefPaths(cfg);
-	// @ts-ignore
-	const ajv = new Ajv(AJV_OPTS);
+	const ajv = new Ajv({
+		allErrors: true,
+		coerceTypes: true,
+		useDefaults: true,
+		removeAdditional: 'all'
+	});
 	const schema = {
 		type: 'object',
 		properties: { [config.name]: config.schema },
@@ -98,7 +97,6 @@ const attemptJsonParsing = ({ value, config, definitions }) => {
 const validateAndCoerce = ({ value, config, definitions }) => {
 	const isUndefinedButNotRequired = !config.required && typeof value === 'undefined';
 	if (config.schema && !isUndefinedButNotRequired) {
-		// @ts-ignore
 		const { value: val, errors } = performAjvValidation({ value, config, definitions });
 		if (errors) {
 			throw new BadRequest('Validation error', { errors });
@@ -121,10 +119,23 @@ const processParameter = ({ value, config, definitions }) =>
 		definitions
 	});
 
-// @ts-ignore
-const defaultContextFactory = ({ req, res }) => ({});
+type ContextFactory<ContextReturnType = any> = ({
+	req,
+	res
+}: {
+	req: DaVinciRequest;
+	res: Response;
+}) => ContextReturnType;
 
-const mapReqToParameters = (req, res, parameters = [], definitions, contextFactory = defaultContextFactory) => {
+const defaultContextFactory: ContextFactory = ({ req, res }) => ({ req, res });
+
+function mapReqToParameters<ContextType>(
+	req: DaVinciRequest,
+	res: Response,
+	parameters = [],
+	definitions,
+	contextFactory: ContextFactory<ContextType> = defaultContextFactory
+) {
 	const context = contextFactory({ req, res });
 
 	return parameters.reduce((acc, p) => {
@@ -151,17 +162,22 @@ const mapReqToParameters = (req, res, parameters = [], definitions, contextFacto
 		}
 		return acc;
 	}, []);
-};
+}
 
-const wrapMiddleware = middlewareFn => (req, res, next) => {
+const wrapMiddleware = middlewareFn => (req: DaVinciRequest, res: Response, next: NextFunction) => {
 	if (req.requestHandled) return next();
 
 	return middlewareFn(req, res, next);
 };
 
-const makeHandlerFunction = (operation, controller, functionName, definitions, contextFactory) => {
-	// @ts-ignore
-	const successCode = _.findKey(operation.responses, (obj, key) => +key >= 200 && +key < 400);
+const makeHandlerFunction = (
+	operation,
+	controller: InstanceType<ClassType>,
+	functionName: string,
+	definitions,
+	contextFactory: ContextFactory
+) => {
+	const successCode = _.findKey(operation.responses, (_obj, key) => +key >= 200 && +key < 400);
 
 	// get middlewares
 	const allMiddlewaresMeta = (
@@ -172,18 +188,26 @@ const makeHandlerFunction = (operation, controller, functionName, definitions, c
 	const afterMiddlewares = allMiddlewaresMeta.filter(m => m.stage === 'after');
 
 	// get response headers
-	const responseHeadersMeta = Reflector.getMetadata(
+	const responseHeadersMeta: IHeaderDecoratorMetadata[] = Reflector.getMetadata(
 		'davinci:express:method-response-header',
 		controller.constructor.prototype
 	);
-	const methodResponseHeadersMeta = _.filter(responseHeadersMeta, { handler: controller[functionName] });
+	const methodResponseHeadersMeta = _.filter<IHeaderDecoratorMetadata>(responseHeadersMeta, {
+		handler: controller[functionName]
+	});
 
 	return [
 		..._.map(beforeMiddlewares, ({ middlewareFunction }) => wrapMiddleware(middlewareFunction)),
 		(req, res, next) => {
 			if (req.requestHandled) return next();
 			// need a custom middleware to set the context ID
-			const parameterList = mapReqToParameters(req, res, operation.parameters, definitions, contextFactory);
+			const parameterList = mapReqToParameters(
+				req,
+				res,
+				operation.parameters,
+				definitions,
+				contextFactory
+			);
 			debug('calling ', functionName);
 			// the controller functions return a promise
 			// coerce the controller return value to be a promise
@@ -192,7 +216,6 @@ const makeHandlerFunction = (operation, controller, functionName, definitions, c
 					req.result = result;
 					req.statusCode = successCode;
 
-					// @ts-ignore
 					methodResponseHeadersMeta.forEach(({ name, value }) => {
 						res.header(name, value);
 					});
@@ -211,7 +234,11 @@ const makeHandlerFunction = (operation, controller, functionName, definitions, c
 	];
 };
 
-export const createRouteHandlers = (controller, definition, contextFactory?) => {
+export const createRouteHandlers = (
+	controller: InstanceType<ClassType>,
+	definition,
+	contextFactory?: ContextFactory
+) => {
 	const routeHandlers = [];
 	const methods = Reflector.getMetadata('davinci:openapi:methods', controller.constructor) || [];
 
@@ -241,12 +268,16 @@ export const createRouteHandlers = (controller, definition, contextFactory?) => 
 	return routeHandlers;
 };
 
-const validateController = Controller => {
+const validateController = (Controller: ClassType) => {
 	if (!Controller) throw new Error('Invalid Controller - missing Controller');
 	if (typeof Controller !== 'function') throw new Error('Invalid Controller - not function');
 };
 
-const createRouterAndSwaggerDoc = (Controller, rsName?, contextFactory?): Router => {
+const createRouterAndSwaggerDoc = (
+	Controller: ClassType,
+	rsName?: string,
+	contextFactory?: ContextFactory
+): Router => {
 	// need to validate the inputs here
 	validateController(Controller);
 
@@ -254,7 +285,8 @@ const createRouterAndSwaggerDoc = (Controller, rsName?, contextFactory?): Router
 	const resourceName = rsName || Controller.name.replace(/Controller$/, '').toLowerCase();
 
 	// get controller metadata
-	const metadata = Reflector.getMetadata('davinci:openapi:controller', Controller) || {};
+	const metadata: IControllerDecoratorArgs =
+		Reflector.getMetadata('davinci:openapi:controller', Controller) || {};
 	const basepath = metadata.basepath || '';
 	const resourceSchema = metadata.resourceSchema;
 	const additionalSchemas = metadata.additionalSchemas;

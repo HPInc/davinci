@@ -1,13 +1,11 @@
-// import Debug from 'debug';
+import Debug from 'debug';
 import * as errors from '../../errors/httpErrors';
 
-// const debug = Debug('of-base-api');
+const debug = Debug('davinci:error-handler');
 
 export default ({ exposeStack = false } = {}) => {
-	// @ts-ignore
-	return (err, req, res, next) => {
-		// eslint-disable-line no-unused-vars
-		// debug(err);
+	return (err, _req, res, _next) => {
+		debug(err);
 
 		let error = err;
 
