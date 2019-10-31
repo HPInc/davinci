@@ -1,9 +1,9 @@
 import { Reflector } from '@davinci/reflector';
-import { IPropDecoratorOptions, IPropDecoratorOptionsFactory, IPropDecoratorMetadata } from './types';
+import { IPropDecoratorOptions, IPropDecoratorOptionsFactory, IPropDecoratorMetadata } from '../types';
 
 /**
  * It annotates a variable as swagger definition property
- * @param opts
+ * @param {IPropDecoratorOptions} opts
  */
 export function prop(opts?: IPropDecoratorOptions | IPropDecoratorOptionsFactory) {
 	return function(prototype: Object, key: string): void {

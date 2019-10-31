@@ -1,7 +1,7 @@
 import _fp from 'lodash/fp';
 import { Reflector } from '@davinci/reflector';
 import { ISwaggerDefinitions } from '../types/openapi';
-import { IPropDecoratorMetadata } from '../decorators/types';
+import { IPropDecoratorMetadata } from '../types';
 
 export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwaggerDefinitions => {
 	const makeSchema = (typeOrClass, key?) => {
@@ -65,6 +65,13 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 
 			const properties = props.reduce((acc, { key, optsFactory }) => {
 				const opts = optsFactory();
+
+				// it's a rawType, we can just return it
+				if (opts && opts.rawType) {
+					acc[key] = opts.rawType;
+					return acc;
+				}
+
 				let type =
 					opts && opts.type
 						? opts.type

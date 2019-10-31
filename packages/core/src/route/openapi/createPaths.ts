@@ -28,7 +28,7 @@ const getParameterDefinition = methodParameterConfig => {
 };
 
 const createPathsDefinition = (theClass: Function): { paths: PathsDefinition; definitions: ISwaggerDefinitions } => {
-	const controllerMetadata: IControllerDecoratorArgs = 
+	const controllerMetadata: IControllerDecoratorArgs =
 		Reflector.getMetadata('davinci:openapi:controller', theClass) || {};
 	// if (!controllerMetadata) throw new Error('Invalid Class. It must be decorated as controller');
 	const { excludedMethods = [] } = controllerMetadata;
