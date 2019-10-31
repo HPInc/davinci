@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.2](https://github.com/Oneflow/davinci/compare/@davinci/core@0.8.1...@davinci/core@0.8.2) (2019-10-31)
+
+
+### Bug Fixes
+
+* **typing:** removed all the [@ts-ignore](https://github.com/ts-ignore), better typing ([764d267](https://github.com/Oneflow/davinci/commit/764d267))
+* tslint errors ([cbec105](https://github.com/Oneflow/davinci/commit/cbec105))
+
+
+
+
+
 ## [0.8.1](https://github.com/Oneflow/davinci/compare/@davinci/core@0.8.0...@davinci/core@0.8.1) (2019-10-30)
 
 
