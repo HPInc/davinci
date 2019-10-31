@@ -4,7 +4,8 @@ import * as errors from '../../errors/httpErrors';
 const debug = Debug('davinci:error-handler');
 
 export default ({ exposeStack = false } = {}) => {
-	return (err, _req, res, _next) => {
+	// @ts-ignore-next-line
+	return (err, req, res, next) => {
 		debug(err);
 
 		let error = err;

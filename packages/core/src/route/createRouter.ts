@@ -6,14 +6,12 @@ import _fp from 'lodash/fp';
 import Promise from 'bluebird';
 import path from 'path';
 import { ClassType, Reflector } from '@davinci/reflector';
-import { DaVinciRequest } from '../express/types';
-
+import { DaVinciRequest, IHeaderDecoratorMetadata } from '../express/types';
 import * as errors from '../errors/httpErrors';
 import * as openapiDocs from './openapi/openapiDocs';
 import createPaths from './openapi/createPaths';
 import createSchemaDefinition from './openapi/createSchemaDefinition';
 import { IControllerDecoratorArgs } from './decorators/route';
-import { IHeaderDecoratorMetadata } from '../express/types';
 
 const { NotImplemented, BadRequest } = errors;
 
@@ -177,7 +175,8 @@ const makeHandlerFunction = (
 	definitions,
 	contextFactory: ContextFactory
 ) => {
-	const successCode = _.findKey(operation.responses, (_obj, key) => +key >= 200 && +key < 400);
+	// @ts-ignore-next-line
+	const successCode = _.findKey(operation.responses, (obj, key) => +key >= 200 && +key < 400);
 
 	// get middlewares
 	const allMiddlewaresMeta = (

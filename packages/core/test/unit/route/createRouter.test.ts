@@ -42,15 +42,6 @@ describe('createRouter', () => {
 			}
 		});
 
-		it('should fail with invalid controller', done => {
-			try {
-				createRouter('this is the wrong type', 'test');
-			} catch (err) {
-				err.should.have.property('message').equal('Invalid Controller - not function');
-				done();
-			}
-		});
-
 		it('should succeed even with invalid controller definitions', done => {
 			const model = {};
 			utils.makeMockControllerClass(model, TestController);
@@ -157,7 +148,7 @@ describe('createRouter', () => {
 			const model = {};
 			const MockClass = utils.makeMockControllerClass(model, TestController);
 			const definition = {
-				paths: (createPathsDefinition(MockClass)).paths
+				paths: createPathsDefinition(MockClass).paths
 			};
 			const routeHandlers = createRouteHandlers(new MockClass(), definition);
 			// @ts-ignore
@@ -179,7 +170,7 @@ describe('createRouter', () => {
 			const model = {};
 			const MockClass = utils.makeMockControllerClass(model, TestController);
 			const definition = {
-				paths: (createPathsDefinition(MockClass)).paths
+				paths: createPathsDefinition(MockClass).paths
 			};
 			const routeHandlers = createRouteHandlers(new MockClass(), definition);
 			// @ts-ignore
