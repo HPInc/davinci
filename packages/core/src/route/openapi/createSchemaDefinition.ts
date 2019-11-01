@@ -1,7 +1,6 @@
 import _fp from 'lodash/fp';
 import { Reflector } from '@davinci/reflector';
-import { ISwaggerDefinitions } from '../types/openapi';
-import { IPropDecoratorMetadata } from '../types';
+import { ISwaggerDefinitions, IPropDecoratorMetadata } from '../types';
 
 export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwaggerDefinitions => {
 	const makeSchema = (typeOrClass, key?) => {

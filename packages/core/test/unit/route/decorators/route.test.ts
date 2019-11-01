@@ -21,11 +21,7 @@ describe('route decorators', () => {
 	describe('verb methods', () => {
 		const createArtifactsAndDecorate = verb => {
 			const decorator = verb === 'delete' ? route.del : route[verb];
-			const MyClass = class {
-				myMethod() {}
-			};
-			sinon.stub(Reflector, 'defineMetadata');
-			sinon.stub(Reflector, 'getMetadata').returns([]);
+
 			const decoratorArgs = {
 				path: '/thepath',
 				description: 'My description',
@@ -33,7 +29,10 @@ describe('route decorators', () => {
 				responses: { '200': {} }
 			};
 
-			decorator(decoratorArgs)(MyClass.prototype, 'myMethod');
+			class MyClass {
+				@decorator(decoratorArgs)
+				myMethod() {}
+			}
 
 			return { decorator, decoratorArgs, MyClass };
 		};
@@ -42,16 +41,16 @@ describe('route decorators', () => {
 			it('should define metadata correctly', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('get');
 
-				// @ts-ignore
-				should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('davinci:openapi:methods');
-				// @ts-ignore
-				should(Reflector.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
+				const methodsMetadata = Reflector.getMetadata('davinci:openapi:methods', MyClass);
+
+				should(methodsMetadata[0]).be.deepEqual({
 					path: decoratorArgs.path,
 					verb: 'get',
 					methodName: 'myMethod',
 					summary: decoratorArgs.summary,
 					description: decoratorArgs.description,
 					responses: decoratorArgs.responses,
+					validation: undefined,
 					handler: MyClass.prototype.myMethod
 				});
 			});
@@ -61,16 +60,16 @@ describe('route decorators', () => {
 			it('should define metadata correctly', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('post');
 
-				// @ts-ignore
-				should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('davinci:openapi:methods');
-				// @ts-ignore
-				should(Reflector.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
+				const methodsMetadata = Reflector.getMetadata('davinci:openapi:methods', MyClass);
+
+				should(methodsMetadata[0]).be.deepEqual({
 					path: decoratorArgs.path,
 					verb: 'post',
 					methodName: 'myMethod',
 					summary: decoratorArgs.summary,
 					description: decoratorArgs.description,
 					responses: decoratorArgs.responses,
+					validation: undefined,
 					handler: MyClass.prototype.myMethod
 				});
 			});
@@ -80,16 +79,16 @@ describe('route decorators', () => {
 			it('should define metadata correctly', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('put');
 
-				// @ts-ignore
-				should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('davinci:openapi:methods');
-				// @ts-ignore
-				should(Reflector.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
+				const methodsMetadata = Reflector.getMetadata('davinci:openapi:methods', MyClass);
+
+				should(methodsMetadata[0]).be.deepEqual({
 					path: decoratorArgs.path,
 					verb: 'put',
 					methodName: 'myMethod',
 					summary: decoratorArgs.summary,
 					description: decoratorArgs.description,
 					responses: decoratorArgs.responses,
+					validation: undefined,
 					handler: MyClass.prototype.myMethod
 				});
 			});
@@ -99,16 +98,16 @@ describe('route decorators', () => {
 			it('should define metadata correctly', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('patch');
 
-				// @ts-ignore
-				should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('davinci:openapi:methods');
-				// @ts-ignore
-				should(Reflector.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
+				const methodsMetadata = Reflector.getMetadata('davinci:openapi:methods', MyClass);
+
+				should(methodsMetadata[0]).be.deepEqual({
 					path: decoratorArgs.path,
 					verb: 'patch',
 					methodName: 'myMethod',
 					summary: decoratorArgs.summary,
 					description: decoratorArgs.description,
 					responses: decoratorArgs.responses,
+					validation: undefined,
 					handler: MyClass.prototype.myMethod
 				});
 			});
@@ -118,16 +117,16 @@ describe('route decorators', () => {
 			it('should define metadata correctly', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('delete');
 
-				// @ts-ignore
-				should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('davinci:openapi:methods');
-				// @ts-ignore
-				should(Reflector.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
+				const methodsMetadata = Reflector.getMetadata('davinci:openapi:methods', MyClass);
+
+				should(methodsMetadata[0]).be.deepEqual({
 					path: decoratorArgs.path,
 					verb: 'delete',
 					methodName: 'myMethod',
 					summary: decoratorArgs.summary,
 					description: decoratorArgs.description,
 					responses: decoratorArgs.responses,
+					validation: undefined,
 					handler: MyClass.prototype.myMethod
 				});
 			});
@@ -137,16 +136,16 @@ describe('route decorators', () => {
 			it('should define metadata correctly', () => {
 				const { decoratorArgs, MyClass } = createArtifactsAndDecorate('head');
 
-				// @ts-ignore
-				should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('davinci:openapi:methods');
-				// @ts-ignore
-				should(Reflector.defineMetadata.getCall(0).args[1][0]).be.deepEqual({
+				const methodsMetadata = Reflector.getMetadata('davinci:openapi:methods', MyClass);
+
+				should(methodsMetadata[0]).be.deepEqual({
 					path: decoratorArgs.path,
 					verb: 'head',
 					methodName: 'myMethod',
 					summary: decoratorArgs.summary,
 					description: decoratorArgs.description,
 					responses: decoratorArgs.responses,
+					validation: undefined,
 					handler: MyClass.prototype.myMethod
 				});
 			});
