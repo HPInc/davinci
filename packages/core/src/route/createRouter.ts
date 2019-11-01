@@ -280,7 +280,7 @@ export const createRouteHandlers = (
 			controller,
 			method.methodName,
 			definition.definitions,
-			validationOptions[method.path][method.verb],
+			_.get(validationOptions, `[${method.path}][${method.verb}]`, {}) as MethodValidation,
 			contextFactory
 		);
 		routeHandlers.push({ method: method.verb, path, handlers });
