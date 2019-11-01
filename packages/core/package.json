@@ -7,7 +7,7 @@
 	"scripts": {
 		"build": "tsc -p ./tsconfig.release.json",
 		"eslint": "../../node_modules/eslint/bin/eslint.js --c .eslintrc 'src/**/*.ts'",
-		"pretest": "npm run tslint && npm run build",
+		"pretest": "npm run eslint && npm run build",
 		"test": "mocha --exit",
 		"cover": "nyc npm test"
 	},

@@ -4,6 +4,7 @@ export interface ClassType<T = any> {
 	new (...args: any[]): T;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RecursiveArray<TValue> extends Array<RecursiveArray<TValue> | TValue> {}
 
 export type TypeValue = ClassType | Function | object | symbol;
