@@ -2,6 +2,9 @@
 import _ from 'lodash';
 
 export class HttpError extends Error {
+	// https://github.com/Microsoft/TypeScript/issues/13965
+	// tslint:disable-next-line variable-name
+	__proto__: Error;
 
 	code: number;
 
@@ -24,11 +27,14 @@ export class HttpError extends Error {
 	 * @param data {*} response extra, could hold error codes or any relevant information
 	 */
 	constructor(message, name, code, className, data = {}) {
+		const trueProto = new.target.prototype;
 		super(message);
+		// eslint-disable-next-line no-proto
+		this.__proto__ = trueProto;
 
 		this.name = name || 'Error';
-		this.statusCode = code;
 		this.code = code;
+		this.statusCode = code;
 		this.className = className;
 
 		const clonedData: any = _.clone(data);

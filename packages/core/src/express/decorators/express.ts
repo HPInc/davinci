@@ -44,7 +44,7 @@ type Stage = 'before' | 'after';
  * @param stage
  */
 const middleware = (middlewareFunction, stage: Stage = 'before'): Function => {
-	return function(target: Record<string, any> | Function, methodName: string | symbol) {
+	return function(target: Record<string, any> | Function, methodName: string) {
 		const args: {
 			middlewareFunction: Function;
 			stage: Stage;
@@ -89,7 +89,7 @@ export { middleware };
  * @param value
  */
 export const header = (name: string, value: string) => {
-	return function(prototype: Record<string, any>, methodName: string | symbol) {
+	return function(prototype: Record<string, any>, methodName: string) {
 		const meta: IHeaderDecoratorMetadata = { name, value, handler: prototype[methodName] };
 		// define new metadata methods
 		Reflector.unshiftMetadata('davinci:express:method-response-header', meta, prototype.constructor);

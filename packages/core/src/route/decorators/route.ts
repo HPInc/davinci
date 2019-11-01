@@ -24,7 +24,7 @@ interface IMethodDecoratorOptions {
  */
 export const createRouteMethodDecorator = verb =>
 	function({ path, summary, description, responses }: IMethodDecoratorOptions): Function {
-		return function(prototype: Record<string, any>, methodName: string | symbol) {
+		return function(prototype: Record<string, any>, methodName: string) {
 			// get the existing metadata props
 			const methods = Reflector.getMetadata('davinci:openapi:methods', prototype.constructor) || [];
 			const meta = { path, verb, methodName, summary, description, responses, handler: prototype[methodName] };
