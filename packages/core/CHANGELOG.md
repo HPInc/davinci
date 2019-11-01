@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.9.1](https://github.com/Oneflow/davinci/compare/@davinci/core@0.9.0...@davinci/core@0.9.1) (2019-11-01)
+
+
+### Bug Fixes
+
+* **validation:** safer check for validationOptions ([b51ced2](https://github.com/Oneflow/davinci/commit/b51ced2))
+
+
+
+
+
 # [0.9.0](https://github.com/Oneflow/davinci/compare/@davinci/core@0.8.2...@davinci/core@0.9.0) (2019-11-01)
 
 

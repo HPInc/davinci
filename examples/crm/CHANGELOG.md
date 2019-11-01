@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.4](https://github.com/Oneflow/davinci/compare/crm@0.8.3...crm@0.8.4) (2019-11-01)
+
+**Note:** Version bump only for package crm
+
+
+
+
+
 ## [0.8.3](https://github.com/Oneflow/davinci/compare/crm@0.8.2...crm@0.8.3) (2019-11-01)
 
 **Note:** Version bump only for package crm
