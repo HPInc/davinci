@@ -1,7 +1,13 @@
 import _ from 'lodash';
 import _fp from 'lodash/fp';
 import { Reflector } from '@davinci/reflector';
-import { IMethodParameter, PathsDefinition, ISwaggerDefinitions } from '../types/openapi';
+import {
+	IMethodParameter,
+	PathsDefinition,
+	PathsValidationOptions,
+	ISwaggerDefinitions,
+	IMethodDecoratorMetadata
+} from '../types';
 import { IControllerDecoratorArgs } from '../decorators/route';
 import { getSchemaDefinition } from './createSchemaDefinition';
 
@@ -27,14 +33,19 @@ const getParameterDefinition = methodParameterConfig => {
 	return { paramDefinition };
 };
 
-const createPathsDefinition = (theClass: Function): { paths: PathsDefinition; definitions: ISwaggerDefinitions } => {
+const createPathsDefinition = (
+	theClass: Function
+): {
+	paths: PathsDefinition;
+	definitions: ISwaggerDefinitions;
+	validationOptions: PathsValidationOptions;
+} => {
 	const controllerMetadata: IControllerDecoratorArgs =
 		Reflector.getMetadata('davinci:openapi:controller', theClass) || {};
-	// if (!controllerMetadata) throw new Error('Invalid Class. It must be decorated as controller');
 	const { excludedMethods = [] } = controllerMetadata;
-	const methods = (Reflector.getMetadata('davinci:openapi:methods', theClass.prototype.constructor) || []).filter(
-		({ methodName }) => !excludedMethods.includes(methodName)
-	);
+	const methods: IMethodDecoratorMetadata[] = (
+		Reflector.getMetadata('davinci:openapi:methods', theClass.prototype.constructor) || []
+	).filter(({ methodName }) => !excludedMethods.includes(methodName));
 	const contextMetadata: IControllerDecoratorArgs = Reflector.getMetadata(
 		'davinci:context',
 		theClass.prototype.constructor
@@ -48,7 +59,7 @@ const createPathsDefinition = (theClass: Function): { paths: PathsDefinition; de
 	return _.reduce(
 		methods,
 		(acc, method) => {
-			const { methodName, path, verb, summary, description, responses } = method;
+			const { methodName, path, verb, summary, description, responses, validation } = method;
 			const parameters = _.filter(methodParameters, { methodName })
 				.map(getParameterDefinition)
 				.map(({ paramDefinition, definitions = {} }) => {
@@ -58,13 +69,13 @@ const createPathsDefinition = (theClass: Function): { paths: PathsDefinition; de
 
 			const resps = responses
 				? _.mapValues(responses, response => {
-					if (typeof response === 'function') {
-						const { definitions: defs, schema } = getSchemaDefinition(response);
-						acc.definitions = { ...acc.definitions, ...defs };
-						return { schema };
-					}
+						if (typeof response === 'function') {
+							const { definitions: defs, schema } = getSchemaDefinition(response);
+							acc.definitions = { ...acc.definitions, ...defs };
+							return { schema };
+						}
 
-					return response;
+						return response;
 				  })
 				: { 200: { description: 'Success' } };
 
@@ -76,9 +87,11 @@ const createPathsDefinition = (theClass: Function): { paths: PathsDefinition; de
 				responses: resps
 			});
 
+			_.set(acc.validationOptions, `${path}.${verb}`, validation || {});
+
 			return acc;
 		},
-		{ paths: {}, definitions: {} }
+		{ paths: {}, definitions: {}, validationOptions: {} }
 	);
 };
 

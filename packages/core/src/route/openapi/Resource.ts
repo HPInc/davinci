@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { ISwaggerDefinitions, PathsDefinition } from '../types/openapi';
+import { ISwaggerDefinitions, PathsDefinition } from '../types';
 
 class Resource {
 	resourceName: string;
