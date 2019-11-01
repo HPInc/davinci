@@ -16,7 +16,7 @@ export interface ISwaggerDefinitions {
 export interface ISchema {
 	$ref?: string;
 	type?: string;
-	[key: string]: any;
+	[key: string]: unknown;
 }
 
 export interface IMethodParameterBase {

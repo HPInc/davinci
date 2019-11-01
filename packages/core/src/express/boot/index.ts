@@ -3,9 +3,11 @@ import requireDir from 'require-dir';
 import _ from 'lodash';
 import path from 'path';
 import Promise from 'bluebird';
-const fs = Promise.promisifyAll(require('fs'));
+import fsModule from 'fs';
 
-const debug = Debug('of-base-api');
+const fs = Promise.promisifyAll(fsModule);
+
+const debug = new Debug('of-base-api');
 
 export const checkAndAssignBootDir = options => {
 	// create an array of boot paths
@@ -49,7 +51,7 @@ export const execBootScripts = (app, options) => {
 	});
 
 	// execute them
-	return Promise.map(bootScripts, (script:any, i) => {
+	return Promise.map(bootScripts, (script: any, i) => {
 		debug(`Executing script ${i}`);
 		if (script.default) {
 			return script.default(app);

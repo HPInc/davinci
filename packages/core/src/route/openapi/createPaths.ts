@@ -1,12 +1,12 @@
 import _ from 'lodash';
 import _fp from 'lodash/fp';
 import { Reflector } from '@davinci/reflector';
-import { IMethodParameter, PathsDefinition, ISwaggerDefinitions } from '../types/openapi';
+import { PathsDefinition, ISwaggerDefinitions } from '../types/openapi';
 import { IControllerDecoratorArgs } from '../decorators/route';
 import { getSchemaDefinition } from './createSchemaDefinition';
 
 const getParameterDefinition = methodParameterConfig => {
-	const options: IMethodParameter = methodParameterConfig.options;
+	const { options } = methodParameterConfig;
 	const paramDefinition = { ...options };
 	// handling special parameters
 	if (['context', 'req', 'res'].includes(methodParameterConfig.type)) {
@@ -18,8 +18,8 @@ const getParameterDefinition = methodParameterConfig => {
 				...schema
 			};
 		} else {
-			const { schema, definitions } = getSchemaDefinition(methodParameterConfig.type);
-			paramDefinition.schema = schema;
+			const { schema: s, definitions } = getSchemaDefinition(methodParameterConfig.type);
+			paramDefinition.schema = s;
 
 			return { paramDefinition, definitions };
 		}
@@ -27,14 +27,16 @@ const getParameterDefinition = methodParameterConfig => {
 	return { paramDefinition };
 };
 
-const createPathsDefinition = (theClass: Function): { paths: PathsDefinition; definitions: ISwaggerDefinitions } => {
+const createPathsDefinition = (
+	theClass: Function
+): { paths: PathsDefinition; definitions: ISwaggerDefinitions } => {
 	const controllerMetadata: IControllerDecoratorArgs =
 		Reflector.getMetadata('davinci:openapi:controller', theClass) || {};
 	// if (!controllerMetadata) throw new Error('Invalid Class. It must be decorated as controller');
 	const { excludedMethods = [] } = controllerMetadata;
-	const methods = (Reflector.getMetadata('davinci:openapi:methods', theClass.prototype.constructor) || []).filter(
-		({ methodName }) => !excludedMethods.includes(methodName)
-	);
+	const methods = (
+		Reflector.getMetadata('davinci:openapi:methods', theClass.prototype.constructor) || []
+	).filter(({ methodName }) => !excludedMethods.includes(methodName));
 	const contextMetadata: IControllerDecoratorArgs = Reflector.getMetadata(
 		'davinci:context',
 		theClass.prototype.constructor
@@ -58,13 +60,13 @@ const createPathsDefinition = (theClass: Function): { paths: PathsDefinition; de
 
 			const resps = responses
 				? _.mapValues(responses, response => {
-					if (typeof response === 'function') {
-						const { definitions: defs, schema } = getSchemaDefinition(response);
-						acc.definitions = { ...acc.definitions, ...defs };
-						return { schema };
-					}
+						if (typeof response === 'function') {
+							const { definitions: defs, schema } = getSchemaDefinition(response);
+							acc.definitions = { ...acc.definitions, ...defs };
+							return { schema };
+						}
 
-					return response;
+						return response;
 				  })
 				: { 200: { description: 'Success' } };
 

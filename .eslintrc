@@ -1,21 +1,78 @@
 {
-	"extends": "airbnb-base",
-	"rules": {
-		"comma-dangle": [2, "never"],
-		"arrow-parens": [2, "as-needed"],
-		"linebreak-style": 0,
-		"padded-blocks": 0,
-		"indent": [1, "tab"],
-		"no-underscore-dangle": [2, { "allow": ["_id", "__v"] } ],
-		"no-param-reassign": [2, { "props": false }],
-		"new-cap": [2, { "capIsNewExceptions": ["Router", "ObjectId"] }],
-		"no-tabs": 0,
-		"max-len": [1, 150], // extended
-		"no-plusplus": 0, // disabled
-		"class-methods-use-this": 0, // disabled
-		"arrow-body-style": 0
+	"extends": [
+		"airbnb-base",
+		"eslint:recommended",
+		"plugin:@typescript-eslint/eslint-recommended",
+		"plugin:@typescript-eslint/recommended",
+		"prettier",
+		"prettier/@typescript-eslint"
+	],
+	"plugins": ["@typescript-eslint"],
+	"parser": "@typescript-eslint/parser",
+	"parserOptions": {
+		"project": "./tsconfig.json",
+		"ecmaVersion": 2018,
+		"sourceType": "module"
 	},
 	"env": {
-		"node": true
+		"es6": true,
+		"node": true,
+		"mocha": true
+	},
+	"rules": {
+		// only apply parens to arrow functions when there are multiple args
+		"arrow-parens": [2, "as-needed"],
+
+		// never have trailing commas
+		"comma-dangle": [2, "never"],
+
+		// always indent with one tab, including switch statements
+		"indent": [1, "tab", { "SwitchCase": 1 }],
+
+		// do not error on linebreak style
+		"linebreak-style": 0,
+
+		// warn for any line over 120 chars
+		"max-len": [1, 120],
+
+		// class constructors must start with a capital letter, allows Router and Object ID without 'new'
+		"new-cap": [2, { "capIsNewExceptions": ["Router", "ObjectId"] }],
+
+		// don't allow modification of any input parameters
+		"no-param-reassign": [2, { "props": false }],
+
+		// allow the ++ operator
+		"no-plusplus": 0,
+
+		// disallow underscore dangle with the exceptions '_id' & '__v'
+		"no-underscore-dangle": [2, { "allow": ["_id", "__v"] }],
+
+		// allow tabs!
+		"no-tabs": 0,
+
+		// allow objects to be defined on a single line
+		"object-curly-newline": 0,
+
+		// use object shorthand wherever possible
+		"object-shorthand": ["error", "always"],
+
+		// allow indentation regardless of blank lines above and below
+		"padded-blocks": 0,
+
+		// ensure properties are either consistently in / without qutoes as needed
+		"quote-props": [2, "consistent-as-needed"],
+
+		"@typescript-eslint/interface-name-prefix": 0,
+
+		"@typescript-eslint/ban-ts-ignore": 1,
+
+		"import/prefer-default-export": 0
+	},
+	"settings": {
+		"import/resolver": {
+			"node": {
+				"extensions": [".js", ".jsx", ".ts", ".tsx"]
+			}
+		}
 	}
 }

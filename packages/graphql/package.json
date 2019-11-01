@@ -28,7 +28,6 @@
 		"@types/graphql": "14.2.3",
 		"@types/mocha": "^5.2.6",
 		"tslib": "^1.9.3",
-		"tslint": "^5.16.0",
 		"typescript": "^3.4.5"
 	}
 }

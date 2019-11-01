@@ -6,7 +6,7 @@ import { IPropDecoratorOptions, IPropDecoratorOptionsFactory, IPropDecoratorMeta
  * @param {IPropDecoratorOptions} opts
  */
 export function prop(opts?: IPropDecoratorOptions | IPropDecoratorOptionsFactory) {
-	return function(prototype: Object, key: string): void {
+	return function(prototype: Record<string, any>, key: string): void {
 		const optsFactory = () => {
 			const options = typeof opts === 'function' ? opts() : opts;
 			if (options && !options.type && !options.typeFactory) {
@@ -23,10 +23,10 @@ export function prop(opts?: IPropDecoratorOptions | IPropDecoratorOptionsFactory
 /**
  * It annotates a class.
  * Its definition will be added in the `definitions` property
- * @param definition
+ * @param options
  */
-export function definition(definition?: { title }) {
+export function definition(options?: { title }) {
 	return function(target: Function): void {
-		Reflector.defineMetadata('davinci:openapi:definition', definition, target);
+		Reflector.defineMetadata('davinci:openapi:definition', options, target);
 	};
 }

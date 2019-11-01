@@ -24,7 +24,7 @@ interface IMethodDecoratorOptions {
  */
 export const createRouteMethodDecorator = verb =>
 	function({ path, summary, description, responses }: IMethodDecoratorOptions): Function {
-		return function(prototype: Object, methodName: string | symbol) {
+		return function(prototype: Record<string, any>, methodName: string | symbol) {
 			// get the existing metadata props
 			const methods = Reflector.getMetadata('davinci:openapi:methods', prototype.constructor) || [];
 			const meta = { path, verb, methodName, summary, description, responses, handler: prototype[methodName] };
@@ -51,7 +51,7 @@ export const head = createRouteMethodDecorator('head');
  * @param options
  */
 export function param(options: IMethodParameter): Function {
-	return function(prototype: Object, methodName: string, index) {
+	return function(prototype: Record<string, any>, methodName: string, index) {
 		// get the existing metadata props
 		const methodParameters = Reflector.getMetadata('davinci:openapi:method-parameters', prototype.constructor) || [];
 		const paramtypes = Reflector.getMetadata('design:paramtypes', prototype, methodName);

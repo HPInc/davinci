@@ -7,15 +7,15 @@ import Promise from 'bluebird';
 import path from 'path';
 import { ClassType, Reflector } from '@davinci/reflector';
 import { DaVinciRequest, IHeaderDecoratorMetadata } from '../express/types';
-import * as errors from '../errors/httpErrors';
+import * as httpErrors from '../errors/httpErrors';
 import * as openapiDocs from './openapi/openapiDocs';
 import createPaths from './openapi/createPaths';
 import createSchemaDefinition from './openapi/createSchemaDefinition';
 import { IControllerDecoratorArgs } from './decorators/route';
 
-const { NotImplemented, BadRequest } = errors;
+const { NotImplemented, BadRequest } = httpErrors;
 
-const debug = Debug('of-base-api');
+const debug = new Debug('of-base-api');
 
 const convertRefPaths = schema => {
 	if (Array.isArray(schema)) {
@@ -56,8 +56,8 @@ const performAjvValidation = ({ value, config: cfg, definitions }) => {
 	};
 	const data = { [config.name]: value };
 
-	_.forEach(definitions, (schema, name) => {
-		const parsedSchema = convertRefPaths(schema);
+	_.forEach(definitions, (theSchema, name) => {
+		const parsedSchema = convertRefPaths(theSchema);
 		ajv.addSchema(parsedSchema, name);
 	});
 
@@ -252,7 +252,7 @@ export const createRouteHandlers = (
 		if (!controller[method.methodName] || !operation) return;
 
 		// convert it from swagger {param} format to express :param format
-		const path = method.path.replace(/{(.*?)}/gi, ':$1');
+		const expressPath = method.path.replace(/{(.*?)}/gi, ':$1');
 
 		// create the handler function
 		const handlers = makeHandlerFunction(
@@ -262,12 +262,12 @@ export const createRouteHandlers = (
 			definition.definitions,
 			contextFactory
 		);
-		routeHandlers.push({ method: method.verb, path, handlers });
+		routeHandlers.push({ method: method.verb, path: expressPath, handlers });
 	});
 	return routeHandlers;
 };
 
-const validateController = (Controller: ClassType) => {
+const validateController = (Controller: ClassType): void => {
 	if (!Controller) throw new Error('Invalid Controller - missing Controller');
 	if (typeof Controller !== 'function') throw new Error('Invalid Controller - not function');
 };
@@ -287,8 +287,8 @@ const createRouterAndSwaggerDoc = (
 	const metadata: IControllerDecoratorArgs =
 		Reflector.getMetadata('davinci:openapi:controller', Controller) || {};
 	const basepath = metadata.basepath || '';
-	const resourceSchema = metadata.resourceSchema;
-	const additionalSchemas = metadata.additionalSchemas;
+	const { resourceSchema } = metadata;
+	const { additionalSchemas } = metadata;
 
 	// create the controller from the supplied class
 	const controller = new Controller();
