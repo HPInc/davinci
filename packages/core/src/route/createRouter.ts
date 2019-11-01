@@ -27,7 +27,7 @@ const transformDefinitionToValidAJVSchemas = (schema, validationOptions: MethodV
 		return _.reduce(
 			schema,
 			(acc, value, key) => {
-				if (key === 'required' && validationOptions.partial) {
+				if (key === 'required' && validationOptions && validationOptions.partial) {
 					return acc;
 				}
 
@@ -62,7 +62,7 @@ const performAjvValidation = ({ value, config: cfg, definitions, validationOptio
 		removeAdditional: 'all'
 	});
 	let required = [];
-	if (!validationOptions.partial && config.required) {
+	if (!(validationOptions && validationOptions.partial) && config.required) {
 		required = [config.name];
 	}
 	const schema = {

@@ -15,7 +15,7 @@ export const READ_HOOKS = [
 	'updateMany'
 ];
 
-const WRITE_HOOKS = ['findOneAndUpdate', 'save', 'update', 'updateMany'];
+const WRITE_HOOKS = ['findOneAndUpdate', 'save', 'validate', 'update', 'updateMany'];
 
 const DELETE_HOOKS = ['deleteMany', 'findOneAndDelete', 'findOneAndRemove'];
 
