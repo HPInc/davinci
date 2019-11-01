@@ -32,6 +32,9 @@ const createRegisterHooks = (hooksList, stage) => (mongooseSchema, handler) => {
 
 	return hooksList.forEach(hook =>
 		mongooseSchema[stage](hook, async function() {
+			if (this.setOptions) {
+				this.setOptions({ runValidators: true });
+			}
 			const args = [hook];
 			if (hasContextInOptions(hook)) {
 				args.unshift(this.options.context);
