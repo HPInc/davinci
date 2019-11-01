@@ -29,6 +29,7 @@ export const getSchemaDefinition = (theClass: Function) => {
 
 		const isArray = Array.isArray(type) || type.name === 'Array';
 		if (isArray && type.length > 0) {
+			// eslint-disable-next-line prefer-destructuring
 			type = type[0];
 		}
 
@@ -115,10 +116,10 @@ export const generateSchema = (
 	schema.methods = methods;
 	schema.statics = statics;
 	if (indexes.length > 0) {
-		indexes.forEach(({ index, options }) => schema.index(index, options));
+		indexes.forEach(({ index, options: o }) => schema.index(index, o));
 	}
 	virtuals.forEach(({ name, handler }) => schema.virtual(name, handler));
-	populates.forEach(({ name, options }) => schema.virtual(name, options));
+	populates.forEach(({ name, options: o }) => schema.virtual(name, o));
 
 	return schema;
 };

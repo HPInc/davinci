@@ -37,6 +37,7 @@ const createRegisterHooks = (hooksList, stage) => (mongooseSchema, handler) => {
 				args.unshift(this.options.context);
 			}
 			if (hasContextinSaveOptions(hook)) {
+				// eslint-disable-next-line no-underscore-dangle
 				args.unshift(_.get(this.$__.saveOptions, 'context'));
 			}
 			return handler(this, ...args);

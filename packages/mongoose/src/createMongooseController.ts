@@ -1,3 +1,4 @@
+// eslint-disable-next-line max-classes-per-file
 import _ from 'lodash';
 import bluebird from 'bluebird';
 import { context, route, httpErrors as errors, openapi } from '@davinci/core';
@@ -92,6 +93,7 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 
 	class MongooseController implements IMongooseController {
 		maxLimit: number;
+
 		defaultQueryParams: { $limit: number; $skip: number };
 
 		constructor(protected model = Model) {
@@ -103,10 +105,10 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 		}
 
 		@route.get({ path: '/', summary: 'List', responses: { 200: ListResponseSchema } })
-		public async find(@route.query() query: QueryParameters, @context() context) {
+		public async find(@route.query() query: QueryParameters, @context() ctx) {
 			if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
-			const { limit, skip, sort, select, populate, where } = this.parseQuery(query, context);
-			const mQuery = this.model.find(where, select, { limit, skip, sort, context });
+			const { limit, skip, sort, select, populate, where } = this.parseQuery(query, ctx);
+			const mQuery = this.model.find(where, select, { limit, skip, sort, context: ctx });
 
 			const [data, total] = await bluebird.all([
 				populate ? mQuery.populate(populate) : mQuery,
@@ -121,10 +123,10 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 			};
 		}
 
-		public async findOne(@route.query() query, @context() context) {
+		public async findOne(@route.query() query, @context() ctx) {
 			if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 			const { sort, select, populate, where } = this.parseQuery(query);
-			const mQuery = this.model.findOne(where, select, { sort, context });
+			const mQuery = this.model.findOne(where, select, { sort, context: ctx });
 			if (populate) {
 				mQuery.populate(populate);
 			}
@@ -140,19 +142,19 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 		@route.get({ path: '/:id', summary: 'Fetch by id', responses: { 200: RSchema } })
 		public async findById(
 			@route.path()
-			id: string,
+				id: string,
 			@route.param({ name: 'query', in: 'query' }) query: QueryParameters,
-			@context() context
+			@context() ctx
 		) {
 			if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 
-			return this.findOne({ ...query, _id: id }, context);
+			return this.findOne({ ...query, _id: id }, ctx);
 		}
 
 		@route.post({ path: '/', summary: 'Create', responses: { 200: RSchema } })
-		public async create(@route.body() data: RSchema, @context() context) {
+		public async create(@route.body() data: RSchema, @context() ctx) {
 			if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
-			const [record] = await this.model.create([data], { context });
+			const [record] = await this.model.create([data], { context: ctx });
 
 			return record;
 		}
@@ -160,16 +162,16 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 		@route.patch({ path: '/:id', summary: 'Update', responses: { 200: RSchema } })
 		public async updateById(
 			@route.path()
-			id: string,
+				id: string,
 			@route.body() data: RSchema,
-			@context() context
+			@context() ctx
 		) {
 			if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 			const updated = await this.model.findOneAndUpdate({ _id: id }, data, {
 				new: true,
 				runValidators: true,
 				setDefaultsOnInsert: true,
-				context
+				ctx
 			});
 
 			if (!updated) {
@@ -180,9 +182,9 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 		}
 
 		@route.del({ path: '/:id', summary: 'Delete', responses: { 200: RSchema } })
-		public async deleteById(@route.path() id: string, @context() context) {
+		public async deleteById(@route.path() id: string, @context() ctx) {
 			if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
-			const removed = await this.model.findOneAndDelete({ _id: id }, { context });
+			const removed = await this.model.findOneAndDelete({ _id: id }, { context: ctx });
 
 			if (!removed) {
 				throw new errors.NotFound();
@@ -198,7 +200,7 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 		 * @param qry
 		 * @param context
 		 */
-		protected parseQuery(qry, context?: any): IParsedMongooseFilters {
+		protected parseQuery(qry, ctx?: any): IParsedMongooseFilters {
 			const query = _.merge({}, this.defaultQueryParams, qry);
 
 			return _.reduce(
@@ -219,7 +221,7 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 					}
 
 					if (key === '$populate' && value) {
-						const parsedPopulates = this.parsePopulate(value, context);
+						const parsedPopulates = this.parsePopulate(value, ctx);
 
 						return { ...acc, [k]: parsedPopulates };
 					}
@@ -246,7 +248,7 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 		 *
 		 * @return mongoose populate
 		 */
-		protected parsePopulate(populateQuery, context) {
+		protected parsePopulate(populateQuery, ctx) {
 			const populates = Array.isArray(populateQuery) ? populateQuery : [populateQuery];
 
 			return populates.reduce((acc, pop) => {
@@ -258,14 +260,14 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 					query = _.pick(pop, ['$limit', '$skip', '$sort', '$select', '$populate', '$where']);
 					populateArgs.path = pop.path;
 				}
-				const { limit, skip, sort, select, populate, where } = this.parseQuery(query, context);
+				const { limit, skip, sort, select, populate, where } = this.parseQuery(query, ctx);
 
 				acc.push(
 					_.merge(populateArgs, {
 						match: where,
 						populate,
 						select,
-						options: { limit, skip, sort, context }
+						options: { limit, skip, sort, context: ctx }
 					})
 				);
 

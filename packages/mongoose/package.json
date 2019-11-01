@@ -9,8 +9,7 @@
 	"types": "build/index.d.ts",
 	"scripts": {
 		"build": "tsc -p ./tsconfig.release.json",
-		"tslint": "tslint -t stylish --project \"tsconfig.json\" '{src,test}/**/*{.ts,.tsx}'",
-		"tslintfix": "tslint --fix -c ../../tslint.json '{src,test}/**/*{.ts,.tsx}'",
+		"eslint": "../../node_modules/eslint/bin/eslint.js --c .eslintrc 'src/**/*.ts'",
 		"pretest": "npm run tslint && npm run build",
 		"test": "mocha --exit",
 		"cover": "nyc npm test"
@@ -21,6 +20,7 @@
 	"dependencies": {
 		"@davinci/core": "^0.8.2",
 		"@davinci/reflector": "^0.7.0",
+		"bluebird": "3.7.1",
 		"debug": "^4.1.1",
 		"lodash": "^4.17.11"
 	},
