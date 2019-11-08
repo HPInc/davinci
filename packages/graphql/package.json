@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/graphql",
-	"version": "0.8.2",
+	"version": "0.8.4",
 	"description": "Framework for rapid and consistent API development",
 	"main": "build/index.js",
 	"types": "build/index.d.ts",
@@ -14,7 +14,7 @@
 	"author": "Oneflow Systems (http://www.oneflowsystems.com/)",
 	"license": "ISC",
 	"dependencies": {
-		"@davinci/core": "^0.8.2",
+		"@davinci/core": "^0.9.1",
 		"@davinci/reflector": "^0.7.0",
 		"bluebird": "3.5.0",
 		"debug": "^4.1.1",

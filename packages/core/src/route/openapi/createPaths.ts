@@ -1,12 +1,18 @@
 import _ from 'lodash';
 import _fp from 'lodash/fp';
 import { Reflector } from '@davinci/reflector';
-import { PathsDefinition, ISwaggerDefinitions } from '../types/openapi';
+import {
+	IMethodParameter,
+	PathsDefinition,
+	PathsValidationOptions,
+	ISwaggerDefinitions,
+	IMethodDecoratorMetadata
+} from '../types';
 import { IControllerDecoratorArgs } from '../decorators/route';
 import { getSchemaDefinition } from './createSchemaDefinition';
 
 const getParameterDefinition = methodParameterConfig => {
-	const { options } = methodParameterConfig;
+	const options: IMethodParameter = methodParameterConfig.options;
 	const paramDefinition = { ...options };
 	// handling special parameters
 	if (['context', 'req', 'res'].includes(methodParameterConfig.type)) {
@@ -18,8 +24,8 @@ const getParameterDefinition = methodParameterConfig => {
 				...schema
 			};
 		} else {
-			const { schema: s, definitions } = getSchemaDefinition(methodParameterConfig.type);
-			paramDefinition.schema = s;
+			const { schema, definitions } = getSchemaDefinition(methodParameterConfig.type);
+			paramDefinition.schema = schema;
 
 			return { paramDefinition, definitions };
 		}
@@ -29,12 +35,15 @@ const getParameterDefinition = methodParameterConfig => {
 
 const createPathsDefinition = (
 	theClass: Function
-): { paths: PathsDefinition; definitions: ISwaggerDefinitions } => {
+): {
+	paths: PathsDefinition;
+	definitions: ISwaggerDefinitions;
+	validationOptions: PathsValidationOptions;
+} => {
 	const controllerMetadata: IControllerDecoratorArgs =
 		Reflector.getMetadata('davinci:openapi:controller', theClass) || {};
-	// if (!controllerMetadata) throw new Error('Invalid Class. It must be decorated as controller');
 	const { excludedMethods = [] } = controllerMetadata;
-	const methods = (
+	const methods: IMethodDecoratorMetadata[] = (
 		Reflector.getMetadata('davinci:openapi:methods', theClass.prototype.constructor) || []
 	).filter(({ methodName }) => !excludedMethods.includes(methodName));
 	const contextMetadata: IControllerDecoratorArgs = Reflector.getMetadata(
@@ -50,7 +59,7 @@ const createPathsDefinition = (
 	return _.reduce(
 		methods,
 		(acc, method) => {
-			const { methodName, path, verb, summary, description, responses } = method;
+			const { methodName, path, verb, summary, description, responses, validation } = method;
 			const parameters = _.filter(methodParameters, { methodName })
 				.map(getParameterDefinition)
 				.map(({ paramDefinition, definitions = {} }) => {
@@ -78,9 +87,11 @@ const createPathsDefinition = (
 				responses: resps
 			});
 
+			_.set(acc.validationOptions, `${path}.${verb}`, validation || {});
+
 			return acc;
 		},
-		{ paths: {}, definitions: {} }
+		{ paths: {}, definitions: {}, validationOptions: {} }
 	);
 };
 

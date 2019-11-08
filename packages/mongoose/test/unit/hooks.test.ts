@@ -214,14 +214,15 @@ describe('mongoose hooks', () => {
 		it('should correctly trigger the hook when `save` method is called', async () => {
 			const customer = new CustomerModel();
 			await customer.save({ context });
-			should(callback.callCount).be.equal(1);
+			should(callback.callCount).be.equal(2);
 			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Model);
 			should(callback.getCall(0).args[1]).be.deepEqual(context);
-			should(callback.getCall(0).args[2]).be.equal('save');
+			should(callback.getCall(0).args[2]).be.equal('validate');
+			should(callback.getCall(1).args[2]).be.equal('save');
 		});
 
 		it('should correctly trigger the hook when `update` method is called', async () => {
-			await CustomerModel.update({}, {}, { context });
+			await CustomerModel.update({}, {}, { runValidators: true, context });
 			should(callback.callCount).be.equal(1);
 			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
 			// should(callback.getCall(0).args[1]).be.equal(context);
@@ -258,10 +259,11 @@ describe('mongoose hooks', () => {
 		it('should correctly trigger the hook when `save` method is called', async () => {
 			const customer = new CustomerModel();
 			await customer.save({ context });
-			should(callback.callCount).be.equal(1);
+			should(callback.callCount).be.equal(2);
 			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Model);
 			should(callback.getCall(0).args[1]).be.deepEqual(context);
-			should(callback.getCall(0).args[2]).be.equal('save');
+			should(callback.getCall(0).args[2]).be.equal('validate');
+			should(callback.getCall(1).args[2]).be.equal('save');
 		});
 
 		it('should correctly trigger the hook when `update` method is called', async () => {

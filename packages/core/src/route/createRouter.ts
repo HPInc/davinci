@@ -7,29 +7,34 @@ import Promise from 'bluebird';
 import path from 'path';
 import { ClassType, Reflector } from '@davinci/reflector';
 import { DaVinciRequest, IHeaderDecoratorMetadata } from '../express/types';
-import * as httpErrors from '../errors/httpErrors';
+import * as errors from '../errors/httpErrors';
 import * as openapiDocs from './openapi/openapiDocs';
 import createPaths from './openapi/createPaths';
 import createSchemaDefinition from './openapi/createSchemaDefinition';
 import { IControllerDecoratorArgs } from './decorators/route';
+import { ISchema, ISwaggerDefinitions, MethodValidation, PathsValidationOptions } from './types';
 
-const { NotImplemented, BadRequest } = httpErrors;
+const { NotImplemented, BadRequest } = errors;
 
-const debug = new Debug('of-base-api');
+const debug = Debug('of-base-api');
 
-const convertRefPaths = schema => {
+const transformDefinitionToValidAJVSchemas = (schema, validationOptions: MethodValidation) => {
 	if (Array.isArray(schema)) {
-		return schema.map(convertRefPaths);
+		return schema.map(s => transformDefinitionToValidAJVSchemas(s, validationOptions));
 	}
 
 	if (typeof schema === 'object') {
 		return _.reduce(
 			schema,
 			(acc, value, key) => {
+				if (key === 'required' && validationOptions && validationOptions.partial) {
+					return acc;
+				}
+
 				if (key === '$ref') {
 					acc[key] = (value || '').replace(/#\/definitions\//, '');
 				} else {
-					acc[key] = convertRefPaths(value);
+					acc[key] = transformDefinitionToValidAJVSchemas(value, validationOptions);
 				}
 
 				return acc;
@@ -41,23 +46,34 @@ const convertRefPaths = schema => {
 	return schema;
 };
 
-const performAjvValidation = ({ value, config: cfg, definitions }) => {
-	const config = convertRefPaths(cfg);
+type ProcessMethodParameters = {
+	value: any;
+	config: ISchema;
+	definitions: ISwaggerDefinitions;
+	validationOptions: MethodValidation;
+};
+
+const performAjvValidation = ({ value, config: cfg, definitions, validationOptions }: ProcessMethodParameters) => {
+	const config = transformDefinitionToValidAJVSchemas(cfg, validationOptions);
 	const ajv = new Ajv({
 		allErrors: true,
 		coerceTypes: true,
 		useDefaults: true,
 		removeAdditional: 'all'
 	});
+	let required = [];
+	if (!(validationOptions && validationOptions.partial) && config.required) {
+		required = [config.name];
+	}
 	const schema = {
 		type: 'object',
 		properties: { [config.name]: config.schema },
-		required: config.required ? [config.name] : []
+		required
 	};
 	const data = { [config.name]: value };
 
-	_.forEach(definitions, (theSchema, name) => {
-		const parsedSchema = convertRefPaths(theSchema);
+	_.forEach(definitions, (schema, name) => {
+		const parsedSchema = transformDefinitionToValidAJVSchemas(schema, validationOptions);
 		ajv.addSchema(parsedSchema, name);
 	});
 
@@ -70,7 +86,7 @@ const performAjvValidation = ({ value, config: cfg, definitions }) => {
 	return { value: data[config.name], errors };
 };
 
-const attemptJsonParsing = ({ value, config, definitions }) => {
+const attemptJsonParsing = ({ value, config, definitions, validationOptions }: ProcessMethodParameters) => {
 	if (_.startsWith(value, '{') && _.endsWith(value, '}')) {
 		try {
 			return {
@@ -89,13 +105,13 @@ const attemptJsonParsing = ({ value, config, definitions }) => {
 		}
 	}
 
-	return { value, config, definitions };
+	return { value, config, definitions, validationOptions };
 };
 
-const validateAndCoerce = ({ value, config, definitions }) => {
+const validateAndCoerce = ({ value, config, definitions, validationOptions }: ProcessMethodParameters) => {
 	const isUndefinedButNotRequired = !config.required && typeof value === 'undefined';
 	if (config.schema && !isUndefinedButNotRequired) {
-		const { value: val, errors } = performAjvValidation({ value, config, definitions });
+		const { value: val, errors } = performAjvValidation({ value, config, definitions, validationOptions });
 		if (errors) {
 			throw new BadRequest('Validation error', { errors });
 		}
@@ -106,7 +122,7 @@ const validateAndCoerce = ({ value, config, definitions }) => {
 	return { value, config };
 };
 
-const processParameter = ({ value, config, definitions }) =>
+const processParameter = ({ value, config, definitions, validationOptions }: ProcessMethodParameters) =>
 	_fp.flow(
 		attemptJsonParsing,
 		validateAndCoerce,
@@ -114,7 +130,8 @@ const processParameter = ({ value, config, definitions }) =>
 	)({
 		value,
 		config,
-		definitions
+		definitions,
+		validationOptions
 	});
 
 type ContextFactory<ContextReturnType = any> = ({
@@ -132,6 +149,7 @@ function mapReqToParameters<ContextType>(
 	res: Response,
 	parameters = [],
 	definitions,
+	methodValidationOptions: MethodValidation,
 	contextFactory: ContextFactory<ContextType> = defaultContextFactory
 ) {
 	const context = contextFactory({ req, res });
@@ -156,7 +174,7 @@ function mapReqToParameters<ContextType>(
 			} else {
 				throw new NotImplemented(`Can't get field ${p.name} - ${p.in} not yet supported`);
 			}
-			acc.push(processParameter({ value, config: p, definitions }));
+			acc.push(processParameter({ value, config: p, definitions, validationOptions: methodValidationOptions }));
 		}
 		return acc;
 	}, []);
@@ -173,6 +191,7 @@ const makeHandlerFunction = (
 	controller: InstanceType<ClassType>,
 	functionName: string,
 	definitions,
+	methodValidationOptions: MethodValidation,
 	contextFactory: ContextFactory
 ) => {
 	// @ts-ignore-next-line
@@ -199,12 +218,12 @@ const makeHandlerFunction = (
 		..._.map(beforeMiddlewares, ({ middlewareFunction }) => wrapMiddleware(middlewareFunction)),
 		(req, res, next) => {
 			if (req.requestHandled) return next();
-			// need a custom middleware to set the context ID
 			const parameterList = mapReqToParameters(
 				req,
 				res,
 				operation.parameters,
 				definitions,
+				methodValidationOptions,
 				contextFactory
 			);
 			debug('calling ', functionName);
@@ -236,6 +255,7 @@ const makeHandlerFunction = (
 export const createRouteHandlers = (
 	controller: InstanceType<ClassType>,
 	definition,
+	validationOptions: PathsValidationOptions,
 	contextFactory?: ContextFactory
 ) => {
 	const routeHandlers = [];
@@ -252,7 +272,7 @@ export const createRouteHandlers = (
 		if (!controller[method.methodName] || !operation) return;
 
 		// convert it from swagger {param} format to express :param format
-		const expressPath = method.path.replace(/{(.*?)}/gi, ':$1');
+		const path = method.path.replace(/{(.*?)}/gi, ':$1');
 
 		// create the handler function
 		const handlers = makeHandlerFunction(
@@ -260,23 +280,20 @@ export const createRouteHandlers = (
 			controller,
 			method.methodName,
 			definition.definitions,
+			_.get(validationOptions, `[${method.path}][${method.verb}]`, {}) as MethodValidation,
 			contextFactory
 		);
-		routeHandlers.push({ method: method.verb, path: expressPath, handlers });
+		routeHandlers.push({ method: method.verb, path, handlers });
 	});
 	return routeHandlers;
 };
 
-const validateController = (Controller: ClassType): void => {
+const validateController = (Controller: ClassType) => {
 	if (!Controller) throw new Error('Invalid Controller - missing Controller');
 	if (typeof Controller !== 'function') throw new Error('Invalid Controller - not function');
 };
 
-const createRouterAndSwaggerDoc = (
-	Controller: ClassType,
-	rsName?: string,
-	contextFactory?: ContextFactory
-): Router => {
+const createRouterAndSwaggerDoc = (Controller: ClassType, rsName?: string, contextFactory?: ContextFactory): Router => {
 	// need to validate the inputs here
 	validateController(Controller);
 
@@ -284,11 +301,10 @@ const createRouterAndSwaggerDoc = (
 	const resourceName = rsName || Controller.name.replace(/Controller$/, '').toLowerCase();
 
 	// get controller metadata
-	const metadata: IControllerDecoratorArgs =
-		Reflector.getMetadata('davinci:openapi:controller', Controller) || {};
+	const metadata: IControllerDecoratorArgs = Reflector.getMetadata('davinci:openapi:controller', Controller) || {};
 	const basepath = metadata.basepath || '';
-	const { resourceSchema } = metadata;
-	const { additionalSchemas } = metadata;
+	const resourceSchema = metadata.resourceSchema;
+	const additionalSchemas = metadata.additionalSchemas;
 
 	// create the controller from the supplied class
 	const controller = new Controller();
@@ -304,7 +320,7 @@ const createRouterAndSwaggerDoc = (
 		[]
 	);
 
-	const { paths, definitions: pathDefinitions } = createPaths(Controller);
+	const { paths, definitions: pathDefinitions, validationOptions } = createPaths(Controller);
 
 	const definition = {
 		definitions: {
@@ -316,7 +332,7 @@ const createRouterAndSwaggerDoc = (
 	};
 
 	// now process the swagger structure and get an array of method/path mappings to handlers
-	const routes = createRouteHandlers(controller, definition, contextFactory);
+	const routes = createRouteHandlers(controller, definition, validationOptions, contextFactory);
 
 	// add them to the router
 	routes.forEach(route => {

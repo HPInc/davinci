@@ -159,7 +159,12 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 			return record;
 		}
 
-		@route.patch({ path: '/:id', summary: 'Update', responses: { 200: RSchema } })
+		@route.patch({
+			path: '/:id',
+			summary: 'Update',
+			responses: { 200: RSchema },
+			validation: { partial: true }
+		})
 		public async updateById(
 			@route.path()
 				id: string,
