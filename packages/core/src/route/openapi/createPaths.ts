@@ -2,7 +2,6 @@ import _ from 'lodash';
 import _fp from 'lodash/fp';
 import { Reflector } from '@davinci/reflector';
 import {
-	IMethodParameter,
 	PathsDefinition,
 	PathsValidationOptions,
 	ISwaggerDefinitions,
