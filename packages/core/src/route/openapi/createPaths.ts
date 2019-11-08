@@ -12,7 +12,7 @@ import { IControllerDecoratorArgs } from '../decorators/route';
 import { getSchemaDefinition } from './createSchemaDefinition';
 
 const getParameterDefinition = methodParameterConfig => {
-	const options: IMethodParameter = methodParameterConfig.options;
+	const {options} = methodParameterConfig;
 	const paramDefinition = { ...options };
 	// handling special parameters
 	if (['context', 'req', 'res'].includes(methodParameterConfig.type)) {
@@ -24,8 +24,8 @@ const getParameterDefinition = methodParameterConfig => {
 				...schema
 			};
 		} else {
-			const { schema, definitions } = getSchemaDefinition(methodParameterConfig.type);
-			paramDefinition.schema = schema;
+			const { schema: s, definitions } = getSchemaDefinition(methodParameterConfig.type);
+			paramDefinition.schema = s;
 
 			return { paramDefinition, definitions };
 		}
@@ -69,13 +69,13 @@ const createPathsDefinition = (
 
 			const resps = responses
 				? _.mapValues(responses, response => {
-						if (typeof response === 'function') {
-							const { definitions: defs, schema } = getSchemaDefinition(response);
-							acc.definitions = { ...acc.definitions, ...defs };
-							return { schema };
-						}
+					if (typeof response === 'function') {
+						const { definitions: defs, schema } = getSchemaDefinition(response);
+						acc.definitions = { ...acc.definitions, ...defs };
+						return { schema };
+					}
 
-						return response;
+					return response;
 				  })
 				: { 200: { description: 'Success' } };
 
