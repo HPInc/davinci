@@ -56,6 +56,8 @@ jobs:
             npm run semantic-release
 
   publish_docs:
+    docker:
+      - image: circleci/node:8-stretch
     steps:
       - restore_cache:
           key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
