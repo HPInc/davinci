@@ -1,5 +1,6 @@
-export { default as generateSchema, generateGQLSchema } from './generateSchema';
 import * as decorators from './decorators';
+
+export { default as generateSchema, generateGQLSchema } from './generateSchema';
 export * from './types';
 
 export { createControllerSchemas } from './createControllerSchemas';

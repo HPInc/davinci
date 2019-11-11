@@ -1,5 +1,3 @@
-import 'reflect-metadata';
-
 // Set up the environment needed for running the unit tests
 
 process.env.NODE_ENV = 'unittest';

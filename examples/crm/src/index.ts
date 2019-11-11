@@ -6,7 +6,7 @@ import packageJson = require('../package.json');
 const options = {
 	version: packageJson.version,
 	boot: {
-		dirPath: './build/examples/crm/boot'
+		dirPath: './build/src/boot'
 	},
 	healthChecks: {
 		readynessEndpoint: '/.ah/ready',

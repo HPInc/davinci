@@ -3,10 +3,15 @@ import { ISwaggerDefinitions, PathsDefinition } from '../types';
 
 class Resource {
 	resourceName: string;
+
 	paths: PathsDefinition;
+
 	definitions: ISwaggerDefinitions;
+
 	parameters: object;
+
 	basePath: string;
+
 	constructor(resourceName, doc, basePath?) {
 		this.resourceName = resourceName;
 		this.paths = doc.paths;

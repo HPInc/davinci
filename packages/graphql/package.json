@@ -6,9 +6,8 @@
 	"types": "build/index.d.ts",
 	"scripts": {
 		"build": "tsc -p ./tsconfig.release.json",
-		"tslint": "tslint -t stylish --project \"tsconfig.json\" '{src,test}/**/*{.ts,.tsx}'",
-		"tslintfix": "tslint --fix -c ../../tslint.json '{src,test}/**/*{.ts,.tsx}'",
-		"pretest": "npm run tslint && npm run build",
+		"eslint": "../../node_modules/eslint/bin/eslint.js --c .eslintrc 'src/**/*.ts'",
+		"pretest": "npm run eslint && npm run build",
 		"test": "mocha --exit",
 		"cover": "nyc npm test"
 	},
@@ -28,7 +27,6 @@
 		"@types/graphql": "14.2.3",
 		"@types/mocha": "^5.2.6",
 		"tslib": "^1.9.3",
-		"tslint": "^5.16.0",
 		"typescript": "^3.4.5"
 	}
 }

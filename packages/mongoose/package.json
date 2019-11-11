@@ -9,9 +9,8 @@
 	"types": "build/index.d.ts",
 	"scripts": {
 		"build": "tsc -p ./tsconfig.release.json",
-		"tslint": "tslint -t stylish --project \"tsconfig.json\" '{src,test}/**/*{.ts,.tsx}'",
-		"tslintfix": "tslint --fix -c ../../tslint.json '{src,test}/**/*{.ts,.tsx}'",
-		"pretest": "npm run tslint && npm run build",
+		"eslint": "../../node_modules/eslint/bin/eslint.js --c .eslintrc 'src/**/*.ts'",
+		"pretest": "npm run eslint && npm run build",
 		"test": "mocha --exit",
 		"cover": "nyc npm test"
 	},
@@ -21,13 +20,13 @@
 	"dependencies": {
 		"@davinci/core": "^0.9.1",
 		"@davinci/reflector": "^0.7.0",
+		"bluebird": "3.7.1",
 		"debug": "^4.1.1",
 		"lodash": "^4.17.11"
 	},
 	"devDependencies": {
 		"mongoose": "5.5.5",
 		"tslib": "^1.9.3",
-		"tslint": "^5.16.0",
 		"typescript": "^3.4.5"
 	}
 }

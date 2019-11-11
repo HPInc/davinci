@@ -35,7 +35,9 @@ export const createControllerSchemas = (
 	Controller: ClassType,
 	{ queries: q, mutations: m, schemas: s } = { queries: {}, mutations: {}, schemas: {} }
 ) => {
+	// eslint-disable-next-line @typescript-eslint/no-use-before-define
 	const { queries, schemas: queriesSchemas } = createResolversAndSchemas(Controller, 'queries', s);
+	// eslint-disable-next-line @typescript-eslint/no-use-before-define
 	const { mutations, schemas: allSchemas } = createResolversAndSchemas(
 		Controller,
 		'mutations',
@@ -47,30 +49,29 @@ export const createControllerSchemas = (
 
 /**
  * Given a controller class it returns queries, mutations and type schemas
- * @param theClass
+ * @param TheClass
  * @param resolverMetadata
  * @param schemas
  * @param operationType
  */
 export const createExecutableSchema = (
-	theClass,
+	TheClass,
 	resolverMetadata: IResolverDecoratorMetadata,
 	schemas,
 	operationType: OperationType
 ) => {
 	const { methodName, returnType } = resolverMetadata;
-	const contextMetadata = Reflector.getMetadata('tscontroller:context', theClass.prototype.constructor);
+	const contextMetadata = Reflector.getMetadata('tscontroller:context', TheClass.prototype.constructor);
 	const resolverArgsMetadata = _fp.flow(
 		_fp.concat(contextMetadata),
 		_fp.filter({ methodName }),
 		_fp.sortBy('index'),
 		_fp.compact
-	)(Reflector.getMetadata('davinci:graphql:args', theClass.prototype.constructor) || []);
+	)(Reflector.getMetadata('davinci:graphql:args', TheClass.prototype.constructor) || []);
 
 	const allSchemas = schemas || {};
-	const controller = new theClass();
+	const controller = new TheClass();
 
-	/////
 	const { schema: graphqlReturnType, schemas: s } = generateSchema({
 		type: returnType,
 		schemas: allSchemas,
@@ -114,7 +115,7 @@ export const createExecutableSchema = (
 					gqlArgType = schemas[name];
 				}
 			} else {
-				const { schema, schemas } = generateSchema({
+				const { schema, schemas: theSchemas } = generateSchema({
 					type,
 					schemas: allSchemas,
 					isInput: true,
@@ -123,10 +124,10 @@ export const createExecutableSchema = (
 				});
 				gqlArgType = schema;
 
-				_.merge(allSchemas, schemas);
+				_.merge(allSchemas, theSchemas);
 			}
 
-			graphqlArgType = options.required ? GraphQLNonNull(gqlArgType) : gqlArgType;
+			graphqlArgType = options.required ? new GraphQLNonNull(gqlArgType) : gqlArgType;
 
 			acc.resolverArgs[name] = { type: graphqlArgType };
 			acc.handlerArgsDefinition.push({ name });
@@ -173,8 +174,8 @@ export const createResolversAndSchemas = (
 
 	const resolvers = resolversMetadata.reduce((acc, query) => {
 		const { methodName, name } = query;
-		const { schema, schemas } = createExecutableSchema(Controller, query, allSchemas, operationType);
-		_.merge(allSchemas, schemas);
+		const { schema, schemas: theSchemas } = createExecutableSchema(Controller, query, allSchemas, operationType);
+		_.merge(allSchemas, theSchemas);
 		acc[name || methodName] = schema;
 
 		return acc;
