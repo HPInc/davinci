@@ -3,6 +3,8 @@
 # abort on errors
 set -e
 
+ssh-keyscan github.com >> ~/.ssh/known_hosts
+
 # build
 npm rebuild node-sass
 npm run docs:build
