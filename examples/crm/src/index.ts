@@ -1,5 +1,5 @@
 import express, { Express } from 'express';
-import { createApp, createRouter, IOfBaseExpress } from '@davinci/core';
+import { createApp, createRouter, DVExpress } from '@davinci/core';
 import CustomerController from './customer/customer.controller';
 import packageJson = require('../package.json');
 
@@ -39,7 +39,7 @@ createApp(expressApp, options, app => {
 
 if (require.main === module) {
 	// this module was run directly from the command line as in node xxx.js
-	(expressApp as IOfBaseExpress).start();
+	(expressApp as DVExpress).start();
 }
 
 export default expressApp;

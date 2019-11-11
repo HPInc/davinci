@@ -10,7 +10,7 @@ npm run docs:build
 cd .vuepress/dist
 
 git init
-git config --global user.email "circleci@oneflowsystems.com"
+git config --global user.email "circleci@hp.com"
 git config --global user.name "Circle CI"
 git add -A
 git commit --allow-empty -am "Update Docs"
