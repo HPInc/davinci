@@ -65,7 +65,7 @@ jobs:
       - run:
           name: Deploy docs
           command: |
-            ./docs/deploy.sh
+            sh ./docs/deploy.sh
 
 workflows:
   version: 2
