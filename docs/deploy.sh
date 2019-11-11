@@ -4,16 +4,15 @@
 set -e
 
 # build
+npm rebuild node-sass
 npm run docs:build
 
-# navigate into the build output directory
-cd .vuepress/dist
+ls | grep -v docs | xargs rm -r
+cp -rlf ./docs/.vuepress/dist/* ./
+rm -r ./docs
 
-git init
 git config --global user.email "circleci@hp.com"
 git config --global user.name "Circle CI"
 git add -A
 git commit --allow-empty -am "Update Docs"
-
-
-cd -
+git push
