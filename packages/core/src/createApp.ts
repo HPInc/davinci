@@ -11,7 +11,7 @@ import responseHandler from './express/middlewares/responseHandler';
 import errorHandler from './express/middlewares/errorHandler';
 import notFoundHandler from './express/middlewares/notFoundHandler';
 import { execBootScripts } from './express/boot';
-import { IOfBaseExpress } from './index';
+import { DVExpress } from './index';
 
 const debug = Debug('of-base-api');
 
@@ -125,7 +125,7 @@ export const configureTerminus = (app, healthChecks: IOptionsHealthChecks = {}) 
 	return createTerminus(app.server, terminusOptions);
 };
 
-export const createApp = (...args: CreateAppArgs): Promise<IOfBaseExpress> => {
+export const createApp = (...args: CreateAppArgs): Promise<DVExpress> => {
 	// process the arguments
 	const [app, options, addMiddlewares] = processArgs(...args);
 

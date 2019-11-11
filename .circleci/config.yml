@@ -54,6 +54,17 @@ jobs:
             git config --global user.email "circleci@oneflowsystems.com"
             git config --global user.name "Circle CI"
             npm run semantic-release
+
+  publish_docs:
+    steps:
+      - restore_cache:
+          key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
+      - add_ssh_keys
+      - run:
+          name: Deploy docs
+          command: |
+            ./docs/deploy.sh
+
 workflows:
   version: 2
   build_and_publish:
@@ -68,3 +79,11 @@ workflows:
             branches:
               only:
                 - master
+      - publish_docs:
+          context: oneflow
+          requires:
+            - checkout_and_test
+#          filters:
+#            branches:
+#              only:
+#                - master

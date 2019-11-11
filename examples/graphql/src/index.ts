@@ -1,5 +1,5 @@
 import express, { Express } from 'express';
-import { createApp, IOfBaseExpress } from '@davinci/core';
+import { createApp, DVExpress } from '@davinci/core';
 import { createGraphQLServer } from '@davinci/graphql';
 import AuthorController from './author/author.controller';
 import BookController from './book/book.controller';
@@ -24,7 +24,7 @@ createApp(expressApp, options, app => {
 
 if (require.main === module) {
 	// this module was run directly from the command line as in node xxx.js
-	(expressApp as IOfBaseExpress).start();
+	(expressApp as DVExpress).start();
 }
 
 export default expressApp;
