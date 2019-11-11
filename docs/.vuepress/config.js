@@ -1,4 +1,5 @@
 module.exports = {
+	base: '',
 	title: 'DaVinci',
 	description: 'Declarative, Code-First, Typescript API Framework based on Express. Supports REST and GraphQL.',
 	head: [
