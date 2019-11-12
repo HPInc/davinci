@@ -11,7 +11,7 @@ npm run docs:build
 
 git config --global user.email "circleci@hp.com"
 git config --global user.name "Circle CI"
-git checkout
+git checkout package-lock.json
 git add docs/.vuepress/dist/
 git checkout gh-pages
 
