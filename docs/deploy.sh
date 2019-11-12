@@ -17,8 +17,9 @@ git checkout gh-pages
 git pull
 
 ls | grep -v docs | xargs rm -r
-cp -rlf ./docs/.vuepress/dist/* ./
+cp -rf ./docs/.vuepress/dist/* ./
 rm -r ./docs
 
+git add .
 git commit --allow-empty -am "Update Docs"
 git push
