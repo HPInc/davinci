@@ -14,11 +14,11 @@ git config --global user.name "Circle CI"
 git checkout package-lock.json
 git add docs/.vuepress/dist/
 git checkout gh-pages
+git pull
 
 ls | grep -v docs | xargs rm -r
 cp -rlf ./docs/.vuepress/dist/* ./
 rm -r ./docs
 
 git commit --allow-empty -am "Update Docs"
-git pull
 git push
