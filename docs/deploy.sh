@@ -17,5 +17,6 @@ git config --global user.email "circleci@hp.com"
 git config --global user.name "Circle CI"
 git checkout gh-pages -f
 git add -A
+git pull
 git commit --allow-empty -am "Update Docs"
 git push
