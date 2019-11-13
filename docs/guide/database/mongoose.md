@@ -70,11 +70,12 @@ export default Customer;
 
 ## Hooks
 
-@davinci/mongoose provides three different hooks: `beforeRead`, `beforeWrite` and `beforeDelete`.\
+@davinci/mongoose provides six different hooks: `beforeRead`, `afterRead`,
+`beforeWrite`, `afterWrite`, `beforeDelete` and `afterDelete`.\
 Under the hood, they use [Mongoose Middlewares](https://mongoosejs.com/docs/middleware.html)
 
--   **beforeRead**\
-    It gets triggered before executing any find/fetch operation.
+-   **beforeRead / afterRead**\
+    It gets triggered before/after executing any find/fetch operation.
     Under the hood it register the following Mongoose Middlewares:
     `find`,
     `findOne`,
@@ -85,16 +86,16 @@ Under the hood, they use [Mongoose Middlewares](https://mongoosejs.com/docs/midd
     `update`,
     `updateOne`,
     `updateMany`
--   **beforeWrite**\
-    It gets triggered before executing any save/persist operation.
+-   **beforeWrite / afterWrite**\
+    It gets triggered before/after executing any save/persist operation.
     Under the hood it register the following Mongoose Middlewares:
     `findOneAndUpdate`,
     `save`,
     `validate`,
     `update`,
     `updateMany`
--   **beforeDelete**\
-    It gets triggered before executing any delete operation.
+-   **beforeDelete / afterDelete**\
+    It gets triggered before/after executing any delete operation.
     Under the hood it register the following Mongoose Middlewares:
     `deleteMany`,
     `findOneAndDelete`,
@@ -105,8 +106,9 @@ import { Document, model } from 'mongoose';
 import { mgoose } from '@davinci/mongoose';
 import { httpErrors } from '@davinci/core';
 import CustomerSchema from './CustomerSchema';
+import { afterDelete } from './hooks';
 
-const { generateSchema, beforeRead, beforeWrite, beforeDelete } = mgoose;
+const { generateSchema, beforeRead, beforeWrite, afterDelete } = mgoose;
 
 const schema = generateSchema(CustomerSchema);
 
@@ -125,7 +127,7 @@ beforeWrite(schema, (doc, context) => {
 	}
 });
 
-beforeDelete(schema, (...args) => {
+afterDelete(schema, (doc) => {
 	// clean associated data
 });
 
