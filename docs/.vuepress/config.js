@@ -15,26 +15,14 @@ module.exports = {
 	],
 	themeConfig: {
 		nav: [{ text: 'Home', link: '/' }, { text: 'Guide', link: '/guide/' }],
-		/*sidebar: {
+		sidebar: {
 			'/guide/': [
 				{
-					title: 'asd',
-					collapsable: false,
-					children: [
-						'',
-						'getting-started',
-						'directory-structure',
-						'basic-config',
-						'assets',
-						'markdown',
-						'using-vue',
-						'i18n',
-						'deploy'
-					]
+					title: 'Guide',
+					children: ['', 'basics/directory-structure', 'basics/controllers', 'basics/openapi-definitions']
 				}
 			]
-		},*/
-		sidebar: 'auto',
+		},
 		editLinks: true,
 		docsDir: 'docs',
 		lastUpdated: true
@@ -48,6 +36,14 @@ module.exports = {
 				updatePopup: true
 			}
 		],
-		['@vuepress/medium-zoom', true]
+		['@vuepress/medium-zoom', true],
+		[
+			'container',
+			{
+				type: 'vue',
+				before: '<pre class="vue-container"><code>',
+				after: '</code></pre>'
+			}
+		]
 	]
 };

@@ -5,7 +5,7 @@
 	},
 	"scripts": {
 		"postinstall": "npm run bootstrap",
-		"build": "lerna run build --parallel",
+		"build": "lerna run build",
 		"test": "lerna run test",
 		"bootstrap": "lerna bootstrap",
 		"bump": "lerna publish",
