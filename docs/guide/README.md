@@ -27,7 +27,7 @@ yarn add @davinci/core
 <br/>
 
 ## Start shaping the API
-We'll implement our endpoints and handlers declaratively, using classes and decorators.
+Implement API endpoints and handlers declaratively, using classes and decorators.
 
 ### Create a controller
 
