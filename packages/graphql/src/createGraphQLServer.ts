@@ -1,7 +1,7 @@
 import { GraphQLSchema, GraphQLObjectType, printSchema } from 'graphql';
 import graphqlHTTP from 'express-graphql';
 import { ClassType } from '@davinci/reflector';
-import { DVExpress } from '@davinci/core';
+import { DaVinciExpress } from '@davinci/core';
 import fs from 'fs';
 import _ from 'lodash';
 import { createControllerSchemas } from './createControllerSchemas';
@@ -35,7 +35,7 @@ const DEFAULT_OPTIONS: ICreateGraphQLServerOptions = {
  * @param options.playgroundEnabled - Additional options passed to the playground UI
  */
 export const createGraphQLServer = (
-	app: DVExpress,
+	app: DaVinciExpress,
 	controllers: ClassType[],
 	options?: ICreateGraphQLServerOptions
 ) => {

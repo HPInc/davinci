@@ -56,7 +56,7 @@ export class CustomerController {
 ```typescript
 // file: ./index.ts
 import express, { Express } from 'express';
-import { createApp, createRouter, DVExpress } from '@davinci/core';
+import { createApp, createRouter, DaVinciExpress } from '@davinci/core';
 import { CustomerController } from './CustomerController';
 import packageJson = require('../package.json');
 
@@ -80,7 +80,7 @@ createApp(expressApp, options, app => {
 
 if (require.main === module) {
 	// this module was run directly from the command line, so we can start the server
-	(expressApp as DVExpress).start();
+	(expressApp as DaVinciExpress).start();
 }
 
 export default expressApp;

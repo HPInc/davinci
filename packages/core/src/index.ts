@@ -14,7 +14,7 @@ const boot = () => {
 	process.exit(-1);
 };
 
-export interface DVExpress extends Express {
+export interface DaVinciExpress extends Express {
 	server: Server;
 	start: Function;
 	close: Function;

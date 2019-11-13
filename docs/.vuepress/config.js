@@ -17,7 +17,13 @@ module.exports = {
 				{
 					title: 'Basics',
 					collapsable: false,
-					children: ['', 'basics/directory-structure', 'basics/controllers', 'basics/openapi-definitions']
+					children: [
+						'',
+						'basics/directory-structure',
+						'basics/controllers',
+						'basics/openapi-definitions',
+						'basics/context'
+					]
 				},
 				{
 					title: 'Database',
