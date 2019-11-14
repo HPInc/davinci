@@ -9,6 +9,28 @@ More specifically, it provides:
 -   Functions to generate Mongoose models starting from a decorated typescript class.
 -   Functions to register some `write/read` hooks.
 
+## Installation
+
+:::: tabs
+
+::: tab npm
+
+```sh
+npm i --save @davinci/mongoose
+```
+
+:::
+
+::: tab yarn
+
+```sh
+yarn add @davinci/mongoose
+```
+
+:::
+
+::::
+
 ## Define the Schema
 
 The schema is, once again, defined using decorators applied to methods of a class.
@@ -127,7 +149,7 @@ beforeWrite(schema, (doc, context) => {
 	}
 });
 
-afterDelete(schema, (doc) => {
+afterDelete(schema, doc => {
 	// clean associated data
 });
 

@@ -1,6 +1,6 @@
 import express, { Express } from 'express';
 import { createApp, createRouter, DaVinciExpress } from '@davinci/core';
-import CustomerController from './customer/customer.controller';
+import { CustomerController } from './api/customer';
 import packageJson = require('../package.json');
 
 const options = {

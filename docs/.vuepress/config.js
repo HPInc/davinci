@@ -29,6 +29,11 @@ module.exports = {
 					title: 'Database',
 					collapsable: false,
 					children: ['database/mongoose']
+				},
+				{
+					title: 'GraphQL',
+					collapsable: false,
+					children: ['graphql/getting-started', 'graphql/controllers']
 				}
 			]
 		},

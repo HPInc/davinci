@@ -1,7 +1,7 @@
 import { Schema } from 'mongoose';
 import { mgoose } from '@davinci/mongoose';
 import { graphql } from '@davinci/graphql';
-import BookSchema from '../book/book.schema';
+import { BookSchema } from '../index';
 
 class AuthorPhone {
 	@mgoose.prop()
