@@ -22,6 +22,7 @@ module.exports = {
 						'basics/directory-structure',
 						'basics/controllers',
 						'basics/openapi-definitions',
+						'basics/swagger-ui',
 						'basics/context'
 					]
 				},
