@@ -102,3 +102,4 @@ Temporary Items
 .apdisk
 .env
 build
+docs/.vuepress/dist

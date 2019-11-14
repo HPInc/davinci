@@ -50,4 +50,4 @@ export default expressApp;
 <br/><br/>  
 Now, point your browser to the `https?://{URL}/explorer` to consult the Swagger UI.
 
-![alt text](./../../.vuepress/public/images/basics/swagger-ui/swagger-ui-screenshot.png 'Logo Title Text 1')
+![](./../../.vuepress/public/images/basics/swagger-ui/swagger-ui-screenshot.png)
