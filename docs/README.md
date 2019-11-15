@@ -1,6 +1,6 @@
 ---
 home: true
-heroImage: https://upload.wikimedia.org/wikipedia/commons/a/ae/Greek_lc_psi.svg
+heroImage: /images/logo.svg
 actionText: Get Started →
 actionLink: /guide/
 features:

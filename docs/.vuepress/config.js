@@ -3,12 +3,11 @@ module.exports = {
 	description: 'Declarative, Code-First, Typescript API Framework based on Express. Supports REST and GraphQL.',
 	base: '/davinci/',
 	head: [
+		['link', { rel: 'icon', href: '/images/logo.svg' }],
 		['link', { rel: 'manifest', href: '/manifest.json' }],
 		['meta', { name: 'theme-color', content: '#3eaf7c' }],
 		['meta', { name: 'apple-mobile-web-app-capable', content: 'yes' }],
-		['meta', { name: 'apple-mobile-web-app-status-bar-style', content: 'black' }],
-		['meta', { name: 'msapplication-TileImage', content: '/icons/msapplication-icon-144x144.png' }],
-		['meta', { name: 'msapplication-TileColor', content: '#000000' }]
+		['meta', { name: 'apple-mobile-web-app-status-bar-style', content: 'black' }]
 	],
 	themeConfig: {
 		nav: [{ text: 'Home', link: '/' }, { text: 'Guide', link: '/guide/' }],
@@ -51,7 +50,6 @@ module.exports = {
 				updatePopup: true
 			}
 		],
-		['@vuepress/medium-zoom', true],
 		[
 			'container',
 			{
