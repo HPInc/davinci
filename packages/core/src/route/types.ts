@@ -73,7 +73,7 @@ export interface PathsValidationOptions {
  */
 export interface IPropDecoratorOptions {
 	type?: TypeValue;
-	rawType?: unknown;
+	rawSchemaOptions?: unknown;
 	typeFactory?: TypeValueFactory;
 	required?: boolean;
 }
