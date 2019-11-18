@@ -11,7 +11,7 @@ import responseHandler from './express/middlewares/responseHandler';
 import errorHandler from './express/middlewares/errorHandler';
 import notFoundHandler from './express/middlewares/notFoundHandler';
 import { execBootScripts } from './express/boot';
-import { IOfBaseExpress } from './index';
+import { DaVinciExpress } from './index';
 
 const debug = new Debug('of-base-api');
 
@@ -126,7 +126,7 @@ export const configureTerminus = (app, healthChecks: IOptionsHealthChecks = {}) 
 	return createTerminus(app.server, terminusOptions);
 };
 
-export const createApp = (...args: CreateAppArgs): Promise<IOfBaseExpress> => {
+export const createApp = (...args: CreateAppArgs): Promise<DaVinciExpress> => {
 	// process the arguments
 	const [app, options, addMiddlewares] = processArgs(...args);
 

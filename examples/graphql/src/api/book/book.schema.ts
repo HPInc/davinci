@@ -1,8 +1,8 @@
 import { Schema } from 'mongoose';
 import { mgoose } from '@davinci/mongoose';
 import { graphql } from '@davinci/graphql';
-import AuthorSchema from '../author/author.schema';
-import { requiredForMutations } from '../lib/schemaUtils';
+import { AuthorSchema } from '../index';
+import { requiredForMutations } from '../../lib/schemaUtils';
 
 @mgoose.index({ isbn: 1 }, { unique: true })
 export default class Book {

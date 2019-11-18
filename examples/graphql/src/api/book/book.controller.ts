@@ -2,7 +2,7 @@ import { graphql } from '@davinci/graphql';
 import { context } from '@davinci/core';
 import model from './book.model';
 import BookSchema, { BookQuery } from './book.schema';
-import AuthorSchema  from '../author/author.schema';
+import { AuthorSchema } from '../index';
 
 const { query, mutation, arg, fieldResolver, parent, info, selectionSet } = graphql;
 

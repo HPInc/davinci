@@ -5,10 +5,12 @@
 	},
 	"scripts": {
 		"postinstall": "npm run bootstrap",
-		"build": "lerna run build --parallel",
+		"build": "lerna run build",
 		"test": "lerna run test",
 		"bootstrap": "lerna bootstrap",
 		"bump": "lerna publish",
+		"docs:dev": "vuepress dev docs",
+		"docs:build": "vuepress build docs --debug",
 		"semantic-release": "lerna version --conventional-commits --github-release -y && lerna publish from-package -y"
 	},
 	"devDependencies": {
@@ -21,6 +23,7 @@
 		"@types/sinon": "7.0.11",
 		"@typescript-eslint/eslint-plugin": "2.6.0",
 		"@typescript-eslint/parser": "2.6.0",
+		"@vuepress/plugin-pwa": "1.2.0",
 		"eslint": "6.1.0",
 		"eslint-config-airbnb-base": "14.0.0",
 		"eslint-plugin-import": "2.18.2",
@@ -33,6 +36,8 @@
 		"sinon": "4.5.0",
 		"ts-node": "8.0.3",
 		"tslib": "^1.9.3",
-		"typescript": "3.4.5"
+		"typescript": "3.4.5",
+		"vuepress": "1.2.0",
+		"vuepress-plugin-element-tabs": "0.1.8"
 	}
 }

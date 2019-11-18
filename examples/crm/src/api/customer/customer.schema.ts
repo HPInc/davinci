@@ -11,10 +11,15 @@ class CustomerPhone {
 	isPrimary: boolean;
 }
 
+@openapi.definition({ title: 'BirtType' })
 class BirthType {
 	@mgoose.prop()
 	@openapi.prop()
 	city: string;
+
+	@mgoose.prop()
+	@openapi.prop()
+	date: Date;
 }
 
 @mgoose.index({ firstname: 1, lastname: 1 }, { unique: true })
@@ -45,10 +50,6 @@ export default class Customer {
 	@mgoose.prop({ type: Schema.Types.ObjectId })
 	@openapi.prop()
 	accountId: number;
-
-	@mgoose.prop({ type: Date })
-	@openapi.prop({ type: Date })
-	startDate: string;
 
 	@mgoose.prop()
 	@openapi.prop()

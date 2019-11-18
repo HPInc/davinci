@@ -98,10 +98,17 @@ export function arg(name?, options?: IArgOptions): Function {
 		const isAlreadySet = !!_.find(methodParameters, { methodName, index });
 		if (isAlreadySet) return;
 
+		let n = name;
+
+		if (!n) {
+			const methodParameterNames = Reflector.getParameterNames(prototype[methodName]);
+			n = methodParameterNames[index];
+		}
+
 		methodParameters.unshift({
 			methodName,
 			index,
-			name,
+			name: n,
 			opts: options,
 			handler: prototype[methodName],
 			type: paramtypes && paramtypes[index]

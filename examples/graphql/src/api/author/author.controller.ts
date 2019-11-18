@@ -2,7 +2,7 @@ import { graphql } from '@davinci/graphql';
 import { context } from '@davinci/core';
 import model from './author.model';
 import AuthorSchema, { AuthorQuery } from './author.schema';
-import BookSchema from '../book/book.schema';
+import { BookSchema } from '../index';
 
 const { query, parent, mutation, fieldResolver, arg } = graphql;
 
@@ -15,7 +15,7 @@ export default class AuthorController {
 	}
 
 	@query([AuthorSchema], 'authors')
-	findAuthors(@arg('query') query: AuthorQuery, @context() context: any) {
+	findAuthors(@arg() query: AuthorQuery, @context() context: any) {
 		return this.model.find(query, {}, { context });
 	}
 
@@ -30,7 +30,7 @@ export default class AuthorController {
 	}
 
 	@fieldResolver<BookSchema>(BookSchema, 'authors', [AuthorSchema])
-	getBookAuthors(@parent() book: BookSchema, @arg('query') query: AuthorQuery, @context() context: any) {
+	getBookAuthors(@parent() book: BookSchema, @arg() query: AuthorQuery, @context() context: any) {
 		console.log(query);
 		// @ts-ignore
 		return this.findAuthors({ ...query, _id: { $in: book.authorIds } }, context);
