@@ -53,6 +53,7 @@ jobs:
           command: |
             git config --global user.email "circleci@oneflowsystems.com"
             git config --global user.name "Circle CI"
+            git checkout -f
             npm run semantic-release
 
   publish_docs:
