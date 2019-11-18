@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.9.0](https://github.com/Oneflow/davinci/compare/@davinci/graphql@0.8.4...@davinci/graphql@0.9.0) (2019-11-18)
+
+
+### Features
+
+* **eslint:** added eslint, removed tslint (deprecated) ([50d4038](https://github.com/Oneflow/davinci/commit/50d4038))
+
+
+
+
+
 ## [0.8.4](https://github.com/Oneflow/davinci/compare/@davinci/graphql@0.8.3...@davinci/graphql@0.8.4) (2019-11-01)
 
 **Note:** Version bump only for package @davinci/graphql

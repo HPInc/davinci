@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.10.0](https://github.com/Oneflow/davinci/compare/@davinci/core@0.9.1...@davinci/core@0.10.0) (2019-11-18)
+
+
+### Features
+
+* **eslint:** added eslint, removed tslint (deprecated) ([50d4038](https://github.com/Oneflow/davinci/commit/50d4038))
+
+
+
+
+
 ## [0.9.1](https://github.com/Oneflow/davinci/compare/@davinci/core@0.9.0...@davinci/core@0.9.1) (2019-11-01)
 
 
