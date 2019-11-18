@@ -85,7 +85,7 @@ workflows:
           context: oneflow
           requires:
             - checkout_and_test
-#          filters:
-#            branches:
-#              only:
-#                - master
+          filters:
+            branches:
+              only:
+                - master
