@@ -1,10 +1,17 @@
 import should from 'should';
+import Sinon from 'sinon';
 import { Model } from 'mongoose';
 import { mgoose } from '../../src';
+
+const sinon = Sinon.createSandbox();
 
 const { getSchemaDefinition, generateSchema, generateModel, prop, index, method } = mgoose;
 
 describe('typed mongoose', () => {
+	afterEach(() => {
+		sinon.restore();
+	});
+
 	describe('#getSchemaDefinition', () => {
 		it('supports primitive types', () => {
 			class Customer {
@@ -164,6 +171,32 @@ describe('typed mongoose', () => {
 					}
 				]
 			]);
+		});
+
+		it('should add validators', () => {
+			const validateFn = sinon.stub().returns(true);
+
+			class Customer {
+				@prop({ validate: validateFn })
+				firstname: string;
+			}
+
+			const schema = generateSchema(Customer);
+			// @ts-ignore
+			should(schema.path('firstname').validators).match([{ validator: validateFn }]);
+		});
+
+		it('should support passing advanced mongoose options', () => {
+			class Customer {
+				@prop({ required: true, index: true, rawMongooseOptions: { alias: 'first' } })
+				firstname: string;
+			}
+
+			const schema = generateSchema(Customer);
+			// @ts-ignore
+			should(schema.path('firstname')).match({
+				options: { required: true, index: true, alias: 'first' }
+			});
 		});
 	});
 

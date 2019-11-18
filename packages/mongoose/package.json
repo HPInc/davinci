@@ -26,7 +26,8 @@
 	},
 	"devDependencies": {
 		"mongoose": "5.5.5",
+		"prettier": "1.19.1",
 		"tslib": "^1.9.3",
-		"typescript": "^3.4.5"
+		"typescript": "3.7.2"
 	}
 }
