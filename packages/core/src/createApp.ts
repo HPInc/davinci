@@ -13,7 +13,7 @@ import notFoundHandler from './express/middlewares/notFoundHandler';
 import { execBootScripts } from './express/boot';
 import { DaVinciExpress } from './index';
 
-const debug = Debug('of-base-api');
+const debug = new Debug('of-base-api');
 
 interface IOptionsHealthChecks {
 	livenessEndpoint?: string;
@@ -86,6 +86,7 @@ export const configureExpress = async (app, options: IOptions = {}, runMiddlewar
 
 		const { path: swaggerUIPath, options: swaggerUIOpts } = get(options, 'openapi.docs', {});
 		if (swaggerUIPath) {
+			// eslint-disable-next-line
 			const swaggerUi = require('swagger-ui-express');
 			app.use('/explorer', swaggerUi.serve, swaggerUi.setup(fullSwaggerDoc, swaggerUIOpts));
 		}
@@ -135,6 +136,7 @@ export const createApp = (...args: CreateAppArgs): Promise<DaVinciExpress> => {
 
 		debug('create the server');
 		const server = http.createServer(app);
+		// eslint-disable-next-line require-atomic-updates
 		app.server = server;
 
 		debug('configure terminus');
@@ -156,6 +158,8 @@ export const createApp = (...args: CreateAppArgs): Promise<DaVinciExpress> => {
 		}
 
 		console.warn('Server not initialised, ignoring');
+
+		return false;
 	};
 
 	app.registerReadynessCheck = fn => {

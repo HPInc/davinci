@@ -13,7 +13,7 @@ import {
  */
 export const createRouteMethodDecorator = verb =>
 	function({ path, summary, description, responses, validation }: IMethodDecoratorOptions): Function {
-		return function(prototype: Object, methodName: string) {
+		return function(prototype: object, methodName: string) {
 			// get the existing metadata props
 			const methods = Reflector.getMetadata('davinci:openapi:methods', prototype.constructor) || [];
 			const meta: IMethodDecoratorMetadata = {
@@ -49,7 +49,7 @@ export const head = createRouteMethodDecorator('head');
  * @param options
  */
 export function param(options: IMethodParameter): Function {
-	return function(prototype: Object, methodName: string, index) {
+	return function(prototype: object, methodName: string, index) {
 		// get the existing metadata props
 		const methodParameters =
 			Reflector.getMetadata('davinci:openapi:method-parameters', prototype.constructor) || [];

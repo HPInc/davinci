@@ -2,7 +2,7 @@ import Debug from 'debug';
 import _ from 'lodash';
 import Resource from './Resource';
 
-const debug = Debug('of-base-api');
+const debug = new Debug('of-base-api');
 
 const SWAGGER_VERSION = '2.0';
 
@@ -31,7 +31,7 @@ export const sanitiseResourcePath = resourcePaths => {
 	});
 };
 
-export const generateFullSwagger = (opts?) => {
+export const generateFullSwagger = opts => {
 	const fullSwagger = _.merge({}, opts, {
 		swagger: SWAGGER_VERSION,
 		paths: {},

@@ -7,16 +7,15 @@ import Promise from 'bluebird';
 import path from 'path';
 import { ClassType, Reflector } from '@davinci/reflector';
 import { DaVinciRequest, IHeaderDecoratorMetadata } from '../express/types';
-import * as errors from '../errors/httpErrors';
+import { NotImplemented, BadRequest } from '../errors/httpErrors';
 import * as openapiDocs from './openapi/openapiDocs';
 import createPaths from './openapi/createPaths';
 import createSchemaDefinition from './openapi/createSchemaDefinition';
 import { IControllerDecoratorArgs } from './decorators/route';
 import { ISchema, ISwaggerDefinitions, MethodValidation, PathsValidationOptions } from './types';
 
-const { NotImplemented, BadRequest } = errors;
 
-const debug = Debug('of-base-api');
+const debug = new Debug('of-base-api');
 
 const transformDefinitionToValidAJVSchemas = (schema, validationOptions: MethodValidation) => {
 	if (Array.isArray(schema)) {
@@ -72,8 +71,8 @@ const performAjvValidation = ({ value, config: cfg, definitions, validationOptio
 	};
 	const data = { [config.name]: value };
 
-	_.forEach(definitions, (schema, name) => {
-		const parsedSchema = transformDefinitionToValidAJVSchemas(schema, validationOptions);
+	_.forEach(definitions, (theSchema, name) => {
+		const parsedSchema = transformDefinitionToValidAJVSchemas(theSchema, validationOptions);
 		ajv.addSchema(parsedSchema, name);
 	});
 
@@ -272,7 +271,7 @@ export const createRouteHandlers = (
 		if (!controller[method.methodName] || !operation) return;
 
 		// convert it from swagger {param} format to express :param format
-		const path = method.path.replace(/{(.*?)}/gi, ':$1');
+		const thePath = method.path.replace(/{(.*?)}/gi, ':$1');
 
 		// create the handler function
 		const handlers = makeHandlerFunction(
@@ -283,7 +282,7 @@ export const createRouteHandlers = (
 			_.get(validationOptions, `[${method.path}][${method.verb}]`, {}) as MethodValidation,
 			contextFactory
 		);
-		routeHandlers.push({ method: method.verb, path, handlers });
+		routeHandlers.push({ method: method.verb, path: thePath, handlers });
 	});
 	return routeHandlers;
 };
@@ -303,8 +302,8 @@ const createRouterAndSwaggerDoc = (Controller: ClassType, rsName?: string, conte
 	// get controller metadata
 	const metadata: IControllerDecoratorArgs = Reflector.getMetadata('davinci:openapi:controller', Controller) || {};
 	const basepath = metadata.basepath || '';
-	const resourceSchema = metadata.resourceSchema;
-	const additionalSchemas = metadata.additionalSchemas;
+	const {resourceSchema} = metadata;
+	const {additionalSchemas} = metadata;
 
 	// create the controller from the supplied class
 	const controller = new Controller();

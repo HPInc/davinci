@@ -1,7 +1,7 @@
 import Debug from 'debug';
 import * as errors from '../../errors/httpErrors';
 
-const debug = Debug('davinci:error-handler');
+const debug = new Debug('davinci:error-handler');
 
 export default ({ exposeStack = false } = {}) => {
 	// @ts-ignore-next-line
@@ -25,9 +25,9 @@ export default ({ exposeStack = false } = {}) => {
 			}
 		}
 
-		error.code = !isNaN(parseInt(error.code, 10)) ? parseInt(error.code, 10) : 500;
+		error.code = !Number.isNaN(parseInt(error.code, 10)) ? parseInt(error.code, 10) : 500;
 
-		const output = Object.assign({}, error.toJSON());
+		const output = { ...error.toJSON()};
 
 		// Don't show stack trace if it is a 404 error
 		if (!exposeStack || error.code === 404) {

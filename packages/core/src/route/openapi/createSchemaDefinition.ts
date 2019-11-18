@@ -23,7 +23,7 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 
 		// it's an object (but not a definition) => recursively call makeSchema on the properties
 		if (typeof typeOrClass === 'object') {
-			const properties = _fp.map((value, key) => ({ [key]: makeSchema(value) }), typeOrClass);
+			const properties = _fp.map((value, k) => ({ [k]: makeSchema(value) }), typeOrClass);
 			return {
 				type: 'object',
 				properties: _fp.isEmpty(properties) ? undefined : properties
@@ -62,25 +62,25 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 			const props: IPropDecoratorMetadata[] =
 				Reflector.getMetadata('davinci:openapi:props', typeOrClass.prototype.constructor) || [];
 
-			const properties = props.reduce((acc, { key, optsFactory }) => {
+			const properties = props.reduce((acc, { key: k, optsFactory }) => {
 				const opts = optsFactory();
 
 				// it's a rawType, we can just return it
 				if (opts && opts.rawType) {
-					acc[key] = opts.rawType;
+					acc[k] = opts.rawType;
 					return acc;
 				}
 
 				let type =
 					opts && opts.type
 						? opts.type
-						: Reflector.getMetadata('design:type', typeOrClass.prototype, key);
+						: Reflector.getMetadata('design:type', typeOrClass.prototype, k);
 
 				if (opts && typeof opts.typeFactory === 'function') {
 					type = opts.typeFactory();
 				}
 
-				acc[key] = makeSchema(type, key);
+				acc[k] = makeSchema(type, k);
 				return acc;
 			}, {});
 
@@ -109,10 +109,12 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 
 			return hasDefinitionDecoration
 				? {
-						$ref: `#/definitions/${title}`
+					$ref: `#/definitions/${title}`
 				  }
 				: definitionObj;
 		}
+
+		return null;
 	};
 
 	const schema = makeSchema(theClass);

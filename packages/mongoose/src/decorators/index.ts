@@ -6,7 +6,7 @@ import { IPropDecoratorOptions, IPropDecoratorOptionsFactory, IPropDecoratorMeta
  * @param opts
  */
 export function prop(opts?: IPropDecoratorOptions | IPropDecoratorOptionsFactory) {
-	return function(prototype: Object, key: string) {
+	return function(prototype: object, key: string) {
 		const optsFactory = () => {
 			const options = typeof opts === 'function' ? opts() : opts;
 			if (options && !options.type && !options.typeFactory) {
@@ -26,6 +26,7 @@ export function prop(opts?: IPropDecoratorOptions | IPropDecoratorOptionsFactory
  * @param index
  * @param options
  */
+// eslint-disable-next-line no-shadow
 export function index(index, options?: any) {
 	return function(target: Function) {
 		Reflector.pushMetadata('davinci:mongoose:indexes', { index, options }, target);
@@ -38,7 +39,7 @@ export function index(index, options?: any) {
  * - mongoose method is the class method is a `prototype` method
  */
 export function method() {
-	return function(target: Function | Object, key: string) {
+	return function(target: Function | object, key: string) {
 		const isPrototype = typeof target === 'object' && typeof target.constructor === 'function';
 		const isStatic = typeof target === 'function' && typeof target.prototype === 'object';
 		const realTarget = isPrototype ? target.constructor : target;
@@ -76,7 +77,7 @@ export interface IVirtualArgs {
  * @param opts
  */
 export function populate({ name, opts }: { name: string; opts: IVirtualArgs }) {
-	return function(target: Object, key: string) {
+	return function(target: object, key: string) {
 		const options = { ...opts, localField: key };
 		Reflector.pushMetadata('davinci:mongoose:populates', { name, options }, target.constructor);
 	};
@@ -87,7 +88,7 @@ export function populate({ name, opts }: { name: string; opts: IVirtualArgs }) {
  * The annotated method will be used as the `getter` of the virtual
  */
 export function virtual() {
-	return function(target: Object, key: string) {
+	return function(target: object, key: string) {
 		const handler = target[key];
 
 		Reflector.pushMetadata('davinci:mongoose:virtuals', { name: key, handler }, target.constructor);

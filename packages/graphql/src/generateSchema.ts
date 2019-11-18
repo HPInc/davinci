@@ -68,7 +68,7 @@ export const generateGQLSchema = ({
 	// it's a primitive type, simple case
 	if ([String, Number, Boolean, Date].includes(type)) {
 		const gqlType = type === Date ? GraphQLDateTime : scalarDict[type.name.toLowerCase()];
-		const schema = isRequired ? GraphQLNonNull(gqlType) : gqlType;
+		const schema = isRequired ? new GraphQLNonNull(gqlType) : gqlType;
 		return { schema, schemas };
 	}
 
@@ -84,8 +84,8 @@ export const generateGQLSchema = ({
 			resolverMetadata,
 			transformMetadata
 		});
-		const gqlType = GraphQLList(gqlSchema.schema);
-		const schema = isRequired ? GraphQLNonNull(gqlType) : gqlType;
+		const gqlType = new GraphQLList(gqlSchema.schema);
+		const schema = isRequired ? new GraphQLNonNull(gqlType) : gqlType;
 
 		return { schema, schemas: _.merge(schemas, gqlSchema.schemas) };
 	}
@@ -94,7 +94,7 @@ export const generateGQLSchema = ({
 	if (typeof type === 'function' || typeof type === 'object') {
 		const suffix = isInput ? [_.upperFirst(operationType || ''), 'Input'].join('') : '';
 		const typeMetadata = Reflector.getMetadata('davinci:graphql:types', type) || {};
-		const name: string = `${typeMetadata.name || type.name || key}${suffix}`;
+		const name = `${typeMetadata.name || type.name || key}${suffix}`;
 
 		// existing type, let's return it
 		if (schemas[name]) {
@@ -104,6 +104,7 @@ export const generateGQLSchema = ({
 		const objTypeConfig: any = {
 			...metadata.opts,
 			name,
+			// eslint-disable-next-line @typescript-eslint/no-use-before-define
 			fields: createObjectFields({
 				parentType: type,
 				schemas,
@@ -118,11 +119,13 @@ export const generateGQLSchema = ({
 
 		schemas[name] =
 			metadata.opts && metadata.opts.required
-				? GraphQLNonNull(new ObjectType(objTypeConfig))
+				? new GraphQLNonNull(new ObjectType(objTypeConfig))
 				: new ObjectType(objTypeConfig);
 
 		return { schema: schemas[name], schemas };
 	}
+
+	return null;
 };
 
 interface ICreateObjectFieldsArgs {

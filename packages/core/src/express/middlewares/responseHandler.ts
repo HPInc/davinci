@@ -1,7 +1,7 @@
 export default () => (req, res, next) => {
-	const requestHandled = req.requestHandled;
-	const result = req.result;
-	const statusCode = req.statusCode;
+	const { requestHandled } = req;
+	const { result } = req;
+	const { statusCode } = req;
 
 	if (!requestHandled) return next();
 
@@ -10,4 +10,6 @@ export default () => (req, res, next) => {
 	} else {
 		res.status(statusCode || 200).send(result);
 	}
+
+	return null;
 };

@@ -1,13 +1,19 @@
+// eslint-disable-next-line max-classes-per-file
 import _ from 'lodash';
 
 export class HttpError extends Error {
 	// https://github.com/Microsoft/TypeScript/issues/13965
 	// tslint:disable-next-line variable-name
 	__proto__: Error;
+
 	code: number;
+
 	statusCode: number;
+
 	className?: string;
+
 	data: any;
+
 	errors: [any];
 
 	/**
@@ -23,10 +29,12 @@ export class HttpError extends Error {
 	constructor(message, name, code, className, data = {}) {
 		const trueProto = new.target.prototype;
 		super(message);
+		// eslint-disable-next-line no-proto
 		this.__proto__ = trueProto;
 
 		this.name = name || 'Error';
-		this.code = this.statusCode = code;
+		this.code = code;
+		this.statusCode = code;
 		this.className = className;
 
 		const clonedData: any = _.clone(data);

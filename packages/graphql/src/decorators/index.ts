@@ -28,7 +28,7 @@ const DEFAULT_FIELD_OPTIONS = {};
  * @param opts
  */
 export function field(opts?: IFieldDecoratorOptions | FieldDecoratorOptionsFactory) {
-	return function(prototype: Object, key: string | symbol): void {
+	return function(prototype: object, key: string | symbol): void {
 		const optsFactory = (args: IFieldDecoratorOptionsFactoryArgs) => {
 			const options = _.merge(
 				{},
@@ -52,7 +52,7 @@ export function field(opts?: IFieldDecoratorOptions | FieldDecoratorOptionsFacto
  * @param name - Optional name
  */
 export const query = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: string): Function => {
-	return function(prototype: Object, methodName: string) {
+	return function(prototype: object, methodName: string) {
 		const metadata: IResolverDecoratorMetadata = {
 			name,
 			methodName,
@@ -69,7 +69,7 @@ export const query = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: s
  * @param name - Optional name
  */
 export const mutation = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: string): Function => {
-	return function(prototype: Object, methodName: string) {
+	return function(prototype: object, methodName: string) {
 		const metadata: IResolverDecoratorMetadata = {
 			name,
 			methodName,
@@ -91,7 +91,7 @@ export interface IArgOptions {
  * @param options
  */
 export function arg(name?, options?: IArgOptions): Function {
-	return function(prototype: Object, methodName: string, index) {
+	return function(prototype: object, methodName: string, index) {
 		// get the existing metadata props
 		const methodParameters = Reflector.getMetadata('davinci:graphql:args', prototype.constructor) || [];
 		const paramtypes = Reflector.getMetadata('design:paramtypes', prototype, methodName);
@@ -124,7 +124,7 @@ export function fieldResolver<T = {}>(
 	fieldName: keyof T,
 	returnType: ClassType | ClassType[]
 ): Function {
-	return function(prototype: Object, methodName: string, index) {
+	return function(prototype: object, methodName: string, index) {
 		// get the existing metadata props
 		const methodParameters =
 			Reflector.getMetadata('davinci:graphql:field-resolvers', resolverOf.prototype.constructor) || [];
@@ -153,7 +153,7 @@ export function fieldResolver<T = {}>(
 }
 
 export function info() {
-	return function(prototype: Object, methodName: string, index) {
+	return function(prototype: object, methodName: string, index) {
 		// get the existing metadata props
 		const methodParameters = Reflector.getMetadata('davinci:graphql:args', prototype.constructor) || [];
 		const isAlreadySet = !!_.find(methodParameters, { methodName, index });
@@ -170,7 +170,7 @@ export function info() {
 }
 
 export function selectionSet() {
-	return function(prototype: Object, methodName: string, index) {
+	return function(prototype: object, methodName: string, index) {
 		// get the existing metadata props
 		const methodParameters = Reflector.getMetadata('davinci:graphql:args', prototype.constructor) || [];
 		const isAlreadySet = !!_.find(methodParameters, { methodName, index });
@@ -187,7 +187,7 @@ export function selectionSet() {
 }
 
 export function parent() {
-	return function(prototype: Object, methodName: string, index) {
+	return function(prototype: object, methodName: string, index) {
 		// get the existing metadata props
 		const methodParameters = Reflector.getMetadata('davinci:graphql:args', prototype.constructor) || [];
 		const isAlreadySet = !!_.find(methodParameters, { methodName, index });
@@ -214,7 +214,7 @@ export interface IResolverDecoratorArgs {
  * @param args
  */
 export function resolver(args?: IResolverDecoratorArgs): Function {
-	return function(target: Object) {
+	return function(target: object) {
 		// define new metadata props
 		Reflector.defineMetadata('davinci:graphql:resolver', args, target);
 	};
