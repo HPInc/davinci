@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.10.0](https://github.com/Oneflow/davinci/compare/@davinci/mongoose@0.9.0...@davinci/mongoose@0.10.0) (2019-11-19)
+
+
+### Features
+
+* **mgoose:** added support for rawMongooseOptions in prop decorator ([fc58778](https://github.com/Oneflow/davinci/commit/fc58778))
+* **mongoose:** prop decorator now has a simpler api ([03f9f22](https://github.com/Oneflow/davinci/commit/03f9f22))
+
+
+
+
+
 # [0.9.0](https://github.com/Oneflow/davinci/compare/@davinci/mongoose@0.8.1...@davinci/mongoose@0.9.0) (2019-11-18)
 
 

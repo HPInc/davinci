@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.9.0](https://github.com/Oneflow/davinci/compare/@davinci/reflector@0.8.0...@davinci/reflector@0.9.0) (2019-11-19)
+
+
+### Features
+
+* **mgoose:** added support for rawMongooseOptions in prop decorator ([fc58778](https://github.com/Oneflow/davinci/commit/fc58778))
+
+
+
+
+
 # [0.8.0](https://github.com/Oneflow/davinci/compare/@davinci/reflector@0.7.0...@davinci/reflector@0.8.0) (2019-11-18)
 
 

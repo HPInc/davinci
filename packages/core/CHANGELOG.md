@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.11.0](https://github.com/Oneflow/davinci/compare/@davinci/core@0.10.0...@davinci/core@0.11.0) (2019-11-19)
+
+
+### Features
+
+* **core:** added rawSchemaOptions support for openapi.prop decorator ([d105d5a](https://github.com/Oneflow/davinci/commit/d105d5a))
+
+
+
+
+
 # [0.10.0](https://github.com/Oneflow/davinci/compare/@davinci/core@0.9.1...@davinci/core@0.10.0) (2019-11-18)
 
 
