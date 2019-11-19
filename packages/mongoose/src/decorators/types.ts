@@ -1,27 +1,10 @@
 import { SchemaTypeOpts } from 'mongoose';
 import { TypeValueFactory, TypeValue, Maybe } from '@davinci/reflector';
 
-export interface IPropDecoratorOptions {
+export interface IPropDecoratorOptions extends SchemaTypeOpts<any> {
 	typeFactory?: TypeValueFactory;
 	type?: TypeValue;
-	required?: boolean;
-	index?: SchemaTypeOpts.IndexOpts | boolean | string;
-	validate?:
-		| RegExp
-		| [RegExp, string]
-		| SchemaTypeOpts.ValidateFn<any>
-		| [SchemaTypeOpts.ValidateFn<any>, string]
-		| SchemaTypeOpts.ValidateOpts
-		| SchemaTypeOpts.AsyncValidateOpts
-		| SchemaTypeOpts.AsyncPromiseValidationFn<any>
-		| SchemaTypeOpts.AsyncPromiseValidationOpts
-		| (
-				| SchemaTypeOpts.ValidateOpts
-				| SchemaTypeOpts.AsyncValidateOpts
-				| SchemaTypeOpts.AsyncPromiseValidationFn<any>
-				| SchemaTypeOpts.AsyncPromiseValidationOpts
-		  )[];
-	rawMongooseOptions?: SchemaTypeOpts<any>;
+	rawType?: any;
 }
 
 export type IPropDecoratorOptionsFactory = () => Maybe<IPropDecoratorOptions>;

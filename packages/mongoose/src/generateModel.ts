@@ -21,6 +21,7 @@ export const getSchemaDefinition = (theClass: Function) => {
 		// - arrays: [string] or [object] or [MyClass]
 		// - objects
 		let type: TypeValue = opts?.type;
+		let isRawType = false;
 
 		if (!type) {
 			if (typeof opts?.typeFactory === 'function') {
@@ -31,8 +32,9 @@ export const getSchemaDefinition = (theClass: Function) => {
 		}
 
 		// explicit mongoose type passing, we can return
-		if (opts?.rawMongooseOptions?.type) {
-			type = opts?.rawMongooseOptions?.type;
+		if (opts?.rawType) {
+			type = opts?.rawType;
+			isRawType = true;
 		}
 
 		const isArray = Array.isArray(type);
@@ -44,7 +46,9 @@ export const getSchemaDefinition = (theClass: Function) => {
 		const isFunction =
 			!([String, Number, Object, Boolean, Date, Schema.Types.ObjectId, Schema.Types.Mixed] as unknown[]).includes(
 				type
-			) && typeof type === 'function';
+			) &&
+			typeof type === 'function' &&
+			!isRawType;
 
 		// if the type is a function, we need to recursively get the schema definition
 		if (isFunction) {
@@ -54,11 +58,8 @@ export const getSchemaDefinition = (theClass: Function) => {
 			}
 		}
 
-		const { rawMongooseOptions, ...propOptions } = opts || {};
-
 		let prop = {
-			...propOptions,
-			...rawMongooseOptions,
+			...opts,
 			type
 		};
 
