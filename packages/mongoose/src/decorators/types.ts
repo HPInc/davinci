@@ -1,8 +1,10 @@
 import { SchemaTypeOpts } from 'mongoose';
-import { TypeValueFactory, Maybe } from '@davinci/reflector';
+import { TypeValueFactory, TypeValue, Maybe } from '@davinci/reflector';
 
 export interface IPropDecoratorOptions extends SchemaTypeOpts<any> {
 	typeFactory?: TypeValueFactory;
+	type?: TypeValue;
+	rawType?: any;
 }
 
 export type IPropDecoratorOptionsFactory = () => Maybe<IPropDecoratorOptions>;

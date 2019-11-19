@@ -65,9 +65,9 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 			const properties = props.reduce((acc, { key: k, optsFactory }) => {
 				const opts = optsFactory();
 
-				// it's a rawType, we can just return it
-				if (opts && opts.rawType) {
-					acc[k] = opts.rawType;
+				// it's a rawSchemaOptions, we can just return it
+				if (opts && opts.rawSchemaOptions) {
+					acc[k] = opts.rawSchemaOptions;
 					return acc;
 				}
 

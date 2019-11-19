@@ -3,18 +3,12 @@ import { IPropDecoratorOptions, IPropDecoratorOptionsFactory, IPropDecoratorMeta
 
 /**
  * Decorate a props as mongoose schema property
- * @param opts
+ * @param options
  */
-export function prop(opts?: IPropDecoratorOptions | IPropDecoratorOptionsFactory) {
-	return function(prototype: object, key: string) {
-		const optsFactory = () => {
-			const options = typeof opts === 'function' ? opts() : opts;
-			if (options && !options.type && !options.typeFactory) {
-				options.type = Reflector.getMetadata('design:type', prototype, key);
-			}
+export function prop(options?: IPropDecoratorOptions | IPropDecoratorOptionsFactory) {
+	return (prototype: object, key: string): void => {
+		const optsFactory = () => (typeof options === 'function' ? options() : options);
 
-			return options;
-		};
 		const metadata: IPropDecoratorMetadata = { key, optsFactory };
 		Reflector.pushMetadata('davinci:mongoose:props', metadata, prototype.constructor);
 	};
@@ -28,7 +22,7 @@ export function prop(opts?: IPropDecoratorOptions | IPropDecoratorOptionsFactory
  */
 // eslint-disable-next-line no-shadow
 export function index(index, options?: any) {
-	return function(target: Function) {
+	return (target: Function): void => {
 		Reflector.pushMetadata('davinci:mongoose:indexes', { index, options }, target);
 	};
 }
@@ -39,7 +33,7 @@ export function index(index, options?: any) {
  * - mongoose method is the class method is a `prototype` method
  */
 export function method() {
-	return function(target: Function | object, key: string) {
+	return (target: Function | object, key: string): void => {
 		const isPrototype = typeof target === 'object' && typeof target.constructor === 'function';
 		const isStatic = typeof target === 'function' && typeof target.prototype === 'object';
 		const realTarget = isPrototype ? target.constructor : target;
@@ -77,7 +71,7 @@ export interface IVirtualArgs {
  * @param opts
  */
 export function populate({ name, opts }: { name: string; opts: IVirtualArgs }) {
-	return function(target: object, key: string) {
+	return (target: object, key: string): void => {
 		const options = { ...opts, localField: key };
 		Reflector.pushMetadata('davinci:mongoose:populates', { name, options }, target.constructor);
 	};
@@ -88,7 +82,7 @@ export function populate({ name, opts }: { name: string; opts: IVirtualArgs }) {
  * The annotated method will be used as the `getter` of the virtual
  */
 export function virtual() {
-	return function(target: object, key: string) {
+	return (target: object, key: string): void => {
 		const handler = target[key];
 
 		Reflector.pushMetadata('davinci:mongoose:virtuals', { name: key, handler }, target.constructor);

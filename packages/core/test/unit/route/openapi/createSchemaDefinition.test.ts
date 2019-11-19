@@ -262,4 +262,33 @@ describe('createSchemaDefinition', () => {
 			}
 		});
 	});
+
+	it('support passing advanced JSON schema options via `rawSchemaOptions` argument', () => {
+		@openapi.definition({ title: 'Customer' })
+		class Customer {
+			@openapi.prop({ required: true, rawSchemaOptions: { oneOf: [{ type: 'object' }, { type: 'array' }] } })
+			customData: string;
+		}
+
+		const definition = createSchemaDefinition(Customer);
+		should(definition).be.deepEqual({
+			Customer: {
+				title: 'Customer',
+				type: 'object',
+				properties: {
+					customData: {
+						oneOf: [
+							{
+								type: 'object'
+							},
+							{
+								type: 'array'
+							}
+						]
+					}
+				},
+				required: ['customData']
+			}
+		});
+	});
 });
