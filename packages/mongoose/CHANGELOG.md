@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.11.0](https://github.com/Oneflow/davinci/compare/@davinci/mongoose@0.10.0...@davinci/mongoose@0.11.0) (2019-11-22)
+
+
+### Features
+
+* **mongoose:** added countDocuments to the list of supported hook events ([e016894](https://github.com/Oneflow/davinci/commit/e016894))
+
+
+
+
+
 # [0.10.0](https://github.com/Oneflow/davinci/compare/@davinci/mongoose@0.9.0...@davinci/mongoose@0.10.0) (2019-11-19)
 
 
