@@ -34,6 +34,14 @@ describe('mongoose hooks', () => {
 			CustomerModel = mongoose.model('customer', CustomerSchema);
 		});
 
+		it('should correctly trigger the hook when `countDocuments` method is called', async () => {
+			await CustomerModel.find({}, null, { context }).countDocuments();
+			should(callback.callCount).be.equal(1);
+			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
+			should(callback.getCall(0).args[1]).be.equal(context);
+			should(callback.getCall(0).args[2]).be.equal('countDocuments');
+		});
+
 		it('should correctly trigger the hook when `find` method is called', async () => {
 			await CustomerModel.find({}, null, { context });
 			should(callback.callCount).be.equal(1);
@@ -119,6 +127,15 @@ describe('mongoose hooks', () => {
 			});
 			CustomerModel = mongoose.model('customer', CustomerSchema);
 		});
+
+		it('should correctly trigger the hook when `countDocuments` method is called', async () => {
+			await CustomerModel.find({}, null, { context }).countDocuments();
+			should(callback.callCount).be.equal(1);
+			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
+			should(callback.getCall(0).args[1]).be.equal(context);
+			should(callback.getCall(0).args[2]).be.equal('countDocuments');
+		});
+
 		it('should correctly trigger the hook when `find` method is called', async () => {
 			await CustomerModel.find({}, null, { context });
 			should(callback.callCount).be.equal(1);

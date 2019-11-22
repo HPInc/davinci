@@ -2,6 +2,7 @@ import _ from 'lodash';
 
 export const READ_HOOKS = [
 	// 'count',
+	'countDocuments',
 	'find',
 	'findOne',
 	'findOneAndDelete',
