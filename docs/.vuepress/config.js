@@ -42,7 +42,6 @@ module.exports = {
 		lastUpdated: true
 	},
 	plugins: [
-		'vuepress-plugin-element-tabs',
 		[
 			'@vuepress/pwa',
 			{
