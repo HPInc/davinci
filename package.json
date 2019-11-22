@@ -37,7 +37,6 @@
 		"ts-node": "8.0.3",
 		"tslib": "^1.9.3",
 		"typescript": "3.7.2",
-		"vuepress": "1.2.0",
-		"vuepress-plugin-element-tabs": "0.1.8"
+		"vuepress": "1.2.0"
 	}
 }

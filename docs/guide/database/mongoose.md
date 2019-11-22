@@ -11,25 +11,15 @@ More specifically, it provides:
 
 ## Installation
 
-:::: tabs
-
-::: tab npm
-
 ```sh
 npm i --save @davinci/mongoose
 ```
 
-:::
-
-::: tab yarn
+or
 
 ```sh
 yarn add @davinci/mongoose
 ```
-
-:::
-
-::::
 
 ## Define the Schema
 

@@ -2,25 +2,15 @@
 
 ## Installation
 
-:::: tabs
-
-::: tab npm
-
 ```sh
 npm i --save @davinci/graphql
 ```
 
-:::
-
-::: tab yarn
+or
 
 ```sh
 yarn add @davinci/graphql
 ```
-
-:::
-
-::::
 
 <br/>
 

@@ -4,25 +4,16 @@
 
 DaVinci can be installed with either `npm` or `yarn`.
 
-:::: tabs
-
-::: tab npm
-
 ```sh
 npm i --save @davinci/core
 ```
 
-:::
-
-::: tab yarn
+or
 
 ```sh
 yarn add @davinci/core
 ```
 
-:::
-
-::::
 
 <br/>
 
