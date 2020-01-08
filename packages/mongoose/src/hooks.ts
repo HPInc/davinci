@@ -19,31 +19,31 @@ const DELETE_HOOKS = ['deleteMany', 'deleteOne', 'remove', 'findOneAndDelete', '
 
 type Hook = ElementType<typeof READ_HOOKS> | ElementType<typeof WRITE_HOOKS> | ElementType<typeof DELETE_HOOKS>;
 
-interface PreArgs {
+export interface PreArgs {
 	query: Mongoose['Query'];
 	hookName: Hook;
 	context: unknown;
 }
-interface AfterArgs {
+export interface AfterArgs {
 	query: Mongoose['Query'];
 	hookName: Hook;
 	context: unknown;
 	result;
 }
 
-interface AfterRawResultArgs {
+export interface AfterRawResultArgs {
 	query: Mongoose['Query'];
 	hookName: Hook;
 	context: unknown;
 	rawResult: unknown;
 }
 
-interface DocumentPreArgs {
+export interface DocumentPreArgs {
 	hookName: Hook;
 	context: unknown;
 	doc: Document;
 }
-interface DocumentPostArgs {
+export interface DocumentPostArgs {
 	result: Document;
 	hookName: Hook;
 	context: unknown;
