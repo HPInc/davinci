@@ -13,3 +13,13 @@ export type ReturnTypeFunc = (returns?: void) => ReturnTypeFuncValue;
 
 export type TypeValueFactory = (type?: void) => TypeValue;
 export type ClassTypeResolver = (of?: void) => ClassType;
+
+/**
+ * Create types from values in array:
+ *
+ * const values = ['A', 'B'] as const
+ * type Foo = ElementType<typeof values> // this is correctly inferred as literal "A" | "B"
+ */
+export type ElementType<T extends ReadonlyArray<unknown>> = T extends ReadonlyArray<infer ElementType>
+	? ElementType
+	: never;
