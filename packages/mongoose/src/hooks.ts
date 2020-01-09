@@ -50,6 +50,19 @@ export interface DocumentPostArgs {
 	doc: Document;
 }
 
+/**
+ * It maps and generates the hook handler arguments
+ * based on the type of the hook
+ * @param stage
+ * @param hookName
+ * @param isReadHook
+ * @param isWriteHook
+ * @param isDeleteHook
+ * @param thisObj
+ * @param result
+ * @param rest
+ * @param context
+ */
 const createHandlerArgs = (
 	stage: Stage,
 	hookName: Hook,
@@ -72,18 +85,27 @@ const createHandlerArgs = (
 	}
 ): PreArgs | AfterArgs | AfterRawResultArgs | DocumentPreArgs | DocumentPostArgs | undefined => {
 	const operation = (isReadHook && 'read') || (isWriteHook && 'write') || (isDeleteHook && 'delete');
-	const returnPreArgs = (): PreArgs => ({ query: thisObj as Mongoose['Query'], hookName, context });
-	const returnAfterArgs = (): AfterArgs => ({ query: thisObj as Mongoose['Query'], hookName, context, result });
+	// createPreArgs creates the arguments for `before(Read|Write|Delete)` hooks
+	const createPreArgs = (): PreArgs => ({ query: thisObj as Mongoose['Query'], hookName, context });
 
-	const returnAfterRawResultArgs = (): AfterRawResultArgs => ({
+	// createAfterArgs creates the arguments for `after(Read|Write|Delete)` hooks
+	const createAfterArgs = (): AfterArgs => ({ query: thisObj as Mongoose['Query'], hookName, context, result });
+
+	// createAfterRawResultArgs creates the arguments for `after(Read|Write|Delete)` hooks triggered by atomic operations
+	const createAfterRawResultArgs = (): AfterRawResultArgs => ({
 		query: thisObj as Mongoose['Query'],
 		hookName,
 		context,
 		rawResult: result
 	});
 
-	const returnDocumentPreArgs = (): DocumentPreArgs => ({ hookName, context, doc: thisObj as Document });
-	const returnDocumentPostArgs = (): DocumentPostArgs => ({
+	// createDocumentPreArgs creates the arguments for `before(Read|Write|Delete)` hooks triggered by
+	// document middlewares: https://mongoosejs.com/docs/middleware.html
+	const createDocumentPreArgs = (): DocumentPreArgs => ({ hookName, context, doc: thisObj as Document });
+
+	// createDocumentPostArgs creates the arguments for `after(Read|Write|Delete)` hooks triggered by
+	// document middlewares: https://mongoosejs.com/docs/middleware.html
+	const createDocumentPostArgs = (): DocumentPostArgs => ({
 		result: thisObj as Document,
 		hookName,
 		context,
@@ -93,7 +115,7 @@ const createHandlerArgs = (
 	const argsSwitch = {
 		countDocuments: {
 			pre: {
-				read: returnPreArgs
+				read: createPreArgs
 			},
 			post: {
 				read: () => ({ query: thisObj, hookName, context, count: result })
@@ -101,103 +123,103 @@ const createHandlerArgs = (
 		},
 		find: {
 			pre: {
-				read: returnPreArgs
+				read: createPreArgs
 			},
 			post: {
-				read: returnAfterArgs
+				read: createAfterArgs
 			}
 		},
 		findOne: {
 			pre: {
-				read: returnPreArgs
+				read: createPreArgs
 			},
 			post: {
-				read: returnAfterArgs
+				read: createAfterArgs
 			}
 		},
 		findOneAndUpdate: {
 			pre: {
-				read: returnPreArgs,
-				write: returnPreArgs
+				read: createPreArgs,
+				write: createPreArgs
 			},
 			post: {
-				read: returnAfterArgs,
-				write: returnAfterArgs
+				read: createAfterArgs,
+				write: createAfterArgs
 			}
 		},
 		update: {
 			pre: {
-				read: returnPreArgs,
-				write: returnPreArgs
+				read: createPreArgs,
+				write: createPreArgs
 			},
 			post: {
-				write: returnAfterRawResultArgs
+				write: createAfterRawResultArgs
 			}
 		},
 		updateMany: {
 			pre: {
-				read: returnPreArgs,
-				write: returnPreArgs
+				read: createPreArgs,
+				write: createPreArgs
 			},
 			post: {
-				write: returnAfterRawResultArgs
+				write: createAfterRawResultArgs
 			}
 		},
 		updateOne: {
 			pre: {
-				read: returnPreArgs,
-				write: returnPreArgs
+				read: createPreArgs,
+				write: createPreArgs
 			},
 			post: {
-				write: returnAfterRawResultArgs
+				write: createAfterRawResultArgs
 			}
 		},
 		findOneAndDelete: {
 			pre: {
-				delete: returnPreArgs
+				delete: createPreArgs
 			},
 			post: {
-				delete: returnAfterArgs
+				delete: createAfterArgs
 			}
 		},
 		findOneAndRemove: {
 			pre: {
-				delete: returnPreArgs
+				delete: createPreArgs
 			},
 			post: {
-				delete: returnAfterArgs
+				delete: createAfterArgs
 			}
 		},
 		deleteOne: {
 			pre: {
-				delete: returnPreArgs
+				delete: createPreArgs
 			},
 			post: {
-				delete: returnAfterRawResultArgs
+				delete: createAfterRawResultArgs
 			}
 		},
 		deleteMany: {
 			pre: {
-				delete: returnPreArgs
+				delete: createPreArgs
 			},
 			post: {
-				delete: returnAfterRawResultArgs
+				delete: createAfterRawResultArgs
 			}
 		},
 		remove: {
 			pre: {
-				delete: returnDocumentPreArgs
+				delete: createDocumentPreArgs
 			},
 			post: {
-				delete: returnDocumentPostArgs
+				delete: createDocumentPostArgs
 			}
 		},
 		save: {
 			pre: {
-				write: returnDocumentPreArgs
+				write: createDocumentPreArgs
 			},
 			post: {
-				write: returnDocumentPostArgs
+				write: createDocumentPostArgs
 			}
 		}
 	};
@@ -205,6 +227,11 @@ const createHandlerArgs = (
 	return argsSwitch?.[hookName]?.[stage]?.[operation]?.();
 };
 
+/**
+ * Factory function that generates (before|after)(Read|Write|Delete) utilities
+ * @param hooksList
+ * @param stage
+ */
 const createRegisterHooks = (hooksList, stage: Stage) => (mongooseSchema, handler): void => {
 	const isReadHook = hooksList === READ_HOOKS;
 	const isWriteHook = hooksList === WRITE_HOOKS;
