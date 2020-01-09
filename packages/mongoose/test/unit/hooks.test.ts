@@ -10,362 +10,425 @@ const sinon = Sinon.createSandbox();
 describe('mongoose hooks', () => {
 	let CustomerSchema;
 	let CustomerModel;
-	let callback;
+	let beforeReadCallback;
+	let afterReadCallback;
+	let beforeWriteCallback;
+	let afterWriteCallback;
+	let beforeDeleteCallback;
+	let afterDeleteCallback;
 	const context = { accountId: '123123' };
+	const customersData = [{ firstname: 'Mike' }, { firstname: 'John' }];
 
 	beforeEach(async () => {
 		delete mongoose.models['customer'];
-		CustomerSchema = new mongoose.Schema();
+		CustomerSchema = new mongoose.Schema({ firstname: String });
 		await mongoose.connect(process.env.MONGODB_URL);
-		callback = sinon.stub();
+
+		beforeReadCallback = sinon.stub();
+		afterReadCallback = sinon.stub();
+		beforeWriteCallback = sinon.stub();
+		afterWriteCallback = sinon.stub();
+		beforeDeleteCallback = sinon.stub();
+		afterDeleteCallback = sinon.stub();
 	});
 
 	afterEach(async () => {
 		sinon.restore();
 		await mongoose.connection.close();
 	});
-
-	/**
-	 * beforeRead
-	 */
-	describe('beforeRead', () => {
+	const registerReadHooks = ({ read, write, delete: del }: { read?: boolean; write?: boolean; delete?: boolean }) => {
 		beforeEach(async () => {
-			beforeRead(CustomerSchema, callback);
-			CustomerModel = mongoose.model('customer', CustomerSchema);
-		});
-
-		it('should correctly trigger the hook when `countDocuments` method is called', async () => {
-			await CustomerModel.find({}, null, { context }).countDocuments();
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			should(callback.getCall(0).args[1]).be.equal(context);
-			should(callback.getCall(0).args[2]).be.equal('countDocuments');
-		});
-
-		it('should correctly trigger the hook when `find` method is called', async () => {
-			await CustomerModel.find({}, null, { context });
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			should(callback.getCall(0).args[1]).be.equal(context);
-			should(callback.getCall(0).args[2]).be.equal('find');
-		});
-
-		it('should correctly trigger the hook when `findOne` method is called', async () => {
-			await CustomerModel.findOne({}, null, { context });
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			should(callback.getCall(0).args[1]).be.equal(context);
-			should(callback.getCall(0).args[2]).be.equal('findOne');
-		});
-
-		it('should correctly trigger the hook when `findOneAndDelete` method is called', async () => {
-			await CustomerModel.findOneAndDelete({});
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			// should(callback.getCall(0).args[1]).be.equal(context);
-			should(callback.getCall(0).args[2]).be.equal('findOneAndDelete');
-		});
-
-		it('should correctly trigger the hook when `findOneAndRemove` method is called', async () => {
-			await CustomerModel.findOneAndRemove({});
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			// should(callback.getCall(0).args[1]).be.equal(context);
-			should(callback.getCall(0).args[2]).be.equal('findOneAndRemove');
-		});
-
-		it('should correctly trigger the hook when `findOneAndUpdate` method is called', async () => {
-			// @ts-ignore
-			await CustomerModel.findOneAndUpdate({}, {}, { context });
-			// findOneAndUpdate method seem to trigger both `findOne` and `findOneAndUpdate` hooks
-			should(callback.callCount).be.equal(2);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			should(callback.getCall(0).args[1]).be.deepEqual(context);
-			should(callback.getCall(0).args[2]).be.equal('findOneAndUpdate');
-		});
-
-		it('should correctly trigger the hook when `deleteMany` method is called', async () => {
-			await CustomerModel.deleteMany({});
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			// should(callback.getCall(0).args[1]).be.equal(context);
-			should(callback.getCall(0).args[2]).be.equal('deleteMany');
-		});
-
-		it('should correctly trigger the hook when `update` method is called', async () => {
-			await CustomerModel.update({}, null, { context });
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			should(callback.getCall(0).args[1]).be.deepEqual(context);
-			should(callback.getCall(0).args[2]).be.equal('update');
-		});
-
-		it('should correctly trigger the hook when `updateOne` method is called', async () => {
-			await CustomerModel.updateOne({}, null, { context });
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			should(callback.getCall(0).args[1]).be.deepEqual(context);
-			should(callback.getCall(0).args[2]).be.equal('updateOne');
-		});
-
-		it('should correctly trigger the hook when `updateMany` method is called', async () => {
-			await CustomerModel.updateMany({}, null, { context });
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			should(callback.getCall(0).args[1]).be.deepEqual(context);
-			should(callback.getCall(0).args[2]).be.equal('updateMany');
-		});
-	});
-
-	/**
-	 * afterRead
-	 */
-	describe('afterRead', () => {
-		beforeEach(async () => {
-			afterRead(CustomerSchema, (...args) => {
-				callback(...args);
+			if (read) {
+				beforeRead(CustomerSchema, ({}) => {})
+				beforeRead(CustomerSchema, beforeReadCallback);
+				afterRead(CustomerSchema, afterReadCallback);
+			}
+			if (write) {
+				beforeWrite(CustomerSchema, beforeWriteCallback);
+				afterWrite(CustomerSchema, afterWriteCallback);
+			}
+			if (del) {
+				beforeDelete(CustomerSchema, beforeDeleteCallback);
+				afterDelete(CustomerSchema, afterDeleteCallback);
+			}
+			CustomerSchema.pre('updateOne', function(...args) {
+				console.log(...args);
 			});
 			CustomerModel = mongoose.model('customer', CustomerSchema);
+			await CustomerModel.deleteMany({}, { skipHooks: true });
+			await CustomerModel.insertMany(customersData, { skipHooks: true });
 		});
 
-		it('should correctly trigger the hook when `countDocuments` method is called', async () => {
+		afterEach(async () => {
+			await CustomerModel.deleteMany();
+		});
+	};
+
+	describe('countDocuments', () => {
+		registerReadHooks({ read: true });
+
+		it('should correctly trigger the hooks', async () => {
 			await CustomerModel.find({}, null, { context }).countDocuments();
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			should(callback.getCall(0).args[1]).be.equal(context);
-			should(callback.getCall(0).args[2]).be.equal('countDocuments');
-		});
+			const beforeArgs = beforeReadCallback.getCall(0).args[0];
+			const afterArgs = afterReadCallback.getCall(0).args[0];
 
-		it('should correctly trigger the hook when `find` method is called', async () => {
+			should(beforeReadCallback.callCount).be.equal(1);
+			should(beforeArgs).match({ hookName: 'countDocuments', context });
+			should(beforeArgs)
+				.have.property('query')
+				.instanceOf(mongoose.Query);
+
+			should(afterReadCallback.callCount).be.equal(1);
+			should(afterArgs).match({ hookName: 'countDocuments', count: 2, context });
+			should(afterArgs)
+				.have.property('query')
+				.instanceOf(mongoose.Query);
+		});
+	});
+
+	describe('find', () => {
+		registerReadHooks({ read: true });
+
+		it('should correctly trigger the hooks', async () => {
 			await CustomerModel.find({}, null, { context });
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			should(callback.getCall(0).args[1]).be.equal(context);
-			should(callback.getCall(0).args[2]).be.equal('find');
-		});
+			const beforeArgs = beforeReadCallback.getCall(0).args[0];
+			const afterArgs = afterReadCallback.getCall(0).args[0];
 
-		it('should correctly trigger the hook when `findOne` method is called', async () => {
-			await CustomerModel.findOne({}, null, { context });
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			should(callback.getCall(0).args[1]).be.equal(context);
-			should(callback.getCall(0).args[2]).be.equal('findOne');
-		});
+			should(beforeReadCallback.callCount).be.equal(1);
+			should(beforeArgs).match({ hookName: 'find', context });
+			should(beforeArgs)
+				.have.property('query')
+				.instanceOf(mongoose.Query);
 
-		it('should correctly trigger the hook when `findOneAndDelete` method is called', async () => {
-			await CustomerModel.findOneAndDelete({});
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			// should(callback.getCall(0).args[1]).be.equal(context);
-			should(callback.getCall(0).args[2]).be.equal('findOneAndDelete');
-		});
-
-		it('should correctly trigger the hook when `findOneAndRemove` method is called', async () => {
-			await CustomerModel.findOneAndRemove({});
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			// should(callback.getCall(0).args[1]).be.equal(context);
-			should(callback.getCall(0).args[2]).be.equal('findOneAndRemove');
-		});
-
-		it('should correctly trigger the hook when `findOneAndUpdate` method is called', async () => {
-			// @ts-ignore
-			await CustomerModel.findOneAndUpdate({}, {}, { context });
-			// findOneAndUpdate method seem to trigger both `findOne` and `findOneAndUpdate` hooks
-			should(callback.callCount).be.equal(2);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			should(callback.getCall(0).args[1]).be.deepEqual(context);
-			should(callback.getCall(0).args[2]).be.equal('findOne');
-		});
-
-		it('should correctly trigger the hook when `deleteMany` method is called', async () => {
-			await CustomerModel.deleteMany({});
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			// should(callback.getCall(0).args[1]).be.equal(context);
-			should(callback.getCall(0).args[2]).be.equal('deleteMany');
-		});
-
-		it('should correctly trigger the hook when `update` method is called', async () => {
-			await CustomerModel.update({}, null, { context });
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			should(callback.getCall(0).args[1]).be.deepEqual(context);
-			should(callback.getCall(0).args[2]).be.equal('update');
-		});
-
-		it('should correctly trigger the hook when `updateOne` method is called', async () => {
-			await CustomerModel.updateOne({}, null, { context });
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			should(callback.getCall(0).args[1]).be.deepEqual(context);
-			should(callback.getCall(0).args[2]).be.equal('updateOne');
-		});
-
-		it('should correctly trigger the hook when `updateMany` method is called', async () => {
-			await CustomerModel.updateMany({}, null, { context });
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			should(callback.getCall(0).args[1]).be.deepEqual(context);
-			should(callback.getCall(0).args[2]).be.equal('updateMany');
+			should(afterReadCallback.callCount).be.equal(1);
+			should(afterArgs).match({ hookName: 'find', context });
+			should(afterArgs)
+				.have.property('query')
+				.instanceOf(mongoose.Query);
+			should(afterArgs)
+				.have.property('result')
+				.length(2);
 		});
 	});
 
-	/**
-	 * beforeWrite
-	 */
-	describe('beforeWrite', () => {
-		beforeEach(async () => {
-			beforeWrite(CustomerSchema, callback);
-			CustomerModel = mongoose.model('customer', CustomerSchema);
-		});
+	describe('findOne', () => {
+		registerReadHooks({ read: true });
 
-		it('should correctly trigger the hook when `findOneAndUpdate` method is called', async () => {
-			await CustomerModel.findOneAndUpdate({}, null, { context });
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			should(callback.getCall(0).args[1]).be.deepEqual(context);
-			should(callback.getCall(0).args[2]).be.equal('findOneAndUpdate');
-		});
+		it('should correctly trigger the hooks', async () => {
+			await CustomerModel.findOne({ firstname: 'Mike' }, null, { context });
+			const beforeArgs = beforeReadCallback.getCall(0).args[0];
+			const afterArgs = afterReadCallback.getCall(0).args[0];
 
-		it('should correctly trigger the hook when `save` method is called', async () => {
-			const customer = new CustomerModel();
+			should(beforeReadCallback.callCount).be.equal(1);
+			should(beforeArgs).match({ hookName: 'findOne', context });
+			should(beforeArgs)
+				.have.property('query')
+				.instanceOf(mongoose.Query);
+
+			should(afterReadCallback.callCount).be.equal(1);
+			should(afterArgs).match({ hookName: 'findOne', context });
+			should(afterArgs)
+				.have.property('query')
+				.instanceOf(mongoose.Query);
+			should(afterArgs)
+				.have.property('result')
+				.match({ firstname: 'Mike' });
+		});
+	});
+
+	describe('findOneAndUpdate', () => {
+		registerReadHooks({ read: true, write: true });
+
+		it('should correctly trigger the hooks', async () => {
+			await CustomerModel.findOneAndUpdate(
+				{ firstname: 'Mike' },
+				{ firstname: 'Michael' },
+				{ context, new: true }
+			);
+			const beforeReadArgs = beforeReadCallback.getCall(0).args[0];
+			const afterReadArgs = afterReadCallback.getCall(0).args[0];
+
+			const beforeWriteArgs = beforeWriteCallback.getCall(0).args[0];
+			const afterWriteArgs = afterWriteCallback.getCall(0).args[0];
+
+			should(beforeReadCallback.callCount).be.equal(1);
+			should(beforeReadArgs).match({ hookName: 'findOneAndUpdate', context });
+			should(beforeReadArgs)
+				.have.property('query')
+				.instanceOf(mongoose.Query);
+
+			should(afterReadCallback.callCount).be.equal(1);
+			should(afterReadArgs).match({ hookName: 'findOneAndUpdate', context });
+			should(afterReadArgs)
+				.have.property('query')
+				.instanceOf(mongoose.Query);
+			should(afterReadArgs)
+				.have.property('result')
+				.match({ firstname: 'Michael' });
+
+			should(beforeWriteCallback.callCount).be.equal(1);
+			should(beforeWriteArgs).match({ hookName: 'findOneAndUpdate', context });
+			should(beforeWriteArgs)
+				.have.property('query')
+				.instanceOf(mongoose.Query);
+
+			should(afterWriteCallback.callCount).be.equal(1);
+			should(afterWriteArgs).match({ hookName: 'findOneAndUpdate', context });
+			should(afterWriteArgs)
+				.have.property('query')
+				.instanceOf(mongoose.Query);
+			should(afterWriteArgs)
+				.have.property('result')
+				.match({ firstname: 'Michael' });
+		});
+	});
+
+	describe('update', () => {
+		registerReadHooks({ read: true, write: true });
+
+		it('should correctly trigger the hooks', async () => {
+			await CustomerModel.update({ firstname: 'Mike' }, { firstname: 'Michael' }, { context, new: true });
+			const beforeReadArgs = beforeReadCallback.getCall(0).args[0];
+
+			const beforeWriteArgs = beforeWriteCallback.getCall(0).args[0];
+			const afterWriteArgs = afterWriteCallback.getCall(0).args[0];
+
+			should(beforeReadCallback.callCount).be.equal(1);
+			should(beforeReadArgs).match({ hookName: 'update', context });
+			should(beforeReadArgs)
+				.have.property('query')
+				.instanceOf(mongoose.Query);
+
+			should(beforeWriteCallback.callCount).be.equal(1);
+			should(beforeWriteArgs).match({ hookName: 'update', context });
+			should(beforeWriteArgs)
+				.have.property('query')
+				.instanceOf(mongoose.Query);
+
+			should(afterWriteCallback.callCount).be.equal(1);
+			should(afterWriteArgs).match({ hookName: 'update', context });
+			should(afterWriteArgs)
+				.have.property('query')
+				.instanceOf(mongoose.Query);
+			should(afterWriteArgs).have.property('rawResult');
+		});
+	});
+
+	describe('updateMany', () => {
+		registerReadHooks({ read: true, write: true });
+
+		it('should correctly trigger the hooks', async () => {
+			await CustomerModel.updateMany({ firstname: 'Mike' }, { firstname: 'Michael' }, { context, new: true });
+			const beforeReadArgs = beforeReadCallback.getCall(0).args[0];
+
+			const beforeWriteArgs = beforeWriteCallback.getCall(0).args[0];
+			const afterWriteArgs = afterWriteCallback.getCall(0).args[0];
+
+			should(beforeReadCallback.callCount).be.equal(1);
+			should(beforeReadArgs).match({ hookName: 'updateMany', context });
+			should(beforeReadArgs)
+				.have.property('query')
+				.instanceOf(mongoose.Query);
+
+			should(beforeWriteCallback.callCount).be.equal(1);
+			should(beforeWriteArgs).match({ hookName: 'updateMany', context });
+			should(beforeWriteArgs)
+				.have.property('query')
+				.instanceOf(mongoose.Query);
+
+			should(afterWriteCallback.callCount).be.equal(1);
+			should(afterWriteArgs).match({ hookName: 'updateMany', context });
+			should(afterWriteArgs)
+				.have.property('query')
+				.instanceOf(mongoose.Query);
+			should(afterWriteArgs).have.property('rawResult');
+		});
+	});
+
+	describe('updateOne', () => {
+		registerReadHooks({ read: true, write: true });
+
+		it('should correctly trigger the hooks', async () => {
+			await CustomerModel.updateOne({ firstname: 'Mike' }, { firstname: 'Michael' }, { context, new: true });
+			const beforeReadArgs = beforeReadCallback.getCall(0).args[0];
+
+			const beforeWriteArgs = beforeWriteCallback.getCall(0).args[0];
+			const afterWriteArgs = afterWriteCallback.getCall(0).args[0];
+
+			should(beforeReadCallback.callCount).be.equal(1);
+			should(beforeReadArgs).match({ hookName: 'updateOne', context });
+			should(beforeReadArgs)
+				.have.property('query')
+				.instanceOf(mongoose.Query);
+
+			should(beforeWriteCallback.callCount).be.equal(1);
+			should(beforeWriteArgs).match({ hookName: 'updateOne', context });
+			should(beforeWriteArgs)
+				.have.property('query')
+				.instanceOf(mongoose.Query);
+
+			should(afterWriteCallback.callCount).be.equal(1);
+			should(afterWriteArgs).match({ hookName: 'updateOne', context });
+			should(afterWriteArgs)
+				.have.property('query')
+				.instanceOf(mongoose.Query);
+			should(afterWriteArgs).have.property('rawResult');
+		});
+	});
+
+	describe('findOneAndDelete', () => {
+		registerReadHooks({ delete: true });
+
+		it('should correctly trigger the hooks', async () => {
+			await CustomerModel.findOneAndDelete({ firstname: 'Mike' }, { context });
+			const beforeDeleteArgs = beforeDeleteCallback.getCall(0).args[0];
+			const afterDeleteArgs = afterDeleteCallback.getCall(0).args[0];
+
+			should(beforeDeleteCallback.callCount).be.equal(1);
+			should(beforeDeleteArgs).match({ hookName: 'findOneAndDelete', context });
+			should(beforeDeleteArgs)
+				.have.property('query')
+				.instanceOf(mongoose.Query);
+
+			should(afterDeleteCallback.callCount).be.equal(1);
+			should(afterDeleteArgs).match({ hookName: 'findOneAndDelete', context });
+			should(afterDeleteArgs)
+				.have.property('query')
+				.instanceOf(mongoose.Query);
+			should(afterDeleteArgs)
+				.have.property('result')
+				.match({ firstname: 'Mike' });
+			should(await CustomerModel.findOne({ firstname: 'Mike' })).be.null();
+		});
+	});
+
+	describe('findOneAndRemove', () => {
+		registerReadHooks({ delete: true });
+
+		it('should correctly trigger the hooks', async () => {
+			await CustomerModel.findOneAndRemove({ firstname: 'Mike' }, { context });
+			const beforeDeleteArgs = beforeDeleteCallback.getCall(0).args[0];
+			const afterDeleteArgs = afterDeleteCallback.getCall(0).args[0];
+
+			should(beforeDeleteCallback.callCount).be.equal(1);
+			should(beforeDeleteArgs).match({ hookName: 'findOneAndRemove', context });
+			should(beforeDeleteArgs)
+				.have.property('query')
+				.instanceOf(mongoose.Query);
+
+			should(afterDeleteCallback.callCount).be.equal(1);
+			should(afterDeleteArgs).match({ hookName: 'findOneAndRemove', context });
+			should(afterDeleteArgs)
+				.have.property('query')
+				.instanceOf(mongoose.Query);
+			should(afterDeleteArgs)
+				.have.property('result')
+				.match({ firstname: 'Mike' });
+			should(await CustomerModel.findOne({ firstname: 'Mike' })).be.null();
+		});
+	});
+
+	describe('deleteOne', () => {
+		registerReadHooks({ delete: true });
+
+		it('should correctly trigger the hooks', async () => {
+			await CustomerModel.deleteOne({ firstname: 'Mike' }).setOptions({ context });
+			const beforeDeleteArgs = beforeDeleteCallback.getCall(0).args[0];
+			const afterDeleteArgs = afterDeleteCallback.getCall(0).args[0];
+
+			should(beforeDeleteCallback.callCount).be.equal(1);
+			should(beforeDeleteArgs).match({ hookName: 'deleteOne', context });
+			should(beforeDeleteArgs)
+				.have.property('query')
+				.instanceOf(mongoose.Query);
+
+			should(afterDeleteCallback.callCount).be.equal(1);
+			should(afterDeleteArgs).match({ hookName: 'deleteOne', context });
+			should(afterDeleteArgs)
+				.have.property('query')
+				.instanceOf(mongoose.Query);
+			should(afterDeleteArgs).have.property('rawResult');
+			should(await CustomerModel.findOne({ firstname: 'Mike' })).be.null();
+		});
+	});
+
+	describe('deleteMany', () => {
+		registerReadHooks({ delete: true });
+
+		it('should correctly trigger the hooks', async () => {
+			await CustomerModel.deleteMany({ firstname: 'Mike' }).setOptions({ context });
+			const beforeDeleteArgs = beforeDeleteCallback.getCall(0).args[0];
+			const afterDeleteArgs = afterDeleteCallback.getCall(0).args[0];
+
+			should(beforeDeleteCallback.callCount).be.equal(1);
+			should(beforeDeleteArgs).match({ hookName: 'deleteMany', context });
+			should(beforeDeleteArgs)
+				.have.property('query')
+				.instanceOf(mongoose.Query);
+
+			should(afterDeleteCallback.callCount).be.equal(1);
+			should(afterDeleteArgs).match({ hookName: 'deleteMany', context });
+			should(afterDeleteArgs)
+				.have.property('query')
+				.instanceOf(mongoose.Query);
+			should(afterDeleteArgs).have.property('rawResult');
+			should(await CustomerModel.findOne({ firstname: 'Mike' })).be.null();
+		});
+	});
+
+	describe('save', () => {
+		registerReadHooks({ write: true });
+
+		it('should correctly trigger the hooks', async () => {
+			const customer = await CustomerModel.findOne({ firstname: 'Mike' }, null, { skipHooks: true });
+			customer.firstname = 'Michael';
+
 			await customer.save({ context });
-			should(callback.callCount).be.equal(2);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Model);
-			should(callback.getCall(0).args[1]).be.deepEqual(context);
-			should(callback.getCall(0).args[2]).be.equal('validate');
-			should(callback.getCall(1).args[2]).be.equal('save');
-		});
 
-		it('should correctly trigger the hook when `update` method is called', async () => {
-			await CustomerModel.update({}, {}, { runValidators: true, context });
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			// should(callback.getCall(0).args[1]).be.equal(context);
-			should(callback.getCall(0).args[2]).be.equal('update');
-		});
+			const beforeWriteArgs = beforeWriteCallback.getCall(0).args[0];
+			const afterWriteArgs = afterWriteCallback.getCall(0).args[0];
 
-		it('should correctly trigger the hook when `updateMany` method is called', async () => {
-			// @ts-ignore
-			await CustomerModel.updateMany({}, {}, { context });
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			should(callback.getCall(0).args[1]).be.deepEqual(context);
-			should(callback.getCall(0).args[2]).be.equal('updateMany');
+			should(beforeWriteCallback.callCount).be.equal(1);
+			should(beforeWriteArgs).match({ hookName: 'save', context });
+			should(beforeWriteArgs)
+				.have.property('doc')
+				.have.property('firstname')
+				.equal('Michael');
+
+			should(afterWriteCallback.callCount).be.equal(1);
+			should(afterWriteArgs).match({ hookName: 'save', context });
+			should(afterWriteArgs)
+				.have.property('result')
+				.have.property('firstname')
+				.equal('Michael');
 		});
 	});
 
-	/**
-	 * afterWrite
-	 */
-	describe('afterWrite', () => {
-		beforeEach(async () => {
-			afterWrite(CustomerSchema, callback);
-			CustomerModel = mongoose.model('customer', CustomerSchema);
-		});
+	describe('remove', () => {
+		registerReadHooks({ delete: true });
 
-		it('should correctly trigger the hook when `findOneAndUpdate` method is called', async () => {
-			await CustomerModel.findOneAndUpdate({}, null, { context });
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			should(callback.getCall(0).args[1]).be.deepEqual(context);
-			should(callback.getCall(0).args[2]).be.equal('findOneAndUpdate');
-		});
+		it('should correctly trigger the hooks', async () => {
+			const customer = await CustomerModel.findOne({ firstname: 'Mike' }, null, { skipHooks: true });
 
-		it('should correctly trigger the hook when `save` method is called', async () => {
-			const customer = new CustomerModel();
-			await customer.save({ context });
-			should(callback.callCount).be.equal(2);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Model);
-			should(callback.getCall(0).args[1]).be.deepEqual(context);
-			should(callback.getCall(0).args[2]).be.equal('validate');
-			should(callback.getCall(1).args[2]).be.equal('save');
-		});
+			await customer.remove({ context });
 
-		it('should correctly trigger the hook when `update` method is called', async () => {
-			await CustomerModel.update({}, {}, { context });
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			// should(callback.getCall(0).args[1]).be.equal(context);
-			should(callback.getCall(0).args[2]).be.equal('update');
-		});
+			const beforeDeleteArgs = beforeDeleteCallback.getCall(0).args[0];
+			const afterDeleteArgs = afterDeleteCallback.getCall(0).args[0];
 
-		it('should correctly trigger the hook when `updateMany` method is called', async () => {
-			// @ts-ignore
-			await CustomerModel.updateMany({}, {}, { context });
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			should(callback.getCall(0).args[1]).be.deepEqual(context);
-			should(callback.getCall(0).args[2]).be.equal('updateMany');
-		});
-	});
+			should(beforeDeleteCallback.callCount).be.equal(1);
+			should(beforeDeleteArgs).match({ hookName: 'remove' });
+			should(beforeDeleteArgs)
+				.have.property('doc')
+				.have.property('firstname')
+				.equal('Mike');
 
-	/**
-	 * beforeDelete
-	 */
-	describe('beforeDelete', () => {
-		beforeEach(async () => {
-			beforeDelete(CustomerSchema, callback);
-			CustomerModel = mongoose.model('customer', CustomerSchema);
-		});
-
-		it('should correctly trigger the hook when `deleteMany` method is called', async () => {
-			await CustomerModel.deleteMany({}, { context });
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			should(callback.getCall(0).args[1]).be.deepEqual(context);
-			should(callback.getCall(0).args[2]).be.equal('deleteMany');
-		});
-
-		it('should correctly trigger the hook when `findOneAndDelete` method is called', async () => {
-			await CustomerModel.findOneAndDelete({}, { context });
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			should(callback.getCall(0).args[1]).be.equal(context);
-			should(callback.getCall(0).args[2]).be.equal('findOneAndDelete');
-		});
-
-		it('should correctly trigger the hook when `findOneAndRemove` method is called', async () => {
-			await CustomerModel.findOneAndRemove({}, { context });
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			should(callback.getCall(0).args[1]).be.equal(context);
-			should(callback.getCall(0).args[2]).be.equal('findOneAndRemove');
-		});
-	});
-
-	/**
-	 * afterDelete
-	 */
-	describe('afterDelete', () => {
-		beforeEach(async () => {
-			afterDelete(CustomerSchema, callback);
-			CustomerModel = mongoose.model('customer', CustomerSchema);
-		});
-
-		it('should correctly trigger the hook when `deleteMany` method is called', async () => {
-			await CustomerModel.deleteMany({}, { context });
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			should(callback.getCall(0).args[1]).be.deepEqual(context);
-			should(callback.getCall(0).args[2]).be.equal('deleteMany');
-		});
-
-		it('should correctly trigger the hook when `findOneAndDelete` method is called', async () => {
-			await CustomerModel.findOneAndDelete({}, { context });
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			should(callback.getCall(0).args[1]).be.equal(context);
-			should(callback.getCall(0).args[2]).be.equal('findOneAndDelete');
-		});
-
-		it('should correctly trigger the hook when `findOneAndRemove` method is called', async () => {
-			await CustomerModel.findOneAndRemove({}, { context });
-			should(callback.callCount).be.equal(1);
-			should(callback.getCall(0).args[0]).be.instanceOf(mongoose.Query);
-			should(callback.getCall(0).args[1]).be.equal(context);
-			should(callback.getCall(0).args[2]).be.equal('findOneAndRemove');
+			should(afterDeleteCallback.callCount).be.equal(1);
+			should(afterDeleteArgs).match({ hookName: 'remove' });
+			should(afterDeleteArgs)
+				.have.property('result')
+				.have.property('firstname')
+				.equal('Mike');
+			should(await CustomerModel.findOne({ firstname: 'Mike' })).be.null();
 		});
 	});
 });

@@ -49,7 +49,7 @@ export default class Customer {
 
 	@mgoose.prop({ type: Schema.Types.ObjectId })
 	@openapi.prop()
-	accountId: number;
+	accountId: string;
 
 	@mgoose.prop()
 	@openapi.prop()
