@@ -1,5 +1,4 @@
-import { ElementType } from '@davinci/reflector';
-import { Document, Mongoose, Schema } from 'mongoose';
+import { Document, Schema, Query } from 'mongoose';
 
 type Stage = 'pre' | 'post';
 
@@ -17,22 +16,35 @@ const WRITE_HOOKS = ['findOneAndUpdate', 'save', 'update', 'updateMany', 'update
 
 const DELETE_HOOKS = ['deleteMany', 'deleteOne', 'remove', 'findOneAndDelete', 'findOneAndRemove'] as const;
 
-type Hook = ElementType<typeof READ_HOOKS> | ElementType<typeof WRITE_HOOKS> | ElementType<typeof DELETE_HOOKS>;
+type Hook =
+	| 'countDocuments'
+	| 'find'
+	| 'findOne'
+	| 'findOneAndUpdate'
+	| 'update'
+	| 'updateMany'
+	| 'updateOne'
+	| 'save'
+	| 'deleteMany'
+	| 'deleteOne'
+	| 'remove'
+	| 'findOneAndDelete'
+	| 'findOneAndRemove';
 
 export interface PreArgs {
-	query: Mongoose['Query'];
+	query: InstanceType<typeof Query>;
 	hookName: Hook;
 	context: unknown;
 }
 export interface AfterArgs {
-	query: Mongoose['Query'];
+	query: InstanceType<typeof Query>;
 	hookName: Hook;
 	context: unknown;
 	result;
 }
 
 export interface AfterRawResultArgs {
-	query: Mongoose['Query'];
+	query: InstanceType<typeof Query>;
 	hookName: Hook;
 	context: unknown;
 	rawResult: unknown;
@@ -78,7 +90,7 @@ const createHandlerArgs = (
 		isReadHook: boolean;
 		isWriteHook: boolean;
 		isDeleteHook: boolean;
-		thisObj: Document | Mongoose['Query'];
+		thisObj: Document | InstanceType<typeof Query>;
 		result?: unknown;
 		rest?: unknown[];
 		context?: unknown;
@@ -86,14 +98,19 @@ const createHandlerArgs = (
 ): PreArgs | AfterArgs | AfterRawResultArgs | DocumentPreArgs | DocumentPostArgs | undefined => {
 	const operation = (isReadHook && 'read') || (isWriteHook && 'write') || (isDeleteHook && 'delete');
 	// createPreArgs creates the arguments for `before(Read|Write|Delete)` hooks
-	const createPreArgs = (): PreArgs => ({ query: thisObj as Mongoose['Query'], hookName, context });
+	const createPreArgs = (): PreArgs => ({ query: thisObj as InstanceType<typeof Query>, hookName, context });
 
 	// createAfterArgs creates the arguments for `after(Read|Write|Delete)` hooks
-	const createAfterArgs = (): AfterArgs => ({ query: thisObj as Mongoose['Query'], hookName, context, result });
+	const createAfterArgs = (): AfterArgs => ({
+		query: thisObj as InstanceType<typeof Query>,
+		hookName,
+		context,
+		result
+	});
 
 	// createAfterRawResultArgs creates the arguments for `after(Read|Write|Delete)` hooks triggered by atomic operations
 	const createAfterRawResultArgs = (): AfterRawResultArgs => ({
-		query: thisObj as Mongoose['Query'],
+		query: thisObj as InstanceType<typeof Query>,
 		hookName,
 		context,
 		rawResult: result
