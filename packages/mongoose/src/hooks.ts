@@ -31,35 +31,35 @@ type Hook =
 	| 'findOneAndDelete'
 	| 'findOneAndRemove';
 
-export interface PreArgs {
+export interface PreArgs<Context = unknown> {
 	query: InstanceType<typeof Query>;
 	hookName: Hook;
-	context: unknown;
+	context: Context;
 }
-export interface AfterArgs {
+export interface AfterArgs<Context = unknown, ModelSchema = unknown> {
 	query: InstanceType<typeof Query>;
 	hookName: Hook;
-	context: unknown;
-	result;
+	context: Context;
+	result: (ModelSchema & Document) | (ModelSchema | Document)[];
 }
 
-export interface AfterRawResultArgs {
+export interface AfterRawResultArgs<Context = unknown> {
 	query: InstanceType<typeof Query>;
 	hookName: Hook;
-	context: unknown;
+	context: Context;
 	rawResult: unknown;
 }
 
-export interface DocumentPreArgs {
+export interface DocumentPreArgs<Context = unknown, ModelSchema = unknown> {
 	hookName: Hook;
-	context: unknown;
-	doc: Document;
+	context: Context;
+	doc: Document & ModelSchema;
 }
-export interface DocumentPostArgs {
+export interface DocumentPostArgs<Context = unknown, ModelSchema = unknown> {
 	result: Document;
 	hookName: Hook;
-	context: unknown;
-	doc: Document;
+	context: Context;
+	doc: Document & ModelSchema;
 }
 
 /**
@@ -91,7 +91,7 @@ const createHandlerArgs = (
 		isWriteHook: boolean;
 		isDeleteHook: boolean;
 		thisObj: Document | InstanceType<typeof Query>;
-		result?: unknown;
+		result?: any;
 		rest?: unknown[];
 		context?: unknown;
 	}
@@ -294,37 +294,59 @@ const createRegisterHooks = (hooksList, stage: Stage) => (mongooseSchema, handle
 	);
 };
 
-export type Handler = {
-	beforeRead: (args: PreArgs) => unknown | Promise<unknown>;
-	afterRead: (args: AfterArgs) => unknown | Promise<unknown>;
+export type Handler<Context = unknown, ModelSchema = unknown> = {
+	beforeRead: (args: PreArgs<Context>) => unknown | Promise<unknown>;
+	afterRead: (args: AfterArgs<Context, ModelSchema>) => unknown | Promise<unknown>;
 
-	beforeWrite: (args: PreArgs & DocumentPreArgs) => unknown | Promise<unknown>;
-	afterWrite: (args: AfterArgs & DocumentPostArgs & AfterRawResultArgs) => unknown | Promise<unknown>;
+	beforeWrite: (args: PreArgs<Context> & DocumentPreArgs<Context, ModelSchema>) => unknown | Promise<unknown>;
+	afterWrite: (
+		args: AfterArgs<Context, ModelSchema> & DocumentPostArgs & AfterRawResultArgs<Context>
+	) => unknown | Promise<unknown>;
 
-	beforeDelete: (args: PreArgs & DocumentPreArgs) => unknown | Promise<unknown>;
-	afterDelete: (args: AfterArgs & DocumentPostArgs & AfterRawResultArgs) => unknown | Promise<unknown>;
+	beforeDelete: (args: PreArgs<Context> & DocumentPreArgs<Context, ModelSchema>) => unknown | Promise<unknown>;
+	afterDelete: (
+		args: AfterArgs<Context, ModelSchema> & DocumentPostArgs<Context, ModelSchema> & AfterRawResultArgs<Context>
+	) => unknown | Promise<unknown>;
 };
 
-export function beforeRead(schema: Schema, handler: Handler['beforeRead']): void {
+export function beforeRead<Context = unknown, ModelSchema = unknown>(
+	schema: Schema,
+	handler: Handler<Context, ModelSchema>['beforeRead']
+): void {
 	return createRegisterHooks(READ_HOOKS, 'pre')(schema, handler);
 }
 
-export function afterRead(schema: Schema, handler: Handler['afterRead']): void {
+export function afterRead<Context = unknown, ModelSchema = unknown>(
+	schema: Schema,
+	handler: Handler<Context, ModelSchema>['afterRead']
+): void {
 	return createRegisterHooks(READ_HOOKS, 'post')(schema, handler);
 }
 
-export function beforeWrite(schema: Schema, handler: Handler['beforeWrite']): void {
+export function beforeWrite<Context = unknown, ModelSchema = unknown>(
+	schema: Schema,
+	handler: Handler<Context, ModelSchema>['beforeWrite']
+): void {
 	return createRegisterHooks(WRITE_HOOKS, 'pre')(schema, handler);
 }
 
-export function afterWrite(schema: Schema, handler: Handler['afterWrite']): void {
+export function afterWrite<Context = unknown, ModelSchema = unknown>(
+	schema: Schema,
+	handler: Handler<Context, ModelSchema>['afterWrite']
+): void {
 	return createRegisterHooks(WRITE_HOOKS, 'post')(schema, handler);
 }
 
-export function beforeDelete(schema: Schema, handler: Handler['beforeDelete']): void {
+export function beforeDelete<Context = unknown, ModelSchema = unknown>(
+	schema: Schema,
+	handler: Handler<Context, ModelSchema>['beforeDelete']
+): void {
 	return createRegisterHooks(DELETE_HOOKS, 'pre')(schema, handler);
 }
 
-export function afterDelete(schema: Schema, handler: Handler['afterDelete']): void {
+export function afterDelete<Context = unknown, ModelSchema = unknown>(
+	schema: Schema,
+	handler: Handler<Context, ModelSchema>['afterDelete']
+): void {
 	return createRegisterHooks(DELETE_HOOKS, 'post')(schema, handler);
 }

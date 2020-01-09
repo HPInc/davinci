@@ -2,6 +2,7 @@ import express, { Express } from 'express';
 import { createApp, createRouter, DaVinciExpress } from '@davinci/core';
 import { CustomerController } from './api/customer';
 import packageJson = require('../package.json');
+import { Context } from './types';
 
 const options = {
 	version: packageJson.version,
@@ -31,7 +32,7 @@ const options = {
 
 const expressApp: Express = express();
 
-const createContext = ({ req }) => ({ accountId: req.headers['x-oneflow-accountid'] });
+const createContext = ({ req }): Context => ({ accountId: req.headers['x-oneflow-accountid'] });
 
 createApp(expressApp, options, app => {
 	app.use(createRouter(CustomerController, 'Customer', createContext));

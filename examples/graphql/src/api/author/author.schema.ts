@@ -44,7 +44,7 @@ export default class Author {
 
 	@mgoose.prop({ type: Schema.Types.ObjectId })
 	@graphql.field()
-	accountId: number;
+	accountId: string;
 
 	@mgoose.prop({ type: Date })
 	@graphql.field({ type: Date })

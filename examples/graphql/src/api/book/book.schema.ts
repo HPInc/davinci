@@ -22,6 +22,10 @@ export default class Book {
 
 	@graphql.field({ typeFactory: () => [AuthorSchema] })
 	authors: AuthorSchema[];
+
+	@mgoose.prop({ type: Schema.Types.ObjectId })
+	@graphql.field()
+	accountId: string;
 }
 
 export class BookQuery extends Book {

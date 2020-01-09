@@ -1,26 +1,28 @@
 import { Document, model } from 'mongoose';
 import { mgoose } from '@davinci/mongoose';
 import BookSchema from './book.schema';
+import { Context } from '../../types';
 
 const { generateSchema, beforeRead, beforeWrite, beforeDelete } = mgoose;
 
 const schema = generateSchema(BookSchema);
 
-beforeRead(schema, (mQuery, context) => {
-	const currentQuery = mQuery.getQuery();
+beforeRead<Context>(schema, ({ query, context }) => {
 	if (context) {
-		mQuery.setQuery({ ...currentQuery, accountId: context.accountId });
+		const currentQuery = query.getQuery();
+		query.setQuery({ ...currentQuery, accountId: context.accountId });
 	}
 });
 
-beforeWrite(schema, (doc, context) => {
+beforeWrite<Context, BookSchema>(schema, ({ doc, context }) => {
+	// inject accountId before persisting into DB
 	if (context) {
 		doc.accountId = context.accountId;
 	}
 });
 
-beforeDelete(schema, (...args) => {
-	console.log(...args);
+beforeDelete(schema, () => {
+	// perform some cleanup
 });
 
 const Book = model<BookSchema & Document>('Book', schema, 'books');
