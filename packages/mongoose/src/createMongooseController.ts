@@ -112,7 +112,7 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 
 			const [data, total] = await bluebird.all([
 				populate ? mQuery.populate(populate) : mQuery,
-				this.model.count(where)
+				this.model.countDocuments(where).setOptions({ context: ctx })
 			]);
 
 			return {
@@ -142,7 +142,7 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 		@route.get({ path: '/:id', summary: 'Fetch by id', responses: { 200: RSchema } })
 		public async findById(
 			@route.path()
-				id: string,
+			id: string,
 			@route.param({ name: 'query', in: 'query' }) query: QueryParameters,
 			@context() ctx
 		) {
@@ -167,7 +167,7 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 		})
 		public async updateById(
 			@route.path()
-				id: string,
+			id: string,
 			@route.body() data: RSchema,
 			@context() ctx
 		) {
