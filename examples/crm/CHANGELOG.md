@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.9.4](https://github.com/Oneflow/davinci/compare/crm@0.9.3...crm@0.9.4) (2020-02-07)
+
+
+### Bug Fixes
+
+* fixed mongoose crud model document count ([9eed0c5](https://github.com/Oneflow/davinci/commit/9eed0c5))
+
+
+
+
+
 ## [0.9.3](https://github.com/Oneflow/davinci/compare/crm@0.9.2...crm@0.9.3) (2020-01-09)
 
 **Note:** Version bump only for package crm
