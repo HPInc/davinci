@@ -1,7 +1,7 @@
 import express, { Express } from 'express';
 import { createApp, createRouter, DaVinciExpress } from '@davinci/core';
 import { CustomerController } from './api/customer';
-import packageJson = require('../package.json');
+import packageJson from '../package.json';
 import { Context } from './types';
 
 const options = {
@@ -21,7 +21,12 @@ const options = {
 					name: 'CRM',
 					version: packageJson.version
 				},
-				securityDefinitions: { Bearer: { type: 'apiKey', name: 'Authorization', in: 'header' } }
+				securityDefinitions: { Bearer: { type: 'apiKey', name: 'Authorization', in: 'header' } },
+				security: [
+					{
+						Bearer: []
+					}
+				]
 			}
 		},
 		ui: {
