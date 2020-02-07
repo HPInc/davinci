@@ -22,7 +22,7 @@
 		"@davinci/reflector": "^0.9.1",
 		"bluebird": "3.7.1",
 		"debug": "^4.1.1",
-		"lodash": "^4.17.11"
+		"lodash": "4.17.15"
 	},
 	"devDependencies": {
 		"mongoose": "5.5.5",
