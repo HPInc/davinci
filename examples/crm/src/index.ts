@@ -1,8 +1,7 @@
 import express, { Express } from 'express';
 import { createApp, createRouter, DaVinciExpress } from '@davinci/core';
 import { CustomerController } from './api/customer';
-// @ts-ignore
-import packageJson = require('../package.json');
+import packageJson from '../package.json';
 import { Context } from './types';
 
 const options = {
