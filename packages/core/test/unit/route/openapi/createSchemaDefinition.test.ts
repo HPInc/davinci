@@ -277,6 +277,7 @@ describe('createSchemaDefinition', () => {
 				type: 'object',
 				properties: {
 					customData: {
+						type: 'string',
 						oneOf: [
 							{
 								type: 'object'
