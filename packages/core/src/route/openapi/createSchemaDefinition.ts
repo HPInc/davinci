@@ -1,4 +1,5 @@
 import _fp from 'lodash/fp';
+import _merge from 'lodash/merge';
 import { Reflector } from '@davinci/reflector';
 import { ISwaggerDefinitions, IPropDecoratorMetadata } from '../types';
 
@@ -65,12 +66,6 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 			const properties = props.reduce((acc, { key: k, optsFactory }) => {
 				const opts = optsFactory();
 
-				// it's a rawSchemaOptions, we can just return it
-				if (opts && opts.rawSchemaOptions) {
-					acc[k] = opts.rawSchemaOptions;
-					return acc;
-				}
-
 				let type =
 					opts && opts.type
 						? opts.type
@@ -80,7 +75,10 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 					type = opts.typeFactory();
 				}
 
-				acc[k] = makeSchema(type, k);
+				const schema = makeSchema(type, k);
+
+				acc[k] = opts?.rawSchemaOptions ? _merge({}, schema, opts.rawSchemaOptions) : schema;
+
 				return acc;
 			}, {});
 

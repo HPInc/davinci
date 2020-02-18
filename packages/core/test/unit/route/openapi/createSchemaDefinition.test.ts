@@ -277,6 +277,7 @@ describe('createSchemaDefinition', () => {
 				type: 'object',
 				properties: {
 					customData: {
+						type: 'string',
 						oneOf: [
 							{
 								type: 'object'
@@ -288,6 +289,74 @@ describe('createSchemaDefinition', () => {
 					}
 				},
 				required: ['customData']
+			}
+		});
+	});
+
+	it('combines schema from `rawSchemaOptions` argument and the one generated from `type` argument ', () => {
+		@openapi.definition({ title: 'ScanPayloadArrayItem' })
+		class ScanPayloadArrayItem {
+			@openapi.prop({ required: true })
+			barcode: string;
+
+			@openapi.prop()
+			count: number;
+
+			@openapi.prop()
+			problem: string;
+
+			@openapi.prop()
+			time: string;
+
+		}
+
+		@openapi.definition({ title: 'ScanPayload' })
+		class ScanPayload {
+			@openapi.prop({ required: true })
+			scannerCode: string;
+
+			@openapi.prop({ required: true, type: [ScanPayloadArrayItem], rawSchemaOptions: { minItems: 1 } })
+			scans: ScanPayloadArrayItem[]
+
+		}
+
+		const definition = createSchemaDefinition(ScanPayload);
+		should(definition).be.deepEqual({
+			ScanPayload: {
+				title: 'ScanPayload',
+				type: 'object',
+				properties: {
+					scannerCode: {
+						type: 'string'
+					},
+					scans: {
+						type: 'array',
+						minItems: 1,
+						items: {
+							$ref: '#/definitions/ScanPayloadArrayItem'
+						}
+					}
+				},
+				required: ['scannerCode', 'scans']
+			},
+			ScanPayloadArrayItem: {
+				title: 'ScanPayloadArrayItem',
+				type: 'object',
+				properties: {
+					barcode: {
+						type: 'string'
+					},
+					count: {
+						type: 'number'
+					},
+					problem: {
+						type: 'string'
+					},
+					time: {
+						type: 'string'
+					}
+				},
+				required: ['barcode']
 			}
 		});
 	});
