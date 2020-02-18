@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.11.3](https://github.com/Oneflow/davinci/compare/@davinci/core@0.11.2...@davinci/core@0.11.3) (2020-02-18)
+
+
+### Bug Fixes
+
+* commit all package-lock ([1208431](https://github.com/Oneflow/davinci/commit/12084317ba2e35eb7a648400e8e28cdeb3ce79a7))
+* deep merge and add unit test ([690f9e5](https://github.com/Oneflow/davinci/commit/690f9e50e0cfacdfcd8f8662fe5a476e2b83a31b))
+* merge schema from type with raw schema ([2b4029a](https://github.com/Oneflow/davinci/commit/2b4029adf7da48b3b51ede5fdc5b572c38b7919b))
+* reinstall whole rope to fix circleci sync error ([9d3c733](https://github.com/Oneflow/davinci/commit/9d3c733cbd72b179fd2b6ce3c795e61ebb01b925))
+* use optional chaining operator and update typescript to 3.7.5 ([6b5d97f](https://github.com/Oneflow/davinci/commit/6b5d97faa6d7ad8df3a87906ce21e589a30827fd))
+
+
+
+
+
 ## [0.11.2](https://github.com/Oneflow/davinci/compare/@davinci/core@0.11.1...@davinci/core@0.11.2) (2020-02-07)
 
 **Note:** Version bump only for package @davinci/core

@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.9.2](https://github.com/Oneflow/davinci/compare/@davinci/reflector@0.9.1...@davinci/reflector@0.9.2) (2020-02-18)
+
+
+### Bug Fixes
+
+* commit all package-lock ([1208431](https://github.com/Oneflow/davinci/commit/12084317ba2e35eb7a648400e8e28cdeb3ce79a7))
+* use optional chaining operator and update typescript to 3.7.5 ([6b5d97f](https://github.com/Oneflow/davinci/commit/6b5d97faa6d7ad8df3a87906ce21e589a30827fd))
+
+
+
+
+
 ## [0.9.1](https://github.com/Oneflow/davinci/compare/@davinci/reflector@0.9.0...@davinci/reflector@0.9.1) (2020-01-09)
 
 **Note:** Version bump only for package @davinci/reflector

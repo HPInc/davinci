@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.11.4](https://github.com/Oneflow/davinci/compare/@davinci/mongoose@0.11.3...@davinci/mongoose@0.11.4) (2020-02-18)
+
+
+### Bug Fixes
+
+* reinstall whole rope to fix circleci sync error ([9d3c733](https://github.com/Oneflow/davinci/commit/9d3c733cbd72b179fd2b6ce3c795e61ebb01b925))
+* use optional chaining operator and update typescript to 3.7.5 ([6b5d97f](https://github.com/Oneflow/davinci/commit/6b5d97faa6d7ad8df3a87906ce21e589a30827fd))
+
+
+
+
+
 ## [0.11.3](https://github.com/Oneflow/davinci/compare/@davinci/mongoose@0.11.2...@davinci/mongoose@0.11.3) (2020-02-07)
 
 **Note:** Version bump only for package @davinci/mongoose

@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.13](https://github.com/Oneflow/davinci/compare/@davinci/example-graphql@0.5.12...@davinci/example-graphql@0.5.13) (2020-02-18)
+
+
+### Bug Fixes
+
+* commit all package-lock ([1208431](https://github.com/Oneflow/davinci/commit/12084317ba2e35eb7a648400e8e28cdeb3ce79a7))
+* reinstall whole rope to fix circleci sync error ([9d3c733](https://github.com/Oneflow/davinci/commit/9d3c733cbd72b179fd2b6ce3c795e61ebb01b925))
+* use optional chaining operator and update typescript to 3.7.5 ([6b5d97f](https://github.com/Oneflow/davinci/commit/6b5d97faa6d7ad8df3a87906ce21e589a30827fd))
+
+
+
+
+
 ## [0.5.12](https://github.com/Oneflow/davinci/compare/@davinci/example-graphql@0.5.11...@davinci/example-graphql@0.5.12) (2020-02-07)
 
 **Note:** Version bump only for package @davinci/example-graphql
