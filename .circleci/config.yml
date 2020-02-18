@@ -67,6 +67,7 @@ jobs:
       - run:
           name: Deploy docs
           command: |
+            rm .npmrc
             sh ./docs/deploy.sh
 
 workflows:
