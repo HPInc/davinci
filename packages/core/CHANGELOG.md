@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.14.0](https://github.com/Oneflow/davinci/compare/@davinci/core@0.13.0...@davinci/core@0.14.0) (2020-02-28)
+
+
+### Features
+
+* configurable swagger path ([5cf46c8](https://github.com/Oneflow/davinci/commit/5cf46c8b0142a1ffb3f9b52d4dc0d30513c3075b))
+
+
+
+
+
 # [0.13.0](https://github.com/Oneflow/davinci/compare/@davinci/core@0.12.0...@davinci/core@0.13.0) (2020-02-28)
 
 
