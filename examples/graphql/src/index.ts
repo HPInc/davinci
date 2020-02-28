@@ -1,9 +1,9 @@
 import express, { Express } from 'express';
-import { createApp, DaVinciExpress } from '@davinci/core';
+import { createApp, DaVinciExpress, DaVinciOptions } from '@davinci/core';
 import { createGraphQLServer } from '@davinci/graphql';
 import { BookController, AuthorController } from './api';
 
-const options = {
+const options: DaVinciOptions = {
 	boot: {
 		dirPath: './build/examples/crm/boot'
 	},

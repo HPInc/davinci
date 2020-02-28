@@ -5,14 +5,14 @@ import { mgoose } from '../../src';
 
 const sinon = Sinon.createSandbox();
 
-const { getSchemaDefinition, generateSchema, generateModel, prop, index, method } = mgoose;
+const { generateSchema, generateModel, prop, index, method, virtual } = mgoose;
 
 describe('typed mongoose', () => {
 	afterEach(() => {
 		sinon.restore();
 	});
 
-	describe('#getSchemaDefinition', () => {
+	describe('schema generation', () => {
 		it('supports primitive types', () => {
 			class Customer {
 				@prop()
@@ -23,7 +23,7 @@ describe('typed mongoose', () => {
 				isActive: boolean;
 			}
 
-			const schema = getSchemaDefinition(Customer);
+			const schema = generateSchema(Customer, {}, false);
 
 			should(schema).be.deepEqual({
 				firstname: {
@@ -49,12 +49,14 @@ describe('typed mongoose', () => {
 				birth: CustomerBirth;
 			}
 
-			const schema = getSchemaDefinition(Customer);
+			const schema = generateSchema(Customer, {}, false);
 
 			should(schema).be.deepEqual({
 				birth: {
-					place: {
-						type: String
+					type: {
+						place: {
+							type: String
+						}
 					}
 				}
 			});
@@ -74,13 +76,15 @@ describe('typed mongoose', () => {
 				tags: string[];
 			}
 
-			const schema = getSchemaDefinition(Customer);
+			const schema = generateSchema(Customer, {}, false);
 
 			should(schema).be.deepEqual({
 				birth: [
 					{
-						place: {
-							type: String
+						type: {
+							place: {
+								type: String
+							}
 						}
 					}
 				],
@@ -106,9 +110,9 @@ describe('typed mongoose', () => {
 				otherProp2: string;
 			}
 
-			const schema1 = getSchemaDefinition(MyClass1);
-			const schema2 = getSchemaDefinition(MyClass2);
-			const baseSchema = getSchemaDefinition(BaseSchema);
+			const schema1 = generateSchema(MyClass1, {}, false);
+			const schema2 = generateSchema(MyClass2, {}, false);
+			const baseSchema = generateSchema(BaseSchema, {}, false);
 
 			should(Object.keys(schema1)).be.deepEqual(['createdAt', 'updatedAt', 'otherProp1']);
 			should(Object.keys(schema2)).be.deepEqual(['createdAt', 'updatedAt', 'otherProp2']);
@@ -198,6 +202,24 @@ describe('typed mongoose', () => {
 			should(schema.path('firstname')).match({
 				options: { required: true, index: true }
 			});
+		});
+
+		it('should support attaching mongoose functionalities to sub-schemas', () => {
+			class Item {
+				@virtual()
+				categories() {}
+			}
+
+			class Order {
+				@prop({ index: true })
+				firstname: string;
+
+				@prop({ type: [Item] })
+				items: Item[];
+			}
+
+			const schema = generateSchema(Order);
+			should(schema.path('items').schema.virtualpath('categories')).be.ok();
 		});
 	});
 

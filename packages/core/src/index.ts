@@ -1,8 +1,8 @@
 import { Express } from 'express';
 import { Server } from 'http';
-
 import * as httpErrors from './errors/httpErrors';
-import { createApp } from './createApp';
+
+export { createApp, DaVinciOptions } from './createApp';
 
 /**
  * This is only here to assist people when upgrading their API.
@@ -22,4 +22,4 @@ export interface DaVinciExpress extends Express {
 
 export * from './route';
 export * from './express';
-export { boot, createApp, httpErrors };
+export { boot, httpErrors };

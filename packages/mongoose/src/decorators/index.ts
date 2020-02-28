@@ -81,10 +81,15 @@ export function populate({ name, opts }: { name: string; opts: IVirtualArgs }) {
  * Decorator that annotate a method marking it as virtual.
  * The annotated method will be used as the `getter` of the virtual
  */
-export function virtual() {
+export function virtual(options?: IVirtualArgs) {
 	return (target: object, key: string): void => {
 		const handler = target[key];
+		if (options?.ref && typeof handler === 'function') {
+			throw new Error(
+				'Ref and getter cannot be used together. Please read: https://mongoosejs.com/docs/guide.html#virtuals'
+			);
+		}
 
-		Reflector.pushMetadata('davinci:mongoose:virtuals', { name: key, handler }, target.constructor);
+		Reflector.pushMetadata('davinci:mongoose:virtuals', { name: key, handler, options }, target.constructor);
 	};
 }

@@ -15,17 +15,17 @@ import { DaVinciExpress } from './index';
 
 const debug = new Debug('of-base-api');
 
-interface IOptionsHealthChecks {
+interface HealthChecksOptions {
 	livenessEndpoint?: string;
 	readynessEndpoint?: string;
 }
 
-interface IOptions {
+export interface DaVinciOptions {
 	version?: string | number;
 	boot?: {
 		dirPath?: string;
 	};
-	healthChecks?: IOptionsHealthChecks;
+	healthChecks?: HealthChecksOptions;
 	openapi?: {
 		docs?: {
 			path: string;
@@ -38,7 +38,7 @@ interface IOptions {
 	};
 }
 
-type CreateAppArgs = [] | [Function] | [Express, Function] | [Express, IOptions, Function];
+type CreateAppArgs = [] | [Function] | [Express, Function] | [Express, DaVinciOptions, Function];
 
 export const processArgs = (...args) => {
 	/*
@@ -69,7 +69,7 @@ export const processArgs = (...args) => {
 	return [app, options, runMiddlewares];
 };
 
-export const configureExpress = async (app, options: IOptions = {}, runMiddlewares?) => {
+export const configureExpress = async (app, options: DaVinciOptions = {}, runMiddlewares?) => {
 	// this is at the start
 	app.use(express.json({ limit: '1mb' }));
 	app.use(express.urlencoded({ extended: true }));
@@ -99,7 +99,7 @@ export const configureExpress = async (app, options: IOptions = {}, runMiddlewar
 	return app;
 };
 
-export const configureTerminus = (app, healthChecks: IOptionsHealthChecks = {}) => {
+export const configureTerminus = (app, healthChecks: HealthChecksOptions = {}) => {
 	const terminusOptions: TerminusOptions = {
 		onSignal: async () => {
 			const jobs = app.locals.onSignalJobs || [];

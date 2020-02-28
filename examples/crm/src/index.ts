@@ -1,10 +1,10 @@
 import express, { Express } from 'express';
-import { createApp, createRouter, DaVinciExpress } from '@davinci/core';
+import { createApp, createRouter, DaVinciExpress, DaVinciOptions } from '@davinci/core';
 import { CustomerController } from './api/customer';
 import packageJson from '../package.json';
 import { Context } from './types';
 
-const options = {
+const options: DaVinciOptions = {
 	version: packageJson.version,
 	boot: {
 		dirPath: './build/src/boot'
