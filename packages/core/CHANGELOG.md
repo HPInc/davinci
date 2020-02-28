@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.13.0](https://github.com/Oneflow/davinci/compare/@davinci/core@0.12.0...@davinci/core@0.13.0) (2020-02-28)
+
+
+### Features
+
+* exposing DaVinci options ([3cdb77e](https://github.com/Oneflow/davinci/commit/3cdb77ee2738c4b0766ae3bf05d4357e95ca43ca))
+
+
+
+
+
 # [0.12.0](https://github.com/Oneflow/davinci/compare/@davinci/core@0.11.3...@davinci/core@0.12.0) (2020-02-28)
 
 

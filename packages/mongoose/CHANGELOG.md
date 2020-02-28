@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.1](https://github.com/Oneflow/davinci/compare/@davinci/mongoose@0.12.0...@davinci/mongoose@0.12.1) (2020-02-28)
+
+
+### Bug Fixes
+
+* **mongoose:** sub-schemas now get correctly attached indexes, virtuals, etc ([48802e5](https://github.com/Oneflow/davinci/commit/48802e505ee1366820caecd8054989c76f073717))
+
+
+
+
+
 # [0.12.0](https://github.com/Oneflow/davinci/compare/@davinci/mongoose@0.11.4...@davinci/mongoose@0.12.0) (2020-02-28)
 
 

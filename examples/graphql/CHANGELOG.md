@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.6.0](https://github.com/Oneflow/davinci/compare/@davinci/example-graphql@0.5.14...@davinci/example-graphql@0.6.0) (2020-02-28)
+
+
+### Features
+
+* exposing DaVinci options ([3cdb77e](https://github.com/Oneflow/davinci/commit/3cdb77ee2738c4b0766ae3bf05d4357e95ca43ca))
+
+
+
+
+
 ## [0.5.14](https://github.com/Oneflow/davinci/compare/@davinci/example-graphql@0.5.13...@davinci/example-graphql@0.5.14) (2020-02-28)
 
 **Note:** Version bump only for package @davinci/example-graphql
