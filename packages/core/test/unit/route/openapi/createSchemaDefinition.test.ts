@@ -307,7 +307,6 @@ describe('createSchemaDefinition', () => {
 
 			@openapi.prop()
 			time: string;
-
 		}
 
 		@openapi.definition({ title: 'ScanPayload' })
@@ -316,8 +315,7 @@ describe('createSchemaDefinition', () => {
 			scannerCode: string;
 
 			@openapi.prop({ required: true, type: [ScanPayloadArrayItem], rawSchemaOptions: { minItems: 1 } })
-			scans: ScanPayloadArrayItem[]
-
+			scans: ScanPayloadArrayItem[];
 		}
 
 		const definition = createSchemaDefinition(ScanPayload);
@@ -357,6 +355,38 @@ describe('createSchemaDefinition', () => {
 					}
 				},
 				required: ['barcode']
+			}
+		});
+	});
+
+	it('should support passing the explicit `type` equal to null or false, to ignore the type detection (useful when passing rawOptions (oneOf, anyOf)', () => {
+		@openapi.definition({ title: 'Customer' })
+		class Customer {
+			@openapi.prop({
+				type: false,
+				rawSchemaOptions: { oneOf: [{ type: 'object' }, { type: 'array', items: { type: 'string' } }] }
+			})
+			someProp: object | string[];
+		}
+
+		const definition = createSchemaDefinition(Customer);
+		should(definition).be.deepEqual({
+			Customer: {
+				title: 'Customer',
+				type: 'object',
+				properties: {
+					someProp: {
+						oneOf: [
+							{
+								type: 'object'
+							},
+							{
+								type: 'array',
+								items: { type: 'string' }
+							}
+						]
+					}
+				}
 			}
 		});
 	});
