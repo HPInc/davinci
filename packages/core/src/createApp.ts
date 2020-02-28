@@ -1,7 +1,6 @@
 import Debug from 'debug';
 import express, { Express } from 'express';
 import http from 'http';
-import get from 'lodash/get';
 import bluebird from 'bluebird';
 import { createTerminus, TerminusOptions } from '@godaddy/terminus';
 
@@ -78,17 +77,18 @@ export const configureExpress = async (app, options: DaVinciOptions = {}, runMid
 	if (runMiddlewares) await runMiddlewares(app);
 
 	// swaggern
-	const { path: openapiDocsPath, options: openapiDocsOpts } = get(options, 'openapi.docs', {});
+	const { path: openapiDocsPath, options: openapiDocsOpts } = options?.openapi?.docs || {};
 	if (openapiDocsPath) {
 		const fullSwaggerDoc = docs.generateFullSwagger(openapiDocsOpts);
 		// tslint:disable-next-line:variable-name
 		app.get(openapiDocsPath, (_req, res) => res.json(fullSwaggerDoc));
 
-		const { path: swaggerUIPath, options: swaggerUIOpts } = get(options, 'openapi.docs', {});
+		const { path: swaggerUIPath, options: swaggerUIOpts } = options?.openapi?.ui || {};
 		if (swaggerUIPath) {
 			// eslint-disable-next-line
 			const swaggerUi = require('swagger-ui-express');
-			app.use('/explorer', swaggerUi.serve, swaggerUi.setup(fullSwaggerDoc, swaggerUIOpts));
+			app.use(swaggerUIPath, swaggerUi.serve, swaggerUi.setup(fullSwaggerDoc, swaggerUIOpts));
+			console.log(`--- Swagger UI available at ${swaggerUIPath}`);
 		}
 	}
 
