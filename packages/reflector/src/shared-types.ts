@@ -7,7 +7,7 @@ export interface ClassType<T = any> {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RecursiveArray<TValue> extends Array<RecursiveArray<TValue> | TValue> {}
 
-export type TypeValue = ClassType | Function | object;
+export type TypeValue = ClassType | Function | object | boolean;
 export type ReturnTypeFuncValue = TypeValue | RecursiveArray<TypeValue>;
 export type ReturnTypeFunc = (returns?: void) => ReturnTypeFuncValue;
 

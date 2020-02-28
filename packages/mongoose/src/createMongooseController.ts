@@ -40,6 +40,21 @@ class PopulateQueryParameter {
 	@openapi.prop()
 	$where?: object;
 
+	@openapi.prop({
+		rawSchemaOptions: {
+			oneOf: [
+				{
+					type: 'object'
+				},
+				{
+					type: 'array',
+					items: { type: 'string' }
+				}
+			]
+		}
+	})
+	$select?: object | string[];
+
 	@openapi.prop()
 	$populate?: PopulateQueryParameter;
 }
@@ -57,6 +72,22 @@ export class QueryParameters {
 
 	@openapi.prop()
 	$where?: object;
+
+	@openapi.prop({
+		type: null,
+		rawSchemaOptions: {
+			oneOf: [
+				{
+					type: 'object'
+				},
+				{
+					type: 'array',
+					items: { type: 'string' }
+				}
+			]
+		}
+	})
+	$select?: object | string[];
 }
 
 /**
@@ -141,8 +172,7 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 
 		@route.get({ path: '/:id', summary: 'Fetch by id', responses: { 200: RSchema } })
 		public async findById(
-			@route.path()
-			id: string,
+			@route.path() id: string,
 			@route.param({ name: 'query', in: 'query' }) query: QueryParameters,
 			@context() ctx
 		) {
@@ -232,7 +262,8 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 					}
 
 					if (key === '$select' && value) {
-						return { ...acc, [k]: (value || []).join(' ') };
+						const v = Array.isArray(value) ? value : Object.keys(value);
+						return { ...acc, [k]: (v || []).join(' ') };
 					}
 
 					if (key === '$where' && value) {

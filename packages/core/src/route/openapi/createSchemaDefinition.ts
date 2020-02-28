@@ -43,9 +43,7 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 				type: 'object'
 			};
 
-			const title: string = hasDefinitionDecoration
-				? definitionMetadata.title
-				: key || typeOrClass.name;
+			const title: string = hasDefinitionDecoration ? definitionMetadata.title : key || typeOrClass.name;
 			if (hasDefinitionDecoration) {
 				if (definitions[title]) {
 					return {
@@ -67,15 +65,15 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 				const opts = optsFactory();
 
 				let type =
-					opts && opts.type
-						? opts.type
-						: Reflector.getMetadata('design:type', typeOrClass.prototype, k);
+					typeof opts?.type === 'undefined'
+						? Reflector.getMetadata('design:type', typeOrClass.prototype, k)
+						: opts.type;
 
 				if (opts && typeof opts.typeFactory === 'function') {
 					type = opts.typeFactory();
 				}
 
-				const schema = makeSchema(type, k);
+				const schema = type ? makeSchema(type, k) : {};
 
 				acc[k] = opts?.rawSchemaOptions ? _merge({}, schema, opts.rawSchemaOptions) : schema;
 
@@ -107,7 +105,7 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 
 			return hasDefinitionDecoration
 				? {
-					$ref: `#/definitions/${title}`
+						$ref: `#/definitions/${title}`
 				  }
 				: definitionObj;
 		}
