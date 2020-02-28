@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.10.0](https://github.com/Oneflow/davinci/compare/@davinci/reflector@0.9.2...@davinci/reflector@0.10.0) (2020-02-28)
+
+
+### Features
+
+* **mongooseController:** added $select support ([02d008a](https://github.com/Oneflow/davinci/commit/02d008a1c820d0648310bf26e2474eab9e0b267a))
+
+
+
+
+
 ## [0.9.2](https://github.com/Oneflow/davinci/compare/@davinci/reflector@0.9.1...@davinci/reflector@0.9.2) (2020-02-18)
 
 

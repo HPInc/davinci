@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.12.0](https://github.com/Oneflow/davinci/compare/@davinci/mongoose@0.11.4...@davinci/mongoose@0.12.0) (2020-02-28)
+
+
+### Features
+
+* **mongooseController:** added $select support ([02d008a](https://github.com/Oneflow/davinci/commit/02d008a1c820d0648310bf26e2474eab9e0b267a))
+
+
+
+
+
 ## [0.11.4](https://github.com/Oneflow/davinci/compare/@davinci/mongoose@0.11.3...@davinci/mongoose@0.11.4) (2020-02-18)
 
 
