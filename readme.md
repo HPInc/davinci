@@ -1,6 +1,5 @@
-### For local development:
+### DaVinci
 
-- run `npm run build` from project root
-- run `npm install` in *examples/crm*
-- run `npm run dev`
+Declarative, Code-First, Typescript API Framework based on Express. Supports REST and GraphQL.
 
+[Get Started →](https://oneflow.github.io/davinci/)
