@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.10.2](https://github.com/Oneflow/davinci/compare/crm@0.10.1...crm@0.10.2) (2020-03-24)
+
+
+### Bug Fixes
+
+* fixed swagger ids by using {id} convention ([a6f23c0](https://github.com/Oneflow/davinci/commit/a6f23c0a418f3e772b6a5eff2a65d84644013666))
+
+
+
+
+
 ## [0.10.1](https://github.com/Oneflow/davinci/compare/crm@0.10.0...crm@0.10.1) (2020-02-28)
 
 **Note:** Version bump only for package crm
