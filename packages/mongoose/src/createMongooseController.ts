@@ -170,7 +170,7 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 			return result;
 		}
 
-		@route.get({ path: '/:id', summary: 'Fetch by id', responses: { 200: RSchema } })
+		@route.get({ path: '/{id}', summary: 'Fetch by id', responses: { 200: RSchema } })
 		public async findById(
 			@route.path() id: string,
 			@route.param({ name: 'query', in: 'query' }) query: QueryParameters,
@@ -190,17 +190,12 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 		}
 
 		@route.patch({
-			path: '/:id',
+			path: '/{id}',
 			summary: 'Update',
 			responses: { 200: RSchema },
 			validation: { partial: true }
 		})
-		public async updateById(
-			@route.path()
-			id: string,
-			@route.body() data: RSchema,
-			@context() ctx
-		) {
+		public async updateById(@route.path() id: string, @route.body() data: RSchema, @context() ctx) {
 			if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 			const updated = await this.model.findOneAndUpdate({ _id: id }, data, {
 				new: true,
@@ -216,7 +211,7 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 			return updated;
 		}
 
-		@route.del({ path: '/:id', summary: 'Delete', responses: { 200: RSchema } })
+		@route.del({ path: '/{id}', summary: 'Delete', responses: { 200: RSchema } })
 		public async deleteById(@route.path() id: string, @context() ctx) {
 			if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
 			const removed = await this.model.findOneAndDelete({ _id: id }, { context: ctx });
