@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.15.0](https://github.com/Oneflow/davinci/compare/@davinci/core@0.14.0...@davinci/core@0.15.0) (2020-03-30)
+
+
+### Features
+
+* add keepAliveTimeout to createApp ([d06fd75](https://github.com/Oneflow/davinci/commit/d06fd7556a04006b4b2230335ac4574c26eca043))
+
+
+
+
+
 # [0.14.0](https://github.com/Oneflow/davinci/compare/@davinci/core@0.13.0...@davinci/core@0.14.0) (2020-02-28)
 
 
