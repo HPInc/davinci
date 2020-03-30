@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.4](https://github.com/Oneflow/davinci/compare/@davinci/mongoose@0.12.3...@davinci/mongoose@0.12.4) (2020-03-30)
+
+
+### Bug Fixes
+
+* correctly passing the context in the updateById method ([ce21207](https://github.com/Oneflow/davinci/commit/ce2120779cda440f9592f47eb107a08ad4bf59e7))
+
+
+
+
+
 ## [0.12.3](https://github.com/Oneflow/davinci/compare/@davinci/mongoose@0.12.2...@davinci/mongoose@0.12.3) (2020-03-24)
 
 

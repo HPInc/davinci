@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.10.3](https://github.com/Oneflow/davinci/compare/crm@0.10.2...crm@0.10.3) (2020-03-30)
+
+
+### Bug Fixes
+
+* correctly passing the context in the updateById method ([ce21207](https://github.com/Oneflow/davinci/commit/ce2120779cda440f9592f47eb107a08ad4bf59e7))
+
+
+
+
+
 ## [0.10.2](https://github.com/Oneflow/davinci/compare/crm@0.10.1...crm@0.10.2) (2020-03-24)
 
 
