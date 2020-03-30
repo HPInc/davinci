@@ -35,6 +35,7 @@ export interface DaVinciOptions {
 			options?: any;
 		};
 	};
+	keepAliveTimeout?: number;
 }
 
 type CreateAppArgs = [] | [Function] | [Express, Function] | [Express, DaVinciOptions, Function];
@@ -136,6 +137,11 @@ export const createApp = (...args: CreateAppArgs): Promise<DaVinciExpress> => {
 
 		debug('create the server');
 		const server = http.createServer(app);
+		
+		server.timeout = options.keepAliveTimeout || 60000;
+		server.keepAliveTimeout = options.keepAliveTimeout || 60000;
+		server.headersTimeout = options.keepAliveTimeout + 1000 || 61000; // should be bigger than keepAliveTimeout
+
 		// eslint-disable-next-line require-atomic-updates
 		app.server = server;
 
