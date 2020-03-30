@@ -138,9 +138,9 @@ export const createApp = (...args: CreateAppArgs): Promise<DaVinciExpress> => {
 		debug('create the server');
 		const server = http.createServer(app);
 		
-		server.timeout = options.keepAliveTimeout || 60000;
-		server.keepAliveTimeout = options.keepAliveTimeout || 60000;
-		server.headersTimeout = options.keepAliveTimeout + 1000 || 61000; // should be bigger than keepAliveTimeout
+		server.timeout = options.keepAliveTimeout || 61000;
+		server.keepAliveTimeout = options.keepAliveTimeout || 61000;
+		server.headersTimeout = options.keepAliveTimeout + 1000 || 62000; // should be bigger than keepAliveTimeout
 
 		// eslint-disable-next-line require-atomic-updates
 		app.server = server;
