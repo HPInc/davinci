@@ -201,7 +201,7 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 				new: true,
 				runValidators: true,
 				setDefaultsOnInsert: true,
-				ctx
+				context: ctx
 			});
 
 			if (!updated) {
