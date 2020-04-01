@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.16.0](https://github.com/Oneflow/davinci/compare/@davinci/core@0.15.0...@davinci/core@0.16.0) (2020-04-01)
+
+
+### Features
+
+* **mongooseErrorMiddleware:** now correctly returning 400 ([04e4fc8](https://github.com/Oneflow/davinci/commit/04e4fc8fe296c60edd29c5928facb025ddef129a))
+
+
+
+
+
 # [0.15.0](https://github.com/Oneflow/davinci/compare/@davinci/core@0.14.0...@davinci/core@0.15.0) (2020-03-30)
 
 
