@@ -1,7 +1,7 @@
 // eslint-disable-next-line max-classes-per-file
 import _ from 'lodash';
 import bluebird from 'bluebird';
-import { context, route, httpErrors as errors, openapi } from '@davinci/core';
+import { context, route, httpErrors as errors, openapi, express, httpErrors } from '@davinci/core';
 
 export interface Constructor<T> {
 	new (...args: any[]): T;
@@ -10,7 +10,7 @@ export interface Constructor<T> {
 interface IParsedMongooseFilters {
 	limit?: number;
 	skip?: number;
-	sort?: string | object;
+	sort?: object;
 	select?: string | [string];
 	populate?: object | [object];
 	where: object;
@@ -56,6 +56,9 @@ class PopulateQueryParameter {
 	$select?: object | string[];
 
 	@openapi.prop()
+	$sort?: object;
+
+	@openapi.prop()
 	$populate?: PopulateQueryParameter;
 }
 
@@ -88,6 +91,9 @@ export class QueryParameters {
 		}
 	})
 	$select?: object | string[];
+
+	@openapi.prop()
+	$sort?: object;
 }
 
 /**
@@ -122,6 +128,16 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 		limit: number;
 	}
 
+	@express.middleware.after((err, _req, _res, next) => {
+		if (err.name === 'ValidationError') {
+			const { name, message, errors: ers, stack } = err;
+			const validationError = new httpErrors.HttpError(name, message, 400, null, ers);
+			validationError.stack = stack;
+			return next(validationError);
+		}
+
+		return next(err);
+	})
 	class MongooseController implements IMongooseController {
 		maxLimit: number;
 
@@ -164,7 +180,7 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 
 			const result = await mQuery;
 			if (!result) {
-				throw new errors.NotFound();
+				throw new errors.NotFound('Record not found');
 			}
 
 			return result;

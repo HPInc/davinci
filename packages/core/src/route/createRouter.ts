@@ -14,7 +14,6 @@ import createSchemaDefinition from './openapi/createSchemaDefinition';
 import { IControllerDecoratorArgs } from './decorators/route';
 import { ISchema, ISwaggerDefinitions, MethodValidation, PathsValidationOptions } from './types';
 
-
 const debug = new Debug('of-base-api');
 
 const transformDefinitionToValidAJVSchemas = (schema, validationOptions: MethodValidation) => {
@@ -179,10 +178,20 @@ function mapReqToParameters<ContextType>(
 	}, []);
 }
 
-const wrapMiddleware = middlewareFn => (req: DaVinciRequest, res: Response, next: NextFunction) => {
-	if (req.requestHandled) return next();
+const wrapMiddleware = middlewareFn => {
+	// it's an error middleware
+	if (middlewareFn.length === 4) {
+		return (err: Error, req: DaVinciRequest, res: Response, next: NextFunction) => {
+			if (req.requestHandled) return next();
 
-	return middlewareFn(req, res, next);
+			return middlewareFn(err, req, res, next);
+		};
+	}
+	return (req: DaVinciRequest, res: Response, next: NextFunction) => {
+		if (req.requestHandled) return next();
+
+		return middlewareFn(req, res, next);
+	};
 };
 
 const makeHandlerFunction = (
@@ -302,8 +311,8 @@ const createRouterAndSwaggerDoc = (Controller: ClassType, rsName?: string, conte
 	// get controller metadata
 	const metadata: IControllerDecoratorArgs = Reflector.getMetadata('davinci:openapi:controller', Controller) || {};
 	const basepath = metadata.basepath || '';
-	const {resourceSchema} = metadata;
-	const {additionalSchemas} = metadata;
+	const { resourceSchema } = metadata;
+	const { additionalSchemas } = metadata;
 
 	// create the controller from the supplied class
 	const controller = new Controller();
