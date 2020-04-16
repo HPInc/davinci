@@ -124,23 +124,34 @@ const { generateSchema, beforeRead, beforeWrite, afterDelete } = mgoose;
 
 const schema = generateSchema(CustomerSchema);
 
-beforeRead(schema, (mQuery, context) => {
-	// inject data for security
-	if (context) {
-		const currentQuery = mQuery.getQuery();
-		mQuery.setQuery({ ...currentQuery, accountId: context.accountId });
+beforeRead<Context>(schema, ({ query, context }) => {
+	// inject accountId before persisting into DB
+	if (!context) return;
+
+	const currentQuery = query.getQuery();
+	query.setQuery({ ...currentQuery, accountId: context.accountId });
+});
+
+beforeWrite<Context, CustomerSchema>(schema, ({ query, doc, context }) => {
+	// inject accountId before persisting into DB
+	if (!context) return;
+
+	// required check for atomic operations
+	if (doc) {
+		doc.accountId = context.accountId;
+	} else {
+		// @ts-ignore
+		query.setUpdate({
+			...query.getUpdate(),
+			accountId: context.accountId
+		});
 	}
 });
 
-beforeWrite(schema, (doc, context) => {
-	// example: disallow save based on the role
-	if (doc.role !== 'role') {
-		throw new httpErrors.Forbidden('You must be admin');
+afterDelete<Context>(schema, ({ doc }) => {
+	if (doc) {
+		// perform some cleanup
 	}
-});
-
-afterDelete(schema, doc => {
-	// clean associated data
 });
 
 const Customer = model<CustomerSchema & Document>('Customer', schema, 'customers');
