@@ -27,6 +27,7 @@ interface IGenerateGQLSchemaArgs {
 	isInput?: boolean;
 	operationType?: OperationType;
 	resolverMetadata?: IResolverDecoratorMetadata;
+	partial?: boolean;
 	schemas?: { [key: string]: any };
 	transformMetadata?: Function;
 }
@@ -53,17 +54,17 @@ export const generateGQLSchema = ({
 	isInput = false,
 	operationType,
 	resolverMetadata,
+	partial,
 	transformMetadata = _.identity
 }: IGenerateGQLSchemaArgs) => {
 	// grab meta infos
 	// maybe it's a decorated class, let's try to get the fields metadata
-	const parentFieldsMetadata: IFieldDecoratorMetadata[] =
-		parentType && parentType.prototype
-			? getFieldsMetadata(parentType.prototype.constructor, isInput, operationType, resolverMetadata)
-			: [];
+	const parentFieldsMetadata: IFieldDecoratorMetadata[] = parentType?.prototype
+		? getFieldsMetadata(parentType.prototype.constructor, isInput, operationType, resolverMetadata)
+		: [];
 	const meta = _fp.find({ key }, parentFieldsMetadata) || ({} as IFieldDecoratorMetadata);
 	const metadata = transformMetadata(meta, { isInput, type, parentType, schemas });
-	const isRequired = metadata.opts && metadata.opts.required;
+	const isRequired = !partial && metadata.opts?.required;
 
 	// it's a primitive type, simple case
 	if ([String, Number, Boolean, Date].includes(type)) {
@@ -82,6 +83,7 @@ export const generateGQLSchema = ({
 			isInput,
 			operationType,
 			resolverMetadata,
+			partial,
 			transformMetadata
 		});
 		const gqlType = new GraphQLList(gqlSchema.schema);
@@ -92,7 +94,9 @@ export const generateGQLSchema = ({
 
 	// it's a complex type => create nested types
 	if (typeof type === 'function' || typeof type === 'object') {
-		const suffix = isInput ? [_.upperFirst(operationType || ''), 'Input'].join('') : '';
+		const suffix = isInput
+			? _.compact([partial && 'Partial', _.upperFirst(operationType || ''), 'Input']).join('')
+			: '';
 		const typeMetadata = Reflector.getMetadata('davinci:graphql:types', type) || {};
 		const name = `${typeMetadata.name || type.name || key}${suffix}`;
 
@@ -111,16 +115,14 @@ export const generateGQLSchema = ({
 				isInput,
 				operationType,
 				resolverMetadata,
+				partial,
 				transformMetadata
 			})
 		};
 
 		const ObjectType = isInput ? GraphQLInputObjectType : GraphQLObjectType;
 
-		schemas[name] =
-			metadata.opts && metadata.opts.required
-				? new GraphQLNonNull(new ObjectType(objTypeConfig))
-				: new ObjectType(objTypeConfig);
+		schemas[name] = isRequired ? new GraphQLNonNull(new ObjectType(objTypeConfig)) : new ObjectType(objTypeConfig);
 
 		return { schema: schemas[name], schemas };
 	}
@@ -133,6 +135,7 @@ interface ICreateObjectFieldsArgs {
 	isInput?: boolean;
 	operationType?: OperationType;
 	resolverMetadata?: IResolverDecoratorMetadata;
+	partial?: boolean;
 	schemas?: { [key: string]: any };
 	transformMetadata?: Function;
 }
@@ -143,6 +146,7 @@ const createObjectFields = ({
 	isInput,
 	operationType,
 	resolverMetadata,
+	partial,
 	transformMetadata = _.identity
 }: ICreateObjectFieldsArgs) => {
 	const fieldsMetadata: IFieldDecoratorMetadata[] = getFieldsMetadata(
@@ -173,14 +177,14 @@ const createObjectFields = ({
 				resolverMetadata,
 				parentType,
 				schemas,
-				transformMetadata
+				transformMetadata,
+				partial
 			});
 
 			acc[key] = { type: gqlSchema.schema };
 			_.merge(schemas, gqlSchema.schemas);
 
-			const hasResolverFunction =
-				parentType.prototype && typeof parentType.prototype[key] === 'function';
+			const hasResolverFunction = parentType.prototype && typeof parentType.prototype[key] === 'function';
 
 			if (hasResolverFunction && !isInput) {
 				acc[key].resolve = parentType.prototype[key];

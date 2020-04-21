@@ -3,8 +3,8 @@ import { Reflector, ClassType } from '@davinci/reflector';
 import { field } from './decorators';
 import { IFieldDecoratorMetadata } from './types';
 
-const OPERATORS = ['EQ', 'NE', 'GT', 'GTE', 'LT', 'LTE', 'IN', 'NIN', 'EXISTS'];
-const LOGIC_OPERATORS = ['AND', 'OR'];
+const OPERATORS = ['EQ', 'NE', 'GT', 'GTE', 'LT', 'LTE', 'IN', 'NIN', 'EXISTS', 'NOT'];
+const LOGIC_OPERATORS = ['AND', 'OR', 'NOR'];
 
 const toMgooseQuerySyntax = (op: typeof OPERATORS[number] | typeof LOGIC_OPERATORS[number]) => `$${_.camelCase(op)}`;
 
@@ -13,8 +13,14 @@ export const parseGqlQuery = (query, path = '') => {
 		query,
 		(acc, value, key) => {
 			if (OPERATORS.includes(key)) {
-				acc[path] = { [toMgooseQuerySyntax(key)]: value };
-				return acc;
+				const v = key === 'NOT' ? parseGqlQuery(value, '') : value;
+				const queryObj = { [toMgooseQuerySyntax(key)]: v };
+				if (path) {
+					acc[path] = queryObj;
+					return acc;
+				}
+
+				return queryObj;
 			}
 
 			if (LOGIC_OPERATORS.includes(key) && Array.isArray(value)) {
@@ -32,6 +38,11 @@ export const parseGqlQuery = (query, path = '') => {
 		},
 		{}
 	);
+};
+
+const renameClass = (theClass: ClassType, newName: string) => {
+	const nameDescriptors = Object.getOwnPropertyDescriptor(theClass, 'name');
+	Object.defineProperty(theClass, 'name', { ...nameDescriptors, value: newName });
 };
 
 const createFieldFilterOperatorsClass = (type, name: string) => {
@@ -63,11 +74,13 @@ const createFieldFilterOperatorsClass = (type, name: string) => {
 
 			@field()
 			EXISTS: boolean;
+
+			@field({ type: BaseFilterOperators })
+			NOT: any;
 		}
 
-		const nameDescriptors = Object.getOwnPropertyDescriptor(BaseFilterOperators, 'name');
 		const newName = _.upperFirst(`${name}Query`);
-		Object.defineProperty(BaseFilterOperators, 'name', { ...nameDescriptors, value: newName });
+		renameClass(BaseFilterOperators, newName);
 
 		return BaseFilterOperators;
 	}
@@ -77,7 +90,27 @@ const createFieldFilterOperatorsClass = (type, name: string) => {
 	}
 
 	if (typeof type === 'function') {
-		return type;
+		const fieldsMetadata = _.map(
+			Reflector.getMetadata('davinci:graphql:fields', type) as IFieldDecoratorMetadata[],
+			({ key, opts, optsFactory }) => {
+				const options = opts ?? optsFactory({ isInput: false, operationType: 'query' });
+
+				return { key, opts: options };
+			}
+		);
+
+		const QueryClass = class {};
+
+		fieldsMetadata.forEach(({ key, opts }) => {
+			const currentType = opts.typeFactory ? opts.typeFactory() : opts.type;
+			const newType = createFieldFilterOperatorsClass(currentType, key);
+			const { description, asInput } = opts;
+			field({ description, asInput, required: false, type: newType })(QueryClass.prototype, key);
+		});
+		const newName = _.upperFirst(`${name}Query`);
+		renameClass(QueryClass, newName);
+
+		return QueryClass;
 	}
 
 	return String;
@@ -102,15 +135,7 @@ export const withOperators = (theClass: ClassType) => {
 		field({ description, asInput, required: false, type: newType })(QueryClass.prototype, key);
 	});
 
-	const AndClass = class extends QueryClass {};
-	field({ typeFactory: () => [AndClass] })(QueryClass.prototype, 'AND');
-	field({ typeFactory: () => [AndClass] })(QueryClass.prototype, 'OR');
-
-	const andFieldsMeta = (Reflector.getMetadata(
-		'davinci:graphql:fields',
-		AndClass
-	) as IFieldDecoratorMetadata[]).filter(({ key }) => !['AND', 'OR'].includes(key));
-	Reflector.defineMetadata('davinci:graphql:fields', andFieldsMeta, AndClass);
+	LOGIC_OPERATORS.forEach(op => field({ typeFactory: () => [QueryClass] })(QueryClass.prototype, op));
 
 	return QueryClass;
 };

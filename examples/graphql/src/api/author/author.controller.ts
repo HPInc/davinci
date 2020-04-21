@@ -26,8 +26,17 @@ export default class AuthorController {
 	}
 
 	@mutation(AuthorSchema)
-	updateAuthorById(@arg('id', { required: true }) id: string, @arg('data', { required: true }) data: AuthorSchema) {
+	updateAuthorById(
+		@arg('id', { required: true }) id: string,
+		@arg('data', { required: true, partial: true }) data: AuthorSchema
+	) {
 		return this.model.findByIdAndUpdate(id, data, { new: true });
+	}
+
+	@mutation(AuthorSchema)
+	updateAuthor(@arg() where: AuthorQuery, @arg('data', { required: true, partial: true }) data: AuthorSchema) {
+		const query = mongodbHelpers.parseGqlQuery(where);
+		return this.model.findOneAndUpdate(query, data, { new: true });
 	}
 
 	@fieldResolver<BookSchema>(BookSchema, 'authors', [AuthorSchema])

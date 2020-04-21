@@ -6,21 +6,27 @@ describe('mongooseHelpers', () => {
 		it('should correctly transform the query', () => {
 			const query = {
 				firstname: { EQ: 'Mike' },
+				lastname: { NOT: { EQ: 'Jordan' } },
 				home: { address: { NE: 'Foobar' } },
-				AND: [{ lastname: { IN: ['Foo'] } }, { lastname: { NIN: ['Bar'] } }],
-				OR: [{ home: { address: { EXISTS: true } } }]
+				OR: [{ lastname: { IN: ['Foo'] } }, { lastname: { NIN: ['Bar'] } }],
+				AND: [{ home: { address: { EXISTS: true } } }, { OR: [{ weight: { EQ: 122 } }, { age: { EQ: 30 } }] }]
 			};
 
-			const mgooseQuery = parseGqlQuery(query);
+			const mongodbQuery = parseGqlQuery(query);
 
-			should(mgooseQuery).be.deepEqual({
+			should(mongodbQuery).be.deepEqual({
 				firstname: {
 					$eq: 'Mike'
+				},
+				lastname: {
+					$not: {
+						$eq: 'Jordan'
+					}
 				},
 				'home.address': {
 					$ne: 'Foobar'
 				},
-				$and: [
+				$or: [
 					{
 						lastname: {
 							$in: ['Foo']
@@ -32,11 +38,25 @@ describe('mongooseHelpers', () => {
 						}
 					}
 				],
-				$or: [
+				$and: [
 					{
 						'home.address': {
 							$exists: true
 						}
+					},
+					{
+						$or: [
+							{
+								weight: {
+									$eq: 122
+								}
+							},
+							{
+								age: {
+									$eq: 30
+								}
+							}
+						]
 					}
 				]
 			});

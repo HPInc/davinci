@@ -30,11 +30,7 @@ const DEFAULT_FIELD_OPTIONS = {};
 export function field(opts?: IFieldDecoratorOptions | FieldDecoratorOptionsFactory) {
 	return function(prototype: object, key: string | symbol): void {
 		const optsFactory = (args: IFieldDecoratorOptionsFactoryArgs) => {
-			const options = _.merge(
-				{},
-				DEFAULT_FIELD_OPTIONS,
-				typeof opts === 'function' ? opts(args) : opts
-			);
+			const options = _.merge({}, DEFAULT_FIELD_OPTIONS, typeof opts === 'function' ? opts(args) : opts);
 			if (!options.type && !options.typeFactory) {
 				options.type = Reflector.getMetadata('design:type', prototype, key);
 			}
@@ -83,6 +79,7 @@ export const mutation = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?
 export interface IArgOptions {
 	required?: boolean;
 	enum?: { [key: string]: string };
+	partial?: boolean;
 }
 
 /**
@@ -144,11 +141,7 @@ export function fieldResolver<T = {}>(
 			handler: prototype[methodName],
 			type: paramtypes && paramtypes[index]
 		});
-		Reflector.defineMetadata(
-			'davinci:graphql:field-resolvers',
-			methodParameters,
-			resolverOf.prototype.constructor
-		);
+		Reflector.defineMetadata('davinci:graphql:field-resolvers', methodParameters, resolverOf.prototype.constructor);
 	};
 }
 
