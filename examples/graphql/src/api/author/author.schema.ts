@@ -20,6 +20,9 @@ class BirthType {
 @mgoose.index({ firstname: 1, lastname: 1 }, { unique: true })
 export default class Author {
 	@graphql.field()
+	_id: string;
+
+	@graphql.field()
 	id: string;
 
 	@mgoose.prop({ required: true })
