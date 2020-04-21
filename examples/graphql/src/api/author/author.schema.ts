@@ -1,6 +1,6 @@
 import { Schema } from 'mongoose';
 import { mgoose } from '@davinci/mongoose';
-import { graphql } from '@davinci/graphql';
+import { graphql, mongodbHelpers } from '@davinci/graphql';
 import { BookSchema } from '../index';
 
 class AuthorPhone {
@@ -69,7 +69,4 @@ export default class Author {
 	getPrototypeSomething() {}
 }
 
-export class AuthorQuery extends Author {
-	@graphql.field({ typeFactory: () => [Author] })
-	and: [Author];
-}
+export class AuthorQuery extends mongodbHelpers.withOperators(Author) {}

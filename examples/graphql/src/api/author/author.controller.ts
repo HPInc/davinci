@@ -1,4 +1,4 @@
-import { graphql } from '@davinci/graphql';
+import { graphql, mongodbHelpers } from '@davinci/graphql';
 import { context } from '@davinci/core';
 import model from './author.model';
 import AuthorSchema, { AuthorQuery } from './author.schema';
@@ -16,7 +16,8 @@ export default class AuthorController {
 
 	@query([AuthorSchema], 'authors')
 	findAuthors(@arg() query: AuthorQuery, @context() context: any) {
-		return this.model.find(query, {}, { context });
+		const q = mongodbHelpers.parseGqlQuery(query);
+		return this.model.find(q, {}, { context });
 	}
 
 	@mutation(AuthorSchema)

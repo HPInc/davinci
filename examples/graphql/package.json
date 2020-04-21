@@ -15,6 +15,7 @@
 		"@davinci/core": "^0.15.0",
 		"@davinci/graphql": "^0.9.8",
 		"@davinci/mongoose": "^0.12.5",
+		"@davinci/reflector": "0.10.0",
 		"debug": "^4.1.1",
 		"express": "4.16.4",
 		"lodash": "^4.17.11",
