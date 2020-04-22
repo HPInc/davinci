@@ -1,3 +1,4 @@
+// eslint-disable-next-line max-classes-per-file
 import _ from 'lodash';
 import { Reflector, ClassType } from '@davinci/reflector';
 import { field } from './decorators';
