@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.13.0](https://github.com/Oneflow/davinci/compare/@davinci/mongoose@0.12.5...@davinci/mongoose@0.13.0) (2020-04-01)
+
+
+### Features
+
+* **mongooseErrorMiddleware:** now correctly returning 400 ([04e4fc8](https://github.com/Oneflow/davinci/commit/04e4fc8fe296c60edd29c5928facb025ddef129a))
+
+
+
+
+
 ## [0.12.5](https://github.com/Oneflow/davinci/compare/@davinci/mongoose@0.12.4...@davinci/mongoose@0.12.5) (2020-03-30)
 
 **Note:** Version bump only for package @davinci/mongoose
