@@ -105,7 +105,7 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 
 			return hasDefinitionDecoration
 				? {
-						$ref: `#/definitions/${title}`
+					$ref: `#/definitions/${title}`
 				  }
 				: definitionObj;
 		}

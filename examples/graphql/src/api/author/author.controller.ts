@@ -1,10 +1,10 @@
-import { graphql } from '@davinci/graphql';
+import { graphql, queryHelpers } from '@davinci/graphql';
 import { context } from '@davinci/core';
 import model from './author.model';
-import AuthorSchema, { AuthorQuery } from './author.schema';
+import AuthorSchema, { AuthorFilter, AuthorPagination } from './author.schema';
 import { BookSchema } from '../index';
 
-const { query, parent, mutation, fieldResolver, arg } = graphql;
+const { query, parent, mutation, fieldResolver, arg, selectionSet } = graphql;
 
 export default class AuthorController {
 	model = model;
@@ -15,8 +15,20 @@ export default class AuthorController {
 	}
 
 	@query([AuthorSchema], 'authors')
-	findAuthors(@arg() query: AuthorQuery, @context() context: any) {
-		return this.model.find(query, {}, { context });
+	findAuthors(
+		@arg() where: AuthorFilter,
+		@arg() paginate: AuthorPagination,
+		@selectionSet() selection,
+		@context() context: any
+	) {
+		const q = queryHelpers.toMongodbQuery(where);
+		const { $limit, $skip } = queryHelpers.toMongodbQuery(paginate || {});
+		const projection = queryHelpers.toMongdbProjection(selection || []);
+
+		return this.model
+			.find(q, projection, { context })
+			.limit($limit)
+			.skip($skip);
 	}
 
 	@mutation(AuthorSchema)
@@ -25,14 +37,21 @@ export default class AuthorController {
 	}
 
 	@mutation(AuthorSchema)
-	updateAuthorById(@arg('id', { required: true }) id: string, @arg('data', { required: true }) data: AuthorSchema) {
+	updateAuthorById(
+		@arg('id', { required: true }) id: string,
+		@arg('data', { required: true, partial: true }) data: AuthorSchema
+	) {
 		return this.model.findByIdAndUpdate(id, data, { new: true });
 	}
 
-	@fieldResolver<BookSchema>(BookSchema, 'authors', [AuthorSchema])
-	getBookAuthors(@parent() book: BookSchema, @arg() query: AuthorQuery, @context() context: any) {
-		console.log(query);
-		// @ts-ignore
-		return this.findAuthors({ ...query, _id: { $in: book.authorIds } }, context);
+	@mutation(AuthorSchema)
+	updateAuthor(@arg() where: AuthorFilter, @arg('data', { required: true, partial: true }) data: AuthorSchema) {
+		const query = queryHelpers.toMongodbQuery(where);
+		return this.model.findOneAndUpdate(query, data, { new: true });
+	}
+
+	@fieldResolver(BookSchema, 'authors', [AuthorSchema])
+	getBookAuthors(@parent() book: BookSchema, @arg() query: AuthorFilter, @context() context: any) {
+		return this.findAuthors({ ...query, _id: { IN: book.authorIds } }, null, null, context);
 	}
 }

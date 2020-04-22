@@ -5,16 +5,13 @@ export type TypeValue = ClassType | GraphQLScalarType | Function | object | symb
 
 export type OperationType = 'query' | 'mutation';
 
-/**
- * @param type - The type of the field. Only Required for complex objects: Classes, Arrays, Objects
- */
 export interface ITypeDecoratorOptions {
 	name?: string;
 	description?: string;
 }
 
 /**
- * @param type - The type of the field. Only Required for complex objects: Classes, Arrays, Objects
+ * @param type - The type of the field. Only Required for complex objects: Arrays, Objects
  */
 export interface IFieldDecoratorOptions {
 	type?: TypeValue;
@@ -30,9 +27,7 @@ export interface IFieldDecoratorOptionsFactoryArgs {
 	resolverMetadata?: IResolverDecoratorMetadata;
 }
 
-export type FieldDecoratorOptionsFactory = (
-	args: IFieldDecoratorOptionsFactoryArgs
-) => Maybe<IFieldDecoratorOptions>;
+export type FieldDecoratorOptionsFactory = (args: IFieldDecoratorOptionsFactoryArgs) => Maybe<IFieldDecoratorOptions>;
 
 export interface IFieldDecoratorMetadata {
 	key: any;

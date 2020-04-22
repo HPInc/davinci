@@ -38,11 +38,7 @@ export const createControllerSchemas = (
 	// eslint-disable-next-line @typescript-eslint/no-use-before-define
 	const { queries, schemas: queriesSchemas } = createResolversAndSchemas(Controller, 'queries', s);
 	// eslint-disable-next-line @typescript-eslint/no-use-before-define
-	const { mutations, schemas: allSchemas } = createResolversAndSchemas(
-		Controller,
-		'mutations',
-		queriesSchemas
-	);
+	const { mutations, schemas: allSchemas } = createResolversAndSchemas(Controller, 'mutations', queriesSchemas);
 
 	return { queries: { ...q, ...queries }, mutations: { ...m, ...mutations }, schemas: allSchemas };
 };
@@ -120,7 +116,8 @@ export const createExecutableSchema = (
 					schemas: allSchemas,
 					isInput: true,
 					operationType,
-					resolverMetadata
+					resolverMetadata,
+					partial: opts?.partial
 				});
 				gqlArgType = schema;
 
@@ -145,10 +142,7 @@ export const createExecutableSchema = (
 				if (isContext) return context;
 				if (isInfo) return info;
 				if (isSelectionSet) {
-					return getFieldsSelection(
-						info.operation.selectionSet.selections[0],
-						info.returnType.ofType
-					);
+					return getFieldsSelection(info.operation.selectionSet.selections[0], info.returnType.ofType);
 				}
 				if (isParent) return root;
 
@@ -161,11 +155,7 @@ export const createExecutableSchema = (
 	return { schema, schemas: allSchemas };
 };
 
-export const createResolversAndSchemas = (
-	Controller: ClassType,
-	resolversType: 'queries' | 'mutations',
-	schemas?
-) => {
+export const createResolversAndSchemas = (Controller: ClassType, resolversType: 'queries' | 'mutations', schemas?) => {
 	const resolversMetadata =
 		Reflector.getMetadata(`davinci:graphql:${resolversType}`, Controller.prototype.constructor) || [];
 

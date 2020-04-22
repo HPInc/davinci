@@ -1,6 +1,6 @@
 import { Schema } from 'mongoose';
 import { mgoose } from '@davinci/mongoose';
-import { graphql } from '@davinci/graphql';
+import { graphql, queryHelpers } from '@davinci/graphql';
 import { BookSchema } from '../index';
 
 class AuthorPhone {
@@ -19,6 +19,9 @@ class BirthType {
 
 @mgoose.index({ firstname: 1, lastname: 1 }, { unique: true })
 export default class Author {
+	@graphql.field()
+	_id: string;
+
 	@graphql.field()
 	id: string;
 
@@ -69,7 +72,6 @@ export default class Author {
 	getPrototypeSomething() {}
 }
 
-export class AuthorQuery extends Author {
-	@graphql.field({ typeFactory: () => [Author] })
-	and: [Author];
-}
+export class AuthorFilter extends queryHelpers.withOperators(Author) {}
+
+export class AuthorPagination extends queryHelpers.withPagination() {}

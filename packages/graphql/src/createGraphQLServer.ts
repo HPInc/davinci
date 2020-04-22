@@ -69,18 +69,18 @@ export const createGraphQLServer = (
 	const schema = new GraphQLSchema({
 		query: queryFields
 			? new GraphQLObjectType({
-					name: 'Query',
-					fields: {
-						...queryFields
-					}
+				name: 'Query',
+				fields: {
+					...queryFields
+				}
 			  })
 			: null,
 		mutation: !_.isEmpty(mutationsFields)
 			? new GraphQLObjectType({
-					name: 'Mutation',
-					fields: {
-						...mutationsFields
-					}
+				name: 'Mutation',
+				fields: {
+					...mutationsFields
+				}
 			  })
 			: null
 	});

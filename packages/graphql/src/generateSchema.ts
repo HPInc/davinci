@@ -5,13 +5,15 @@ import {
 	GraphQLBoolean,
 	GraphQLList,
 	GraphQLNonNull,
-	GraphQLInputObjectType
+	GraphQLInputObjectType,
+	GraphQLUnionType
 } from 'graphql';
 import { GraphQLDateTime } from 'graphql-iso-date';
 import _fp from 'lodash/fp';
 import _ from 'lodash';
 import { Reflector } from '@davinci/reflector';
 import { IFieldDecoratorMetadata, IResolverDecoratorMetadata, OperationType } from './types';
+import { UnionType } from './gqlTypes';
 import { createExecutableSchema } from './createControllerSchemas';
 
 const scalarDict = {
@@ -27,6 +29,7 @@ interface IGenerateGQLSchemaArgs {
 	isInput?: boolean;
 	operationType?: OperationType;
 	resolverMetadata?: IResolverDecoratorMetadata;
+	partial?: boolean;
 	schemas?: { [key: string]: any };
 	transformMetadata?: Function;
 }
@@ -53,17 +56,17 @@ export const generateGQLSchema = ({
 	isInput = false,
 	operationType,
 	resolverMetadata,
+	partial,
 	transformMetadata = _.identity
 }: IGenerateGQLSchemaArgs) => {
 	// grab meta infos
 	// maybe it's a decorated class, let's try to get the fields metadata
-	const parentFieldsMetadata: IFieldDecoratorMetadata[] =
-		parentType && parentType.prototype
-			? getFieldsMetadata(parentType.prototype.constructor, isInput, operationType, resolverMetadata)
-			: [];
+	const parentFieldsMetadata: IFieldDecoratorMetadata[] = parentType?.prototype
+		? getFieldsMetadata(parentType.prototype.constructor, isInput, operationType, resolverMetadata)
+		: [];
 	const meta = _fp.find({ key }, parentFieldsMetadata) || ({} as IFieldDecoratorMetadata);
 	const metadata = transformMetadata(meta, { isInput, type, parentType, schemas });
-	const isRequired = metadata.opts && metadata.opts.required;
+	const isRequired = !partial && metadata.opts?.required;
 
 	// it's a primitive type, simple case
 	if ([String, Number, Boolean, Date].includes(type)) {
@@ -82,6 +85,7 @@ export const generateGQLSchema = ({
 			isInput,
 			operationType,
 			resolverMetadata,
+			partial,
 			transformMetadata
 		});
 		const gqlType = new GraphQLList(gqlSchema.schema);
@@ -92,7 +96,9 @@ export const generateGQLSchema = ({
 
 	// it's a complex type => create nested types
 	if (typeof type === 'function' || typeof type === 'object') {
-		const suffix = isInput ? [_.upperFirst(operationType || ''), 'Input'].join('') : '';
+		const suffix = isInput
+			? _.compact([partial && 'Partial', _.upperFirst(operationType || ''), 'Input']).join('')
+			: '';
 		const typeMetadata = Reflector.getMetadata('davinci:graphql:types', type) || {};
 		const name = `${typeMetadata.name || type.name || key}${suffix}`;
 
@@ -101,26 +107,56 @@ export const generateGQLSchema = ({
 			return { schema: schemas[name], schemas };
 		}
 
-		const objTypeConfig: any = {
-			...metadata.opts,
-			name,
-			// eslint-disable-next-line @typescript-eslint/no-use-before-define
-			fields: createObjectFields({
-				parentType: type,
-				schemas,
-				isInput,
-				operationType,
-				resolverMetadata,
-				transformMetadata
-			})
-		};
+		if (type instanceof UnionType) {
+			const types = Array.isArray(type.types)
+				? type.types.map(
+					t =>
+						generateGQLSchema({
+							type: t,
+							parentType,
+							schemas,
+							key,
+							isInput,
+							operationType,
+							resolverMetadata,
+							partial,
+							transformMetadata
+						}).schema
+				  )
+				: type.types;
 
-		const ObjectType = isInput ? GraphQLInputObjectType : GraphQLObjectType;
+			const unionTypeConfig = {
+				..._.omit(metadata.opts, ['type']),
+				name,
+				types,
+				resolveType: type.resolveType
+			};
 
-		schemas[name] =
-			metadata.opts && metadata.opts.required
+			schemas[name] = isRequired
+				? new GraphQLNonNull(new GraphQLUnionType(unionTypeConfig))
+				: new GraphQLUnionType(unionTypeConfig);
+		} else {
+			const objTypeConfig: any = {
+				...metadata.opts,
+				name,
+
+				// eslint-disable-next-line @typescript-eslint/no-use-before-define
+				fields: createObjectFields({
+					parentType: type,
+					schemas,
+					isInput,
+					operationType,
+					resolverMetadata,
+					partial,
+					transformMetadata
+				})
+			};
+
+			const ObjectType = isInput ? GraphQLInputObjectType : GraphQLObjectType;
+			schemas[name] = isRequired
 				? new GraphQLNonNull(new ObjectType(objTypeConfig))
 				: new ObjectType(objTypeConfig);
+		}
 
 		return { schema: schemas[name], schemas };
 	}
@@ -133,6 +169,7 @@ interface ICreateObjectFieldsArgs {
 	isInput?: boolean;
 	operationType?: OperationType;
 	resolverMetadata?: IResolverDecoratorMetadata;
+	partial?: boolean;
 	schemas?: { [key: string]: any };
 	transformMetadata?: Function;
 }
@@ -143,6 +180,7 @@ const createObjectFields = ({
 	isInput,
 	operationType,
 	resolverMetadata,
+	partial,
 	transformMetadata = _.identity
 }: ICreateObjectFieldsArgs) => {
 	const fieldsMetadata: IFieldDecoratorMetadata[] = getFieldsMetadata(
@@ -173,14 +211,14 @@ const createObjectFields = ({
 				resolverMetadata,
 				parentType,
 				schemas,
-				transformMetadata
+				transformMetadata,
+				partial
 			});
 
 			acc[key] = { type: gqlSchema.schema };
 			_.merge(schemas, gqlSchema.schemas);
 
-			const hasResolverFunction =
-				parentType.prototype && typeof parentType.prototype[key] === 'function';
+			const hasResolverFunction = parentType.prototype && typeof parentType.prototype[key] === 'function';
 
 			if (hasResolverFunction && !isInput) {
 				acc[key].resolve = parentType.prototype[key];
@@ -192,17 +230,17 @@ const createObjectFields = ({
 		const fieldsWithExternalResolver = isInput
 			? {}
 			: externalFieldsResolvers.reduce((acc, fieldMeta) => {
-					const { prototype, fieldName } = fieldMeta;
-					const { schema, schemas: s } = createExecutableSchema(
-						prototype.constructor,
-						fieldMeta,
-						schemas,
-						operationType
-					);
-					_.merge(schemas, s);
+				const { prototype, fieldName } = fieldMeta;
+				const { schema, schemas: s } = createExecutableSchema(
+					prototype.constructor,
+					fieldMeta,
+					schemas,
+					operationType
+				);
+				_.merge(schemas, s);
 
-					acc[fieldName] = schema;
-					return acc;
+				acc[fieldName] = schema;
+				return acc;
 			  }, {});
 
 		return { ...fields, ...fieldsWithExternalResolver };

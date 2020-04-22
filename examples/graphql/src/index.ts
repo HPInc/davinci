@@ -5,7 +5,7 @@ import { BookController, AuthorController } from './api';
 
 const options: DaVinciOptions = {
 	boot: {
-		dirPath: './build/examples/crm/boot'
+		dirPath: './build/boot'
 	},
 	healthChecks: {
 		readynessEndpoint: '/.ah/ready',
