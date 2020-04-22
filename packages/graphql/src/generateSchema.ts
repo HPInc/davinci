@@ -5,13 +5,15 @@ import {
 	GraphQLBoolean,
 	GraphQLList,
 	GraphQLNonNull,
-	GraphQLInputObjectType
+	GraphQLInputObjectType,
+	GraphQLUnionType
 } from 'graphql';
 import { GraphQLDateTime } from 'graphql-iso-date';
 import _fp from 'lodash/fp';
 import _ from 'lodash';
 import { Reflector } from '@davinci/reflector';
 import { IFieldDecoratorMetadata, IResolverDecoratorMetadata, OperationType } from './types';
+import { UnionType } from './gqlTypes';
 import { createExecutableSchema } from './createControllerSchemas';
 
 const scalarDict = {
@@ -105,24 +107,56 @@ export const generateGQLSchema = ({
 			return { schema: schemas[name], schemas };
 		}
 
-		const objTypeConfig: any = {
-			...metadata.opts,
-			name,
-			// eslint-disable-next-line @typescript-eslint/no-use-before-define
-			fields: createObjectFields({
-				parentType: type,
-				schemas,
-				isInput,
-				operationType,
-				resolverMetadata,
-				partial,
-				transformMetadata
-			})
-		};
+		if (type instanceof UnionType) {
+			const types = Array.isArray(type.types)
+				? type.types.map(
+					t =>
+						generateGQLSchema({
+							type: t,
+							parentType,
+							schemas,
+							key,
+							isInput,
+							operationType,
+							resolverMetadata,
+							partial,
+							transformMetadata
+						}).schema
+				  )
+				: type.types;
 
-		const ObjectType = isInput ? GraphQLInputObjectType : GraphQLObjectType;
+			const unionTypeConfig = {
+				..._.omit(metadata.opts, ['type']),
+				name,
+				types,
+				resolveType: type.resolveType
+			};
 
-		schemas[name] = isRequired ? new GraphQLNonNull(new ObjectType(objTypeConfig)) : new ObjectType(objTypeConfig);
+			schemas[name] = isRequired
+				? new GraphQLNonNull(new GraphQLUnionType(unionTypeConfig))
+				: new GraphQLUnionType(unionTypeConfig);
+		} else {
+			const objTypeConfig: any = {
+				...metadata.opts,
+				name,
+
+				// eslint-disable-next-line @typescript-eslint/no-use-before-define
+				fields: createObjectFields({
+					parentType: type,
+					schemas,
+					isInput,
+					operationType,
+					resolverMetadata,
+					partial,
+					transformMetadata
+				})
+			};
+
+			const ObjectType = isInput ? GraphQLInputObjectType : GraphQLObjectType;
+			schemas[name] = isRequired
+				? new GraphQLNonNull(new ObjectType(objTypeConfig))
+				: new ObjectType(objTypeConfig);
+		}
 
 		return { schema: schemas[name], schemas };
 	}
@@ -196,17 +230,17 @@ const createObjectFields = ({
 		const fieldsWithExternalResolver = isInput
 			? {}
 			: externalFieldsResolvers.reduce((acc, fieldMeta) => {
-					const { prototype, fieldName } = fieldMeta;
-					const { schema, schemas: s } = createExecutableSchema(
-						prototype.constructor,
-						fieldMeta,
-						schemas,
-						operationType
-					);
-					_.merge(schemas, s);
+				const { prototype, fieldName } = fieldMeta;
+				const { schema, schemas: s } = createExecutableSchema(
+					prototype.constructor,
+					fieldMeta,
+					schemas,
+					operationType
+				);
+				_.merge(schemas, s);
 
-					acc[fieldName] = schema;
-					return acc;
+				acc[fieldName] = schema;
+				return acc;
 			  }, {});
 
 		return { ...fields, ...fieldsWithExternalResolver };

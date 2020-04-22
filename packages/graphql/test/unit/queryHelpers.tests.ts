@@ -87,11 +87,11 @@ describe('mongooseHelpers', () => {
 			const { schema: gqlSchema } = generateGQLSchema({ type: MyClassFilter });
 			const fields = gqlSchema.getFields();
 
-			const firnameFields = fields.firstname.type.getFields();
+			const firstnameFields = fields.firstname.type.getFields();
 			const phoneFields = fields.phone.type.getFields();
 
 			should(Object.keys(fields)).be.deepEqual(['firstname', 'phone', 'AND', 'OR', 'NOR']);
-			should(Object.keys(firnameFields)).be.deepEqual([
+			should(Object.keys(firstnameFields)).be.deepEqual([
 				'EQ',
 				'NE',
 				'GT',
@@ -103,7 +103,7 @@ describe('mongooseHelpers', () => {
 				'EXISTS',
 				'NOT'
 			]);
-			should(firnameFields.EQ.type).be.equal(GraphQLString);
+			should(firstnameFields.EQ.type).be.equal(GraphQLString);
 			should(fields.phone.type).be.instanceOf(GraphQLObjectType);
 			should(Object.keys(phoneFields)).be.deepEqual(['number', 'AND', 'OR', 'NOR']);
 			should(Object.keys(phoneFields.number.type.getFields())).be.deepEqual([
