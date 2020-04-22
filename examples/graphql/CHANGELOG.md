@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.7.0](https://github.com/Oneflow/davinci/compare/@davinci/example-graphql@0.6.5...@davinci/example-graphql@0.7.0) (2020-04-22)
+
+
+### Features
+
+* complete querying ([353be47](https://github.com/Oneflow/davinci/commit/353be478ea8fbc39dc76aa22a47a9bf65b654348))
+* querying working for basic types ([a8f6187](https://github.com/Oneflow/davinci/commit/a8f6187df7be9cfdcd244e8eb73480b677189f4f))
+
+
+
+
+
 ## [0.6.5](https://github.com/Oneflow/davinci/compare/@davinci/example-graphql@0.6.4...@davinci/example-graphql@0.6.5) (2020-04-01)
 
 **Note:** Version bump only for package @davinci/example-graphql

@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.10.0](https://github.com/Oneflow/davinci/compare/@davinci/graphql@0.9.9...@davinci/graphql@0.10.0) (2020-04-22)
+
+
+### Bug Fixes
+
+* eslint fixes ([26ec606](https://github.com/Oneflow/davinci/commit/26ec60686121f0112965b7966fd0215767df1fd6))
+
+
+### Features
+
+* complete querying ([353be47](https://github.com/Oneflow/davinci/commit/353be478ea8fbc39dc76aa22a47a9bf65b654348))
+* querying working for basic types ([a8f6187](https://github.com/Oneflow/davinci/commit/a8f6187df7be9cfdcd244e8eb73480b677189f4f))
+
+
+
+
+
 ## [0.9.9](https://github.com/Oneflow/davinci/compare/@davinci/graphql@0.9.8...@davinci/graphql@0.9.9) (2020-04-01)
 
 **Note:** Version bump only for package @davinci/graphql

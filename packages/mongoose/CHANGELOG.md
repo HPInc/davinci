@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.13.1](https://github.com/Oneflow/davinci/compare/@davinci/mongoose@0.13.0...@davinci/mongoose@0.13.1) (2020-04-22)
+
+**Note:** Version bump only for package @davinci/mongoose
+
+
+
+
+
 # [0.13.0](https://github.com/Oneflow/davinci/compare/@davinci/mongoose@0.12.5...@davinci/mongoose@0.13.0) (2020-04-01)
 
 

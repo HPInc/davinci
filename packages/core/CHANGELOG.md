@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.16.1](https://github.com/Oneflow/davinci/compare/@davinci/core@0.16.0...@davinci/core@0.16.1) (2020-04-22)
+
+
+### Bug Fixes
+
+* eslint fixes ([26ec606](https://github.com/Oneflow/davinci/commit/26ec60686121f0112965b7966fd0215767df1fd6))
+
+
+
+
+
 # [0.16.0](https://github.com/Oneflow/davinci/compare/@davinci/core@0.15.0...@davinci/core@0.16.0) (2020-04-01)
 
 
