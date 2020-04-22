@@ -3,18 +3,24 @@ import { Reflector, ClassType } from '@davinci/reflector';
 import { field } from './decorators';
 import { IFieldDecoratorMetadata } from './types';
 
-const OPERATORS = ['EQ', 'NE', 'GT', 'GTE', 'LT', 'LTE', 'IN', 'NIN', 'EXISTS', 'NOT'];
+const OPERATORS = ['EQ', 'NE', 'GT', 'GTE', 'LT', 'LTE', 'IN', 'NIN', 'EXISTS', 'NOT', 'LIMIT', 'SKIP'];
 const LOGIC_OPERATORS = ['AND', 'OR', 'NOR'];
 
-const toMgooseQuerySyntax = (op: typeof OPERATORS[number] | typeof LOGIC_OPERATORS[number]) => `$${_.camelCase(op)}`;
+const convertToMongodbOperator = (op: typeof OPERATORS[number] | typeof LOGIC_OPERATORS[number]) =>
+	`$${_.camelCase(op)}`;
 
-export const parseGqlQuery = (query, path = '') => {
+/**
+ * Parse a GQL query into a Mongodb compatible query
+ * @param query
+ * @param path
+ */
+export const toMongodbQuery = (query, path = '') => {
 	return _.reduce(
 		query,
 		(acc, value, key) => {
 			if (OPERATORS.includes(key)) {
-				const v = key === 'NOT' ? parseGqlQuery(value, '') : value;
-				const queryObj = { [toMgooseQuerySyntax(key)]: v };
+				const v = key === 'NOT' ? toMongodbQuery(value, '') : value;
+				const queryObj = { [convertToMongodbOperator(key)]: v };
 				if (path) {
 					acc[path] = queryObj;
 					return acc;
@@ -24,12 +30,12 @@ export const parseGqlQuery = (query, path = '') => {
 			}
 
 			if (LOGIC_OPERATORS.includes(key) && Array.isArray(value)) {
-				acc[toMgooseQuerySyntax(key)] = value.map(v => parseGqlQuery(v, path));
+				acc[convertToMongodbOperator(key)] = value.map(v => toMongodbQuery(v, path));
 				return acc;
 			}
 
 			if (typeof value === 'object') {
-				return { ...acc, ...parseGqlQuery(value, _.compact([path, key]).join('.')) };
+				return { ...acc, ...toMongodbQuery(value, _.compact([path, key]).join('.')) };
 			}
 
 			acc[key] = value;
@@ -39,6 +45,9 @@ export const parseGqlQuery = (query, path = '') => {
 		{}
 	);
 };
+
+const removeRegex = /(\[\])/g;
+export const toMongdbProjection = (selectionSet: string[] = []) => selectionSet.map(s => s.replace(removeRegex, ''));
 
 const renameClass = (theClass: ClassType, newName: string) => {
 	const nameDescriptors = Object.getOwnPropertyDescriptor(theClass, 'name');
@@ -79,7 +88,7 @@ const createFieldFilterOperatorsClass = (type, name: string) => {
 			NOT: any;
 		}
 
-		const newName = _.upperFirst(`${name}Query`);
+		const newName = _.upperFirst(`${name}Filter`);
 		renameClass(BaseFilterOperators, newName);
 
 		return BaseFilterOperators;
@@ -91,7 +100,7 @@ const createFieldFilterOperatorsClass = (type, name: string) => {
 
 	if (typeof type === 'function') {
 		const fieldsMetadata = _.map(
-			Reflector.getMetadata('davinci:graphql:fields', type) as IFieldDecoratorMetadata[],
+			Reflector.getMetadata<IFieldDecoratorMetadata[]>('davinci:graphql:fields', type),
 			({ key, opts, optsFactory }) => {
 				const options = opts ?? optsFactory({ isInput: false, operationType: 'query' });
 
@@ -107,8 +116,10 @@ const createFieldFilterOperatorsClass = (type, name: string) => {
 			const { description, asInput } = opts;
 			field({ description, asInput, required: false, type: newType })(QueryClass.prototype, key);
 		});
-		const newName = _.upperFirst(`${name}Query`);
+		const newName = _.upperFirst(`${name}Filter`);
 		renameClass(QueryClass, newName);
+
+		LOGIC_OPERATORS.forEach(op => field({ typeFactory: () => [QueryClass] })(QueryClass.prototype, op));
 
 		return QueryClass;
 	}
@@ -116,26 +127,22 @@ const createFieldFilterOperatorsClass = (type, name: string) => {
 	return String;
 };
 
+/**
+ * Extends a class adding the querying capabilities
+ * @param theClass
+ */
 export const withOperators = (theClass: ClassType) => {
-	const fieldsMetadata = _.map(
-		Reflector.getMetadata('davinci:graphql:fields', theClass) as IFieldDecoratorMetadata[],
-		({ key, opts, optsFactory }) => {
-			const options = opts ?? optsFactory({ isInput: false, operationType: 'query' });
+	return createFieldFilterOperatorsClass(theClass, theClass.name);
+};
 
-			return { key, opts: options };
-		}
-	);
+export const withPagination = () => {
+	class BasePaginationOperators {
+		@field()
+		LIMIT: number;
 
-	const QueryClass = class {};
+		@field()
+		SKIP: number;
+	}
 
-	fieldsMetadata.forEach(({ key, opts }) => {
-		const type = opts.typeFactory ? opts.typeFactory() : opts.type;
-		const newType = createFieldFilterOperatorsClass(type, key);
-		const { description, asInput } = opts;
-		field({ description, asInput, required: false, type: newType })(QueryClass.prototype, key);
-	});
-
-	LOGIC_OPERATORS.forEach(op => field({ typeFactory: () => [QueryClass] })(QueryClass.prototype, op));
-
-	return QueryClass;
+	return class extends BasePaginationOperators {};
 };

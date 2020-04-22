@@ -1,5 +1,5 @@
 import * as decorators from './decorators';
-import { parseGqlQuery, withOperators } from './mongooseHelpers';
+import * as queryHelpers from './queryHelpers';
 
 export { default as generateSchema, generateGQLSchema } from './generateSchema';
 export * from './types';
@@ -11,7 +11,4 @@ export const graphql = {
 	...decorators
 };
 
-export const mongodbHelpers = {
-	parseGqlQuery,
-	withOperators
-};
+export { queryHelpers };

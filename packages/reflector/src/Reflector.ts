@@ -18,7 +18,7 @@ function cleanUp(fn: string) {
 }
 
 export default class Reflector {
-	static getMetadata(metadataKey: any, target: any, propertyKey?: string | symbol) {
+	static getMetadata<ReturnType = any>(metadataKey: any, target: any, propertyKey?: string | symbol): ReturnType {
 		return Reflect.getMetadata(metadataKey, target, propertyKey);
 	}
 
