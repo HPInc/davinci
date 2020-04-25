@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.11.0](https://github.com/Oneflow/davinci/compare/@davinci/graphql@0.10.0...@davinci/graphql@0.11.0) (2020-04-25)
+
+
+### Features
+
+* **graphql:** added support for middlewares ([c3af5fb](https://github.com/Oneflow/davinci/commit/c3af5fb0c45ffeac53493e3a73d203d12cf902f7))
+
+
+
+
+
 # [0.10.0](https://github.com/Oneflow/davinci/compare/@davinci/graphql@0.9.9...@davinci/graphql@0.10.0) (2020-04-22)
 
 
