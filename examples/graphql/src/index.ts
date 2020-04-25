@@ -1,6 +1,7 @@
 import express, { Express } from 'express';
 import { createApp, DaVinciExpress, DaVinciOptions } from '@davinci/core';
 import { createGraphQLServer } from '@davinci/graphql';
+import { Request } from 'express';
 import { BookController, AuthorController } from './api';
 
 const options: DaVinciOptions = {
@@ -15,7 +16,7 @@ const options: DaVinciOptions = {
 
 const expressApp: Express = express();
 
-const context = ({ req }) => ({ accountId: req.headers['x-oneflow-accountid'] });
+const context = (req: Request) => ({ accountId: req.headers['x-oneflow-accountid'], test: true });
 
 createApp(expressApp, options, app => {
 	createGraphQLServer(app, [BookController, AuthorController], { context });

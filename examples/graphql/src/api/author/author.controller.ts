@@ -4,8 +4,11 @@ import model from './author.model';
 import AuthorSchema, { AuthorFilter, AuthorPagination } from './author.schema';
 import { BookSchema } from '../index';
 
-const { query, parent, mutation, fieldResolver, arg, selectionSet } = graphql;
+const { query, parent, mutation, fieldResolver, arg, selectionSet, middleware } = graphql;
 
+@middleware((_source, _args, context) => {
+	console.log(context);
+})
 export default class AuthorController {
 	model = model;
 
@@ -14,6 +17,9 @@ export default class AuthorController {
 		return this.model.findById(id);
 	}
 
+	@middleware((_source, _args, context) => {
+		console.log(context);
+	})
 	@query([AuthorSchema], 'authors')
 	findAuthors(
 		@arg() where: AuthorFilter,

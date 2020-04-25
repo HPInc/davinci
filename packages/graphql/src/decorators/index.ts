@@ -6,7 +6,8 @@ import {
 	IFieldDecoratorMetadata,
 	FieldDecoratorOptionsFactory,
 	IFieldDecoratorOptionsFactoryArgs,
-	IResolverDecoratorMetadata
+	IResolverDecoratorMetadata,
+	ResolverMiddleware
 } from '../types';
 
 /**
@@ -196,19 +197,47 @@ export function parent() {
 	};
 }
 
-export interface IResolverDecoratorArgs {
-	excludedMethods?: string[];
-	resourceSchema?: Function;
-}
+type Stage = 'before' | 'after';
+
+const middleware = <TSource = any, TContext = any>(
+	middlewareFunction: ResolverMiddleware<TSource, TContext>,
+	stage: Stage = 'before'
+): Function => {
+	return function(target: Record<string, any> | Function, methodName: string) {
+		const args: {
+			middlewareFunction: Function;
+			stage: Stage;
+			handler?: Function;
+			isControllerMw?: boolean;
+		} = { middlewareFunction, stage };
+
+		let realTarget = target;
+		if (typeof target === 'object' && target[methodName]) {
+			args.handler = target[methodName];
+			realTarget = target.constructor;
+		} else {
+			args.isControllerMw = true;
+		}
+
+		// define new metadata methods
+		Reflector.unshiftMetadata('davinci:graphql:middleware', args, realTarget);
+
+		return target;
+	};
+};
 
 /**
- * Decorator that annotate a controller.
- * It allows setting the basepath, resourceSchema, etc
- * @param args
+ * Decorator that allow to specify a `before` middlewares per controller method basis
+ * @param middlewareFunction
  */
-export function resolver(args?: IResolverDecoratorArgs): Function {
-	return function(target: object) {
-		// define new metadata props
-		Reflector.defineMetadata('davinci:graphql:resolver', args, target);
-	};
-}
+middleware.before = <TSource, TContext>(middlewareFunction: ResolverMiddleware<TSource, TContext>) =>
+	middleware(middlewareFunction, 'before');
+
+/**
+ * Decorator that allow to specify a `after` middlewares per controller method basis
+ * @param middlewareFunction
+ */
+middleware.after = <TSource, TContext>(middlewareFunction: ResolverMiddleware<TSource, TContext>) =>
+	middleware(middlewareFunction, 'after');
+
+export { middleware };
