@@ -1,5 +1,6 @@
-import { GraphQLScalarType } from 'graphql';
+import { GraphQLScalarType , GraphQLFieldResolver } from 'graphql';
 import { ClassType, TypeValueFactory, Maybe } from '@davinci/reflector';
+
 
 export type TypeValue = ClassType | GraphQLScalarType | Function | object | symbol;
 
@@ -41,3 +42,7 @@ export interface IResolverDecoratorMetadata {
 	returnType: any;
 	handler: Function;
 }
+
+export type SelectionSet<T> = { [P in keyof T]?: boolean | SelectionSet<T[P]> };
+
+export type ResolverMiddleware<TSource = any, TContext = any> = GraphQLFieldResolver<TSource, TContext>;

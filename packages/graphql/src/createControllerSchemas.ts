@@ -2,8 +2,19 @@ import _fp from 'lodash/fp';
 import _ from 'lodash';
 import { GraphQLEnumType, GraphQLList, GraphQLNonNull } from 'graphql';
 import { Reflector, ClassType } from '@davinci/reflector';
+import Bluebird from 'bluebird';
 import generateSchema from './generateSchema';
-import { IResolverDecoratorMetadata, OperationType } from './types';
+import { IResolverDecoratorMetadata, OperationType, ResolverMiddleware } from './types';
+
+function applyMiddlewares<TSource, TContext>(...middlewares: ResolverMiddleware<TSource, TContext>[]) {
+	const main: ResolverMiddleware<TSource, TContext> = async (root, args, context, info) => {
+		const results = await Bluebird.map(middlewares, middleware => middleware(root, args, context, info));
+
+		return results[results.length - 1];
+	};
+
+	return main;
+}
 
 /**
  * Returns a flatten list of fields
@@ -57,7 +68,7 @@ export const createExecutableSchema = (
 	operationType: OperationType
 ) => {
 	const { methodName, returnType } = resolverMetadata;
-	const contextMetadata = Reflector.getMetadata('tscontroller:context', TheClass.prototype.constructor);
+	const contextMetadata = Reflector.getMetadata('davinci:context', TheClass.prototype.constructor);
 	const resolverArgsMetadata = _fp.flow(
 		_fp.concat(contextMetadata),
 		_fp.filter({ methodName }),
@@ -133,23 +144,38 @@ export const createExecutableSchema = (
 		{ resolverArgs: {}, handlerArgsDefinition: [] }
 	);
 
+	// get middlewares
+	const allMiddlewaresMeta = (
+		Reflector.getMetadata('davinci:graphql:middleware', controller.constructor) || []
+	).filter(metadata => metadata.handler === controller[methodName] || metadata.isControllerMw);
+	const beforeMiddlewares = allMiddlewaresMeta
+		.filter(m => m.stage === 'before')
+		.map(({ middlewareFunction }) => middlewareFunction);
+	const afterMiddlewares = allMiddlewaresMeta
+		.filter(m => m.stage === 'after')
+		.map(({ middlewareFunction }) => middlewareFunction);
+
+	const mainResolve = (root, args, context, info) => {
+		const handlerArgs = handlerArgsDefinition.map(argDefinition => {
+			const { name, isContext, isInfo, isSelectionSet, isParent } = argDefinition;
+			if (isContext) return context;
+			if (isInfo) return info;
+			if (isSelectionSet) {
+				return getFieldsSelection(info.operation.selectionSet.selections[0], info.returnType.ofType);
+			}
+			if (isParent) return root;
+
+			return (args || {})[name];
+		});
+		return controller[methodName](...handlerArgs);
+	};
+
+	const resolve = applyMiddlewares(...beforeMiddlewares, mainResolve, ...afterMiddlewares);
+
 	const schema = {
 		type: graphqlReturnType,
 		args: resolverArgs,
-		resolve(root, args, context, info) {
-			const handlerArgs = handlerArgsDefinition.map(argDefinition => {
-				const { name, isContext, isInfo, isSelectionSet, isParent } = argDefinition;
-				if (isContext) return context;
-				if (isInfo) return info;
-				if (isSelectionSet) {
-					return getFieldsSelection(info.operation.selectionSet.selections[0], info.returnType.ofType);
-				}
-				if (isParent) return root;
-
-				return (args || {})[name];
-			});
-			return controller[methodName](...handlerArgs);
-		}
+		resolve
 	};
 
 	return { schema, schemas: allSchemas };

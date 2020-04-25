@@ -46,9 +46,7 @@ export const createGraphQLServer = (
 	);
 
 	const allSchemas = { queries: {}, mutations: {}, schemas: {} };
-	const { queries: queryFields, mutations: mutationsFields, schemas: controllerSchemas } = (
-		controllers || []
-	).reduce(
+	const { queries: queryFields, mutations: mutationsFields, schemas: controllerSchemas } = (controllers || []).reduce(
 		(acc, controller) => {
 			_.merge(allSchemas, controllerSchemas);
 			const { queries, mutations, schemas } = createControllerSchemas(controller, allSchemas);
@@ -92,12 +90,12 @@ export const createGraphQLServer = (
 
 	app.use(
 		graphqlEndpoint,
-		graphqlHTTP({
+		graphqlHTTP(request => ({
 			schema,
 			graphiql: false,
-			context,
+			context: typeof context === 'function' ? context(request) : context,
 			...(graphqlOptions || {})
-		})
+		}))
 	);
 	console.info(`--- 🚀 GraphQL running on ${graphqlEndpoint}`);
 
