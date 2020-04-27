@@ -131,9 +131,10 @@ const createFieldFilterOperatorsClass = (type, name: string) => {
 /**
  * Extends a class adding the querying capabilities
  * @param theClass
+ * @param name
  */
-export const withOperators = (theClass: ClassType) => {
-	return createFieldFilterOperatorsClass(theClass, theClass.name);
+export const withOperators = (theClass: ClassType, name = theClass.name) => {
+	return createFieldFilterOperatorsClass(theClass, name);
 };
 
 export const withPagination = () => {
