@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.11.1](https://github.com/Oneflow/davinci/compare/@davinci/graphql@0.11.0...@davinci/graphql@0.11.1) (2020-04-27)
+
+
+### Bug Fixes
+
+* middleware concurrency ([5a61d73](https://github.com/Oneflow/davinci/commit/5a61d73b9c851665642ede7464ac92a0ad21f91b))
+
+
+
+
+
 # [0.11.0](https://github.com/Oneflow/davinci/compare/@davinci/graphql@0.10.0...@davinci/graphql@0.11.0) (2020-04-25)
 
 
