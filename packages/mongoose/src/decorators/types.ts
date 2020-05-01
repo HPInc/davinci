@@ -1,3 +1,8 @@
+/*
+ * © Copyright 2020 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
+
 import { SchemaTypeOpts } from 'mongoose';
 import { TypeValueFactory, TypeValue, Maybe } from '@davinci/reflector';
 

@@ -1,3 +1,8 @@
+/*
+ * © Copyright 2020 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
+
 import Debug from 'debug';
 import requireDir from 'require-dir';
 import _ from 'lodash';

@@ -1,3 +1,8 @@
+/*
+ * © Copyright 2020 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
+
 import { GraphQLScalarType , GraphQLFieldResolver } from 'graphql';
 import { ClassType, TypeValueFactory, Maybe } from '@davinci/reflector';
 

@@ -1,3 +1,8 @@
+/*
+ * © Copyright 2020 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
+
 import _ from 'lodash';
 import { Reflector, ReturnTypeFunc, ReturnTypeFuncValue, ClassType } from '@davinci/reflector';
 import {

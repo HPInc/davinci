@@ -1,3 +1,8 @@
+/*
+ * © Copyright 2020 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
+
 import { Reflector } from '@davinci/reflector';
 import { IPropDecoratorOptions, IPropDecoratorOptionsFactory, IPropDecoratorMetadata } from './types';
 

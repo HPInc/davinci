@@ -1,3 +1,8 @@
+/*
+ * © Copyright 2020 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
+
 import { GraphQLUnionTypeConfig } from 'graphql';
 
 type Types = GraphQLUnionTypeConfig<{}, {}>['types'];
