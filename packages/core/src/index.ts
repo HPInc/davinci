@@ -1,3 +1,8 @@
+/*
+ * © Copyright 2020 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
+
 import { Express } from 'express';
 import { Server } from 'http';
 import * as httpErrors from './errors/httpErrors';

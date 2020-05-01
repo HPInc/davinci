@@ -1,3 +1,8 @@
+/*
+ * © Copyright 2020 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
+
 import 'reflect-metadata';
 
 const getParameterNameCache = new Map();

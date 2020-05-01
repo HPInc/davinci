@@ -1,3 +1,8 @@
+/*
+ * © Copyright 2020 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
+
 import _fp from 'lodash/fp';
 import _ from 'lodash';
 import { GraphQLEnumType, GraphQLList, GraphQLNonNull } from 'graphql';

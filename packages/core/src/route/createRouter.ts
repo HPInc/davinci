@@ -1,3 +1,8 @@
+/*
+ * © Copyright 2020 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
+
 import Ajv from 'ajv';
 import Debug from 'debug';
 import express, { NextFunction, Response, Router } from 'express';

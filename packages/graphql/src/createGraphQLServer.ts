@@ -1,3 +1,8 @@
+/*
+ * © Copyright 2020 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
+
 import { GraphQLSchema, GraphQLObjectType, printSchema } from 'graphql';
 import graphqlHTTP from 'express-graphql';
 import { ClassType } from '@davinci/reflector';

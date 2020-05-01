@@ -1,3 +1,8 @@
+/*
+ * © Copyright 2020 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
+
 import { Document, Schema, Query } from 'mongoose';
 
 type Stage = 'pre' | 'post';

@@ -1,3 +1,8 @@
+/*
+ * © Copyright 2020 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
+
 export type Maybe<T> = null | undefined | T;
 
 export interface ClassType<T = any> {

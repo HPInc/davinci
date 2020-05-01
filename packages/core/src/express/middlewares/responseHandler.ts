@@ -1,3 +1,8 @@
+/*
+ * © Copyright 2020 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
+
 export default () => (req, res, next) => {
 	const { requestHandled } = req;
 	const { result } = req;

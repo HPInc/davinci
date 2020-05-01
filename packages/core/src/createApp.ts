@@ -1,3 +1,8 @@
+/*
+ * © Copyright 2020 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
+
 import Debug from 'debug';
 import express, { Express } from 'express';
 import http from 'http';
@@ -137,7 +142,7 @@ export const createApp = (...args: CreateAppArgs): Promise<DaVinciExpress> => {
 
 		debug('create the server');
 		const server = http.createServer(app);
-		
+
 		server.timeout = options.keepAliveTimeout || 61000;
 		server.keepAliveTimeout = options.keepAliveTimeout || 61000;
 		server.headersTimeout = options.keepAliveTimeout + 1000 || 62000; // should be bigger than keepAliveTimeout

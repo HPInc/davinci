@@ -1,3 +1,8 @@
+/*
+ * © Copyright 2020 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
+
 import _fp from 'lodash/fp';
 import _merge from 'lodash/merge';
 import { Reflector } from '@davinci/reflector';
