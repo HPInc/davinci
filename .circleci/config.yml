@@ -74,10 +74,8 @@ workflows:
   version: 2
   build_and_publish:
     jobs:
-      - checkout_and_test:
-          context: oneflow
+      - checkout_and_test
       - publish:
-          context: oneflow
           requires:
             - checkout_and_test
           filters:
@@ -85,7 +83,6 @@ workflows:
               only:
                 - master
       - publish_docs:
-          context: oneflow
           requires:
             - checkout_and_test
           filters:
