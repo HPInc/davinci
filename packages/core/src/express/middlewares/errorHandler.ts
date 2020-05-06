@@ -9,18 +9,18 @@ import * as errors from '../../errors/httpErrors';
 const debug = new Debug('davinci:error-handler');
 
 export default ({ exposeStack = false } = {}) => {
-	// @ts-ignore-next-line
-	return (err, req, res, next) => {
+	return (err, _req, res, _next) => {
 		debug(err);
 
 		let error = err;
 
-		// include support for Feathers errors, coming from feathers-mongoose/etc
+		// include support for legacy Feathers errors, coming from feathers-mongoose/etc
 		if (err.type === 'FeathersError') {
 			error = new errors.HttpError(err.message, err.name, err.code, err.className, err.data);
 			error.errors = err.errors;
 			error.stack = err.stack;
-		} else if (!(err instanceof errors.HttpError)) {
+			// eslint-disable-next-line no-underscore-dangle
+		} else if (!(err instanceof errors.HttpError) && err._type !== 'davinciHttpError') {
 			error = new errors.InternalServerError(err.message, {
 				errors: err.errors
 			});

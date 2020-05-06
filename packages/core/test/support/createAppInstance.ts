@@ -1,10 +1,10 @@
 // const express = require('express');
 // const { boot, createRouter } = require('../../index');
-// const CustomerController = require('../../examples/crm/customer/CustomerController');
+// const CustomerController = require('../../examples/rest/customer/CustomerController');
 
 // const createAppInstance = (options) => {
 // 	const app = express();
-// 	boot(app, { ...options, bootDirPath: './examples/crm/boot' }, app => {
+// 	boot(app, { ...options, bootDirPath: './examples/rest/boot' }, app => {
 // 		app.use('/api/customer', createRouter(CustomerController));
 // 	});
 

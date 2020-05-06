@@ -21,6 +21,8 @@ export class HttpError extends Error {
 
 	errors: [any];
 
+	_type = 'davinciHttpError'
+
 	/**
 	 * Create an HttpError instance
 	 *
@@ -31,6 +33,7 @@ export class HttpError extends Error {
 	 * @param className {string} The class name (ie, bad-request)
 	 * @param data {*} response extra, could hold error codes or any relevant information
 	 */
+	// @ts-ignore
 	constructor(message, name, code, className, data = {}) {
 		const trueProto = new.target.prototype;
 		super(message);
