@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/graphql",
-	"version": "0.12.1",
+	"version": "0.12.2",
 	"description": "Framework for rapid and consistent API development",
 	"main": "build/index.js",
 	"types": "build/index.d.ts",
