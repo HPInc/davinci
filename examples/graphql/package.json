@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/example-graphql",
-	"version": "0.8.1",
+	"version": "0.9.0",
 	"private": true,
 	"description": "",
 	"main": "index.js",
@@ -12,9 +12,9 @@
 	"author": "Piero Maltese <maltesepiero@gmail.com>",
 	"license": "ISC",
 	"dependencies": {
-		"@davinci/core": "^0.16.1",
-		"@davinci/graphql": "^0.11.1",
-		"@davinci/mongoose": "^0.13.1",
+		"@davinci/core": "^0.17.0",
+		"@davinci/graphql": "^0.12.0",
+		"@davinci/mongoose": "^0.14.0",
 		"debug": "^4.1.1",
 		"express": "4.16.4",
 		"lodash": "^4.17.11",

@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/mongoose",
-	"version": "0.13.1",
+	"version": "0.14.0",
 	"description": "> TODO: description",
 	"author": "HP",
 	"homepage": "",
@@ -18,8 +18,8 @@
 		"mongoose": "5.5.5"
 	},
 	"dependencies": {
-		"@davinci/core": "^0.16.1",
-		"@davinci/reflector": "^0.10.1",
+		"@davinci/core": "^0.17.0",
+		"@davinci/reflector": "^0.11.0",
 		"bluebird": "3.7.1",
 		"debug": "^4.1.1",
 		"lodash": "4.17.15"

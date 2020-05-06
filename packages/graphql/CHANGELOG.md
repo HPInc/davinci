@@ -3,6 +3,40 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.12.0 (2020-05-06)
+
+
+### Bug Fixes
+
+* commit all package-lock ([1208431](https://github.com/HPInc/davinci/commit/12084317ba2e35eb7a648400e8e28cdeb3ce79a7))
+* eslint fixes ([26ec606](https://github.com/HPInc/davinci/commit/26ec60686121f0112965b7966fd0215767df1fd6))
+* line length ([3c591f4](https://github.com/HPInc/davinci/commit/3c591f403c4629455425716ced0d2c459aef5e59))
+* middleware concurrency ([5a61d73](https://github.com/HPInc/davinci/commit/5a61d73b9c851665642ede7464ac92a0ad21f91b))
+* PR review fixes ([0c7d94c](https://github.com/HPInc/davinci/commit/0c7d94c22f15e7dd71b1e8ce896d19fbc26945cb))
+* reinstall whole rope to fix circleci sync error ([9d3c733](https://github.com/HPInc/davinci/commit/9d3c733cbd72b179fd2b6ce3c795e61ebb01b925))
+* use optional chaining operator and update typescript to 3.7.5 ([6b5d97f](https://github.com/HPInc/davinci/commit/6b5d97faa6d7ad8df3a87906ce21e589a30827fd))
+
+
+### Features
+
+* added apollo server creation logic, mutations, example ([1922911](https://github.com/HPInc/davinci/commit/1922911207986f13bb2bf775f6f8495bd5759fa2))
+* added info and selectionSet decorators ([5bf051c](https://github.com/HPInc/davinci/commit/5bf051cb6219decc1e6dbec06d9e99e20627196a))
+* added inputField decorator ([77864f2](https://github.com/HPInc/davinci/commit/77864f223bc7a8fa0f0505f68d21a2f08fff361c))
+* added typeFactory for lazy loading types ([74bb11d](https://github.com/HPInc/davinci/commit/74bb11dd79aa49ffc83c0671e2d77ed67cbdfbde))
+* complete querying ([353be47](https://github.com/HPInc/davinci/commit/353be478ea8fbc39dc76aa22a47a9bf65b654348))
+* graphql.field not accept a factory function ([3cf28af](https://github.com/HPInc/davinci/commit/3cf28afbb77a0b5301b3baa9a1e4bccb5857bf5c))
+* **decoratorFactory:** added factory functions to the openapi prop decorator ([fdc5cdf](https://github.com/HPInc/davinci/commit/fdc5cdf8006ced4f896b19263fe13d2f910ef5a5))
+* **eslint:** added eslint, removed tslint (deprecated) ([50d4038](https://github.com/HPInc/davinci/commit/50d4038b62fb95fa208259941f70c5dd2a3874cb))
+* **graphql:** added support for middlewares ([c3af5fb](https://github.com/HPInc/davinci/commit/c3af5fb0c45ffeac53493e3a73d203d12cf902f7))
+* now the field decorator function accept resolverMetadata as argument ([ef9e83b](https://github.com/HPInc/davinci/commit/ef9e83bc34c021c78dc792b47e6879745ad1d814))
+* querying working for basic types ([a8f6187](https://github.com/HPInc/davinci/commit/a8f6187df7be9cfdcd244e8eb73480b677189f4f))
+* simplified graphql schema generation ([4cd5a68](https://github.com/HPInc/davinci/commit/4cd5a68de7825d42fa475033608d3a1007a20482))
+* switched to express-graphql instead of apollo-server-express ([51e6548](https://github.com/HPInc/davinci/commit/51e654882af46c43d743a165988136991bce7f2c))
+
+
+
+
+
 ## [0.11.1](https://github.com/Oneflow/davinci/compare/@davinci/graphql@0.11.0...@davinci/graphql@0.11.1) (2020-04-27)
 
 
