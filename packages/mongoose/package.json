@@ -15,7 +15,7 @@
 		"cover": "nyc npm test"
 	},
 	"peerDependencies": {
-		"mongoose": "5.5.5"
+		"mongoose": "5.7.5"
 	},
 	"dependencies": {
 		"@davinci/core": "^0.17.1",
@@ -25,7 +25,7 @@
 		"lodash": "4.17.15"
 	},
 	"devDependencies": {
-		"mongoose": "5.5.5",
+		"mongoose": "5.7.5",
 		"prettier": "1.19.1",
 		"tslib": "^1.9.3",
 		"typescript": "^3.7.5"
