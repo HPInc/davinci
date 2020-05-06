@@ -1,11 +1,3 @@
-# `mongoose`
+## @davinci/mongoose
 
-> TODO: description
-
-## Usage
-
-```
-const mongoose = require('mongoose');
-
-// TODO: DEMONSTRATE API
-```
+*Checkout [https://hpinc.github.io/davinci/guide/database/mongoose.html](https://hpinc.github.io/davinci/guide/database/mongoose.html)*
