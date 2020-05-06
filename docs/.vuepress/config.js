@@ -10,7 +10,10 @@ module.exports = {
 		['meta', { name: 'apple-mobile-web-app-status-bar-style', content: 'black' }]
 	],
 	themeConfig: {
-		nav: [{ text: 'Home', link: '/' }, { text: 'Guide', link: '/guide/' }],
+		nav: [
+			{ text: 'Home', link: '/' },
+			{ text: 'Guide', link: '/guide/' }
+		],
 		sidebar: {
 			'/guide/': [
 				{
@@ -55,6 +58,12 @@ module.exports = {
 				type: 'vue',
 				before: '<pre class="vue-container"><code>',
 				after: '</code></pre>'
+			}
+		],
+		[
+			'@vuepress/google-analytics',
+			{
+				ga: process.env.GA_ID
 			}
 		]
 	]
