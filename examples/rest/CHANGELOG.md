@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 0.11.1 (2020-05-06)
+
+**Note:** Version bump only for package @davinci/example-rest
+
+
+
+
+
 # 0.11.0 (2020-05-06)
 
 

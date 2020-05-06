@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.17.1](https://github.com/HPInc/davinci/compare/@davinci/core@0.17.0...@davinci/core@0.17.1) (2020-05-06)
+
+
+### Bug Fixes
+
+* error type detection from the errorHandler MW ([83a16b8](https://github.com/HPInc/davinci/commit/83a16b8ca6f4f0326522a218e80de43000b9c103))
+
+
+
+
+
 # 0.17.0 (2020-05-06)
 
 
