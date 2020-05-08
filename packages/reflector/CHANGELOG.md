@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0](https://github.com/HPInc/davinci/compare/@davinci/reflector@0.11.1...@davinci/reflector@1.0.0) (2020-05-08)
+
+
+### Bug Fixes
+
+* **UnionType:** graphql union type ([bdee0c5](https://github.com/HPInc/davinci/commit/bdee0c5b6c50e69cc43430a75e6f723a0a814b77))
+
+
+### BREAKING CHANGES
+
+* **UnionType:** changed graphql arg decorator arguments to be consistent with others
+
+
+
+
+
 ## [0.11.1](https://github.com/HPInc/davinci/compare/@davinci/reflector@0.11.0...@davinci/reflector@0.11.1) (2020-05-06)
 
 **Note:** Version bump only for package @davinci/reflector

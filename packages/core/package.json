@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/core",
-	"version": "0.17.1",
+	"version": "0.17.2",
 	"description": "Framework for rapid and consistent API development",
 	"main": "build/index.js",
 	"types": "build/index.d.ts",
@@ -14,7 +14,7 @@
 	"author": "HP",
 	"license": "ISC",
 	"dependencies": {
-		"@davinci/reflector": "^0.11.1",
+		"@davinci/reflector": "^1.0.0",
 		"@godaddy/terminus": "4.1.0",
 		"@types/mocha": "^5.2.6",
 		"ajv": "6.2.1",
