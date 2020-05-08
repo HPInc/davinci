@@ -4,20 +4,29 @@
  */
 
 import { GraphQLUnionTypeConfig } from 'graphql';
-
-type Types = GraphQLUnionTypeConfig<{}, {}>['types'];
+import { ClassType } from '@davinci/reflector';
 
 type ResolveType = GraphQLUnionTypeConfig<{}, {}>['resolveType'];
 
 export class UnionType {
-	types: Types;
+	name: string;
+
+	types: ClassType[];
 
 	resolveType: ResolveType;
 
-	constructor(types: Types, resolveType: ResolveType) {
+	constructor(name: string, types: ClassType[], resolveType: ResolveType) {
+		this.name = name;
 		this.types = types;
 		this.resolveType = resolveType;
 	}
 }
-export const createUnionType = ({ types, resolveType }: { types: Types; resolveType: ResolveType }) =>
-	new UnionType(types, resolveType);
+
+interface CreateUnionTypeArgs {
+	name: UnionType['name'];
+	types: UnionType['types'];
+	resolveType: UnionType['resolveType'];
+}
+
+export const createUnionType = ({ types, resolveType, name }: CreateUnionTypeArgs) =>
+	new UnionType(name, types, resolveType);

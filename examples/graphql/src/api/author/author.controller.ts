@@ -13,7 +13,7 @@ export default class AuthorController {
 	model = model;
 
 	@query(AuthorSchema, 'authorById')
-	getAuthorById(@arg('id', { required: true }) id: string) {
+	getAuthorById(@arg({ required: true }) id: string) {
 		return this.model.findById(id);
 	}
 
@@ -38,20 +38,17 @@ export default class AuthorController {
 	}
 
 	@mutation(AuthorSchema)
-	createAuthor(@arg('data', { required: true }) data: AuthorSchema) {
+	createAuthor(@arg({ required: true }) data: AuthorSchema) {
 		return this.model.create(data);
 	}
 
 	@mutation(AuthorSchema)
-	updateAuthorById(
-		@arg('id', { required: true }) id: string,
-		@arg('data', { required: true, partial: true }) data: AuthorSchema
-	) {
+	updateAuthorById(@arg({ required: true }) id: string, @arg({ required: true, partial: true }) data: AuthorSchema) {
 		return this.model.findByIdAndUpdate(id, data, { new: true });
 	}
 
 	@mutation(AuthorSchema)
-	updateAuthor(@arg() where: AuthorFilter, @arg('data', { required: true, partial: true }) data: AuthorSchema) {
+	updateAuthor(@arg() where: AuthorFilter, @arg({ required: true, partial: true }) data: AuthorSchema) {
 		const query = queryHelpers.toMongodbQuery(where);
 		return this.model.findOneAndUpdate(query, data, { new: true });
 	}

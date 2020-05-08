@@ -19,7 +19,7 @@ describe('createControllerSchemas', () => {
 
 		class Controller {
 			@query(Customer, 'customers')
-			fetchCustomers(@arg('page') page: string) {
+			fetchCustomers(@arg() page: string) {
 				return page;
 			}
 		}
@@ -47,7 +47,7 @@ describe('createControllerSchemas', () => {
 
 		class Controller {
 			@mutation(Customer, 'createCustomer')
-			createCustomer(@arg('customer') customer: Customer) {
+			createCustomer(@arg() customer: Customer) {
 				return customer;
 			}
 		}

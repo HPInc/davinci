@@ -1,6 +1,6 @@
 import { Schema } from 'mongoose';
 import { mgoose } from '@davinci/mongoose';
-import { graphql } from '@davinci/graphql';
+import { graphql, queryHelpers } from '@davinci/graphql';
 import { AuthorSchema } from '../index';
 import { requiredForMutations } from '../../lib/schemaUtils';
 
@@ -28,7 +28,6 @@ export default class Book {
 	accountId: string;
 }
 
-export class BookQuery extends Book {
-	@graphql.field({ typeFactory: () => [Book] })
-	and: [Book];
-}
+export class BookFilter extends queryHelpers.withOperators(Book) {}
+
+export class BookPagination extends queryHelpers.withPagination() {}
