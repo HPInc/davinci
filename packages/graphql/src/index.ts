@@ -11,6 +11,7 @@ export { createUnionType } from './gqlTypes';
 
 export { default as generateSchema, generateGQLSchema } from './generateSchema';
 export * from './types';
+export * from './gqlTypes';
 
 export { createControllerSchemas } from './createControllerSchemas';
 export { default as createGraphQLServer } from './createGraphQLServer';

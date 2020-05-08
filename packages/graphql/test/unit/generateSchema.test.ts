@@ -1,7 +1,7 @@
 import should from 'should';
-import { GraphQLBoolean, GraphQLFloat, GraphQLList, GraphQLObjectType, GraphQLString } from 'graphql';
+import { GraphQLBoolean, GraphQLFloat, GraphQLList, GraphQLObjectType, GraphQLString, GraphQLUnionType } from 'graphql';
 import _fp from 'lodash/fp';
-import { graphql, generateGQLSchema } from '../../src';
+import { graphql, generateGQLSchema, UnionType } from '../../src';
 import { fieldResolver } from '../../src/decorators';
 
 const { field } = graphql;
@@ -94,11 +94,11 @@ describe('schema generation', () => {
 				title: string;
 			}
 
+			// @ts-ignore
 			class AuthorController {
 				@fieldResolver(Book, 'authors', [Author])
 				getBookAuthors() {}
 			}
-			console.log(AuthorController);
 
 			const { schema } = generateGQLSchema({ type: Book });
 
@@ -141,6 +141,30 @@ describe('schema generation', () => {
 				.be.instanceOf(GraphQLList)
 				.have.property('ofType')
 				.equal(schemas.CustomerPhone);
+		});
+
+		it('supports union types', () => {
+			class Cat {
+				@field()
+				breed: string;
+			}
+
+			class Human {
+				@field()
+				phone: string;
+			}
+
+			const resolveType = () => 'Human';
+			const Animal = new UnionType('Animal', [Cat, Human], resolveType);
+
+			const schemas: any = generateGQLSchema({ type: Animal }).schemas;
+
+			should(Object.keys(schemas)).be.deepEqual(['Cat', 'Human', 'Animal']);
+			const types = schemas.Animal.getTypes();
+			should(types[0].name).be.equal('Cat')
+			should(types[1].name).be.equal('Human')
+			should(types).have.length(2);
+			should(schemas.Animal).be.instanceOf(GraphQLUnionType);
 		});
 
 		it('if transformMetadata is supplied, it should transform the metadata', () => {

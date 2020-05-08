@@ -83,6 +83,7 @@ export const mutation = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?
 };
 
 export interface IArgOptions {
+	name?: string;
 	required?: boolean;
 	enum?: { [key: string]: string };
 	partial?: boolean;
@@ -90,10 +91,9 @@ export interface IArgOptions {
 
 /**
  * Decorator that annotate a method parameter
- * @param name
  * @param options
  */
-export function arg(name?, options?: IArgOptions): Function {
+export function arg(options?: IArgOptions): Function {
 	return function(prototype: object, methodName: string, index) {
 		// get the existing metadata props
 		const methodParameters = Reflector.getMetadata('davinci:graphql:args', prototype.constructor) || [];
@@ -101,7 +101,7 @@ export function arg(name?, options?: IArgOptions): Function {
 		const isAlreadySet = !!_.find(methodParameters, { methodName, index });
 		if (isAlreadySet) return;
 
-		let n = name;
+		let n = options?.name;
 
 		if (!n) {
 			const methodParameterNames = Reflector.getParameterNames(prototype[methodName]);
