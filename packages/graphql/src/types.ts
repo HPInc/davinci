@@ -3,13 +3,21 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { GraphQLScalarType , GraphQLFieldResolver } from 'graphql';
+import { GraphQLScalarType, GraphQLFieldResolver } from 'graphql';
 import { ClassType, TypeValueFactory, Maybe } from '@davinci/reflector';
-
 
 export type TypeValue = ClassType | GraphQLScalarType | Function | object | symbol;
 
 export type OperationType = 'query' | 'mutation';
+
+export interface IArgOptions {
+	name?: string;
+	required?: boolean;
+	enum?: { [key: string]: string };
+	partial?: boolean;
+	type?: TypeValue;
+	typeFactory?: TypeValueFactory;
+}
 
 export interface ITypeDecoratorOptions {
 	name?: string;
