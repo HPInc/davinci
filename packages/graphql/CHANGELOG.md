@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.1.0](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.0.0...@davinci/graphql@1.1.0) (2020-05-21)
+
+
+### Features
+
+* **graphqlArg:** allow specify explicit type ([98a2b68](https://github.com/HPInc/davinci/commit/98a2b68eb6571ebd43d0a9bbf1788bef6f0d06c7))
+
+
+
+
+
 # [1.0.0](https://github.com/HPInc/davinci/compare/@davinci/graphql@0.12.2...@davinci/graphql@1.0.0) (2020-05-08)
 
 
