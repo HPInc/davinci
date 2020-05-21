@@ -6,6 +6,7 @@
 import _ from 'lodash';
 import { Reflector, ReturnTypeFunc, ReturnTypeFuncValue, ClassType } from '@davinci/reflector';
 import {
+	IArgOptions,
 	ITypeDecoratorOptions,
 	IFieldDecoratorOptions,
 	IFieldDecoratorMetadata,
@@ -82,13 +83,6 @@ export const mutation = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?
 	};
 };
 
-export interface IArgOptions {
-	name?: string;
-	required?: boolean;
-	enum?: { [key: string]: string };
-	partial?: boolean;
-}
-
 /**
  * Decorator that annotate a method parameter
  * @param options
@@ -98,6 +92,8 @@ export function arg(options?: IArgOptions): Function {
 		// get the existing metadata props
 		const methodParameters = Reflector.getMetadata('davinci:graphql:args', prototype.constructor) || [];
 		const paramtypes = Reflector.getMetadata('design:paramtypes', prototype, methodName);
+		const argType = options?.type ? options?.type : paramtypes?.[index];
+
 		const isAlreadySet = !!_.find(methodParameters, { methodName, index });
 		if (isAlreadySet) return;
 
@@ -114,7 +110,7 @@ export function arg(options?: IArgOptions): Function {
 			name: n,
 			opts: options,
 			handler: prototype[methodName],
-			type: paramtypes && paramtypes[index]
+			type: argType
 		});
 		Reflector.defineMetadata('davinci:graphql:args', methodParameters, prototype.constructor);
 	};
