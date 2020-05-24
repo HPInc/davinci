@@ -61,7 +61,7 @@ const renameClass = (theClass: ClassType, newName: string) => {
 };
 
 const createFieldFilterOperatorsClass = (type, name: string) => {
-	if ([String, Number, Date].includes(type)) {
+	if ([String, Number, Date, Boolean].includes(type)) {
 		class BaseFilterOperators {
 			@field({ typeFactory: () => type })
 			EQ: any;
