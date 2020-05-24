@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.1](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.1.0...@davinci/graphql@1.1.1) (2020-05-24)
+
+
+### Bug Fixes
+
+* **graphql:** added boolean to the base type list ([cf0f35a](https://github.com/HPInc/davinci/commit/cf0f35aa18148b97854415ed092a225087203440))
+
+
+
+
+
 # [1.1.0](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.0.0...@davinci/graphql@1.1.0) (2020-05-21)
 
 
