@@ -220,8 +220,17 @@ const middleware = <TSource = any, TContext = any>(
 			args.isControllerMw = true;
 		}
 
+		const middlewares = (Reflector.getMetadata('davinci:graphql:middleware', realTarget) || [])
+			.concat(args)
+			.sort((a, b) => {
+				if (a.isControllerMw && !b.isControllerMw) return -1;
+				if (!a.isControllerMw && b.isControllerMw) return 1;
+
+				return 0;
+			});
+
 		// define new metadata methods
-		Reflector.pushMetadata('davinci:graphql:middleware', args, realTarget);
+		Reflector.defineMetadata('davinci:graphql:middleware', middlewares, realTarget);
 
 		return target;
 	};
