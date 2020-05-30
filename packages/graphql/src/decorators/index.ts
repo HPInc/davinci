@@ -221,7 +221,7 @@ const middleware = <TSource = any, TContext = any>(
 		}
 
 		// define new metadata methods
-		Reflector.unshiftMetadata('davinci:graphql:middleware', args, realTarget);
+		Reflector.pushMetadata('davinci:graphql:middleware', args, realTarget);
 
 		return target;
 	};
