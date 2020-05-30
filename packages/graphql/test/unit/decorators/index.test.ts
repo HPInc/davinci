@@ -1,5 +1,5 @@
-import { graphql } from '../../../src';
 import { Reflector } from '@davinci/reflector';
+import { graphql } from '../../../src';
 
 describe('decorators', () => {
 	describe('middleware', () => {
