@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.3](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.1.2...@davinci/graphql@1.1.3) (2020-05-30)
+
+
+### Bug Fixes
+
+* controller middlewares have precedence ([ea3d7b4](https://github.com/HPInc/davinci/commit/ea3d7b4de0ca46ccc832fb3d0772b2d3dc277c13))
+
+
+
+
+
 ## [1.1.2](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.1.1...@davinci/graphql@1.1.2) (2020-05-30)
 
 
