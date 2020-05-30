@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.2](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.1.1...@davinci/graphql@1.1.2) (2020-05-30)
+
+
+### Bug Fixes
+
+* **graphqlMiddleware:** using pushMetadata to fix classes extends ([e29d93c](https://github.com/HPInc/davinci/commit/e29d93ce71ce2b4e0937c9e5138c139edbeb9546))
+
+
+
+
+
 ## [1.1.1](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.1.0...@davinci/graphql@1.1.1) (2020-05-24)
 
 
