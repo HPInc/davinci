@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.4](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.1.3...@davinci/graphql@1.1.4) (2020-06-12)
+
+
+### Bug Fixes
+
+* **graphqlMiddleware:** now using bluebird mapSeries ([8e8c7dd](https://github.com/HPInc/davinci/commit/8e8c7ddf311c3a7878f7ef3d88dcb9199225b41c))
+
+
+
+
+
 ## [1.1.3](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.1.2...@davinci/graphql@1.1.3) (2020-05-30)
 
 
