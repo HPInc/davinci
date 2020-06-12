@@ -13,9 +13,7 @@ import { IResolverDecoratorMetadata, OperationType, ResolverMiddleware } from '.
 
 function applyMiddlewares<TSource, TContext>(...middlewares: ResolverMiddleware<TSource, TContext>[]) {
 	const main: ResolverMiddleware<TSource, TContext> = async (root, args, context, info) => {
-		const results = await Bluebird.map(middlewares, middleware => middleware(root, args, context, info), {
-			concurrency: 1
-		});
+		const results = await Bluebird.mapSeries(middlewares, middleware => middleware(root, args, context, info));
 
 		return results[results.length - 1];
 	};
