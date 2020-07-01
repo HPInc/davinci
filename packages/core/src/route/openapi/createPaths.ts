@@ -12,7 +12,7 @@ import { getSchemaDefinition } from './createSchemaDefinition';
 
 const getParameterDefinition = methodParameterConfig => {
 	const {
-		options: { type, ...options }
+		options: { type, enum: enumOptions, ...options }
 	} = methodParameterConfig;
 	const paramDefinition = { ...options };
 	// handling special parameters
@@ -20,10 +20,28 @@ const getParameterDefinition = methodParameterConfig => {
 		paramDefinition.schema = { type: methodParameterConfig.type };
 	} else {
 		const schema = methodParameterConfig?.options?.schema;
+
 		if (schema) {
 			paramDefinition.schema = {
 				...schema
 			};
+		} else if (enumOptions?.length) {
+			const { schemas, definitions } = enumOptions.reduce(
+				(acc, enumType) => {
+					const { schema: s, definitions: d } = getSchemaDefinition(enumType);
+					acc.schemas.push(s);
+					acc.definitions = { ...acc.definitions, ...d };
+					return acc;
+				},
+				{
+					schemas: [],
+					definitions: {}
+				}
+			);
+
+			paramDefinition.schema = { oneOf: schemas };
+
+			return { paramDefinition, definitions };
 		} else {
 			const { schema: s, definitions } = getSchemaDefinition(type);
 			paramDefinition.schema = s;
