@@ -28,6 +28,7 @@ export interface ISchema {
 
 export interface IMethodParameterBase {
 	name?: string;
+	type?: TypeValue;
 	description?: string;
 	required?: boolean;
 	schema?: ISchema;

@@ -19,7 +19,7 @@ import createSchemaDefinition from './openapi/createSchemaDefinition';
 import { IControllerDecoratorArgs } from './decorators/route';
 import { ISchema, ISwaggerDefinitions, MethodValidation, PathsValidationOptions } from './types';
 
-const debug = new Debug('of-base-api');
+const debug = new Debug('davinci:create-router');
 
 const transformDefinitionToValidAJVSchemas = (schema, validationOptions: MethodValidation) => {
 	if (Array.isArray(schema)) {

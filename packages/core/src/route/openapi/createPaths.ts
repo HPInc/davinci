@@ -6,29 +6,26 @@
 import _ from 'lodash';
 import _fp from 'lodash/fp';
 import { Reflector } from '@davinci/reflector';
-import {
-	PathsDefinition,
-	PathsValidationOptions,
-	ISwaggerDefinitions,
-	IMethodDecoratorMetadata
-} from '../types';
+import { PathsDefinition, PathsValidationOptions, ISwaggerDefinitions, IMethodDecoratorMetadata } from '../types';
 import { IControllerDecoratorArgs } from '../decorators/route';
 import { getSchemaDefinition } from './createSchemaDefinition';
 
 const getParameterDefinition = methodParameterConfig => {
-	const {options} = methodParameterConfig;
+	const {
+		options: { type, ...options }
+	} = methodParameterConfig;
 	const paramDefinition = { ...options };
 	// handling special parameters
 	if (['context', 'req', 'res'].includes(methodParameterConfig.type)) {
 		paramDefinition.schema = { type: methodParameterConfig.type };
 	} else {
-		const schema = _.get(methodParameterConfig, 'options.schema');
+		const schema = methodParameterConfig?.options?.schema;
 		if (schema) {
 			paramDefinition.schema = {
 				...schema
 			};
 		} else {
-			const { schema: s, definitions } = getSchemaDefinition(methodParameterConfig.type);
+			const { schema: s, definitions } = getSchemaDefinition(type);
 			paramDefinition.schema = s;
 
 			return { paramDefinition, definitions };
