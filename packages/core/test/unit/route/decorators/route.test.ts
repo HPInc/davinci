@@ -246,10 +246,11 @@ describe('route decorators', () => {
 				methodName: 'myMethod',
 				index: 0,
 				options: {
-					name: 'correctName',
-					in: 'query'
+					name: 'test',
+					in: 'query',
+					type: [String]
 				},
-				type: String
+				type: [String]
 			});
 		});
 	});
