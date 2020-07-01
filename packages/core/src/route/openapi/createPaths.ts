@@ -12,7 +12,7 @@ import { getSchemaDefinition } from './createSchemaDefinition';
 
 const getParameterDefinition = methodParameterConfig => {
 	const {
-		options: { type, ...options }
+		options: { type = null, ...options } = {}
 	} = methodParameterConfig;
 	const paramDefinition = { ...options };
 	// handling special parameters
