@@ -1,23 +1,13 @@
 import { graphql, queryHelpers } from '@davinci/graphql';
 import { context } from '@davinci/core';
-import Bluebird from 'bluebird';
 import model from './author.model';
 import AuthorSchema, { AuthorFilter, AuthorPagination } from './author.schema';
 import { BookSchema } from '../index';
 
 const { query, parent, mutation, fieldResolver, arg, selectionSet, middleware } = graphql;
 
-@middleware(async (_source, _args, _three) => {
-	await Bluebird.delay(2000);
-	console.log('3');
-})
-@middleware(async (_source, _args, _two) => {
-	await Bluebird.delay(2000);
-	console.log('2');
-})
-@middleware(async (_source, _args, _one) => {
-	await Bluebird.delay(2000);
-	console.log('1');
+@middleware((_source, _args, context) => {
+	console.log(context);
 })
 export default class AuthorController {
 	model = model;
@@ -27,9 +17,8 @@ export default class AuthorController {
 		return this.model.findById(id);
 	}
 
-	@middleware(async (_source, _args, _four) => {
-		await Bluebird.delay(2000);
-		console.log('4');
+	@middleware((_source, _args, context) => {
+		console.log(context);
 	})
 	@query([AuthorSchema], 'authors')
 	findAuthors(
