@@ -5,12 +5,7 @@
 
 import _ from 'lodash';
 import { Reflector } from '@davinci/reflector';
-import {
-	IMethodParameter,
-	IMethodParameterBase,
-	IMethodDecoratorOptions,
-	IMethodDecoratorMetadata
-} from '../types';
+import { IMethodParameter, IMethodParameterBase, IMethodDecoratorOptions, IMethodDecoratorMetadata } from '../types';
 
 /**
  * Factory function that generates route method decorators
@@ -58,7 +53,10 @@ export function param(options: IMethodParameter): Function {
 		// get the existing metadata props
 		const methodParameters =
 			Reflector.getMetadata('davinci:openapi:method-parameters', prototype.constructor) || [];
+
 		const paramtypes = Reflector.getMetadata('design:paramtypes', prototype, methodName);
+		const type = options.type ?? paramtypes?.[index];
+
 		if (!options.name) {
 			const methodParameterNames = Reflector.getParameterNames(prototype[methodName]);
 			options.name = methodParameterNames[index];
@@ -68,7 +66,7 @@ export function param(options: IMethodParameter): Function {
 			index,
 			options,
 			handler: prototype[methodName],
-			type: paramtypes && paramtypes[index]
+			type
 		};
 
 		const methodParameterIndex = _.findIndex(methodParameters, { methodName, index });
@@ -78,11 +76,7 @@ export function param(options: IMethodParameter): Function {
 			methodParameters.unshift(meta);
 		}
 
-		Reflector.defineMetadata(
-			'davinci:openapi:method-parameters',
-			methodParameters,
-			prototype.constructor
-		);
+		Reflector.defineMetadata('davinci:openapi:method-parameters', methodParameters, prototype.constructor);
 	};
 }
 

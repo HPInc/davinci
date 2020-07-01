@@ -204,7 +204,7 @@ describe('route decorators', () => {
 
 		We want only the decorator specified in the CustomerController class, to have effect
 		*/
-		it(`should ignore setting metadata on the method, if metadata already exists 
+		it(`should ignore setting metadata on the method, if metadata already exists
 				(example: it was defined by the extending class)`, () => {
 			class BaseClass {
 				myMethod(@route.param({ name: 'wrongName', in: 'query' }) query: string) {
@@ -229,6 +229,28 @@ describe('route decorators', () => {
 					in: 'query'
 				},
 				type: String
+			});
+		});
+
+		it('should allow to pass an explicit type as parameter', () => {
+			class MyClass {
+				myMethod(@route.query({ name: 'test', type: [String] }) query: string[]) {
+					return query;
+				}
+			}
+
+			const metadata = Reflector.getMetadata('davinci:openapi:method-parameters', MyClass.prototype.constructor);
+			// @ts-ignore
+			should(metadata[0]).be.deepEqual({
+				handler: MyClass.prototype.myMethod,
+				methodName: 'myMethod',
+				index: 0,
+				options: {
+					name: 'test',
+					in: 'query',
+					type: [String]
+				},
+				type: [String]
 			});
 		});
 	});

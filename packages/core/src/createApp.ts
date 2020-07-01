@@ -17,7 +17,7 @@ import notFoundHandler from './express/middlewares/notFoundHandler';
 import { execBootScripts } from './express/boot';
 import { DaVinciExpress } from './index';
 
-const debug = new Debug('of-base-api');
+const debug = new Debug('davinci:init');
 
 interface HealthChecksOptions {
 	livenessEndpoint?: string;

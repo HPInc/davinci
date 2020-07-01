@@ -7,7 +7,7 @@ import Debug from 'debug';
 import _ from 'lodash';
 import Resource from './Resource';
 
-const debug = new Debug('of-base-api');
+const debug = new Debug('davinci:openapi');
 
 const SWAGGER_VERSION = '2.0';
 

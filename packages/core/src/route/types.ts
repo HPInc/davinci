@@ -28,6 +28,8 @@ export interface ISchema {
 
 export interface IMethodParameterBase {
 	name?: string;
+	type?: TypeValue;
+	enum?: TypeValue[];
 	description?: string;
 	required?: boolean;
 	schema?: ISchema;
