@@ -11,9 +11,7 @@ import { IControllerDecoratorArgs } from '../decorators/route';
 import { getSchemaDefinition } from './createSchemaDefinition';
 
 const getParameterDefinition = methodParameterConfig => {
-	const {
-		options: { type, enum: enumOptions, ...options }
-	} = methodParameterConfig;
+	const { options: { type = null, enum: enumOptions = null, ...options } = {} } = methodParameterConfig;
 	const paramDefinition = { ...options };
 	// handling special parameters
 	if (['context', 'req', 'res'].includes(methodParameterConfig.type)) {
