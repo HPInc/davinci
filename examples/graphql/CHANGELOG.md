@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.6](https://github.com/HPInc/davinci/compare/@davinci/example-graphql@1.0.5...@davinci/example-graphql@1.0.6) (2020-07-01)
+
+
+### Bug Fixes
+
+* remove unused testing npms ([c6d02b6](https://github.com/HPInc/davinci/commit/c6d02b6f5fd8ac2ad83399f3e697ab424e834dde))
+
+
+
+
+
 ## [1.0.5](https://github.com/HPInc/davinci/compare/@davinci/example-graphql@1.0.4...@davinci/example-graphql@1.0.5) (2020-06-12)
 
 **Note:** Version bump only for package @davinci/example-graphql

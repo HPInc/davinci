@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.11.4](https://github.com/HPInc/davinci/compare/@davinci/example-rest@0.11.3...@davinci/example-rest@0.11.4) (2020-07-01)
+
+
+### Bug Fixes
+
+* remove unused testing npms ([c6d02b6](https://github.com/HPInc/davinci/commit/c6d02b6f5fd8ac2ad83399f3e697ab424e834dde))
+
+
+
+
+
 ## [0.11.3](https://github.com/HPInc/davinci/compare/@davinci/example-rest@0.11.2...@davinci/example-rest@0.11.3) (2020-05-08)
 
 **Note:** Version bump only for package @davinci/example-rest

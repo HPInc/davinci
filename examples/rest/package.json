@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/example-rest",
-	"version": "0.11.3",
+	"version": "0.11.4",
 	"private": true,
 	"description": "",
 	"main": "index.js",
