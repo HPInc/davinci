@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.18.0](https://github.com/HPInc/davinci/compare/@davinci/core@0.17.2...@davinci/core@0.18.0) (2020-07-01)
+
+
+### Bug Fixes
+
+* added enum initializer ([fbe23a7](https://github.com/HPInc/davinci/commit/fbe23a7c7b86c2617d571a003958f86d5e64b661))
+* added safety check ([622c10d](https://github.com/HPInc/davinci/commit/622c10d040df6fb0275362405a75bbc8de6c158c))
+* allow metho parameters to pass an explicit type ([3973fd9](https://github.com/HPInc/davinci/commit/3973fd9aa06e72e3d66866c1ad886f264a35b6f8))
+* fixing tests ([56f80cb](https://github.com/HPInc/davinci/commit/56f80cb1db4f7450aa472494281c03a60e832b42))
+
+
+### Features
+
+* added the ability to specify enum parameter types ([987c4e1](https://github.com/HPInc/davinci/commit/987c4e1c75cdfd4e8f17208d9a701add4dc8a05b))
+
+
+
+
+
 ## [0.17.2](https://github.com/HPInc/davinci/compare/@davinci/core@0.17.1...@davinci/core@0.17.2) (2020-05-08)
 
 **Note:** Version bump only for package @davinci/core
