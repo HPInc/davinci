@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.18.1](https://github.com/HPInc/davinci/compare/@davinci/core@0.18.0...@davinci/core@0.18.1) (2020-07-02)
+
+
+### Bug Fixes
+
+* parameters type inference ([5c6c4e9](https://github.com/HPInc/davinci/commit/5c6c4e9497eeed8a20593e1e16cc4b9529eeedc5))
+
+
+
+
+
 # [0.18.0](https://github.com/HPInc/davinci/compare/@davinci/core@0.17.2...@davinci/core@0.18.0) (2020-07-01)
 
 
