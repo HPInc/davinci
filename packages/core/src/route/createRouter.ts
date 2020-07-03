@@ -18,6 +18,7 @@ import createPaths from './openapi/createPaths';
 import createSchemaDefinition from './openapi/createSchemaDefinition';
 import { IControllerDecoratorArgs } from './decorators/route';
 import { ISchema, ISwaggerDefinitions, MethodValidation, PathsValidationOptions } from './types';
+import { DaVinciExpress } from '../index';
 
 const debug = new Debug('davinci:create-router');
 
@@ -306,7 +307,12 @@ const validateController = (Controller: ClassType) => {
 	if (typeof Controller !== 'function') throw new Error('Invalid Controller - not function');
 };
 
-const createRouterAndSwaggerDoc = (Controller: ClassType, rsName?: string, contextFactory?: ContextFactory): Router => {
+const createRouterAndSwaggerDoc = (
+	Controller: ClassType,
+	rsName?: string | null,
+	contextFactory?: ContextFactory | null,
+	router: Router = express.Router()
+): Router | DaVinciExpress => {
 	// need to validate the inputs here
 	validateController(Controller);
 
@@ -321,9 +327,6 @@ const createRouterAndSwaggerDoc = (Controller: ClassType, rsName?: string, conte
 
 	// create the controller from the supplied class
 	const controller = new Controller();
-
-	// create the router
-	const router = express.Router();
 
 	// create the swagger structure
 	const mainDefinition = resourceSchema ? createSchemaDefinition(resourceSchema) : {};

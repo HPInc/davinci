@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import should from 'should';
 import Sinon from 'sinon';
+import express from 'express';
 import MongooseController from '../../support/MongooseController';
 import createRouter, { createRouteHandlers } from '../../../src/route/createRouter';
 import { route } from '../../../src/route';
@@ -64,6 +65,25 @@ describe('createRouter', () => {
 			router.stack[0].route.should.have.property('path').equal('/:id');
 			router.stack[0].route.should.have.property('methods').deepEqual({ delete: true });
 			done();
+		});
+
+		it('should register the routes to the router instance provided as parameter', () => {
+			let app = express();
+
+			@route.controller({ basepath: '/api/test' })
+			class TestController {
+				@route.get({ path: '/hello', summary: 'Find' })
+				find() {}
+			}
+			const router = createRouter(TestController, 'test', null, app);
+
+			should(router).be.equal(app);
+			should(app._router.stack[2].route).match({
+				path: '/api/test/hello',
+				methods: {
+					get: true
+				}
+			});
 		});
 	});
 
