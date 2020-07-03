@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.19.1](https://github.com/HPInc/davinci/compare/@davinci/core@0.19.0...@davinci/core@0.19.1) (2020-07-03)
+
+
+### Bug Fixes
+
+* don't use console ([5ee0bda](https://github.com/HPInc/davinci/commit/5ee0bda2f42f981e840f56530b4cafb3385221ea))
+
+
+
+
+
 # [0.19.0](https://github.com/HPInc/davinci/compare/@davinci/core@0.18.1...@davinci/core@0.19.0) (2020-07-03)
 
 
