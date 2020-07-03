@@ -40,7 +40,7 @@ const expressApp: Express = express();
 const createContext = ({ req }): Context => ({ accountId: req.headers['x-oneflow-accountid'] });
 
 createApp(expressApp, options, app => {
-	app.use(createRouter(CustomerController, 'Customer', createContext));
+	createRouter(CustomerController, 'Customer', createContext, app);
 });
 
 if (require.main === module) {
