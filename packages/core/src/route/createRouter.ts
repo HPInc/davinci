@@ -5,7 +5,7 @@
 
 import Ajv from 'ajv';
 import Debug from 'debug';
-import express, { Express, NextFunction, Response, Router } from 'express';
+import express, { NextFunction, Response, Router } from 'express';
 import _ from 'lodash';
 import _fp from 'lodash/fp';
 import Promise from 'bluebird';
@@ -311,7 +311,7 @@ const createRouterAndSwaggerDoc = (
 	Controller: ClassType,
 	rsName?: string | null,
 	contextFactory?: ContextFactory | null,
-	app?: DaVinciExpress | Express
+	router: Router = express.Router()
 ): Router | DaVinciExpress => {
 	// need to validate the inputs here
 	validateController(Controller);
@@ -349,9 +349,6 @@ const createRouterAndSwaggerDoc = (
 
 	// now process the swagger structure and get an array of method/path mappings to handlers
 	const routes = createRouteHandlers(controller, definition, validationOptions, contextFactory);
-
-	// create the router or use the provided app
-	const router = app ?? express.Router();
 
 	// add them to the router
 	routes.forEach(route => {

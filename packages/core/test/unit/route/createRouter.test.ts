@@ -67,7 +67,7 @@ describe('createRouter', () => {
 			done();
 		});
 
-		it('should register the routes to the app instance provided as parameter', () => {
+		it('should register the routes to the router instance provided as parameter', () => {
 			let app = express();
 
 			@route.controller({ basepath: '/api/test' })
