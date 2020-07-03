@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.12.0](https://github.com/HPInc/davinci/compare/@davinci/example-rest@0.11.6...@davinci/example-rest@0.12.0) (2020-07-03)
+
+
+### Features
+
+* allow passing the express instance as parameter ([89f410e](https://github.com/HPInc/davinci/commit/89f410e04ba65f52177868b000dbf10243f62281))
+
+
+
+
+
 ## [0.11.6](https://github.com/HPInc/davinci/compare/@davinci/example-rest@0.11.5...@davinci/example-rest@0.11.6) (2020-07-02)
 
 **Note:** Version bump only for package @davinci/example-rest

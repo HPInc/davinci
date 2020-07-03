@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.19.0](https://github.com/HPInc/davinci/compare/@davinci/core@0.18.1...@davinci/core@0.19.0) (2020-07-03)
+
+
+### Bug Fixes
+
+* using the common Router interface as type of the parameter ([8eab484](https://github.com/HPInc/davinci/commit/8eab48438053853bf15fb6676ba9e2deadd7758b))
+
+
+### Features
+
+* allow passing the express instance as parameter ([89f410e](https://github.com/HPInc/davinci/commit/89f410e04ba65f52177868b000dbf10243f62281))
+
+
+
+
+
 ## [0.18.1](https://github.com/HPInc/davinci/compare/@davinci/core@0.18.0...@davinci/core@0.18.1) (2020-07-02)
 
 
