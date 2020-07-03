@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.19.2](https://github.com/HPInc/davinci/compare/@davinci/core@0.19.1...@davinci/core@0.19.2) (2020-07-03)
+
+
+### Bug Fixes
+
+* **core:** moved express to peerDependencies ([e6e5341](https://github.com/HPInc/davinci/commit/e6e5341a03bba09ea52348a63f9260ed5307005e))
+
+
+
+
+
 ## [0.19.1](https://github.com/HPInc/davinci/compare/@davinci/core@0.19.0...@davinci/core@0.19.1) (2020-07-03)
 
 
