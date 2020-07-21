@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.19.3](https://github.com/HPInc/davinci/compare/@davinci/core@0.19.2...@davinci/core@0.19.3) (2020-07-21)
+
+
+### Bug Fixes
+
+* update lodash due to security vulnerability ([f41eb8f](https://github.com/HPInc/davinci/commit/f41eb8f7d5c6958288508a51427b8fb1083de11c))
+
+
+
+
+
 ## [0.19.2](https://github.com/HPInc/davinci/compare/@davinci/core@0.19.1...@davinci/core@0.19.2) (2020-07-03)
 
 

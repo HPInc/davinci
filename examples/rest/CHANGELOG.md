@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.3](https://github.com/HPInc/davinci/compare/@davinci/example-rest@0.12.2...@davinci/example-rest@0.12.3) (2020-07-21)
+
+
+### Bug Fixes
+
+* update lodash due to security vulnerability ([f41eb8f](https://github.com/HPInc/davinci/commit/f41eb8f7d5c6958288508a51427b8fb1083de11c))
+
+
+
+
+
 ## [0.12.2](https://github.com/HPInc/davinci/compare/@davinci/example-rest@0.12.1...@davinci/example-rest@0.12.2) (2020-07-03)
 
 **Note:** Version bump only for package @davinci/example-rest
