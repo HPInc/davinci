@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.2.0](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.1.10...@davinci/graphql@1.2.0) (2020-07-24)
+
+
+### Bug Fixes
+
+* last @types/graphql version ([d31d184](https://github.com/HPInc/davinci/commit/d31d184eb22e1c1987c835d74753d419ad509260))
+
+
+### Features
+
+* **asyncGraphqlHTTP:** now graphqlHTTP can return a promise ([acd662e](https://github.com/HPInc/davinci/commit/acd662eaee0991b24b2bfc4e1f51901b27a0036d))
+
+
+
+
+
 ## [1.1.10](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.1.9...@davinci/graphql@1.1.10) (2020-07-21)
 
 
