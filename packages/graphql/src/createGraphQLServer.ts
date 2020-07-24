@@ -4,7 +4,7 @@
  */
 
 import { GraphQLSchema, GraphQLObjectType, printSchema } from 'graphql';
-import graphqlHTTP from 'express-graphql';
+import { graphqlHTTP, OptionsData } from 'express-graphql';
 import { ClassType } from '@davinci/reflector';
 import { DaVinciExpress } from '@davinci/core';
 import fs from 'fs';
@@ -15,7 +15,7 @@ import playground from './playground-markup';
 export interface ICreateGraphQLServerOptions {
 	context?: Function | object;
 	graphqlEndpoint?: string;
-	graphqlOptions?: graphqlHTTP.Options;
+	graphqlOptions?: OptionsData;
 	playgroundEnabled?: boolean;
 	playgroundOptions?: any;
 }
@@ -72,18 +72,18 @@ export const createGraphQLServer = (
 	const schema = new GraphQLSchema({
 		query: queryFields
 			? new GraphQLObjectType({
-				name: 'Query',
-				fields: {
-					...queryFields
-				}
+					name: 'Query',
+					fields: {
+						...queryFields
+					}
 			  })
 			: null,
 		mutation: !_.isEmpty(mutationsFields)
 			? new GraphQLObjectType({
-				name: 'Mutation',
-				fields: {
-					...mutationsFields
-				}
+					name: 'Mutation',
+					fields: {
+						...mutationsFields
+					}
 			  })
 			: null
 	});
@@ -95,12 +95,15 @@ export const createGraphQLServer = (
 
 	app.use(
 		graphqlEndpoint,
-		graphqlHTTP(request => ({
-			schema,
-			graphiql: false,
-			context: typeof context === 'function' ? context(request) : context,
-			...(graphqlOptions || {})
-		}))
+		graphqlHTTP(async request => {
+			const ctx = typeof context === 'function' ? await context(request) : context;
+			return {
+				schema,
+				graphiql: false,
+				context: ctx,
+				...(graphqlOptions || {})
+			};
+		})
 	);
 	console.info(`--- 🚀 GraphQL running on ${graphqlEndpoint}`);
 
