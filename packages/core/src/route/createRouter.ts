@@ -178,7 +178,8 @@ function mapReqToParameters<ContextType>(
 			} else {
 				throw new NotImplemented(`Can't get field ${p.name} - ${p.in} not yet supported`);
 			}
-			acc.push(processParameter({ value, config: p, definitions, validationOptions: methodValidationOptions }));
+			// eslint-disable-next-line no-underscore-dangle
+			acc[p._index] = processParameter({ value, config: p, definitions, validationOptions: methodValidationOptions });
 		}
 		return acc;
 	}, []);
