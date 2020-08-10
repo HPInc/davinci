@@ -16,7 +16,6 @@
 	"dependencies": {
 		"@davinci/reflector": "^1.0.0",
 		"@godaddy/terminus": "4.1.0",
-		"@types/mocha": "^5.2.6",
 		"ajv": "6.2.1",
 		"bluebird": "3.5.0",
 		"debug": "^4.1.1",
@@ -29,6 +28,7 @@
 		"mongoose": "5.5.5"
 	},
 	"devDependencies": {
+		"@types/mocha": "^5.2.7",
 		"express": "^4.16.4",
 		"tslib": "^1.9.3",
 		"typescript": "^3.7.5"
