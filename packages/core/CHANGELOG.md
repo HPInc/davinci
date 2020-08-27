@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.19.4](https://github.com/HPInc/davinci/compare/@davinci/core@0.19.3...@davinci/core@0.19.4) (2020-08-27)
+
+
+### Bug Fixes
+
+* moved @types/mocha to devDependencies ([54b51fd](https://github.com/HPInc/davinci/commit/54b51fdeaaf9099e956773181b5f4899d14052af))
+
+
+
+
+
 ## [0.19.3](https://github.com/HPInc/davinci/compare/@davinci/core@0.19.2...@davinci/core@0.19.3) (2020-07-21)
 
 
