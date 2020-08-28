@@ -21,7 +21,7 @@ const options = {
 			path: '/api-doc.json',
 			options: {
 				info: {
-					name: 'Customer API',
+					title: 'Customer API',
 					version: packageJson.version
 				},
 				securityDefinitions: { Bearer: { type: 'apiKey', name: 'Authorization', in: 'header' } }
