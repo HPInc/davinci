@@ -12,6 +12,7 @@ describe('mongooseHelpers', () => {
 				firstname: { EQ: 'Mike' },
 				lastname: { NOT: { EQ: 'Jordan' } },
 				home: { address: { NE: 'Foobar' } },
+				myNumber: { GTE: 1, LTE: 10 },
 				OR: [{ lastname: { IN: ['Foo'] } }, { lastname: { NIN: ['Bar'] } }],
 				AND: [{ home: { address: { EXISTS: true } } }, { OR: [{ weight: { EQ: 122 } }, { age: { EQ: 30 } }] }]
 			};
@@ -29,6 +30,10 @@ describe('mongooseHelpers', () => {
 				},
 				'home.address': {
 					$ne: 'Foobar'
+				},
+				myNumber: {
+					$gte: 1,
+					$lte: 10
 				},
 				$or: [
 					{

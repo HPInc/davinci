@@ -28,7 +28,8 @@ export const toMongodbQuery = (query, path = '') => {
 				const v = key === 'NOT' ? toMongodbQuery(value, '') : value;
 				const queryObj = { [convertToMongodbOperator(key)]: v };
 				if (path) {
-					acc[path] = queryObj;
+					const obj = _.get(acc, path);
+					acc[path] = _.merge({}, obj, queryObj);
 					return acc;
 				}
 
