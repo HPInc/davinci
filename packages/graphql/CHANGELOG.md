@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.2](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.2.1...@davinci/graphql@1.2.2) (2020-09-26)
+
+
+### Bug Fixes
+
+* **graphql:** fixed an issue with multiple operators ([4a7075b](https://github.com/HPInc/davinci/commit/4a7075bf79a252c94a59b43f7c5340af3b390863))
+
+
+
+
+
 ## [1.2.1](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.2.0...@davinci/graphql@1.2.1) (2020-08-27)
 
 **Note:** Version bump only for package @davinci/graphql
