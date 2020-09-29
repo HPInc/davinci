@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.3](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.2.2...@davinci/graphql@1.2.3) (2020-09-29)
+
+
+### Bug Fixes
+
+* respect parameters position ([8f699c4](https://github.com/HPInc/davinci/commit/8f699c42caf13464e3754ac77b86fe3a45d373ba))
+
+
+
+
+
 ## [1.2.2](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.2.1...@davinci/graphql@1.2.2) (2020-09-26)
 
 
