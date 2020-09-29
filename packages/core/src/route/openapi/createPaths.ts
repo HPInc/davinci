@@ -12,7 +12,7 @@ import { getSchemaDefinition } from './createSchemaDefinition';
 
 const getParameterDefinition = methodParameterConfig => {
 	const { type,  options: { type: t = null, enum: enumOptions = null, ...options } = {} } = methodParameterConfig;
-	const paramDefinition = { ...options };
+	const paramDefinition = { ...options, _index: methodParameterConfig.index };
 	// handling special parameters
 	if (['context', 'req', 'res'].includes(methodParameterConfig.type)) {
 		paramDefinition.schema = { type: methodParameterConfig.type };

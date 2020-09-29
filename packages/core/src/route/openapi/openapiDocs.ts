@@ -31,7 +31,7 @@ export const sanitiseResourcePath = resourcePaths => {
 			parameters: _.filter(
 				path.parameters,
 				parameter => !EXCLUDED_PARAMETER_TYPES.includes(parameter.schema.type)
-			)
+			).map(p => _.omit(p, ['_index']))
 		};
 	});
 };
