@@ -165,18 +165,15 @@ export const createExecutableSchema = (
 			const { name, index, isContext, isInfo, isSelectionSet, isParent } = argDefinition;
 			if (isContext) {
 				acc[index] = context;
-			}
-			if (isInfo) {
+			} else if (isInfo) {
 				acc[index] = info;
-			}
-			if (isSelectionSet) {
+			} else if (isSelectionSet) {
 				acc[index] = getFieldsSelection(info.operation.selectionSet.selections[0], info.returnType.ofType);
-			}
-			if (isParent) {
+			} else if (isParent) {
 				acc[index] = root;
+			} else {
+				acc[index] = args?.[name];
 			}
-
-			acc[index] = args?.[name];
 
 			return acc;
 		}, []);
