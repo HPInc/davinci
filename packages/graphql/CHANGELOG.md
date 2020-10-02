@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.4](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.2.3...@davinci/graphql@1.2.4) (2020-10-02)
+
+
+### Bug Fixes
+
+* **graphql:** fixed issue with handlers definition processing ([c5a4d66](https://github.com/HPInc/davinci/commit/c5a4d66751c900be97716850426175b1dc41d9f3))
+
+
+
+
+
 ## [1.2.3](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.2.2...@davinci/graphql@1.2.3) (2020-09-29)
 
 

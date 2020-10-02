@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/example-graphql",
-	"version": "1.0.16",
+	"version": "1.0.17",
 	"private": true,
 	"description": "",
 	"main": "index.js",
@@ -13,7 +13,7 @@
 	"license": "ISC",
 	"dependencies": {
 		"@davinci/core": "^0.19.5",
-		"@davinci/graphql": "^1.2.3",
+		"@davinci/graphql": "^1.2.4",
 		"@davinci/mongoose": "^0.14.11",
 		"debug": "^4.1.1",
 		"express": "4.16.4",
