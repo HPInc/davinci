@@ -14,6 +14,7 @@ import {
 	GraphQLUnionType
 } from 'graphql';
 import { GraphQLDateTime } from 'graphql-iso-date';
+import { GraphQLJSONObject } from 'graphql-type-json';
 import _fp from 'lodash/fp';
 import _ from 'lodash';
 import { Reflector } from '@davinci/reflector';
@@ -24,7 +25,9 @@ import { createExecutableSchema } from './createControllerSchemas';
 const scalarDict = {
 	number: GraphQLFloat,
 	string: GraphQLString,
-	boolean: GraphQLBoolean
+	boolean: GraphQLBoolean,
+	object: GraphQLJSONObject,
+	date: GraphQLDateTime
 };
 
 interface IGenerateGQLSchemaArgs {
@@ -74,8 +77,8 @@ export const generateGQLSchema = ({
 	const isRequired = !partial && metadata.opts?.required;
 
 	// it's a primitive type, simple case
-	if ([String, Number, Boolean, Date].includes(type)) {
-		const gqlType = type === Date ? GraphQLDateTime : scalarDict[type.name.toLowerCase()];
+	if ([String, Number, Boolean, Date, Object].includes(type)) {
+		const gqlType = scalarDict[type.name.toLowerCase()];
 		const schema = isRequired ? new GraphQLNonNull(gqlType) : gqlType;
 		return { schema, schemas };
 	}

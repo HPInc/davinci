@@ -1,5 +1,7 @@
 import should from 'should';
 import { GraphQLBoolean, GraphQLFloat, GraphQLList, GraphQLObjectType, GraphQLString, GraphQLUnionType } from 'graphql';
+import { GraphQLDateTime } from 'graphql-iso-date';
+import { GraphQLJSONObject } from 'graphql-type-json';
 import _fp from 'lodash/fp';
 import { graphql, generateGQLSchema, UnionType } from '../../src';
 import { fieldResolver } from '../../src/decorators';
@@ -16,6 +18,10 @@ describe('schema generation', () => {
 				age: number;
 				@field()
 				isActive: boolean;
+				@field()
+				date: Date
+				@field()
+				blob: Object
 
 				@field({ type: String })
 				something() {}
@@ -28,10 +34,12 @@ describe('schema generation', () => {
 				.equal('Customer');
 			const fields = schema.getFields();
 
-			should(Object.keys(fields)).be.deepEqual(['firstname', 'age', 'isActive', 'something']);
+			should(Object.keys(fields)).be.deepEqual(['firstname', 'age', 'isActive', 'date', 'blob', 'something']);
 			should(fields.firstname.type).be.equal(GraphQLString);
 			should(fields.age.type).be.equal(GraphQLFloat);
 			should(fields.isActive.type).be.equal(GraphQLBoolean);
+			should(fields.date.type).be.equal(GraphQLDateTime);
+			should(fields.blob.type).be.equal(GraphQLJSONObject);
 			should(fields.something.type).be.equal(GraphQLString);
 		});
 
