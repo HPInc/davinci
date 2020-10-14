@@ -27,7 +27,6 @@
 		"@davinci/core": "^0.19.6"
 	},
 	"devDependencies": {
-		"@davinci/core": "^0.19.6",
 		"mongoose": "5.7.5",
 		"prettier": "1.19.1",
 		"tslib": "^1.9.3",
