@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.19.6](https://github.com/HPInc/davinci/compare/@davinci/core@0.19.5...@davinci/core@0.19.6) (2020-10-14)
+
+
+### Bug Fixes
+
+* responseHandler is now inline in the router middleware stack ([737f687](https://github.com/HPInc/davinci/commit/737f687c799c30db5cb23d0bf4fad5316865b371))
+
+
+
+
+
 ## [0.19.5](https://github.com/HPInc/davinci/compare/@davinci/core@0.19.4...@davinci/core@0.19.5) (2020-09-29)
 
 
