@@ -19,6 +19,7 @@ import createSchemaDefinition from './openapi/createSchemaDefinition';
 import { IControllerDecoratorArgs } from './decorators/route';
 import { ISchema, ISwaggerDefinitions, MethodValidation, PathsValidationOptions } from './types';
 import { DaVinciExpress } from '../index';
+import responseHandler from '../express/middlewares/responseHandler';
 
 const debug = new Debug('davinci:create-router');
 
@@ -179,7 +180,12 @@ function mapReqToParameters<ContextType>(
 				throw new NotImplemented(`Can't get field ${p.name} - ${p.in} not yet supported`);
 			}
 			// eslint-disable-next-line no-underscore-dangle
-			acc[p._index] = processParameter({ value, config: p, definitions, validationOptions: methodValidationOptions });
+			acc[p._index] = processParameter({
+				value,
+				config: p,
+				definitions,
+				validationOptions: methodValidationOptions
+			});
 		}
 		return acc;
 	}, []);
@@ -263,7 +269,8 @@ const makeHandlerFunction = (
 		(req, _res, next) => {
 			req.requestHandled = true;
 			next();
-		}
+		},
+		responseHandler
 	];
 };
 
