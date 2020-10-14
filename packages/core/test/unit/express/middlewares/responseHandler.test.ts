@@ -29,7 +29,7 @@ class ReqMock {
 
 describe('responseHandler', () => {
 	it('should handle a result correctly', async () => {
-		const handler = responseHandler();
+		const handler = responseHandler;
 		const res = new ResMock();
 		const req = new ReqMock();
 		req.requestHandled = true;

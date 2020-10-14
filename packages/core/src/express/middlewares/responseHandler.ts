@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-export default () => (req, res, next) => {
+export default (req, res, next) => {
 	const { requestHandled } = req;
 	const { result } = req;
 	const { statusCode } = req;

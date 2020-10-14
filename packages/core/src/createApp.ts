@@ -11,7 +11,6 @@ import { createTerminus, TerminusOptions } from '@godaddy/terminus';
 
 import config from './config';
 import * as docs from './route/openapi/openapiDocs';
-import responseHandler from './express/middlewares/responseHandler';
 import errorHandler from './express/middlewares/errorHandler';
 import notFoundHandler from './express/middlewares/notFoundHandler';
 import { execBootScripts } from './express/boot';
@@ -98,7 +97,6 @@ export const configureExpress = async (app, options: DaVinciOptions = {}, runMid
 		}
 	}
 
-	app.use(responseHandler());
 	app.use(notFoundHandler());
 	app.use(errorHandler());
 
