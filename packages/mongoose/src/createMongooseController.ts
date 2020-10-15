@@ -6,7 +6,6 @@
 // eslint-disable-next-line max-classes-per-file
 import _ from 'lodash';
 import bluebird from 'bluebird';
-import { context, route, httpErrors as errors, openapi, express, httpErrors } from '@davinci/core';
 
 export interface Constructor<T> {
 	new (...args: any[]): T;
@@ -31,76 +30,6 @@ export interface IMongooseController {
 	updateById(id: string, data: any, context: object): Promise<any>;
 }
 
-@openapi.definition({ title: 'PopulateQueryParameter' })
-class PopulateQueryParameter {
-	@openapi.prop()
-	path: string;
-
-	@openapi.prop()
-	$limit?: number;
-
-	@openapi.prop()
-	$skip?: number;
-
-	@openapi.prop()
-	$where?: object;
-
-	@openapi.prop({
-		rawSchemaOptions: {
-			oneOf: [
-				{
-					type: 'object'
-				},
-				{
-					type: 'array',
-					items: { type: 'string' }
-				}
-			]
-		}
-	})
-	$select?: object | string[];
-
-	@openapi.prop()
-	$sort?: object;
-
-	@openapi.prop()
-	$populate?: PopulateQueryParameter;
-}
-
-@openapi.definition({ title: 'QueryParameters' })
-export class QueryParameters {
-	@openapi.prop({ type: PopulateQueryParameter })
-	$populate?: PopulateQueryParameter;
-
-	@openapi.prop()
-	$limit?: number;
-
-	@openapi.prop()
-	$skip?: number;
-
-	@openapi.prop()
-	$where?: object;
-
-	@openapi.prop({
-		type: null,
-		rawSchemaOptions: {
-			oneOf: [
-				{
-					type: 'object'
-				},
-				{
-					type: 'array',
-					items: { type: 'string' }
-				}
-			]
-		}
-	})
-	$select?: object | string[];
-
-	@openapi.prop()
-	$sort?: object;
-}
-
 /**
  * We use a factory to pass Model and ResourceSchema.
  * This allow us to use ResourceSchema to define some request types, and build the openaapi specification
@@ -114,6 +43,79 @@ export class QueryParameters {
  * DELETE /api/{resourceName}/{id}
  */
 export const createMongooseController = <T extends Constructor<{}>>(Model, ResourceSchema) => {
+	// eslint-disable-next-line @typescript-eslint/no-var-requires,global-require
+	const { context, route, httpErrors, openapi, express } = require('@davinci/core');
+
+	@openapi.definition({ title: 'PopulateQueryParameter' })
+	class PopulateQueryParameter {
+		@openapi.prop()
+		path: string;
+
+		@openapi.prop()
+		$limit?: number;
+
+		@openapi.prop()
+		$skip?: number;
+
+		@openapi.prop()
+		$where?: object;
+
+		@openapi.prop({
+			rawSchemaOptions: {
+				oneOf: [
+					{
+						type: 'object'
+					},
+					{
+						type: 'array',
+						items: { type: 'string' }
+					}
+				]
+			}
+		})
+		$select?: object | string[];
+
+		@openapi.prop()
+		$sort?: object;
+
+		@openapi.prop()
+		$populate?: PopulateQueryParameter;
+	}
+
+	@openapi.definition({ title: 'QueryParameters' })
+	class QueryParameters {
+		@openapi.prop({ type: PopulateQueryParameter })
+		$populate?: PopulateQueryParameter;
+
+		@openapi.prop()
+		$limit?: number;
+
+		@openapi.prop()
+		$skip?: number;
+
+		@openapi.prop()
+		$where?: object;
+
+		@openapi.prop({
+			type: null,
+			rawSchemaOptions: {
+				oneOf: [
+					{
+						type: 'object'
+					},
+					{
+						type: 'array',
+						items: { type: 'string' }
+					}
+				]
+			}
+		})
+		$select?: object | string[];
+
+		@openapi.prop()
+		$sort?: object;
+	}
+
 	// Let's create a usable resource schema
 	class RSchema extends ResourceSchema {}
 
@@ -158,7 +160,7 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 
 		@route.get({ path: '/', summary: 'List', responses: { 200: ListResponseSchema } })
 		public async find(@route.query() query: QueryParameters, @context() ctx) {
-			if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
+			if (!this.model) throw new httpErrors.MethodNotAllowed('No model implemented');
 			const { limit, skip, sort, select, populate, where } = this.parseQuery(query, ctx);
 			const mQuery = this.model.find(where, select, { limit, skip, sort, context: ctx });
 
@@ -176,7 +178,7 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 		}
 
 		public async findOne(@route.query() query, @context() ctx) {
-			if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
+			if (!this.model) throw new httpErrors.MethodNotAllowed('No model implemented');
 			const { sort, select, populate, where } = this.parseQuery(query);
 			const mQuery = this.model.findOne(where, select, { sort, context: ctx });
 			if (populate) {
@@ -185,7 +187,7 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 
 			const result = await mQuery;
 			if (!result) {
-				throw new errors.NotFound('Record not found');
+				throw new httpErrors.NotFound('Record not found');
 			}
 
 			return result;
@@ -197,14 +199,14 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 			@route.param({ name: 'query', in: 'query' }) query: QueryParameters,
 			@context() ctx
 		) {
-			if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
+			if (!this.model) throw new httpErrors.MethodNotAllowed('No model implemented');
 
 			return this.findOne({ ...query, _id: id }, ctx);
 		}
 
 		@route.post({ path: '/', summary: 'Create', responses: { 200: RSchema } })
 		public async create(@route.body() data: RSchema, @context() ctx) {
-			if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
+			if (!this.model) throw new httpErrors.MethodNotAllowed('No model implemented');
 			const [record] = await this.model.create([data], { context: ctx });
 
 			return record;
@@ -217,7 +219,7 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 			validation: { partial: true }
 		})
 		public async updateById(@route.path() id: string, @route.body() data: RSchema, @context() ctx) {
-			if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
+			if (!this.model) throw new httpErrors.MethodNotAllowed('No model implemented');
 			const updated = await this.model.findOneAndUpdate({ _id: id }, data, {
 				new: true,
 				runValidators: true,
@@ -226,7 +228,7 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 			});
 
 			if (!updated) {
-				throw new errors.NotFound();
+				throw new httpErrors.NotFound();
 			}
 
 			return updated;
@@ -234,11 +236,11 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 
 		@route.del({ path: '/{id}', summary: 'Delete', responses: { 200: RSchema } })
 		public async deleteById(@route.path() id: string, @context() ctx) {
-			if (!this.model) throw new errors.MethodNotAllowed('No model implemented');
+			if (!this.model) throw new httpErrors.MethodNotAllowed('No model implemented');
 			const removed = await this.model.findOneAndDelete({ _id: id }, { context: ctx });
 
 			if (!removed) {
-				throw new errors.NotFound();
+				throw new httpErrors.NotFound();
 			}
 
 			return removed;
