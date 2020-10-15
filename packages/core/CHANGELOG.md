@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0](https://github.com/HPInc/davinci/compare/@davinci/core@0.19.6...@davinci/core@1.0.0) (2020-10-15)
+
+
+### chore
+
+* swagger-ui-dist as peer and optional dependency ([795cf05](https://github.com/HPInc/davinci/commit/795cf0595c37ed42af1159cd90c9095c7838a710))
+
+
+### BREAKING CHANGES
+
+* the main app must install swagger-ui-dist
+
+
+
+
+
 ## [0.19.6](https://github.com/HPInc/davinci/compare/@davinci/core@0.19.5...@davinci/core@0.19.6) (2020-10-14)
 
 

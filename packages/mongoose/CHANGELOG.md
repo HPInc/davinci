@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.14.13](https://github.com/HPInc/davinci/compare/@davinci/mongoose@0.14.12...@davinci/mongoose@0.14.13) (2020-10-15)
+
+
+### Reverts
+
+* Revert "chore: added @davinci/core as mongoose devDependency" ([2ea8422](https://github.com/HPInc/davinci/commit/2ea8422dedbf89a59f11129ad5733092e38b5267))
+
+
+
+
+
 ## [0.14.12](https://github.com/HPInc/davinci/compare/@davinci/mongoose@0.14.11...@davinci/mongoose@0.14.12) (2020-10-14)
 
 **Note:** Version bump only for package @davinci/mongoose
