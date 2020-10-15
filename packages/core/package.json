@@ -20,12 +20,15 @@
 		"bluebird": "3.5.0",
 		"debug": "^4.1.1",
 		"lodash": "4.17.19",
-		"require-dir": "0.3.2",
-		"swagger-ui-express": "^4.0.7"
+		"require-dir": "0.3.2"
 	},
 	"peerDependencies": {
 		"express": "^4.16.4",
-		"mongoose": "5.5.5"
+		"mongoose": "5.5.5",
+		"swagger-ui-express": "^4.0.7"
+	},
+	"optionalDependencies": {
+		"swagger-ui-express": "^4.0.7"
 	},
 	"devDependencies": {
 		"@types/mocha": "^5.2.7",
