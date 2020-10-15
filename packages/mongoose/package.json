@@ -24,6 +24,9 @@
 		"@davinci/core": "^1.0.0",
 		"mongoose": "5.7.5"
 	},
+	"optionalDependencies": {
+		"@davinci/core": "^1.0.0"
+	},
 	"devDependencies": {
 		"@davinci/core": "^1.0.0",
 		"mongoose": "5.7.5",
