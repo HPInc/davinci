@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.14.14](https://github.com/HPInc/davinci/compare/@davinci/mongoose@0.14.13...@davinci/mongoose@0.14.14) (2020-10-29)
+
+
+### Bug Fixes
+
+* restored package.json main ([ac74971](https://github.com/HPInc/davinci/commit/ac749716b67dc41b249eec55ef31869cc46d52d8))
+* restored package.json optionalDependency ([630303f](https://github.com/HPInc/davinci/commit/630303fbeee1136efa47aa3f2d40163c5f9ee610))
+
+
+
+
+
 ## [0.14.13](https://github.com/HPInc/davinci/compare/@davinci/mongoose@0.14.12...@davinci/mongoose@0.14.13) (2020-10-15)
 
 
