@@ -102,4 +102,6 @@ Temporary Items
 .apdisk
 .env
 build
+build-cjs
+build-esm
 docs/.vuepress/dist
