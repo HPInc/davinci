@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/mongoose",
-	"version": "0.14.14",
+	"version": "0.14.15",
 	"description": "> TODO: description",
 	"author": "HP",
 	"homepage": "",
@@ -29,7 +29,7 @@
 		"mongoose": "5.7.5"
 	},
 	"optionalDependencies": {
-		"@davinci/core": "^1.0.0"
+		"@davinci/core": "^1.0.1"
 	},
 	"devDependencies": {
 		"@davinci/core": "^1.0.0",
