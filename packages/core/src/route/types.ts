@@ -4,6 +4,7 @@
  */
 
 import { TypeValue, TypeValueFactory, Maybe } from '@davinci/reflector';
+import { IJsonSchema } from 'openapi-types';
 
 export interface ISwaggerDefinition {
 	title?: string;
@@ -71,6 +72,12 @@ export interface PathsValidationOptions {
 	};
 }
 
+type IDecoratorOptionsFactory<T> = () => Maybe<T>;
+type IDecoratorMetadata<T> = {
+	key: string;
+	optsFactory?: IDecoratorOptionsFactory<T>;
+};
+
 /**
  * Something
  * @param type - Explicitly passed type
@@ -84,13 +91,10 @@ export interface IPropDecoratorOptions {
 	typeFactory?: TypeValueFactory;
 	required?: boolean;
 }
+export type IPropDecoratorOptionsFactory = IDecoratorOptionsFactory<IPropDecoratorOptions>;
+export type IPropDecoratorMetadata = IDecoratorMetadata<IPropDecoratorOptions>;
 
-export type IPropDecoratorOptionsFactory = () => Maybe<IPropDecoratorOptions>;
-
-export interface IPropDecoratorMetadata {
-	key: string;
-	optsFactory?: IPropDecoratorOptionsFactory;
-}
+export type IDefinitionDecoratorOptions = { title: any; } & Pick<IJsonSchema, 'dependencies' | 'oneOf' | 'allOf' | 'anyOf' | 'not'>;
 
 export interface IMethodResponseOutput {
 	description?: string;
