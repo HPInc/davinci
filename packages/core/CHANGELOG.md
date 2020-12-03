@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.1.0](https://github.com/HPInc/davinci/compare/@davinci/core@1.0.2...@davinci/core@1.1.0) (2020-12-03)
+
+
+### Features
+
+* allow additional fields in openapi definition ([#41](https://github.com/HPInc/davinci/issues/41)) ([374785c](https://github.com/HPInc/davinci/commit/374785c0122008386a791074a21e40890a93dfb3))
+
+
+
+
+
 ## [1.0.2](https://github.com/HPInc/davinci/compare/@davinci/core@1.0.1...@davinci/core@1.0.2) (2020-12-03)
 
 
