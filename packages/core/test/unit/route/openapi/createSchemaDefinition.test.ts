@@ -390,4 +390,51 @@ describe('createSchemaDefinition', () => {
 			}
 		});
 	});
+
+	it('should support dependencies', () => {
+		@openapi.definition({
+			title: 'Customer',
+			dependencies: {
+				c: ['a']
+			},
+			oneOf: [
+				{ required: ['a'] },
+				{ required: ['b'] }
+			]
+		})
+		class Customer {
+			@openapi.prop()
+			a?: string;
+
+			@openapi.prop()
+			b?: string;
+
+			@openapi.prop()
+			c?: string;
+		}
+
+		const definition = createSchemaDefinition(Customer);
+		should(definition).be.deepEqual({
+			Customer: {
+				title: 'Customer',
+				type: 'object',
+				properties: {
+					a: {
+						type: 'string'
+					},
+					b: {
+						type: 'string'
+					},
+					c: {
+						type: 'string'
+					}
+				},
+				dependencies: { c: ['a'] },
+				oneOf: [
+					{ required: ['a'] },
+					{ required: ['b'] }
+				]
+			}
+		});
+	});
 });

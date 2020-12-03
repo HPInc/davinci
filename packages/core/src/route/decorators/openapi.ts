@@ -5,7 +5,10 @@
 
 import { Reflector } from '@davinci/reflector';
 import _ from 'lodash';
-import { IPropDecoratorOptions, IPropDecoratorOptionsFactory, IPropDecoratorMetadata } from '../types';
+import {
+	IPropDecoratorOptions, IPropDecoratorOptionsFactory, IPropDecoratorMetadata,
+	IDefinitionDecoratorOptions
+} from '../types';
 
 /**
  * It annotates a variable as swagger definition property
@@ -31,7 +34,7 @@ export function prop(opts?: IPropDecoratorOptions | IPropDecoratorOptionsFactory
  * Its definition will be added in the `definitions` property
  * @param options
  */
-export function definition(options?: { title }) {
+export function definition(options?: IDefinitionDecoratorOptions) {
 	return function(target: Function): void {
 		Reflector.defineMetadata('davinci:openapi:definition', options, target);
 	};
