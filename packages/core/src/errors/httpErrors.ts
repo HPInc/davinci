@@ -19,7 +19,7 @@ export class HttpError extends Error {
 
 	data: any;
 
-	errors: [any];
+	errors: any[];
 
 	_type = 'davinciHttpError'
 
