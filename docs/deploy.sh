@@ -21,5 +21,5 @@ cp -rf ./docs/.vuepress/dist/* ./
 rm -r ./docs
 
 git add .
-git commit --allow-empty -am "Update Docs"
+git commit --allow-empty -am "Update Docs [skip ci]"
 git push
