@@ -10,7 +10,7 @@ describe('createMongooseController', () => {
 	let CustomerSchema;
 
 	beforeEach(() => {
-		mongoose.models = {};
+		mongoose.modelNames().forEach(modelName => mongoose.deleteModel(modelName));
 		// @ts-ignore
 		mongoose.modelSchemas = {};
 

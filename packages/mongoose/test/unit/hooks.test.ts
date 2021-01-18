@@ -20,7 +20,8 @@ describe('mongoose hooks', () => {
 	const customersData = [{ firstname: 'Mike' }, { firstname: 'John' }];
 
 	beforeEach(async () => {
-		delete mongoose.models['customer'];
+		mongoose.modelNames().forEach(modelName => mongoose.deleteModel(modelName));
+
 		CustomerSchema = new mongoose.Schema({ firstname: String });
 		await mongoose.connect(process.env.MONGODB_URL);
 
@@ -39,7 +40,7 @@ describe('mongoose hooks', () => {
 	const registerReadHooks = ({ read, write, delete: del }: { read?: boolean; write?: boolean; delete?: boolean }) => {
 		beforeEach(async () => {
 			if (read) {
-				beforeRead(CustomerSchema, ({}) => {})
+				beforeRead(CustomerSchema, ({ }) => { })
 				beforeRead(CustomerSchema, beforeReadCallback);
 				afterRead(CustomerSchema, afterReadCallback);
 			}
@@ -51,7 +52,7 @@ describe('mongoose hooks', () => {
 				beforeDelete(CustomerSchema, beforeDeleteCallback);
 				afterDelete(CustomerSchema, afterDeleteCallback);
 			}
-			CustomerSchema.pre('updateOne', function(...args) {
+			CustomerSchema.pre('updateOne', function (...args) {
 				console.log(...args);
 			});
 			CustomerModel = mongoose.model('customer', CustomerSchema);
@@ -75,14 +76,12 @@ describe('mongoose hooks', () => {
 			should(beforeReadCallback.callCount).be.equal(1);
 			should(beforeArgs).match({ hookName: 'countDocuments', context });
 			should(beforeArgs)
-				.have.property('query')
-				.instanceOf(mongoose.Query);
+				.have.property('query');
 
 			should(afterReadCallback.callCount).be.equal(1);
 			should(afterArgs).match({ hookName: 'countDocuments', count: 2, context });
 			should(afterArgs)
-				.have.property('query')
-				.instanceOf(mongoose.Query);
+				.have.property('query');
 		});
 	});
 
@@ -97,14 +96,12 @@ describe('mongoose hooks', () => {
 			should(beforeReadCallback.callCount).be.equal(1);
 			should(beforeArgs).match({ hookName: 'find', context });
 			should(beforeArgs)
-				.have.property('query')
-				.instanceOf(mongoose.Query);
+				.have.property('query');
 
 			should(afterReadCallback.callCount).be.equal(1);
 			should(afterArgs).match({ hookName: 'find', context });
 			should(afterArgs)
-				.have.property('query')
-				.instanceOf(mongoose.Query);
+				.have.property('query');
 			should(afterArgs)
 				.have.property('result')
 				.length(2);
@@ -123,13 +120,11 @@ describe('mongoose hooks', () => {
 			should(beforeArgs).match({ hookName: 'findOne', context });
 			should(beforeArgs)
 				.have.property('query')
-				.instanceOf(mongoose.Query);
 
 			should(afterReadCallback.callCount).be.equal(1);
 			should(afterArgs).match({ hookName: 'findOne', context });
 			should(afterArgs)
-				.have.property('query')
-				.instanceOf(mongoose.Query);
+				.have.property('query');
 			should(afterArgs)
 				.have.property('result')
 				.match({ firstname: 'Mike' });
@@ -154,14 +149,12 @@ describe('mongoose hooks', () => {
 			should(beforeReadCallback.callCount).be.equal(1);
 			should(beforeReadArgs).match({ hookName: 'findOneAndUpdate', context });
 			should(beforeReadArgs)
-				.have.property('query')
-				.instanceOf(mongoose.Query);
+				.have.property('query');
 
 			should(afterReadCallback.callCount).be.equal(1);
 			should(afterReadArgs).match({ hookName: 'findOneAndUpdate', context });
 			should(afterReadArgs)
-				.have.property('query')
-				.instanceOf(mongoose.Query);
+				.have.property('query');
 			should(afterReadArgs)
 				.have.property('result')
 				.match({ firstname: 'Michael' });
@@ -169,14 +162,12 @@ describe('mongoose hooks', () => {
 			should(beforeWriteCallback.callCount).be.equal(1);
 			should(beforeWriteArgs).match({ hookName: 'findOneAndUpdate', context });
 			should(beforeWriteArgs)
-				.have.property('query')
-				.instanceOf(mongoose.Query);
+				.have.property('query');
 
 			should(afterWriteCallback.callCount).be.equal(1);
 			should(afterWriteArgs).match({ hookName: 'findOneAndUpdate', context });
 			should(afterWriteArgs)
-				.have.property('query')
-				.instanceOf(mongoose.Query);
+				.have.property('query');
 			should(afterWriteArgs)
 				.have.property('result')
 				.match({ firstname: 'Michael' });
@@ -196,20 +187,17 @@ describe('mongoose hooks', () => {
 			should(beforeReadCallback.callCount).be.equal(1);
 			should(beforeReadArgs).match({ hookName: 'update', context });
 			should(beforeReadArgs)
-				.have.property('query')
-				.instanceOf(mongoose.Query);
+				.have.property('query');
 
 			should(beforeWriteCallback.callCount).be.equal(1);
 			should(beforeWriteArgs).match({ hookName: 'update', context });
 			should(beforeWriteArgs)
-				.have.property('query')
-				.instanceOf(mongoose.Query);
+				.have.property('query');
 
 			should(afterWriteCallback.callCount).be.equal(1);
 			should(afterWriteArgs).match({ hookName: 'update', context });
 			should(afterWriteArgs)
-				.have.property('query')
-				.instanceOf(mongoose.Query);
+				.have.property('query');
 			should(afterWriteArgs).have.property('rawResult');
 		});
 	});
@@ -227,20 +215,17 @@ describe('mongoose hooks', () => {
 			should(beforeReadCallback.callCount).be.equal(1);
 			should(beforeReadArgs).match({ hookName: 'updateMany', context });
 			should(beforeReadArgs)
-				.have.property('query')
-				.instanceOf(mongoose.Query);
+				.have.property('query');
 
 			should(beforeWriteCallback.callCount).be.equal(1);
 			should(beforeWriteArgs).match({ hookName: 'updateMany', context });
 			should(beforeWriteArgs)
-				.have.property('query')
-				.instanceOf(mongoose.Query);
+				.have.property('query');
 
 			should(afterWriteCallback.callCount).be.equal(1);
 			should(afterWriteArgs).match({ hookName: 'updateMany', context });
 			should(afterWriteArgs)
-				.have.property('query')
-				.instanceOf(mongoose.Query);
+				.have.property('query');
 			should(afterWriteArgs).have.property('rawResult');
 		});
 	});
@@ -258,20 +243,17 @@ describe('mongoose hooks', () => {
 			should(beforeReadCallback.callCount).be.equal(1);
 			should(beforeReadArgs).match({ hookName: 'updateOne', context });
 			should(beforeReadArgs)
-				.have.property('query')
-				.instanceOf(mongoose.Query);
+				.have.property('query');
 
 			should(beforeWriteCallback.callCount).be.equal(1);
 			should(beforeWriteArgs).match({ hookName: 'updateOne', context });
 			should(beforeWriteArgs)
-				.have.property('query')
-				.instanceOf(mongoose.Query);
+				.have.property('query');
 
 			should(afterWriteCallback.callCount).be.equal(1);
 			should(afterWriteArgs).match({ hookName: 'updateOne', context });
 			should(afterWriteArgs)
-				.have.property('query')
-				.instanceOf(mongoose.Query);
+				.have.property('query');
 			should(afterWriteArgs).have.property('rawResult');
 		});
 	});
@@ -287,14 +269,12 @@ describe('mongoose hooks', () => {
 			should(beforeDeleteCallback.callCount).be.equal(1);
 			should(beforeDeleteArgs).match({ hookName: 'findOneAndDelete', context });
 			should(beforeDeleteArgs)
-				.have.property('query')
-				.instanceOf(mongoose.Query);
+				.have.property('query');
 
 			should(afterDeleteCallback.callCount).be.equal(1);
 			should(afterDeleteArgs).match({ hookName: 'findOneAndDelete', context });
 			should(afterDeleteArgs)
-				.have.property('query')
-				.instanceOf(mongoose.Query);
+				.have.property('query');
 			should(afterDeleteArgs)
 				.have.property('result')
 				.match({ firstname: 'Mike' });
@@ -313,14 +293,12 @@ describe('mongoose hooks', () => {
 			should(beforeDeleteCallback.callCount).be.equal(1);
 			should(beforeDeleteArgs).match({ hookName: 'findOneAndRemove', context });
 			should(beforeDeleteArgs)
-				.have.property('query')
-				.instanceOf(mongoose.Query);
+				.have.property('query');
 
 			should(afterDeleteCallback.callCount).be.equal(1);
 			should(afterDeleteArgs).match({ hookName: 'findOneAndRemove', context });
 			should(afterDeleteArgs)
-				.have.property('query')
-				.instanceOf(mongoose.Query);
+				.have.property('query');
 			should(afterDeleteArgs)
 				.have.property('result')
 				.match({ firstname: 'Mike' });
@@ -339,14 +317,12 @@ describe('mongoose hooks', () => {
 			should(beforeDeleteCallback.callCount).be.equal(1);
 			should(beforeDeleteArgs).match({ hookName: 'deleteOne', context });
 			should(beforeDeleteArgs)
-				.have.property('query')
-				.instanceOf(mongoose.Query);
+				.have.property('query');
 
 			should(afterDeleteCallback.callCount).be.equal(1);
 			should(afterDeleteArgs).match({ hookName: 'deleteOne', context });
 			should(afterDeleteArgs)
-				.have.property('query')
-				.instanceOf(mongoose.Query);
+				.have.property('query');
 			should(afterDeleteArgs).have.property('rawResult');
 			should(await CustomerModel.findOne({ firstname: 'Mike' })).be.null();
 		});
@@ -363,14 +339,12 @@ describe('mongoose hooks', () => {
 			should(beforeDeleteCallback.callCount).be.equal(1);
 			should(beforeDeleteArgs).match({ hookName: 'deleteMany', context });
 			should(beforeDeleteArgs)
-				.have.property('query')
-				.instanceOf(mongoose.Query);
+				.have.property('query');
 
 			should(afterDeleteCallback.callCount).be.equal(1);
 			should(afterDeleteArgs).match({ hookName: 'deleteMany', context });
 			should(afterDeleteArgs)
-				.have.property('query')
-				.instanceOf(mongoose.Query);
+				.have.property('query');
 			should(afterDeleteArgs).have.property('rawResult');
 			should(await CustomerModel.findOne({ firstname: 'Mike' })).be.null();
 		});

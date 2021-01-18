@@ -26,14 +26,14 @@
 	},
 	"peerDependencies": {
 		"@davinci/core": "^1.0.0",
-		"mongoose": "5.7.5"
+		"mongoose": "5.11.13"
 	},
 	"optionalDependencies": {
 		"@davinci/core": "^1.1.0"
 	},
 	"devDependencies": {
 		"@davinci/core": "^1.0.0",
-		"mongoose": "5.7.5",
+		"mongoose": "5.11.13",
 		"prettier": "1.19.1",
 		"tslib": "^1.9.3",
 		"typescript": "^3.7.5"

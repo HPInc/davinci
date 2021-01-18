@@ -29,7 +29,7 @@
 	},
 	"peerDependencies": {
 		"express": "^4.16.4",
-		"mongoose": "5.5.5",
+		"mongoose": "5.11.13",
 		"swagger-ui-express": "^4.0.7"
 	},
 	"optionalDependencies": {
