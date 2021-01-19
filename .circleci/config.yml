@@ -1,9 +1,21 @@
-version: 2
-jobs:
-  checkout_and_test:
+version: 2.1
+
+executors:
+  mongo3_6:
     docker:
       - image: circleci/node:10
       - image: circleci/mongo:3.6-jessie
+  mongo4_4:
+    docker:
+      - image: circleci/node:10
+      - image: circleci/mongo:4.4
+
+jobs:
+  checkout_and_test:
+    parameters:
+      mongo-version: 
+        type: executor
+    executor: << parameters.mongo-version >>
     steps:
       - checkout
 #      - restore_cache:
@@ -33,16 +45,15 @@ jobs:
           command: |
             npx lerna run build
       - save_cache:
-          key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
+          key: v1-source-{{ .Environment.CIRCLE_JOB }}-{{ .Environment.CIRCLE_SHA1 }}
           paths:
-            - ~
-
+            - ~/
   publish:
     docker:
       - image: circleci/node:8-stretch
     steps:
       - restore_cache:
-          key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
+          key: v1-source-checkout_and_test-mongo4_4-{{ .Environment.CIRCLE_SHA1 }}
       - add_ssh_keys
       - run:
           name: Add github to known_hosts
@@ -62,7 +73,7 @@ jobs:
       - image: circleci/node:8-stretch
     steps:
       - restore_cache:
-          key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
+          key: v1-source-checkout_and_test-mongo4_4-{{ .Environment.CIRCLE_SHA1 }}
       - add_ssh_keys
       - run:
           name: Deploy docs
@@ -74,7 +85,10 @@ workflows:
   version: 2
   build_and_publish:
     jobs:
-      - checkout_and_test
+      - checkout_and_test:
+          matrix:
+            parameters:
+              mongo-version: [mongo3_6, mongo4_4]
       - publish:
           requires:
             - checkout_and_test
