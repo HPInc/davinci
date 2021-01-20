@@ -47,7 +47,7 @@ jobs:
       - save_cache:
           key: v1-source-{{ .Environment.CIRCLE_JOB }}-{{ .Environment.CIRCLE_SHA1 }}
           paths:
-            - ~/
+            - "~"
   publish:
     docker:
       - image: circleci/node:8-stretch
