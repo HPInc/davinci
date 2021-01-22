@@ -36,20 +36,22 @@ type Hook =
 	| 'findOneAndDelete'
 	| 'findOneAndRemove';
 
+type QueryResultType = Document | Document[];
+
 export interface PreArgs<Context = unknown> {
-	query: InstanceType<typeof Query>;
+	query: Query<QueryResultType, Document>,
 	hookName: Hook;
 	context: Context;
 }
 export interface AfterArgs<Context = unknown, ModelSchema = unknown> {
-	query: InstanceType<typeof Query>;
+	query: Query<QueryResultType, Document>;
 	hookName: Hook;
 	context: Context;
 	result: (ModelSchema & Document) | (ModelSchema | Document)[];
 }
 
 export interface AfterRawResultArgs<Context = unknown> {
-	query: InstanceType<typeof Query>;
+	query: Query<QueryResultType, Document>;
 	hookName: Hook;
 	context: Context;
 	rawResult: unknown;
@@ -95,7 +97,7 @@ const createHandlerArgs = (
 		isReadHook: boolean;
 		isWriteHook: boolean;
 		isDeleteHook: boolean;
-		thisObj: Document | InstanceType<typeof Query>;
+		thisObj: Document | Query<QueryResultType, Document>;
 		result?: any;
 		rest?: unknown[];
 		context?: unknown;
@@ -103,11 +105,11 @@ const createHandlerArgs = (
 ): PreArgs | AfterArgs | AfterRawResultArgs | DocumentPreArgs | DocumentPostArgs | undefined => {
 	const operation = (isReadHook && 'read') || (isWriteHook && 'write') || (isDeleteHook && 'delete');
 	// createPreArgs creates the arguments for `before(Read|Write|Delete)` hooks
-	const createPreArgs = (): PreArgs => ({ query: thisObj as InstanceType<typeof Query>, hookName, context });
+	const createPreArgs = (): PreArgs => ({ query: thisObj as Query<QueryResultType, Document>, hookName, context });
 
 	// createAfterArgs creates the arguments for `after(Read|Write|Delete)` hooks
 	const createAfterArgs = (): AfterArgs => ({
-		query: thisObj as InstanceType<typeof Query>,
+		query: thisObj as Query<QueryResultType, Document>,
 		hookName,
 		context,
 		result
@@ -115,7 +117,7 @@ const createHandlerArgs = (
 
 	// createAfterRawResultArgs creates the arguments for `after(Read|Write|Delete)` hooks triggered by atomic operations
 	const createAfterRawResultArgs = (): AfterRawResultArgs => ({
-		query: thisObj as InstanceType<typeof Query>,
+		query: thisObj as Query<QueryResultType, Document>,
 		hookName,
 		context,
 		rawResult: result
