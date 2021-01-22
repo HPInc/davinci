@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.14.18](https://github.com/HPInc/davinci/compare/@davinci/mongoose@0.14.17...@davinci/mongoose@0.14.18) (2021-01-22)
+
+
+### Bug Fixes
+
+* upgrade mongoose version to 5.11.13 ([6820d3f](https://github.com/HPInc/davinci/commit/6820d3ffcad04379e430826385ac555e10ca8611))
+
+
+
+
+
 ## [0.14.17](https://github.com/HPInc/davinci/compare/@davinci/mongoose@0.14.16...@davinci/mongoose@0.14.17) (2020-12-03)
 
 **Note:** Version bump only for package @davinci/mongoose

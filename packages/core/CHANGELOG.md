@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.1](https://github.com/HPInc/davinci/compare/@davinci/core@1.1.0...@davinci/core@1.1.1) (2021-01-22)
+
+
+### Bug Fixes
+
+* upgrade mongoose version to 5.11.13 ([6820d3f](https://github.com/HPInc/davinci/commit/6820d3ffcad04379e430826385ac555e10ca8611))
+
+
+
+
+
 # [1.1.0](https://github.com/HPInc/davinci/compare/@davinci/core@1.0.2...@davinci/core@1.1.0) (2020-12-03)
 
 

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.12](https://github.com/HPInc/davinci/compare/@davinci/example-rest@0.12.11...@davinci/example-rest@0.12.12) (2021-01-22)
+
+
+### Bug Fixes
+
+* upgrade mongoose version to 5.11.13 ([6820d3f](https://github.com/HPInc/davinci/commit/6820d3ffcad04379e430826385ac555e10ca8611))
+
+
+
+
+
 ## [0.12.11](https://github.com/HPInc/davinci/compare/@davinci/example-rest@0.12.10...@davinci/example-rest@0.12.11) (2020-12-03)
 
 **Note:** Version bump only for package @davinci/example-rest
