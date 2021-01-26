@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.14](https://github.com/HPInc/davinci/compare/@davinci/example-rest@0.12.13...@davinci/example-rest@0.12.14) (2021-01-26)
+
+
+### Bug Fixes
+
+* update licenses ([98c76b7](https://github.com/HPInc/davinci/commit/98c76b72d8fdea0cb13fed0afd3b95f2890a345f))
+
+
+
+
+
 ## [0.12.13](https://github.com/HPInc/davinci/compare/@davinci/example-rest@0.12.12...@davinci/example-rest@0.12.13) (2021-01-26)
 
 **Note:** Version bump only for package @davinci/example-rest

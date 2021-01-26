@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.2](https://github.com/HPInc/davinci/compare/@davinci/core@1.1.1...@davinci/core@1.1.2) (2021-01-26)
+
+
+### Bug Fixes
+
+* update licenses ([98c76b7](https://github.com/HPInc/davinci/commit/98c76b72d8fdea0cb13fed0afd3b95f2890a345f))
+
+
+
+
+
 ## [1.1.1](https://github.com/HPInc/davinci/compare/@davinci/core@1.1.0...@davinci/core@1.1.1) (2021-01-22)
 
 
