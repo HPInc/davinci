@@ -1,7 +1,7 @@
 {
 	"name": "@davinci/mongoose",
 	"version": "0.14.18",
-	"description": "> TODO: description",
+	"description": "Integration with Mongoose ODM",
 	"author": "HP",
 	"homepage": "",
 	"license": "ISC",
