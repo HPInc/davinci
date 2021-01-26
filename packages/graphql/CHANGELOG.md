@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.12](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.2.11...@davinci/graphql@1.2.12) (2021-01-26)
+
+**Note:** Version bump only for package @davinci/graphql
+
+
+
+
+
 ## [1.2.11](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.2.10...@davinci/graphql@1.2.11) (2021-01-26)
 
 
