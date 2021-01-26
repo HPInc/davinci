@@ -2,7 +2,7 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/Oneflow/davinci.git"
+		"url": "git+https://github.com/HPInc/davinci.git"
 	},
 	"scripts": {
 		"postinstall": "npm run bootstrap",
@@ -12,7 +12,7 @@
 		"bump": "lerna publish",
 		"docs:dev": "vuepress dev docs",
 		"docs:build": "vuepress build docs --debug",
-		"semantic-release": "lerna version --conventional-commits --github-release -y && lerna publish from-package -y"
+		"semantic-release": "lerna version --conventional-commits --create-release github -y && lerna publish from-package -y"
 	},
 	"devDependencies": {
 		"@types/bluebird": "3.5.25",
@@ -28,7 +28,7 @@
 		"eslint-config-airbnb-base": "14.0.0",
 		"eslint-config-prettier": "6.6.0",
 		"eslint-plugin-import": "2.18.2",
-		"lerna": "^3.13.4",
+		"lerna": "^3.22.1",
 		"mocha": "5.2.0",
 		"mongoose": "5.11.13",
 		"nyc": "14.0.0",

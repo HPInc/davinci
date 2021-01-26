@@ -16,7 +16,7 @@ const options: DaVinciOptions = {
 
 const expressApp: Express = express();
 
-const context = (req: Request) => ({ accountId: req.headers['x-oneflow-accountid'], test: true });
+const context = (req: Request) => ({ accountId: req.headers['x-custom-accountid'], test: true });
 
 createApp(expressApp, options, app => {
 	createGraphQLServer(app, [BookController, AuthorController], { context });

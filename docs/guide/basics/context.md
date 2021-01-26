@@ -23,7 +23,7 @@ interface Context {
 
 function createContext({ req }: { req: Request }): Context {
 	return {
-		accountId: req.headers['x-oneflow-accountid']
+		accountId: req.headers['x-custom-accountid']
 	};
 }
 

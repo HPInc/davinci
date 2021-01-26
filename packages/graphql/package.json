@@ -15,8 +15,8 @@
 		"test": "mocha --exit",
 		"cover": "nyc npm test"
 	},
-	"author": "Oneflow Systems (http://www.oneflowsystems.com/)",
-	"license": "ISC",
+	"author": "HP",
+	"license": "MIT",
 	"dependencies": {
 		"@davinci/core": "^1.1.1",
 		"@davinci/reflector": "^1.0.1",
