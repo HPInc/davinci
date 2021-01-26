@@ -85,16 +85,19 @@ type IDecoratorMetadata<T> = {
  * @param typeFactory - Function that returns a type (useful for lazily evaluated types)
  * @param required - Whether the property is required or not
  */
-export interface IPropDecoratorOptions {
+export interface IPropDecoratorOptions extends Omit<IJsonSchema, 'type' | 'required'> {
 	type?: TypeValue;
-	rawSchemaOptions?: unknown;
+	/**
+	 * @deprecated you can now pass Open API properties at the root configuration level
+	 */
+	rawSchemaOptions?: Omit<IJsonSchema, 'type' | 'required'>;
 	typeFactory?: TypeValueFactory;
 	required?: boolean;
 }
 export type IPropDecoratorOptionsFactory = IDecoratorOptionsFactory<IPropDecoratorOptions>;
 export type IPropDecoratorMetadata = IDecoratorMetadata<IPropDecoratorOptions>;
 
-export type IDefinitionDecoratorOptions = { title: any; } & Pick<IJsonSchema, 'dependencies' | 'oneOf' | 'allOf' | 'anyOf' | 'not'>;
+export type IDefinitionDecoratorOptions = { title: any; } & Omit<IJsonSchema, 'type' | 'required'>;
 
 export interface IMethodResponseOutput {
 	description?: string;

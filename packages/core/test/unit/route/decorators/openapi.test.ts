@@ -19,6 +19,37 @@ describe('openapi decorators', () => {
 
 			should(propsMetadata[0].optsFactory()).match({ required: false });
 		});
+
+		it('should support openapi properties at the root level', () => {
+			class Customer {
+				@openapi.prop({
+					required: false,
+					oneOf: [{ type: 'string', enum: ['one', 'two'] }, { type: 'number' }]
+				})
+				firstname: string;
+			}
+
+			const propsMetadata = Reflect.getMetadata('davinci:openapi:props', Customer);
+			should(propsMetadata[0])
+				.have.property('key')
+				.equal('firstname');
+			should(propsMetadata[0])
+				.have.property('optsFactory')
+				.type('function');
+
+			should(propsMetadata[0].optsFactory()).match({
+				required: false,
+				oneOf: [
+					{
+						type: 'string',
+						enum: ['one', 'two']
+					},
+					{
+						type: 'number'
+					}
+				]
+			});
+		});
 	});
 
 	describe('@openapi.definition()', () => {
