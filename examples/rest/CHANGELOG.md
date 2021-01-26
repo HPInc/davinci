@@ -3,6 +3,44 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.15](https://github.com/HPInc/davinci/compare/@davinci/example-rest@0.12.14...@davinci/example-rest@0.12.15) (2021-01-26)
+
+**Note:** Version bump only for package @davinci/example-rest
+
+
+
+
+
+## [0.12.14](https://github.com/HPInc/davinci/compare/@davinci/example-rest@0.12.13...@davinci/example-rest@0.12.14) (2021-01-26)
+
+
+### Bug Fixes
+
+* update licenses ([98c76b7](https://github.com/HPInc/davinci/commit/98c76b72d8fdea0cb13fed0afd3b95f2890a345f))
+
+
+
+
+
+## [0.12.13](https://github.com/HPInc/davinci/compare/@davinci/example-rest@0.12.12...@davinci/example-rest@0.12.13) (2021-01-26)
+
+**Note:** Version bump only for package @davinci/example-rest
+
+
+
+
+
+## [0.12.12](https://github.com/HPInc/davinci/compare/@davinci/example-rest@0.12.11...@davinci/example-rest@0.12.12) (2021-01-22)
+
+
+### Bug Fixes
+
+* upgrade mongoose version to 5.11.13 ([6820d3f](https://github.com/HPInc/davinci/commit/6820d3ffcad04379e430826385ac555e10ca8611))
+
+
+
+
+
 ## [0.12.11](https://github.com/HPInc/davinci/compare/@davinci/example-rest@0.12.10...@davinci/example-rest@0.12.11) (2020-12-03)
 
 **Note:** Version bump only for package @davinci/example-rest

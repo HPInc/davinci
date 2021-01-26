@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { SchemaTypeOpts } from 'mongoose';
+import { SchemaTypeOptions } from 'mongoose';
 import { TypeValueFactory, TypeValue, Maybe } from '@davinci/reflector';
 
-export interface IPropDecoratorOptions extends SchemaTypeOpts<any> {
+export interface IPropDecoratorOptions extends SchemaTypeOptions<any> {
 	typeFactory?: TypeValueFactory;
 	type?: TypeValue;
 	rawType?: any;

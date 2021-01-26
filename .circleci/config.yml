@@ -21,7 +21,7 @@ jobs:
       - run:
           name: install NPM dependencies
           command: |
-            echo -e "//registry.npmjs.org/:_authToken=$NPM_TOKEN\nscope=@oneflow" > .npmrc
+            echo -e "//registry.npmjs.org/:_authToken=$NPM_TOKEN\nscope=@davinci" > .npmrc
             npm install
 #      - save_cache:
 #          key: v2-npm-deps-{{ .Branch }}-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
@@ -63,8 +63,8 @@ jobs:
       - run:
           name: publish
           command: |
-            git config --global user.email "circleci@oneflowsystems.com"
-            git config --global user.name "Circle CI"
+            git config --global user.email "circleci@hp.com"
+            git config --global user.name "CircleCI"
             git checkout -f
             npm run semantic-release
 

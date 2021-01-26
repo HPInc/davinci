@@ -1,10 +1,9 @@
 {
 	"name": "@davinci/mongoose",
-	"version": "0.14.17",
-	"description": "> TODO: description",
+	"version": "0.14.21",
+	"description": "Integration with Mongoose ODM",
 	"author": "HP",
-	"homepage": "",
-	"license": "ISC",
+	"license": "MIT",
 	"main": "build-cjs/index.js",
 	"module": "build-esm/index.js",
 	"types": "build-cjs/index.d.ts",
@@ -19,21 +18,21 @@
 		"cover": "nyc npm test"
 	},
 	"dependencies": {
-		"@davinci/reflector": "^1.0.1",
+		"@davinci/reflector": "^1.0.2",
 		"bluebird": "3.7.1",
 		"debug": "^4.1.1",
 		"lodash": "4.17.19"
 	},
 	"peerDependencies": {
 		"@davinci/core": "^1.0.0",
-		"mongoose": "5.7.5"
+		"mongoose": "5.11.13"
 	},
 	"optionalDependencies": {
-		"@davinci/core": "^1.1.0"
+		"@davinci/core": "^1.1.3"
 	},
 	"devDependencies": {
 		"@davinci/core": "^1.0.0",
-		"mongoose": "5.7.5",
+		"mongoose": "5.11.13",
 		"prettier": "1.19.1",
 		"tslib": "^1.9.3",
 		"typescript": "^3.7.5"

@@ -3,6 +3,44 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.27](https://github.com/HPInc/davinci/compare/@davinci/example-graphql@1.0.26...@davinci/example-graphql@1.0.27) (2021-01-26)
+
+**Note:** Version bump only for package @davinci/example-graphql
+
+
+
+
+
+## [1.0.26](https://github.com/HPInc/davinci/compare/@davinci/example-graphql@1.0.25...@davinci/example-graphql@1.0.26) (2021-01-26)
+
+
+### Bug Fixes
+
+* update licenses ([98c76b7](https://github.com/HPInc/davinci/commit/98c76b72d8fdea0cb13fed0afd3b95f2890a345f))
+
+
+
+
+
+## [1.0.25](https://github.com/HPInc/davinci/compare/@davinci/example-graphql@1.0.24...@davinci/example-graphql@1.0.25) (2021-01-26)
+
+**Note:** Version bump only for package @davinci/example-graphql
+
+
+
+
+
+## [1.0.24](https://github.com/HPInc/davinci/compare/@davinci/example-graphql@1.0.23...@davinci/example-graphql@1.0.24) (2021-01-22)
+
+
+### Bug Fixes
+
+* upgrade mongoose version to 5.11.13 ([6820d3f](https://github.com/HPInc/davinci/commit/6820d3ffcad04379e430826385ac555e10ca8611))
+
+
+
+
+
 ## [1.0.23](https://github.com/HPInc/davinci/compare/@davinci/example-graphql@1.0.22...@davinci/example-graphql@1.0.23) (2020-12-03)
 
 **Note:** Version bump only for package @davinci/example-graphql

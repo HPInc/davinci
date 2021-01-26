@@ -61,17 +61,15 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 		$where?: object;
 
 		@openapi.prop({
-			rawSchemaOptions: {
-				oneOf: [
-					{
-						type: 'object'
-					},
-					{
-						type: 'array',
-						items: { type: 'string' }
-					}
-				]
-			}
+			oneOf: [
+				{
+					type: 'object'
+				},
+				{
+					type: 'array',
+					items: { type: 'string' }
+				}
+			]
 		})
 		$select?: object | string[];
 
@@ -98,17 +96,15 @@ export const createMongooseController = <T extends Constructor<{}>>(Model, Resou
 
 		@openapi.prop({
 			type: null,
-			rawSchemaOptions: {
-				oneOf: [
-					{
-						type: 'object'
-					},
-					{
-						type: 'array',
-						items: { type: 'string' }
-					}
-				]
-			}
+			oneOf: [
+				{
+					type: 'object'
+				},
+				{
+					type: 'array',
+					items: { type: 'string' }
+				}
+			]
 		})
 		$select?: object | string[];
 

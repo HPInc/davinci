@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.2](https://github.com/HPInc/davinci/compare/@davinci/reflector@1.0.1...@davinci/reflector@1.0.2) (2021-01-26)
+
+
+### Bug Fixes
+
+* update licenses ([98c76b7](https://github.com/HPInc/davinci/commit/98c76b72d8fdea0cb13fed0afd3b95f2890a345f))
+
+
+
+
+
 ## [1.0.1](https://github.com/HPInc/davinci/compare/@davinci/reflector@1.0.0...@davinci/reflector@1.0.1) (2020-10-15)
 
 **Note:** Version bump only for package @davinci/reflector

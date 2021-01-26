@@ -6,12 +6,13 @@ class CustomerPhone {
 	@mgoose.prop()
 	@openapi.prop()
 	number: string;
+
 	@mgoose.prop()
 	@openapi.prop()
 	isPrimary: boolean;
 }
 
-@openapi.definition({ title: 'BirtType' })
+@openapi.definition({ title: 'BirthType' })
 class BirthType {
 	@mgoose.prop()
 	@openapi.prop()
@@ -34,12 +35,25 @@ export default class Customer {
 	lastname: string;
 
 	@mgoose.prop()
-	@openapi.prop()
+	@openapi.prop({
+		minimum: 18
+	})
 	age: number;
 
 	@mgoose.prop()
-	@openapi.prop()
-	weight: number;
+	@openapi.prop({
+		type: null,
+		oneOf: [
+			{
+				type: 'number'
+			},
+			{
+				type: 'string',
+				pattern: '\\d+(kg|lbs)'
+			}
+		]
+	})
+	weight: number | string;
 
 	// typeFactory is useful in cases where schemas depends on each other (circular dependencies),
 	// because they will be evaluated lazily
