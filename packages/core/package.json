@@ -16,7 +16,7 @@
 		"cover": "nyc npm test"
 	},
 	"author": "HP",
-	"license": "ISC",
+	"license": "MIT",
 	"dependencies": {
 		"@davinci/reflector": "^1.0.1",
 		"@godaddy/terminus": "4.1.0",

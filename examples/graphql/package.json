@@ -9,8 +9,8 @@
 		"dev": "DEBUG=* ts-node ./src/index.ts"
 	},
 	"keywords": [],
-	"author": "Piero Maltese <maltesepiero@gmail.com>",
-	"license": "ISC",
+	"author": "HP",
+	"license": "MIT",
 	"dependencies": {
 		"@davinci/core": "^1.1.1",
 		"@davinci/graphql": "^1.2.10",

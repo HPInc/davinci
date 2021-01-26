@@ -37,7 +37,7 @@ const options: DaVinciOptions = {
 
 const expressApp: Express = express();
 
-const createContext = ({ req }): Context => ({ accountId: req.headers['x-oneflow-accountid'] });
+const createContext = ({ req }): Context => ({ accountId: req.headers['x-custom-accountid'] });
 
 createApp(expressApp, options, app => {
 	createRouter(CustomerController, 'Customer', createContext, app);

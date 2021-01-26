@@ -10,7 +10,7 @@
 	},
 	"keywords": [],
 	"author": "HP",
-	"license": "ISC",
+	"license": "MIT",
 	"dependencies": {
 		"@davinci/core": "^1.1.1",
 		"@davinci/mongoose": "^0.14.19",
