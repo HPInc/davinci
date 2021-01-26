@@ -293,7 +293,7 @@ describe('createSchemaDefinition', () => {
 		});
 	});
 
-	it('combines schema from `rawSchemaOptions` argument and the one generated from `type` argument ', () => {
+	it('combines schema from `rawSchemaOptions` argument and the one generated from `type` argument', () => {
 		@openapi.definition({ title: 'ScanPayloadArrayItem' })
 		class ScanPayloadArrayItem {
 			@openapi.prop({ required: true })

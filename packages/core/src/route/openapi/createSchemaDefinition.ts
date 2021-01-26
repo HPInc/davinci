@@ -5,6 +5,7 @@
 
 import _fp from 'lodash/fp';
 import _merge from 'lodash/merge';
+import _omit from 'lodash/omit';
 import { Reflector } from '@davinci/reflector';
 import { ISwaggerDefinitions, IPropDecoratorMetadata } from '../types';
 
@@ -80,7 +81,12 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 
 				const schema = type ? makeSchema(type, k) : {};
 
-				acc[k] = opts?.rawSchemaOptions ? _merge({}, schema, opts.rawSchemaOptions) : schema;
+				acc[k] = _merge(
+					{},
+					schema,
+					_omit(opts, ['rawSchemaOptions', 'type', 'required']),
+					opts?.rawSchemaOptions
+				);
 
 				return acc;
 			}, {});
