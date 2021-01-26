@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/example-rest",
-	"version": "0.12.12",
+	"version": "0.12.13",
 	"private": true,
 	"description": "",
 	"main": "index.js",
@@ -13,7 +13,7 @@
 	"license": "ISC",
 	"dependencies": {
 		"@davinci/core": "^1.1.1",
-		"@davinci/mongoose": "^0.14.18",
+		"@davinci/mongoose": "^0.14.19",
 		"debug": "^4.1.1",
 		"express": "4.16.4",
 		"lodash": "4.17.19",
