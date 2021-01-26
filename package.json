@@ -2,7 +2,7 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/Oneflow/davinci.git"
+		"url": "git+https://github.com/HPInc/davinci.git"
 	},
 	"scripts": {
 		"postinstall": "npm run bootstrap",
@@ -12,7 +12,7 @@
 		"bump": "lerna publish",
 		"docs:dev": "vuepress dev docs",
 		"docs:build": "vuepress build docs --debug",
-		"semantic-release": "lerna version --conventional-commits --github-release -y && lerna publish from-package -y"
+		"semantic-release": "lerna version --conventional-commits --create-release github -y && lerna publish from-package -y"
 	},
 	"devDependencies": {
 		"@types/bluebird": "3.5.25",
