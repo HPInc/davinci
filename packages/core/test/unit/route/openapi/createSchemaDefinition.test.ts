@@ -392,7 +392,7 @@ describe('createSchemaDefinition', () => {
 	});
 
 	it('should support dependencies', () => {
-		@openapi.definition({
+		@openapi.definition<Customer>({
 			title: 'Customer',
 			dependencies: {
 				c: ['a']
