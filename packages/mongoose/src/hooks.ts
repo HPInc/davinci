@@ -36,22 +36,20 @@ type Hook =
 	| 'findOneAndDelete'
 	| 'findOneAndRemove';
 
-type QueryResultType = Document | Document[];
-
-export interface PreArgs<Context = unknown> {
-	query: Query<QueryResultType, Document>,
+export interface PreArgs<Context = unknown, ModelSchema = unknown> {
+	query: Query<ModelSchema, ModelSchema & Document>;
 	hookName: Hook;
 	context: Context;
 }
 export interface AfterArgs<Context = unknown, ModelSchema = unknown> {
-	query: Query<QueryResultType, Document>;
+	query: Query<ModelSchema, ModelSchema & Document>;
 	hookName: Hook;
 	context: Context;
-	result: (ModelSchema & Document) | (ModelSchema | Document)[];
+	result: (ModelSchema & Document) | (ModelSchema & Document)[];
 }
 
-export interface AfterRawResultArgs<Context = unknown> {
-	query: Query<QueryResultType, Document>;
+export interface AfterRawResultArgs<Context = unknown, ModelSchema = unknown> {
+	query: Query<ModelSchema, ModelSchema & Document>;
 	hookName: Hook;
 	context: Context;
 	rawResult: unknown;
@@ -82,7 +80,7 @@ export interface DocumentPostArgs<Context = unknown, ModelSchema = unknown> {
  * @param rest
  * @param context
  */
-const createHandlerArgs = (
+const createHandlerArgs = <Context = unknown, ResultType = unknown>(
 	stage: Stage,
 	hookName: Hook,
 	{
@@ -97,27 +95,37 @@ const createHandlerArgs = (
 		isReadHook: boolean;
 		isWriteHook: boolean;
 		isDeleteHook: boolean;
-		thisObj: Document | Query<QueryResultType, Document>;
+		thisObj: Document | Query<ResultType, ResultType & Document>;
 		result?: any;
 		rest?: unknown[];
-		context?: unknown;
+		context?: Context;
 	}
-): PreArgs | AfterArgs | AfterRawResultArgs | DocumentPreArgs | DocumentPostArgs | undefined => {
+):
+	| PreArgs<ResultType>
+	| AfterArgs<ResultType>
+	| AfterRawResultArgs<ResultType>
+	| DocumentPreArgs
+	| DocumentPostArgs
+	| undefined => {
 	const operation = (isReadHook && 'read') || (isWriteHook && 'write') || (isDeleteHook && 'delete');
 	// createPreArgs creates the arguments for `before(Read|Write|Delete)` hooks
-	const createPreArgs = (): PreArgs => ({ query: thisObj as Query<QueryResultType, Document>, hookName, context });
+	const createPreArgs = (): PreArgs<Context, ResultType> => ({
+		query: thisObj as Query<ResultType, ResultType & Document>,
+		hookName,
+		context
+	});
 
 	// createAfterArgs creates the arguments for `after(Read|Write|Delete)` hooks
-	const createAfterArgs = (): AfterArgs => ({
-		query: thisObj as Query<QueryResultType, Document>,
+	const createAfterArgs = (): AfterArgs<Context, ResultType> => ({
+		query: thisObj as Query<ResultType, ResultType & Document>,
 		hookName,
 		context,
 		result
 	});
 
 	// createAfterRawResultArgs creates the arguments for `after(Read|Write|Delete)` hooks triggered by atomic operations
-	const createAfterRawResultArgs = (): AfterRawResultArgs => ({
-		query: thisObj as Query<QueryResultType, Document>,
+	const createAfterRawResultArgs = (): AfterRawResultArgs<Context, ResultType> => ({
+		query: thisObj as Query<ResultType, ResultType & Document>,
 		hookName,
 		context,
 		rawResult: result
@@ -256,7 +264,7 @@ const createHandlerArgs = (
  * @param hooksList
  * @param stage
  */
-const createRegisterHooks = (hooksList, stage: Stage) => (mongooseSchema, handler): void => {
+const createRegisterHooks = (hooksList, stage: Stage) => <T>(mongooseSchema: T, handler): void => {
 	const isReadHook = hooksList === READ_HOOKS;
 	const isWriteHook = hooksList === WRITE_HOOKS;
 	const isDeleteHook = hooksList === DELETE_HOOKS;
@@ -284,7 +292,7 @@ const createRegisterHooks = (hooksList, stage: Stage) => (mongooseSchema, handle
 				}
 			}
 
-			const args = createHandlerArgs(stage, hook, {
+			const args = createHandlerArgs<T, T & Document>(stage, hook, {
 				isReadHook,
 				isWriteHook,
 				isDeleteHook,
@@ -302,17 +310,23 @@ const createRegisterHooks = (hooksList, stage: Stage) => (mongooseSchema, handle
 };
 
 export type Handler<Context = unknown, ModelSchema = unknown> = {
-	beforeRead: (args: PreArgs<Context>) => unknown | Promise<unknown>;
+	beforeRead: (args: PreArgs<Context, ModelSchema>) => unknown | Promise<unknown>;
 	afterRead: (args: AfterArgs<Context, ModelSchema>) => unknown | Promise<unknown>;
 
-	beforeWrite: (args: PreArgs<Context> & DocumentPreArgs<Context, ModelSchema>) => unknown | Promise<unknown>;
+	beforeWrite: (
+		args: PreArgs<Context, ModelSchema> & DocumentPreArgs<Context, ModelSchema>
+	) => unknown | Promise<unknown>;
 	afterWrite: (
 		args: AfterArgs<Context, ModelSchema> & DocumentPostArgs & AfterRawResultArgs<Context>
 	) => unknown | Promise<unknown>;
 
-	beforeDelete: (args: PreArgs<Context> & DocumentPreArgs<Context, ModelSchema>) => unknown | Promise<unknown>;
+	beforeDelete: (
+		args: PreArgs<Context, ModelSchema> & DocumentPreArgs<Context, ModelSchema>
+	) => unknown | Promise<unknown>;
 	afterDelete: (
-		args: AfterArgs<Context, ModelSchema> & DocumentPostArgs<Context, ModelSchema> & AfterRawResultArgs<Context>
+		args: AfterArgs<Context, ModelSchema> &
+			DocumentPostArgs<Context, ModelSchema> &
+			AfterRawResultArgs<Context, ModelSchema>
 	) => unknown | Promise<unknown>;
 };
 

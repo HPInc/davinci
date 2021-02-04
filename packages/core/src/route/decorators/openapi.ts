@@ -6,7 +6,9 @@
 import { Reflector } from '@davinci/reflector';
 import _ from 'lodash';
 import {
-	IPropDecoratorOptions, IPropDecoratorOptionsFactory, IPropDecoratorMetadata,
+	IPropDecoratorOptions,
+	IPropDecoratorOptionsFactory,
+	IPropDecoratorMetadata,
 	IDefinitionDecoratorOptions
 } from '../types';
 

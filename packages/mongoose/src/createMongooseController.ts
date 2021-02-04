@@ -42,7 +42,10 @@ export interface IMongooseController {
  * POST /api/{resourceName}
  * DELETE /api/{resourceName}/{id}
  */
-export const createMongooseController = <T extends Constructor<{}>>(Model, ResourceSchema) => {
+export const createMongooseController = <T extends Constructor<{}>>(
+	Model,
+	ResourceSchema
+): Constructor<IMongooseController> & T => {
 	// eslint-disable-next-line @typescript-eslint/no-var-requires,global-require
 	const { context, route, httpErrors, openapi, express } = require('@davinci/core');
 

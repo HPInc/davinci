@@ -97,7 +97,7 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 
 			const required = _fp.flow(
 				_fp.filter(({ optsFactory }: IPropDecoratorMetadata) => {
-					const options = optsFactory() || {};
+					const options = optsFactory() || { required: false };
 					return options.required;
 				}),
 				_fp.map('key')
@@ -116,7 +116,7 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 
 			return hasDefinitionDecoration
 				? {
-					$ref: `#/definitions/${title}`
+						$ref: `#/definitions/${title}`
 				  }
 				: definitionObj;
 		}
