@@ -102,10 +102,7 @@ export type IPropDecoratorOptions<T> = Partial<JSONSchemaType<T, true>> & {
 export type IPropDecoratorOptionsFactory<T> = IDecoratorOptionsFactory<IPropDecoratorOptions<T>>;
 export type IPropDecoratorMetadata<T> = IDecoratorMetadata<IPropDecoratorOptions<T>>;
 
-export type IDefinitionDecoratorOptions<T = Known> = { title: any } & Pick<
-	Partial<JSONSchemaType<T, true>>,
-	'dependencies' | 'oneOf' | 'allOf' | 'anyOf' | 'not'
->;
+export type IDefinitionDecoratorOptions<T = Known> = { title: any } & Partial<JSONSchemaType<T, true>>;
 
 export interface IMethodResponseOutput {
 	description?: string;
