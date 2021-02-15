@@ -114,11 +114,7 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 				};
 			}
 
-			return hasDefinitionDecoration
-				? {
-						$ref: `#/definitions/${title}`
-				  }
-				: definitionObj;
+			return hasDefinitionDecoration ? { $ref: `#/definitions/${title}` } : definitionObj;
 		}
 
 		return null;
