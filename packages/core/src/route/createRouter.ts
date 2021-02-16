@@ -4,6 +4,7 @@
  */
 
 import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
 import Debug from 'debug';
 import express, { NextFunction, Response, Router } from 'express';
 import _ from 'lodash';
@@ -66,6 +67,7 @@ const performAjvValidation = ({ value, config: cfg, definitions, validationOptio
 		useDefaults: true,
 		removeAdditional: 'all'
 	});
+	addFormats(ajv);
 	let required = [];
 	if (!(validationOptions && validationOptions.partial) && config.required) {
 		required = [config.name];
