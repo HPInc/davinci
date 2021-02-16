@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.1](https://github.com/HPInc/davinci/compare/@davinci/core@1.2.0...@davinci/core@1.2.1) (2021-02-16)
+
+
+### Bug Fixes
+
+* install and use ajv-formats ([#52](https://github.com/HPInc/davinci/issues/52)) ([4e93a39](https://github.com/HPInc/davinci/commit/4e93a398975a68bce18ef5ce75ef2e948e59f85a))
+
+
+
+
+
 # [1.2.0](https://github.com/HPInc/davinci/compare/@davinci/core@1.1.3...@davinci/core@1.2.0) (2021-02-16)
 
 
