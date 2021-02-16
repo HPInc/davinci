@@ -4,7 +4,11 @@
  */
 
 import { TypeValue, TypeValueFactory, Maybe } from '@davinci/reflector';
-import { IJsonSchema } from 'openapi-types';
+import { JSONSchemaType } from 'ajv';
+
+// eslint-disable-next-line
+interface KnownRecord extends Record<string, Known> {}
+declare type Known = KnownRecord | [Known, ...Known[]] | Known[] | number | string | boolean | null;
 
 export interface ISwaggerDefinition {
 	title?: string;
@@ -85,19 +89,20 @@ type IDecoratorMetadata<T> = {
  * @param typeFactory - Function that returns a type (useful for lazily evaluated types)
  * @param required - Whether the property is required or not
  */
-export interface IPropDecoratorOptions extends Omit<IJsonSchema, 'type' | 'required'> {
-	type?: TypeValue;
+export type IPropDecoratorOptions<T> = Partial<JSONSchemaType<T, true>> & {
+	type?: TypeValue | JSONSchemaType<T, true>['type'];
+	required?: boolean | JSONSchemaType<T, true>['required'];
 	/**
 	 * @deprecated you can now pass Open API properties at the root configuration level
 	 */
-	rawSchemaOptions?: Omit<IJsonSchema, 'type' | 'required'>;
+	rawSchemaOptions?: Partial<JSONSchemaType<T, true>>;
 	typeFactory?: TypeValueFactory;
-	required?: boolean;
-}
-export type IPropDecoratorOptionsFactory = IDecoratorOptionsFactory<IPropDecoratorOptions>;
-export type IPropDecoratorMetadata = IDecoratorMetadata<IPropDecoratorOptions>;
+};
 
-export type IDefinitionDecoratorOptions = { title: any; } & Omit<IJsonSchema, 'type' | 'required'>;
+export type IPropDecoratorOptionsFactory<T> = IDecoratorOptionsFactory<IPropDecoratorOptions<T>>;
+export type IPropDecoratorMetadata<T> = IDecoratorMetadata<IPropDecoratorOptions<T>>;
+
+export type IDefinitionDecoratorOptions<T = Known> = { title: any } & Partial<JSONSchemaType<T, true>>;
 
 export interface IMethodResponseOutput {
 	description?: string;

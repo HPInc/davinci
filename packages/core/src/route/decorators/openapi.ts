@@ -6,7 +6,9 @@
 import { Reflector } from '@davinci/reflector';
 import _ from 'lodash';
 import {
-	IPropDecoratorOptions, IPropDecoratorOptionsFactory, IPropDecoratorMetadata,
+	IPropDecoratorOptions,
+	IPropDecoratorOptionsFactory,
+	IPropDecoratorMetadata,
 	IDefinitionDecoratorOptions
 } from '../types';
 
@@ -14,7 +16,7 @@ import {
  * It annotates a variable as swagger definition property
  * @param {IPropDecoratorOptions} opts
  */
-export function prop(opts?: IPropDecoratorOptions | IPropDecoratorOptionsFactory) {
+export function prop<T = any>(opts?: IPropDecoratorOptions<T> | IPropDecoratorOptionsFactory<T>) {
 	return function(prototype: Record<string, any>, key: string): void {
 		const optsFactory = () => {
 			const options = typeof opts === 'function' ? opts() : opts;
@@ -24,7 +26,7 @@ export function prop(opts?: IPropDecoratorOptions | IPropDecoratorOptionsFactory
 
 			return options;
 		};
-		const metadata: IPropDecoratorMetadata = { key, optsFactory };
+		const metadata: IPropDecoratorMetadata<T> = { key, optsFactory };
 		Reflector.pushMetadata('davinci:openapi:props', metadata, prototype.constructor);
 	};
 }
@@ -34,7 +36,7 @@ export function prop(opts?: IPropDecoratorOptions | IPropDecoratorOptionsFactory
  * Its definition will be added in the `definitions` property
  * @param options
  */
-export function definition(options?: IDefinitionDecoratorOptions) {
+export function definition<T = any>(options?: IDefinitionDecoratorOptions<T>) {
 	return function(target: Function): void {
 		Reflector.defineMetadata('davinci:openapi:definition', options, target);
 	};

@@ -64,7 +64,7 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 				definitionObj.title = title;
 			}
 
-			const props: IPropDecoratorMetadata[] =
+			const props: IPropDecoratorMetadata<any>[] =
 				Reflector.getMetadata('davinci:openapi:props', typeOrClass.prototype.constructor) || [];
 
 			const properties = props.reduce((acc, { key: k, optsFactory }) => {
@@ -96,8 +96,8 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 			}
 
 			const required = _fp.flow(
-				_fp.filter(({ optsFactory }: IPropDecoratorMetadata) => {
-					const options = optsFactory() || {};
+				_fp.filter(({ optsFactory }: IPropDecoratorMetadata<any>) => {
+					const options = optsFactory() || { required: false };
 					return options.required;
 				}),
 				_fp.map('key')
@@ -114,11 +114,7 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 				};
 			}
 
-			return hasDefinitionDecoration
-				? {
-					$ref: `#/definitions/${title}`
-				  }
-				: definitionObj;
+			return hasDefinitionDecoration ? { $ref: `#/definitions/${title}` } : definitionObj;
 		}
 
 		return null;

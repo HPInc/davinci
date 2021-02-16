@@ -392,15 +392,12 @@ describe('createSchemaDefinition', () => {
 	});
 
 	it('should support dependencies', () => {
-		@openapi.definition({
+		@openapi.definition<Customer>({
 			title: 'Customer',
 			dependencies: {
 				c: ['a']
 			},
-			oneOf: [
-				{ required: ['a'] },
-				{ required: ['b'] }
-			]
+			oneOf: [{ required: ['a'] }, { required: ['b'] }]
 		})
 		class Customer {
 			@openapi.prop()
@@ -430,10 +427,7 @@ describe('createSchemaDefinition', () => {
 					}
 				},
 				dependencies: { c: ['a'] },
-				oneOf: [
-					{ required: ['a'] },
-					{ required: ['b'] }
-				]
+				oneOf: [{ required: ['a'] }, { required: ['b'] }]
 			}
 		});
 	});

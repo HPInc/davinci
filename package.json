@@ -30,7 +30,7 @@
 		"eslint-plugin-import": "2.18.2",
 		"lerna": "^3.22.1",
 		"mocha": "5.2.0",
-		"mongoose": "5.11.13",
+		"mongoose": "^5.11.15",
 		"nyc": "14.0.0",
 		"should": "^13.2.3",
 		"sinon": "4.5.0",

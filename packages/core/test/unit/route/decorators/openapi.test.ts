@@ -22,11 +22,11 @@ describe('openapi decorators', () => {
 
 		it('should support openapi properties at the root level', () => {
 			class Customer {
-				@openapi.prop({
+				@openapi.prop<string | number>({
 					required: false,
 					oneOf: [{ type: 'string', enum: ['one', 'two'] }, { type: 'number' }]
 				})
-				firstname: string;
+				firstname: string | number;
 			}
 
 			const propsMetadata = Reflect.getMetadata('davinci:openapi:props', Customer);
