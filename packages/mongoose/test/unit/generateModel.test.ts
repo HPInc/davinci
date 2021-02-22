@@ -221,6 +221,46 @@ describe('typed mongoose', () => {
 			const schema = generateSchema(Order);
 			should(schema.path('items').schema.virtualpath('categories')).be.ok();
 		});
+
+		it('avoid passing the schema options down to subschemas', () => {
+			class Item {
+				@virtual()
+				categories() {}
+			}
+
+			class Order {
+				@prop({ index: true })
+				firstname: string;
+
+				@prop({ type: [Item] })
+				items: Item[];
+			}
+
+			const schema = generateSchema(Order, { timestamps: true });
+			should(schema.options.timestamps).be.True();
+			should(schema.path('items').schema.options.timestamps).not.be.True();
+		});
+
+		it('should allow passing the schema options using the decorator', () => {
+			@mgoose.schema({ timestamps: false, id: false, _id: false })
+			class Item {
+				@virtual()
+				categories() {}
+			}
+
+			@mgoose.schema({ timestamps: true, id: true, _id: true })
+			class Order {
+				@prop({ index: true })
+				firstname: string;
+
+				@prop({ type: [Item] })
+				items: Item[];
+			}
+
+			const schema = generateSchema(Order);
+			should(schema.options).match({ timestamps: true, id: true, _id: true });
+			should(schema.path('items').schema.options).match({ timestamps: false, id: false, _id: false });
+		});
 	});
 
 	describe('#generateModel', () => {

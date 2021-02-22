@@ -42,7 +42,10 @@ export const createMongooseSchema = (classSchema: ClassType, definition: SchemaD
 	// get virtual fields
 	const virtuals = Reflector.getMetadata('davinci:mongoose:virtuals', classSchema.prototype.constructor) || [];
 
-	const schema = new Schema(definition, options);
+	// get schema options
+	const decoratorOptions = Reflector.getMetadata('davinci:mongoose:schemaOptions', classSchema.prototype.constructor);
+
+	const schema = new Schema(definition, decoratorOptions ?? options);
 	schema.methods = methods;
 	schema.statics = statics;
 	if (indexes.length > 0) {
@@ -116,7 +119,8 @@ export const generateSchema = (
 		if (isFunction) {
 			const classType = type as ClassType;
 			if (classType.name !== 'ObjectId' && classType.name !== 'Mixed') {
-				type = generateSchema(classType, options, returnMongooseSchema);
+				// passing null to avoid setting the options recursively to sub-schemas
+				type = generateSchema(classType, null, returnMongooseSchema);
 			}
 		}
 
