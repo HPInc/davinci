@@ -45,7 +45,7 @@ export const createMongooseSchema = (classSchema: ClassType, definition: SchemaD
 	// get schema options
 	const decoratorOptions = Reflector.getMetadata('davinci:mongoose:schemaOptions', classSchema.prototype.constructor);
 
-	const schema = new Schema(definition, decoratorOptions ?? options);
+	const schema = new Schema(definition, options ?? decoratorOptions);
 	schema.methods = methods;
 	schema.statics = statics;
 	if (indexes.length > 0) {

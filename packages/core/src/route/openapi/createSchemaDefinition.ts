@@ -84,7 +84,7 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 				acc[k] = _merge(
 					{},
 					schema,
-					_omit(opts, ['rawSchemaOptions', 'type', 'required']),
+					_omit(opts, ['rawSchemaOptions', 'type', 'required', 'typeFactory']),
 					opts?.rawSchemaOptions
 				);
 
