@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0](https://github.com/HPInc/davinci/compare/@davinci/core@1.2.1...@davinci/core@1.3.0) (2021-02-22)
+
+
+### Features
+
+* **mongoose:** better handling of schema options ([#53](https://github.com/HPInc/davinci/issues/53)) ([968d7f0](https://github.com/HPInc/davinci/commit/968d7f0f9308e8ab46dfb3073b801b9f03df36ac))
+
+
+
+
+
 ## [1.2.1](https://github.com/HPInc/davinci/compare/@davinci/core@1.2.0...@davinci/core@1.2.1) (2021-02-16)
 
 

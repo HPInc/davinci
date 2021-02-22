@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.14.0](https://github.com/HPInc/davinci/compare/@davinci/example-rest@0.13.1...@davinci/example-rest@0.14.0) (2021-02-22)
+
+
+### Features
+
+* **mongoose:** better handling of schema options ([#53](https://github.com/HPInc/davinci/issues/53)) ([968d7f0](https://github.com/HPInc/davinci/commit/968d7f0f9308e8ab46dfb3073b801b9f03df36ac))
+
+
+
+
+
 ## [0.13.1](https://github.com/HPInc/davinci/compare/@davinci/example-rest@0.13.0...@davinci/example-rest@0.13.1) (2021-02-16)
 
 **Note:** Version bump only for package @davinci/example-rest

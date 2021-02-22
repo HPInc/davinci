@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/mongoose",
-	"version": "0.15.1",
+	"version": "0.16.0",
 	"description": "Integration with Mongoose ODM",
 	"author": "HP",
 	"license": "MIT",
@@ -28,7 +28,7 @@
 		"mongoose": "^5.11.0"
 	},
 	"optionalDependencies": {
-		"@davinci/core": "^1.2.1"
+		"@davinci/core": "^1.3.0"
 	},
 	"devDependencies": {
 		"@davinci/core": "^1.0.0",
