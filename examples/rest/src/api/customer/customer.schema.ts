@@ -13,6 +13,7 @@ class CustomerPhone {
 }
 
 @openapi.definition({ title: 'BirthType' })
+@mgoose.schema({ _id: false })
 class BirthType {
 	@mgoose.prop()
 	@openapi.prop()

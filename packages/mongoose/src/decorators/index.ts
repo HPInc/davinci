@@ -4,6 +4,7 @@
  */
 
 import { Reflector } from '@davinci/reflector';
+import { SchemaOptions } from 'mongoose';
 import { IPropDecoratorOptions, IPropDecoratorOptionsFactory, IPropDecoratorMetadata } from './types';
 
 /**
@@ -83,7 +84,7 @@ export function populate({ name, opts }: { name: string; opts: IVirtualArgs }) {
 }
 
 /**
- * Decorator that annotate a method marking it as virtual.
+ * Decorator that annotates a method marking it as virtual.
  * The annotated method will be used as the `getter` of the virtual
  */
 export function virtual(options?: IVirtualArgs) {
@@ -96,5 +97,14 @@ export function virtual(options?: IVirtualArgs) {
 		}
 
 		Reflector.pushMetadata('davinci:mongoose:virtuals', { name: key, handler, options }, target.constructor);
+	};
+}
+
+/**
+ * Decorator that annotates a schema, allowing to pass options to the mongoose 'Schema' constructor
+ */
+export function schema(options?: SchemaOptions) {
+	return (target: Function): void => {
+		Reflector.defineMetadata('davinci:mongoose:schemaOptions', options, target);
 	};
 }
