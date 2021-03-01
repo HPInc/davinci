@@ -103,7 +103,6 @@ Under the hood, they use [Mongoose Middlewares](https://mongoosejs.com/docs/midd
     Under the hood it register the following Mongoose Middlewares:
     `findOneAndUpdate`,
     `save`,
-    `validate`,
     `update`,
     `updateMany`
 -   **beforeDelete / afterDelete**\
