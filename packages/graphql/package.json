@@ -25,6 +25,7 @@
 		"express-graphql": "0.11.0",
 		"graphql": "14.4.2",
 		"graphql-iso-date": "3.6.1",
+		"graphql-type-json": "0.3.2",
 		"lodash": "^4.17.19"
 	},
 	"devDependencies": {
