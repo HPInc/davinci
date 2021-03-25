@@ -14,7 +14,7 @@ import {
 	GraphQLUnionType
 } from 'graphql';
 import { GraphQLDateTime } from 'graphql-iso-date';
-import { GraphQLJSONObject } from 'graphql-type-json';
+import { GraphQLJSON } from 'graphql-type-json';
 import _fp from 'lodash/fp';
 import _ from 'lodash';
 import { Reflector } from '@davinci/reflector';
@@ -26,7 +26,7 @@ const scalarDict = {
 	number: GraphQLFloat,
 	string: GraphQLString,
 	boolean: GraphQLBoolean,
-	object: GraphQLJSONObject,
+	object: GraphQLJSON,
 	date: GraphQLDateTime
 };
 
