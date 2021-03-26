@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.1](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.4.0...@davinci/graphql@1.4.1) (2021-03-26)
+
+
+### Bug Fixes
+
+* using the more generic GraphQLJSON, instead of GraphQLJSONObject ([#56](https://github.com/HPInc/davinci/issues/56)) ([4792ac1](https://github.com/HPInc/davinci/commit/4792ac16fe01479b5285ab21f0293aa988a11019))
+
+
+
+
+
 # [1.4.0](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.3.2...@davinci/graphql@1.4.0) (2021-03-10)
 
 
