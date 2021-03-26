@@ -1,7 +1,7 @@
 import should from 'should';
 import { GraphQLBoolean, GraphQLFloat, GraphQLList, GraphQLObjectType, GraphQLString, GraphQLUnionType } from 'graphql';
 import { GraphQLDateTime } from 'graphql-iso-date';
-import { GraphQLJSONObject } from 'graphql-type-json';
+import { GraphQLJSON } from 'graphql-type-json';
 import _fp from 'lodash/fp';
 import { graphql, generateGQLSchema, UnionType } from '../../src';
 import { fieldResolver } from '../../src/decorators';
@@ -39,7 +39,7 @@ describe('schema generation', () => {
 			should(fields.age.type).be.equal(GraphQLFloat);
 			should(fields.isActive.type).be.equal(GraphQLBoolean);
 			should(fields.date.type).be.equal(GraphQLDateTime);
-			should(fields.blob.type).be.equal(GraphQLJSONObject);
+			should(fields.blob.type).be.equal(GraphQLJSON);
 			should(fields.something.type).be.equal(GraphQLString);
 		});
 
