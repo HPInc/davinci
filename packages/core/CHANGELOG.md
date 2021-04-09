@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.4.0](https://github.com/HPInc/davinci/compare/@davinci/core@1.3.0...@davinci/core@1.4.0) (2021-04-09)
+
+
+### Features
+
+* **openapi:** expose function to generate openapi definitions ([#57](https://github.com/HPInc/davinci/issues/57)) ([77ee485](https://github.com/HPInc/davinci/commit/77ee4854fc3352210a5075b41172777da2781b4f))
+
+
+
+
+
 # [1.3.0](https://github.com/HPInc/davinci/compare/@davinci/core@1.2.1...@davinci/core@1.3.0) (2021-02-22)
 
 
