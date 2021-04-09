@@ -6,6 +6,7 @@
 import * as route from './decorators/route';
 import * as openapi from './decorators/openapi';
 import * as openapiDocs from './openapi/openapiDocs';
-import createRouter from './createRouter';
 
-export { route, openapi, openapiDocs, createRouter };
+export { route, openapi, openapiDocs };
+export { default as createRouter } from './createRouter';
+export { createOpenapiSchemaDefinitions } from './openapi/createOpenapiSchemaDefinitions';

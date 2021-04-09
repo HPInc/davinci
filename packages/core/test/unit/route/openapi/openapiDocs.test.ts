@@ -44,23 +44,26 @@ describe('openapiDocs', () => {
 
 	describe('#generateFullSwagger', () => {
 		it('should generate a swagger doc', () => {
-			openapiDocs.addResource('customer', {
-				definitions: { Customer: { type: 'object' } },
-				paths: {
-					'/': {
-						get: {
-							summary: 'This is a summary',
-							operationId: 'operationId',
-							parameters: [{ name: 'query', in: 'query', schema: { type: 'string' } }],
-							responses: {
-								'200': {
-									description: 'Result'
+			openapiDocs.addResource(
+				{
+					definitions: { Customer: { type: 'object' } },
+					paths: {
+						'/': {
+							get: {
+								summary: 'This is a summary',
+								operationId: 'operationId',
+								parameters: [{ name: 'query', in: 'query', schema: { type: 'string' } }],
+								responses: {
+									'200': {
+										description: 'Result'
+									}
 								}
 							}
 						}
 					}
-				}
-			});
+				},
+				'customer'
+			);
 			const swagger = openapiDocs.generateFullSwagger({
 				basePath: '/api',
 				info: { version: '1.0.0', title: 'API' }
@@ -106,29 +109,32 @@ describe('openapiDocs', () => {
 		});
 
 		it('should strip out req, res, context parameters from paths', () => {
-			openapiDocs.addResource('customer', {
-				definitions: { Customer: { type: 'object' } },
-				paths: {
-					'/': {
-						get: {
-							summary: 'This is a summary',
-							operationId: 'operationId',
-							parameters: [
-								{ name: 'theQuery', in: 'query', schema: { type: 'string' } },
-								{ schema: { type: 'context' } },
-								{ schema: { type: 'req' } },
-								{ schema: { type: 'res' } },
-								{ name: 'theBody', in: 'body', schema: { type: 'object' } }
-							],
-							responses: {
-								'200': {
-									description: 'Result'
+			openapiDocs.addResource(
+				{
+					definitions: { Customer: { type: 'object' } },
+					paths: {
+						'/': {
+							get: {
+								summary: 'This is a summary',
+								operationId: 'operationId',
+								parameters: [
+									{ name: 'theQuery', in: 'query', schema: { type: 'string' } },
+									{ schema: { type: 'context' } },
+									{ schema: { type: 'req' } },
+									{ schema: { type: 'res' } },
+									{ name: 'theBody', in: 'body', schema: { type: 'object' } }
+								],
+								responses: {
+									'200': {
+										description: 'Result'
+									}
 								}
 							}
 						}
 					}
-				}
-			});
+				},
+				'customer'
+			);
 			const swagger = openapiDocs.generateFullSwagger({
 				basePath: '/api',
 				info: { version: '1.0.0', title: 'API' }

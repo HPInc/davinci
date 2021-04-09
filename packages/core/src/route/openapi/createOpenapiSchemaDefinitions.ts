@@ -9,7 +9,7 @@ import _omit from 'lodash/omit';
 import { Reflector } from '@davinci/reflector';
 import { ISwaggerDefinitions, IPropDecoratorMetadata } from '../types';
 
-export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwaggerDefinitions => {
+export const getOpenapiSchemaDefinitions = (theClass: Function, definitions = {}): ISwaggerDefinitions => {
 	const makeSchema = (typeOrClass, key?) => {
 		// it's a primitive type, simple case
 		if ([String, Number, Boolean, Date].includes(typeOrClass)) {
@@ -49,7 +49,7 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 				type: 'object'
 			};
 
-			const title: string = hasDefinitionDecoration ? definitionMetadata.title : key || typeOrClass.name;
+			const title: string = definitionMetadata?.title ?? key ?? typeOrClass.name;
 			if (hasDefinitionDecoration) {
 				if (definitions[title]) {
 					return {
@@ -125,12 +125,12 @@ export const getSchemaDefinition = (theClass: Function, definitions = {}): ISwag
 	return { schema, definitions };
 };
 
-export const createSchemaDefinition = (theClass: Function) => {
+export const createOpenapiSchemaDefinitions = (theClass: Function) => {
 	if (theClass) {
-		const { definitions } = getSchemaDefinition(theClass);
+		const { definitions } = getOpenapiSchemaDefinitions(theClass);
 		return definitions;
 	}
 	return {};
 };
 
-export default createSchemaDefinition;
+export default createOpenapiSchemaDefinitions;

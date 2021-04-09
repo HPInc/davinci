@@ -8,7 +8,7 @@ import _fp from 'lodash/fp';
 import { Reflector } from '@davinci/reflector';
 import { PathsDefinition, PathsValidationOptions, ISwaggerDefinitions, IMethodDecoratorMetadata } from '../types';
 import { IControllerDecoratorArgs } from '../decorators/route';
-import { getSchemaDefinition } from './createSchemaDefinition';
+import { getOpenapiSchemaDefinitions } from './createOpenapiSchemaDefinitions';
 
 const getParameterDefinition = methodParameterConfig => {
 	const { type,  options: { type: t = null, enum: enumOptions = null, ...options } = {} } = methodParameterConfig;
@@ -26,7 +26,7 @@ const getParameterDefinition = methodParameterConfig => {
 		} else if (enumOptions?.length) {
 			const { schemas, definitions } = enumOptions.reduce(
 				(acc, enumType) => {
-					const { schema: s, definitions: d } = getSchemaDefinition(enumType);
+					const { schema: s, definitions: d } = getOpenapiSchemaDefinitions(enumType);
 					acc.schemas.push(s);
 					acc.definitions = { ...acc.definitions, ...d };
 					return acc;
@@ -41,7 +41,7 @@ const getParameterDefinition = methodParameterConfig => {
 
 			return { paramDefinition, definitions };
 		} else {
-			const { schema: s, definitions } = getSchemaDefinition(type);
+			const { schema: s, definitions } = getOpenapiSchemaDefinitions(type);
 			paramDefinition.schema = s;
 
 			return { paramDefinition, definitions };
@@ -87,7 +87,7 @@ const createPathsDefinition = (
 			const resps = responses
 				? _.mapValues(responses, response => {
 					if (typeof response === 'function') {
-						const { definitions: defs, schema } = getSchemaDefinition(response);
+						const { definitions: defs, schema } = getOpenapiSchemaDefinitions(response);
 						acc.definitions = { ...acc.definitions, ...defs };
 						return { schema };
 					}

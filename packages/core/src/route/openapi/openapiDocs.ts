@@ -13,10 +13,10 @@ const SWAGGER_VERSION = '2.0';
 
 export const resources = [];
 
-export const addResource = (resourceName, doc, basepath?) => {
-	debug(`adding ${resourceName} resource`);
+export const addResource = (doc, resourceName?: string, basepath?: string) => {
+	debug(`adding resource`, resourceName);
 	// create the resource from the doc
-	const resource = new Resource(resourceName, doc, basepath);
+	const resource = new Resource(doc, resourceName, basepath);
 	// add it to the registry
 	resources.push(resource);
 };
