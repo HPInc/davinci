@@ -38,6 +38,6 @@ export function prop<T = any>(opts?: IPropDecoratorOptions<T> | IPropDecoratorOp
  */
 export function definition<T = any>(options?: IDefinitionDecoratorOptions<T>) {
 	return function(target: Function): void {
-		Reflector.defineMetadata('davinci:openapi:definition', options, target);
+		Reflector.defineMetadata('davinci:openapi:definition', options ?? {}, target);
 	};
 }

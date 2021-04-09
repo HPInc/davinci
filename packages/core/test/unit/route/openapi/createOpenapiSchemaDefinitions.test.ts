@@ -1,8 +1,9 @@
 import should from 'should';
-import createSchemaDefinition from '../../../../src/route/openapi/createSchemaDefinition';
+import createOpenapiSchemaDefinitions from '../../../../src/route/openapi/createOpenapiSchemaDefinitions';
 import { openapi } from '../../../../src/route';
+import * as openapiDocs from '../../../../src/route/openapi/openapiDocs';
 
-describe('createSchemaDefinition', () => {
+describe('createOpenapiSchemaDefinitions', () => {
 	it('Given a decorated class, it should create a schema definition', () => {
 		@openapi.definition({ title: 'Customer' })
 		class Customer {
@@ -12,7 +13,7 @@ describe('createSchemaDefinition', () => {
 			lastname: string;
 		}
 
-		const definition = createSchemaDefinition(Customer);
+		const definition = createOpenapiSchemaDefinitions(Customer);
 		should(definition).be.deepEqual({
 			Customer: {
 				title: 'Customer',
@@ -43,7 +44,7 @@ describe('createSchemaDefinition', () => {
 			phone: CustomerPhone;
 		}
 
-		const definition = createSchemaDefinition(Customer);
+		const definition = createOpenapiSchemaDefinitions(Customer);
 		should(definition).be.deepEqual({
 			Customer: {
 				title: 'Customer',
@@ -82,7 +83,7 @@ describe('createSchemaDefinition', () => {
 			phone: CustomerPhone;
 		}
 
-		const definition = createSchemaDefinition(Customer);
+		const definition = createOpenapiSchemaDefinitions(Customer);
 		should(definition).be.deepEqual({
 			CustomerPhone: {
 				title: 'CustomerPhone',
@@ -115,7 +116,7 @@ describe('createSchemaDefinition', () => {
 			groups: string[];
 		}
 
-		const definition = createSchemaDefinition(Customer);
+		const definition = createOpenapiSchemaDefinitions(Customer);
 		should(definition).be.deepEqual({
 			Customer: {
 				title: 'Customer',
@@ -146,7 +147,7 @@ describe('createSchemaDefinition', () => {
 			phone: CustomerPhone[];
 		}
 
-		const definition = createSchemaDefinition(Customer);
+		const definition = createOpenapiSchemaDefinitions(Customer);
 		should(definition).be.deepEqual({
 			Customer: {
 				title: 'Customer',
@@ -207,7 +208,7 @@ describe('createSchemaDefinition', () => {
 		 *  };
 		 */
 
-		const definition = createSchemaDefinition(Customer);
+		const definition = createOpenapiSchemaDefinitions(Customer);
 		should(definition).be.deepEqual({
 			CustomerPhone: {
 				title: 'CustomerPhone',
@@ -245,7 +246,7 @@ describe('createSchemaDefinition', () => {
 			lastname: string;
 		}
 
-		const definition = createSchemaDefinition(Customer);
+		const definition = createOpenapiSchemaDefinitions(Customer);
 		should(definition).be.deepEqual({
 			Customer: {
 				title: 'Customer',
@@ -270,7 +271,7 @@ describe('createSchemaDefinition', () => {
 			customData: string;
 		}
 
-		const definition = createSchemaDefinition(Customer);
+		const definition = createOpenapiSchemaDefinitions(Customer);
 		should(definition).be.deepEqual({
 			Customer: {
 				title: 'Customer',
@@ -318,7 +319,7 @@ describe('createSchemaDefinition', () => {
 			scans: ScanPayloadArrayItem[];
 		}
 
-		const definition = createSchemaDefinition(ScanPayload);
+		const definition = createOpenapiSchemaDefinitions(ScanPayload);
 		should(definition).be.deepEqual({
 			ScanPayload: {
 				title: 'ScanPayload',
@@ -369,7 +370,7 @@ describe('createSchemaDefinition', () => {
 			someProp: object | string[];
 		}
 
-		const definition = createSchemaDefinition(Customer);
+		const definition = createOpenapiSchemaDefinitions(Customer);
 		should(definition).be.deepEqual({
 			Customer: {
 				title: 'Customer',
@@ -410,7 +411,7 @@ describe('createSchemaDefinition', () => {
 			c?: string;
 		}
 
-		const definition = createSchemaDefinition(Customer);
+		const definition = createOpenapiSchemaDefinitions(Customer);
 		should(definition).be.deepEqual({
 			Customer: {
 				title: 'Customer',
@@ -429,6 +430,48 @@ describe('createSchemaDefinition', () => {
 				dependencies: { c: ['a'] },
 				oneOf: [{ required: ['a'] }, { required: ['b'] }]
 			}
+		});
+	});
+
+	it('should be able to generate an Open API definition and add it to the openapiDocs', () => {
+		@openapi.definition()
+		class Customer {
+			@openapi.prop()
+			firstname: string;
+
+			@openapi.prop({ required: true })
+			lastname: string;
+		}
+
+		const definitions = createOpenapiSchemaDefinitions(Customer);
+		openapiDocs.addResource({ definitions });
+		const swagger = openapiDocs.generateFullSwagger({
+			basePath: '/api',
+			info: { version: '1.0.0', title: 'API' }
+		});
+
+		should(swagger).be.match({
+			swagger: '2.0',
+			info: {
+				version: '1.0.0',
+				title: 'API'
+			},
+			definitions: {
+				Customer: {
+					type: 'object',
+					title: 'Customer',
+					properties: {
+						firstname: {
+							type: 'string'
+						},
+						lastname: {
+							type: 'string'
+						}
+					},
+					required: ['lastname']
+				}
+			},
+			parameters: {}
 		});
 	});
 });

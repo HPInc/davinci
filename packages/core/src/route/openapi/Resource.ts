@@ -17,7 +17,7 @@ class Resource {
 
 	basePath: string;
 
-	constructor(resourceName, doc, basePath?) {
+	constructor(doc, resourceName, basePath?) {
 		this.resourceName = resourceName;
 		this.paths = doc.paths;
 		this.definitions = doc.definitions;

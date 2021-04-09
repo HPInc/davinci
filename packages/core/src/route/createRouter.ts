@@ -16,7 +16,7 @@ import { DaVinciRequest, IHeaderDecoratorMetadata } from '../express/types';
 import { NotImplemented, BadRequest } from '../errors/httpErrors';
 import * as openapiDocs from './openapi/openapiDocs';
 import createPaths from './openapi/createPaths';
-import createSchemaDefinition from './openapi/createSchemaDefinition';
+import createOpenapiSchemaDefinitions from './openapi/createOpenapiSchemaDefinitions';
 import { IControllerDecoratorArgs } from './decorators/route';
 import { ISchema, ISwaggerDefinitions, MethodValidation, PathsValidationOptions } from './types';
 import { DaVinciExpress } from '../index';
@@ -339,10 +339,10 @@ const createRouterAndSwaggerDoc = (
 	const controller = new Controller();
 
 	// create the swagger structure
-	const mainDefinition = resourceSchema ? createSchemaDefinition(resourceSchema) : {};
+	const mainDefinition = resourceSchema ? createOpenapiSchemaDefinitions(resourceSchema) : {};
 	const additionalDefinitions = _.reduce(
 		additionalSchemas,
-		(acc, schema) => ({ ...acc, ...createSchemaDefinition(schema) }),
+		(acc, schema) => ({ ...acc, ...createOpenapiSchemaDefinitions(schema) }),
 		[]
 	);
 
@@ -366,7 +366,7 @@ const createRouterAndSwaggerDoc = (
 		return router[route.method](routePath, ...route.handlers);
 	});
 
-	openapiDocs.addResource(resourceName, definition, basepath);
+	openapiDocs.addResource(definition, resourceName, basepath);
 
 	return router;
 };
