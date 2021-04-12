@@ -11,7 +11,7 @@ import { IControllerDecoratorArgs } from '../decorators/route';
 import { getOpenapiSchemaDefinitions } from './createOpenapiSchemaDefinitions';
 
 const getParameterDefinition = methodParameterConfig => {
-	const { type,  options: { type: t = null, enum: enumOptions = null, ...options } = {} } = methodParameterConfig;
+	const { type, options: { type: t = null, enum: enumOptions = null, ...options } = {} } = methodParameterConfig;
 	const paramDefinition = { ...options, _index: methodParameterConfig.index };
 	// handling special parameters
 	if (['context', 'req', 'res'].includes(methodParameterConfig.type)) {
@@ -96,14 +96,19 @@ const createPathsDefinition = (
 				  })
 				: { 200: { description: 'Success' } };
 
-			_.set(acc.paths, `${path}.${verb}`, {
+			const pathConfig: Record<string, unknown> = {
 				summary,
 				description,
 				operationId: methodName,
 				parameters,
-				responses: resps,
-				hidden
-			});
+				responses: resps
+			};
+
+			if (!_.isEmpty(hidden)) {
+				pathConfig.hidden = pathConfig;
+			}
+
+			_.set(acc.paths, `${path}.${verb}`, pathConfig);
 
 			_.set(acc.validationOptions, `${path}.${verb}`, validation || {});
 
