@@ -24,13 +24,14 @@ export const addResource = (doc, resourceName?: string, basepath?: string) => {
 export const sanitiseResourcePath = resourcePaths => {
 	const EXCLUDED_PARAMETER_TYPES = ['res', 'req', 'context'];
 
-	// remove non-standard parameters
 	return _.reduce(
 		resourcePaths,
 		(acc, pathConfig, method) => {
+			// add the configuration only if !hidden
 			if (!pathConfig.hidden) {
 				acc[method] = {
 					...pathConfig,
+					// remove non-standard parameters
 					parameters: _.filter(
 						pathConfig.parameters,
 						parameter => !EXCLUDED_PARAMETER_TYPES.includes(parameter.schema.type)
