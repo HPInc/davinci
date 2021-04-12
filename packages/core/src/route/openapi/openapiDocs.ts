@@ -25,15 +25,22 @@ export const sanitiseResourcePath = resourcePaths => {
 	const EXCLUDED_PARAMETER_TYPES = ['res', 'req', 'context'];
 
 	// remove non-standard parameters
-	return _.mapValues(resourcePaths, path => {
-		return {
-			...path,
-			parameters: _.filter(
-				path.parameters,
-				parameter => !EXCLUDED_PARAMETER_TYPES.includes(parameter.schema.type)
-			).map(p => _.omit(p, ['_index']))
-		};
-	});
+	return _.reduce(
+		resourcePaths,
+		(acc, pathConfig, method) => {
+			if (!pathConfig.hidden) {
+				acc[method] = {
+					...pathConfig,
+					parameters: _.filter(
+						pathConfig.parameters,
+						parameter => !EXCLUDED_PARAMETER_TYPES.includes(parameter.schema.type)
+					).map(p => _.omit(p, ['_index']))
+				};
+			}
+			return acc;
+		},
+		{}
+	);
 };
 
 export const generateFullSwagger = opts => {
@@ -61,7 +68,10 @@ export const generateFullSwagger = opts => {
 			const trimmedBasePath = _.trim(resource.basePath, '/');
 			let fullPath = `/${trimmedBasePath}${pathName}`;
 			if (pathName === '/') fullPath = `/${trimmedBasePath}`;
-			fullSwagger.paths[fullPath] = sanitiseResourcePath(resourcePath);
+			const path = sanitiseResourcePath(resourcePath);
+			if (!_.isEmpty(path)) {
+				fullSwagger.paths[fullPath] = path;
+			}
 		});
 	});
 

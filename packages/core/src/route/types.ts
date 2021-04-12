@@ -124,6 +124,7 @@ export interface IMethodDecoratorOptions {
 	description?: string;
 	responses?: IMethodResponses;
 	validation?: MethodValidation;
+	hidden?: boolean;
 }
 
 export interface IMethodDecoratorMetadata {
@@ -135,4 +136,5 @@ export interface IMethodDecoratorMetadata {
 	verb: Verb;
 	methodName: string;
 	validation?: MethodValidation;
+	hidden?: boolean;
 }

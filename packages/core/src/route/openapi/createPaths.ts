@@ -76,7 +76,7 @@ const createPathsDefinition = (
 	return _.reduce(
 		methods,
 		(acc, method) => {
-			const { methodName, path, verb, summary, description, responses, validation } = method;
+			const { methodName, path, verb, summary, description, responses, validation, hidden } = method;
 			const parameters = _.filter(methodParameters, { methodName })
 				.map(getParameterDefinition)
 				.map(({ paramDefinition, definitions = {} }) => {
@@ -101,7 +101,8 @@ const createPathsDefinition = (
 				description,
 				operationId: methodName,
 				parameters,
-				responses: resps
+				responses: resps,
+				hidden
 			});
 
 			_.set(acc.validationOptions, `${path}.${verb}`, validation || {});
