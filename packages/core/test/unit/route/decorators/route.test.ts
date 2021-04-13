@@ -51,6 +51,7 @@ describe('route decorators', () => {
 					description: decoratorArgs.description,
 					responses: decoratorArgs.responses,
 					validation: undefined,
+					hidden: undefined,
 					handler: MyClass.prototype.myMethod
 				});
 			});
@@ -70,6 +71,7 @@ describe('route decorators', () => {
 					description: decoratorArgs.description,
 					responses: decoratorArgs.responses,
 					validation: undefined,
+					hidden: undefined,
 					handler: MyClass.prototype.myMethod
 				});
 			});
@@ -89,6 +91,7 @@ describe('route decorators', () => {
 					description: decoratorArgs.description,
 					responses: decoratorArgs.responses,
 					validation: undefined,
+					hidden: undefined,
 					handler: MyClass.prototype.myMethod
 				});
 			});
@@ -108,6 +111,7 @@ describe('route decorators', () => {
 					description: decoratorArgs.description,
 					responses: decoratorArgs.responses,
 					validation: undefined,
+					hidden: undefined,
 					handler: MyClass.prototype.myMethod
 				});
 			});
@@ -127,6 +131,7 @@ describe('route decorators', () => {
 					description: decoratorArgs.description,
 					responses: decoratorArgs.responses,
 					validation: undefined,
+					hidden: undefined,
 					handler: MyClass.prototype.myMethod
 				});
 			});
@@ -146,6 +151,7 @@ describe('route decorators', () => {
 					description: decoratorArgs.description,
 					responses: decoratorArgs.responses,
 					validation: undefined,
+					hidden: undefined,
 					handler: MyClass.prototype.myMethod
 				});
 			});

@@ -12,7 +12,7 @@ import { IMethodParameter, IMethodParameterBase, IMethodDecoratorOptions, IMetho
  * @param verb
  */
 export const createRouteMethodDecorator = verb =>
-	function({ path, summary, description, responses, validation }: IMethodDecoratorOptions): Function {
+	function({ path, summary, description, responses, validation, hidden }: IMethodDecoratorOptions): Function {
 		return function(prototype: object, methodName: string) {
 			// get the existing metadata props
 			const methods = Reflector.getMetadata('davinci:openapi:methods', prototype.constructor) || [];
@@ -24,6 +24,7 @@ export const createRouteMethodDecorator = verb =>
 				description,
 				responses,
 				validation,
+				hidden,
 				handler: prototype[methodName]
 			};
 			let methodIndex = _.findIndex(methods, { methodName });

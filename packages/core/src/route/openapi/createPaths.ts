@@ -11,7 +11,7 @@ import { IControllerDecoratorArgs } from '../decorators/route';
 import { getOpenapiSchemaDefinitions } from './createOpenapiSchemaDefinitions';
 
 const getParameterDefinition = methodParameterConfig => {
-	const { type,  options: { type: t = null, enum: enumOptions = null, ...options } = {} } = methodParameterConfig;
+	const { type, options: { type: t = null, enum: enumOptions = null, ...options } = {} } = methodParameterConfig;
 	const paramDefinition = { ...options, _index: methodParameterConfig.index };
 	// handling special parameters
 	if (['context', 'req', 'res'].includes(methodParameterConfig.type)) {
@@ -76,7 +76,7 @@ const createPathsDefinition = (
 	return _.reduce(
 		methods,
 		(acc, method) => {
-			const { methodName, path, verb, summary, description, responses, validation } = method;
+			const { methodName, path, verb, summary, description, responses, validation, hidden } = method;
 			const parameters = _.filter(methodParameters, { methodName })
 				.map(getParameterDefinition)
 				.map(({ paramDefinition, definitions = {} }) => {
@@ -96,13 +96,19 @@ const createPathsDefinition = (
 				  })
 				: { 200: { description: 'Success' } };
 
-			_.set(acc.paths, `${path}.${verb}`, {
+			const pathConfig: Record<string, unknown> = {
 				summary,
 				description,
 				operationId: methodName,
 				parameters,
 				responses: resps
-			});
+			};
+
+			if (!_.isEmpty(hidden)) {
+				pathConfig.hidden = pathConfig;
+			}
+
+			_.set(acc.paths, `${path}.${verb}`, pathConfig);
 
 			_.set(acc.validationOptions, `${path}.${verb}`, validation || {});
 
