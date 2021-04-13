@@ -104,8 +104,8 @@ const createPathsDefinition = (
 				responses: resps
 			};
 
-			if (!_.isEmpty(hidden)) {
-				pathConfig.hidden = pathConfig;
+			if (!_.isNull(hidden) && !_.isUndefined(hidden)) {
+				pathConfig.hidden = hidden;
 			}
 
 			_.set(acc.paths, `${path}.${verb}`, pathConfig);

@@ -196,4 +196,18 @@ describe('createPathsDefinition', () => {
 			}
 		});
 	});
+
+	it('should support hiding the endpoints from the swagger doc', () => {
+		class MyClass {
+			@route.post({ path: '/', summary: 'Create', description: 'Create one or multiple items', hidden: true })
+			post() {
+				return { success: true };
+			}
+		}
+
+		const { paths } = createPathsDefinition(MyClass);
+		should(paths['/'].post)
+			.have.property('hidden')
+			.equal(true);
+	});
 });
