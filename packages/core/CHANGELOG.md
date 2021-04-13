@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.5.0](https://github.com/HPInc/davinci/compare/@davinci/core@1.4.0...@davinci/core@1.5.0) (2021-04-13)
+
+
+### Bug Fixes
+
+* tests ([a1b93fb](https://github.com/HPInc/davinci/commit/a1b93fba852e496c8b8d589784428311615dc648))
+
+
+### Features
+
+* **openapi:** added the ability to hide endpoints from swagger ([7e61607](https://github.com/HPInc/davinci/commit/7e6160736eb88ef34f4f90d1b7f0bfdb94a1563b))
+
+
+
+
+
 # [1.4.0](https://github.com/HPInc/davinci/compare/@davinci/core@1.3.0...@davinci/core@1.4.0) (2021-04-09)
 
 
