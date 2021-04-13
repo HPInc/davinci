@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.1](https://github.com/HPInc/davinci/compare/@davinci/core@1.5.0...@davinci/core@1.5.1) (2021-04-13)
+
+
+### Bug Fixes
+
+* **openapi:** fixed the function that handle the 'hidden' property ([ecb59f8](https://github.com/HPInc/davinci/commit/ecb59f8fc059d03523394549b07f9a0411358f0b))
+
+
+
+
+
 # [1.5.0](https://github.com/HPInc/davinci/compare/@davinci/core@1.4.0...@davinci/core@1.5.0) (2021-04-13)
 
 
