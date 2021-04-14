@@ -4,7 +4,7 @@ import Sinon from 'sinon';
 import express from 'express';
 import MongooseController from '../../support/MongooseController';
 import createRouter, { createRouteHandlers } from '../../../src/route/createRouter';
-import { route } from '../../../src/route';
+import { route, openapi } from '../../../src/route';
 import * as utils from '../../support/utils';
 import createPathsDefinition from '../../../src/route/openapi/createPaths';
 
@@ -145,6 +145,7 @@ describe('createRouter', () => {
 
 	describe('createRouteHandlers', () => {
 		let TestController;
+
 		beforeEach(() => {
 			TestController = class extends MongooseController {
 				constructor(model) {
@@ -206,6 +207,38 @@ describe('createRouter', () => {
 			promise.should.be.a.Promise();
 			await promise;
 			reqMock.result.should.be.equal('asyncResult');
+		});
+
+		it('should correctly strip out the `hidden` property for definitions, before feed it to AJV', async () => {
+			const model = {};
+
+			@openapi.definition({ title: 'Test', hidden: true })
+			class MySchema {
+				@openapi.prop()
+				name: string;
+			}
+			class MyController {
+				@route.post({ path: '/createSomething', summary: '' })
+				createSomething(@route.body() data: MySchema) {
+					return data;
+				}
+			}
+
+			const MockClass = utils.makeMockControllerClass(model, MyController);
+			const definition = createPathsDefinition(MockClass);
+			const routeHandlers = createRouteHandlers(new MockClass(), definition, {});
+			// @ts-ignore
+			const handler = _.find(routeHandlers, { path: '/createSomething' }).handlers[0];
+			const reqMock = { body: { name: 'test' }, result: null, statusCode: null };
+			const resMock = {
+				status: null,
+				json: null
+			};
+			const nextMock = () => {};
+			const promise = handler(reqMock, resMock, nextMock);
+			promise.should.be.a.Promise();
+			await promise;
+			reqMock.result.should.be.deepEqual(reqMock.body);
 		});
 	});
 });

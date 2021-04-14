@@ -24,13 +24,17 @@ import responseHandler from '../express/middlewares/responseHandler';
 
 const debug = new Debug('davinci:create-router');
 
-const transformDefinitionToValidAJVSchemas = (schema, validationOptions: MethodValidation) => {
+const transformDefinitionToValidAJVSchemas = (
+	schema,
+	validationOptions: MethodValidation,
+	type?: 'definition' | 'param'
+) => {
 	if (Array.isArray(schema)) {
 		return schema.map(s => transformDefinitionToValidAJVSchemas(s, validationOptions));
 	}
 
 	if (typeof schema === 'object') {
-		return _.reduce(
+		const result = _.reduce(
 			schema,
 			(acc, value, key) => {
 				if (key === 'required' && validationOptions && validationOptions.partial) {
@@ -47,6 +51,12 @@ const transformDefinitionToValidAJVSchemas = (schema, validationOptions: MethodV
 			},
 			{}
 		);
+
+		if (type === 'definition') {
+			return _.omit(result, ['hidden']);
+		}
+
+		return result;
 	}
 
 	return schema;
@@ -80,7 +90,7 @@ const performAjvValidation = ({ value, config: cfg, definitions, validationOptio
 	const data = { [config.name]: value };
 
 	_.forEach(definitions, (theSchema, name) => {
-		const parsedSchema = transformDefinitionToValidAJVSchemas(theSchema, validationOptions);
+		const parsedSchema = transformDefinitionToValidAJVSchemas(theSchema, validationOptions, 'definition');
 		ajv.addSchema(parsedSchema, name);
 	});
 
@@ -188,6 +198,7 @@ function mapReqToParameters<ContextType>(
 				definitions,
 				validationOptions: methodValidationOptions
 			});
+			console.log(acc[p.index]);
 		}
 		return acc;
 	}, []);
