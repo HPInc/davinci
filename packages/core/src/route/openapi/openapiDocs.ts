@@ -21,6 +21,10 @@ export const addResource = (doc, resourceName?: string, basepath?: string) => {
 	resources.push(resource);
 };
 
+export const sanitiseResource = resource => {
+	return _.omit(resource, ['hidden']);
+};
+
 export const sanitiseResourcePath = resourcePaths => {
 	const EXCLUDED_PARAMETER_TYPES = ['res', 'req', 'context'];
 
@@ -55,7 +59,9 @@ export const generateFullSwagger = opts => {
 	resources.forEach(resource => {
 		// add definitions
 		_.each(resource.definitions, (resourceDefinition, defName) => {
-			fullSwagger.definitions[defName] = resourceDefinition;
+			if (!resourceDefinition.hidden) {
+				fullSwagger.definitions[defName] = sanitiseResource(resourceDefinition);
+			}
 		});
 
 		// TODO is this actually used, it is not part of the openAPI specification

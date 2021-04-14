@@ -229,5 +229,31 @@ describe('openapiDocs', () => {
 				}
 			});
 		});
+
+		it('should hide a definition if "hidden" is set to true', () => {
+			openapiDocs.addResource(
+				{
+					definitions: {
+						Customer: { type: 'object', hidden: true },
+						Animal: { type: 'object', hidden: false },
+						Plant: { type: 'object' }
+					}
+				},
+				'customer'
+			);
+			const swagger = openapiDocs.generateFullSwagger({
+				basePath: '/api',
+				info: { version: '1.0.0', title: 'API' }
+			});
+
+			should(swagger.definitions).be.deepEqual({
+				Animal: {
+					type: 'object'
+				},
+				Plant: {
+					type: 'object'
+				}
+			});
+		});
 	});
 });
