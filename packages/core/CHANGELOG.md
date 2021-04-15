@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.3](https://github.com/HPInc/davinci/compare/@davinci/core@1.5.2...@davinci/core@1.5.3) (2021-04-15)
+
+
+### Bug Fixes
+
+* **openapi:** filter out 'hidden' prop before ajv validation ([c3161d8](https://github.com/HPInc/davinci/commit/c3161d885a3c0303c5a0b8272a40862aed45edf3))
+* removed console.log ([485d533](https://github.com/HPInc/davinci/commit/485d53382cb2ddcd03a96b22a683d6517c66928c))
+
+
+
+
+
 ## [1.5.2](https://github.com/HPInc/davinci/compare/@davinci/core@1.5.1...@davinci/core@1.5.2) (2021-04-14)
 
 
