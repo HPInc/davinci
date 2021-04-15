@@ -198,7 +198,6 @@ function mapReqToParameters<ContextType>(
 				definitions,
 				validationOptions: methodValidationOptions
 			});
-			console.log(acc[p.index]);
 		}
 		return acc;
 	}, []);
