@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.4](https://github.com/HPInc/davinci/compare/@davinci/core@1.5.3...@davinci/core@1.5.4) (2021-04-28)
+
+
+### Bug Fixes
+
+* use correct 'debug' namespace ([42c5141](https://github.com/HPInc/davinci/commit/42c51413a7849eee7d2d25a105d6de5c0667abbe))
+
+
+
+
+
 ## [1.5.3](https://github.com/HPInc/davinci/compare/@davinci/core@1.5.2...@davinci/core@1.5.3) (2021-04-15)
 
 
