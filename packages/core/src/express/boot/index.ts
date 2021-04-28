@@ -12,7 +12,7 @@ import fsModule from 'fs';
 
 const fs = Promise.promisifyAll(fsModule);
 
-const debug = new Debug('of-base-api');
+const debug = new Debug('davinci:boot');
 
 export const checkAndAssignBootDir = options => {
 	// create an array of boot paths
