@@ -21,6 +21,7 @@
 		"@davinci/reflector": "^1.0.2",
 		"@godaddy/terminus": "^4.1.0",
 		"ajv": "^7.0.0",
+		"ajv-errors": "^3.0.0",
 		"ajv-formats": "^1.5.1",
 		"bluebird": "^3.5.0",
 		"debug": "^4.1.1",

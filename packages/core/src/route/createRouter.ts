@@ -5,6 +5,7 @@
 
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
+import addErrors from 'ajv-errors'
 import Debug from 'debug';
 import express, { NextFunction, Response, Router } from 'express';
 import _ from 'lodash';
@@ -67,16 +68,12 @@ type ProcessMethodParameters = {
 	config: ISchema;
 	definitions: ISwaggerDefinitions;
 	validationOptions: MethodValidation;
+	ajv: Ajv;
 };
 
-const performAjvValidation = ({ value, config: cfg, definitions, validationOptions }: ProcessMethodParameters) => {
+const performAjvValidation = ({ value, config: cfg, definitions, validationOptions, ajv }: ProcessMethodParameters) => {
 	const config = transformDefinitionToValidAJVSchemas(cfg, validationOptions);
-	const ajv = new Ajv({
-		allErrors: true,
-		coerceTypes: true,
-		useDefaults: true,
-		removeAdditional: 'all'
-	});
+	addErrors(ajv);
 	addFormats(ajv);
 	let required = [];
 	if (!(validationOptions && validationOptions.partial) && config.required) {
@@ -103,7 +100,7 @@ const performAjvValidation = ({ value, config: cfg, definitions, validationOptio
 	return { value: data[config.name], errors };
 };
 
-const attemptJsonParsing = ({ value, config, definitions, validationOptions }: ProcessMethodParameters) => {
+const attemptJsonParsing = ({ value, config, definitions, validationOptions, ajv }: ProcessMethodParameters) => {
 	if (_.startsWith(value, '{') && _.endsWith(value, '}')) {
 		try {
 			return {
@@ -122,13 +119,13 @@ const attemptJsonParsing = ({ value, config, definitions, validationOptions }: P
 		}
 	}
 
-	return { value, config, definitions, validationOptions };
+	return { value, config, definitions, validationOptions, ajv };
 };
 
-const validateAndCoerce = ({ value, config, definitions, validationOptions }: ProcessMethodParameters) => {
+const validateAndCoerce = ({ value, config, definitions, validationOptions, ajv }: ProcessMethodParameters) => {
 	const isUndefinedButNotRequired = !config.required && typeof value === 'undefined';
 	if (config.schema && !isUndefinedButNotRequired) {
-		const { value: val, errors } = performAjvValidation({ value, config, definitions, validationOptions });
+		const { value: val, errors } = performAjvValidation({ value, config, definitions, validationOptions, ajv });
 		if (errors) {
 			throw new BadRequest('Validation error', { errors });
 		}
@@ -139,7 +136,7 @@ const validateAndCoerce = ({ value, config, definitions, validationOptions }: Pr
 	return { value, config };
 };
 
-const processParameter = ({ value, config, definitions, validationOptions }: ProcessMethodParameters) =>
+const processParameter = ({ value, config, definitions, validationOptions, ajv }: ProcessMethodParameters) =>
 	_fp.flow(
 		attemptJsonParsing,
 		validateAndCoerce,
@@ -148,7 +145,8 @@ const processParameter = ({ value, config, definitions, validationOptions }: Pro
 		value,
 		config,
 		definitions,
-		validationOptions
+		validationOptions, 
+		ajv
 	});
 
 type ContextFactory<ContextReturnType = any> = ({
@@ -167,7 +165,13 @@ function mapReqToParameters<ContextType>(
 	parameters = [],
 	definitions,
 	methodValidationOptions: MethodValidation,
-	contextFactory: ContextFactory<ContextType> = defaultContextFactory
+	contextFactory: ContextFactory<ContextType> = defaultContextFactory,
+	ajv: Ajv = new Ajv({
+		allErrors: true,
+		coerceTypes: true,
+		useDefaults: true,
+		removeAdditional: 'all'
+	})
 ) {
 	const context = contextFactory({ req, res });
 
@@ -196,7 +200,8 @@ function mapReqToParameters<ContextType>(
 				value,
 				config: p,
 				definitions,
-				validationOptions: methodValidationOptions
+				validationOptions: methodValidationOptions,
+				ajv
 			});
 		}
 		return acc;
@@ -225,7 +230,8 @@ const makeHandlerFunction = (
 	functionName: string,
 	definitions,
 	methodValidationOptions: MethodValidation,
-	contextFactory: ContextFactory
+	contextFactory: ContextFactory,
+	ajv: Ajv
 ) => {
 	// @ts-ignore-next-line
 	const successCode = _.findKey(operation.responses, (obj, key) => +key >= 200 && +key < 400);
@@ -257,7 +263,8 @@ const makeHandlerFunction = (
 				operation.parameters,
 				definitions,
 				methodValidationOptions,
-				contextFactory
+				contextFactory,
+				ajv
 			);
 			debug('calling ', functionName);
 			// the controller functions return a promise
@@ -290,7 +297,8 @@ export const createRouteHandlers = (
 	controller: InstanceType<ClassType>,
 	definition,
 	validationOptions: PathsValidationOptions,
-	contextFactory?: ContextFactory
+	contextFactory?: ContextFactory,
+	ajv?: Ajv
 ) => {
 	const routeHandlers = [];
 	const methods = Reflector.getMetadata('davinci:openapi:methods', controller.constructor) || [];
@@ -315,7 +323,8 @@ export const createRouteHandlers = (
 			method.methodName,
 			definition.definitions,
 			_.get(validationOptions, `[${method.path}][${method.verb}]`, {}) as MethodValidation,
-			contextFactory
+			contextFactory,
+			ajv
 		);
 		routeHandlers.push({ method: method.verb, path: thePath, handlers });
 	});
@@ -331,7 +340,8 @@ const createRouterAndSwaggerDoc = (
 	Controller: ClassType,
 	rsName?: string | null,
 	contextFactory?: ContextFactory | null,
-	router: Router = express.Router()
+	router: Router = express.Router(),
+	ajv?: Ajv | null
 ): Router | DaVinciExpress => {
 	// need to validate the inputs here
 	validateController(Controller);
@@ -368,7 +378,7 @@ const createRouterAndSwaggerDoc = (
 	};
 
 	// now process the swagger structure and get an array of method/path mappings to handlers
-	const routes = createRouteHandlers(controller, definition, validationOptions, contextFactory);
+	const routes = createRouteHandlers(controller, definition, validationOptions, contextFactory, ajv);
 
 	// add them to the router
 	routes.forEach(route => {

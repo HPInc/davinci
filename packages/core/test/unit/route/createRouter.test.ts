@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import Ajv from 'ajv';
 import should from 'should';
 import Sinon from 'sinon';
 import express from 'express';
@@ -84,6 +85,20 @@ describe('createRouter', () => {
 					get: true
 				}
 			});
+		});
+
+		it('should accept ajv instance provided as parameter', () => {
+			const model = {};
+			const mockClass = utils.makeMockControllerClass(model, TestController);
+			const ajv = new Ajv({
+				allErrors: true,
+				coerceTypes: true,
+				useDefaults: true,
+				removeAdditional: 'all'
+			});
+			const router = createRouter(mockClass, 'test', null, undefined, ajv);
+			should(router).have.property('params');
+			should(router.name).be.equal('router');
 		});
 	});
 
@@ -239,6 +254,41 @@ describe('createRouter', () => {
 			promise.should.be.a.Promise();
 			await promise;
 			reqMock.result.should.be.deepEqual(reqMock.body);
+		});
+
+		it('should use the ajv instance provided as parameter',  async () => {	
+			const ajv = new Ajv({
+				allErrors: true,
+				coerceTypes: true,
+				useDefaults: true,
+				removeAdditional: 'all'
+			});
+			const addSchemaSpy = sinon.spy(ajv, 'addSchema');
+			const validateSpy = sinon.spy(ajv, 'validate');
+
+			const model = {};
+
+			@openapi.definition({ title: 'Test', hidden: true })
+			class MySchema {
+				@openapi.prop()
+				name: string;
+			}
+			class MyController {
+				@route.post({ path: '/createSomething', summary: '' })
+				createSomething(@route.body() data: MySchema) {
+					return data;
+				}
+			}
+
+			const MockClass = utils.makeMockControllerClass(model, MyController);
+			const definition = createPathsDefinition(MockClass);
+			const routeHandlers = createRouteHandlers(new MockClass(), definition, {}, undefined, ajv);
+			// @ts-ignore
+			const handler = _.find(routeHandlers, { path: '/createSomething' }).handlers[0];
+			const reqMock = { body: { name: 'test' }, result: null, statusCode: null };
+			await handler(reqMock, {}, () => {});
+			validateSpy.callCount.should.be.greaterThanOrEqual(1);
+			addSchemaSpy.callCount.should.be.greaterThanOrEqual(1);
 		});
 	});
 });
