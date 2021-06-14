@@ -1,3 +1,4 @@
+import Ajv from 'ajv';
 import express, { Express } from 'express';
 import { createApp, createRouter, DaVinciExpress, DaVinciOptions } from '@davinci/core';
 import { CustomerController } from './api/customer';
@@ -40,7 +41,13 @@ const expressApp: Express = express();
 const createContext = ({ req }): Context => ({ accountId: req.headers['x-custom-accountid'] });
 
 createApp(expressApp, options, app => {
-	createRouter(CustomerController, 'Customer', createContext, app);
+	const ajv = new Ajv({
+		allErrors: true,
+		coerceTypes: true,
+		useDefaults: true,
+		removeAdditional: 'all'
+	});
+	createRouter(CustomerController, 'Customer', createContext, app, ajv);
 });
 
 if (require.main === module) {
