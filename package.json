@@ -25,6 +25,8 @@
 		"@typescript-eslint/parser": "2.7.0",
 		"@vuepress/plugin-pwa": "1.2.0",
 		"ajv": "^7.0.0",
+		"ajv-errors": "^2.0.0",
+		"ajv-formats": "^1.5.1",
 		"eslint": "6.6.0",
 		"eslint-config-airbnb-base": "14.0.0",
 		"eslint-config-prettier": "6.6.0",

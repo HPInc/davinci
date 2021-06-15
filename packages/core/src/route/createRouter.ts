@@ -73,8 +73,6 @@ type ProcessMethodParameters = {
 
 const performAjvValidation = ({ value, config: cfg, definitions, validationOptions, ajv }: ProcessMethodParameters) => {
 	const config = transformDefinitionToValidAJVSchemas(cfg, validationOptions);
-	addErrors(ajv);
-	addFormats(ajv);
 	let required = [];
 	if (!(validationOptions && validationOptions.partial) && config.required) {
 		required = [config.name];
@@ -159,6 +157,18 @@ type ContextFactory<ContextReturnType = any> = ({
 
 const defaultContextFactory: ContextFactory = ({ req, res }) => ({ req, res });
 
+const createDefaultAjvInstance = () => {
+	const ajv = new Ajv({
+		allErrors: true,
+		coerceTypes: true,
+		useDefaults: true,
+		removeAdditional: 'all'
+	});
+	addErrors(ajv);
+	addFormats(ajv);
+	return ajv;
+};
+
 function mapReqToParameters<ContextType>(
 	req: DaVinciRequest,
 	res: Response,
@@ -166,12 +176,7 @@ function mapReqToParameters<ContextType>(
 	definitions,
 	methodValidationOptions: MethodValidation,
 	contextFactory: ContextFactory<ContextType> = defaultContextFactory,
-	ajv: Ajv = new Ajv({
-		allErrors: true,
-		coerceTypes: true,
-		useDefaults: true,
-		removeAdditional: 'all'
-	})
+	ajv: Ajv = createDefaultAjvInstance()
 ) {
 	const context = contextFactory({ req, res });
 
