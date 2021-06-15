@@ -45,7 +45,7 @@ const createContext = ({ req }): Context => ({ accountId: req.headers['x-custom-
 const createAjvInstance = () => {
 	const ajv = new Ajv({
 		allErrors: true,
-		coerceTypes: true,
+		coerceTypes: false,
 		useDefaults: true,
 		removeAdditional: 'all'
 	});

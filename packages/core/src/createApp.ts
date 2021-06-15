@@ -151,7 +151,7 @@ export const createApp = (...args: CreateAppArgs): Promise<DaVinciExpress> => {
 		debug('configure terminus');
 		await configureTerminus(app, options.healthChecks);
 
-		await new Promise(resolve =>
+		await new Promise<void>(resolve =>
 			server.listen(config.PORT, () => {
 				console.log(`--- Server listening on ${config.PORT}`);
 				resolve();
