@@ -157,7 +157,9 @@ type ContextFactory<ContextReturnType = any> = ({
 
 const defaultContextFactory: ContextFactory = ({ req, res }) => ({ req, res });
 
-const createDefaultAjvInstance = () => {
+type AjvFactory = () => Ajv;
+
+const createDefaultAjvInstance: AjvFactory = () => {
 	const ajv = new Ajv({
 		allErrors: true,
 		coerceTypes: true,
@@ -176,7 +178,7 @@ function mapReqToParameters<ContextType>(
 	definitions,
 	methodValidationOptions: MethodValidation,
 	contextFactory: ContextFactory<ContextType> = defaultContextFactory,
-	ajv: Ajv = createDefaultAjvInstance()
+	ajv: AjvFactory = createDefaultAjvInstance
 ) {
 	const context = contextFactory({ req, res });
 
@@ -206,7 +208,7 @@ function mapReqToParameters<ContextType>(
 				config: p,
 				definitions,
 				validationOptions: methodValidationOptions,
-				ajv
+				ajv: ajv()
 			});
 		}
 		return acc;
@@ -236,7 +238,7 @@ const makeHandlerFunction = (
 	definitions,
 	methodValidationOptions: MethodValidation,
 	contextFactory: ContextFactory,
-	ajv: Ajv
+	ajv: AjvFactory
 ) => {
 	// @ts-ignore-next-line
 	const successCode = _.findKey(operation.responses, (obj, key) => +key >= 200 && +key < 400);
@@ -303,7 +305,7 @@ export const createRouteHandlers = (
 	definition,
 	validationOptions: PathsValidationOptions,
 	contextFactory?: ContextFactory,
-	ajv?: Ajv
+	ajv?: AjvFactory
 ) => {
 	const routeHandlers = [];
 	const methods = Reflector.getMetadata('davinci:openapi:methods', controller.constructor) || [];
@@ -346,7 +348,7 @@ const createRouterAndSwaggerDoc = (
 	rsName?: string | null,
 	contextFactory?: ContextFactory | null,
 	router: Router = express.Router(),
-	ajv?: Ajv | null
+	ajv?: AjvFactory | null
 ): Router | DaVinciExpress => {
 	// need to validate the inputs here
 	validateController(Controller);

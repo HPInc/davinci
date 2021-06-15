@@ -87,16 +87,16 @@ describe('createRouter', () => {
 			});
 		});
 
-		it('should accept ajv instance provided as parameter', () => {
+		it('should accept ajv factory provided as parameter', () => {
 			const model = {};
 			const mockClass = utils.makeMockControllerClass(model, TestController);
-			const ajv = new Ajv({
+			const factory = () => new Ajv({
 				allErrors: true,
 				coerceTypes: true,
 				useDefaults: true,
 				removeAdditional: 'all'
 			});
-			const router = createRouter(mockClass, 'test', null, undefined, ajv);
+			const router = createRouter(mockClass, 'test', null, undefined, factory);
 			should(router).have.property('params');
 			should(router.name).be.equal('router');
 		});
@@ -256,15 +256,14 @@ describe('createRouter', () => {
 			reqMock.result.should.be.deepEqual(reqMock.body);
 		});
 
-		it('should use the ajv instance provided as parameter',  async () => {	
-			const ajv = new Ajv({
+		it('should use the ajv factory provided as parameter',  async () => {	
+			const factory = () => new Ajv({
 				allErrors: true,
 				coerceTypes: true,
 				useDefaults: true,
 				removeAdditional: 'all'
 			});
-			const addSchemaSpy = sinon.spy(ajv, 'addSchema');
-			const validateSpy = sinon.spy(ajv, 'validate');
+			const factorySpy = sinon.spy(factory);
 
 			const model = {};
 
@@ -282,13 +281,12 @@ describe('createRouter', () => {
 
 			const MockClass = utils.makeMockControllerClass(model, MyController);
 			const definition = createPathsDefinition(MockClass);
-			const routeHandlers = createRouteHandlers(new MockClass(), definition, {}, undefined, ajv);
+			const routeHandlers = createRouteHandlers(new MockClass(), definition, {}, undefined, factorySpy);
 			// @ts-ignore
 			const handler = _.find(routeHandlers, { path: '/createSomething' }).handlers[0];
 			const reqMock = { body: { name: 'test' }, result: null, statusCode: null };
 			await handler(reqMock, {}, () => {});
-			validateSpy.callCount.should.be.greaterThanOrEqual(1);
-			addSchemaSpy.callCount.should.be.greaterThanOrEqual(1);
+			factorySpy.callCount.should.be.equal(1);
 		});
 	});
 });

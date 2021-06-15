@@ -1,4 +1,6 @@
 import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
+import addErrors from 'ajv-errors';
 import express, { Express } from 'express';
 import { createApp, createRouter, DaVinciExpress, DaVinciOptions } from '@davinci/core';
 import { CustomerController } from './api/customer';
@@ -40,14 +42,20 @@ const expressApp: Express = express();
 
 const createContext = ({ req }): Context => ({ accountId: req.headers['x-custom-accountid'] });
 
-createApp(expressApp, options, app => {
+const createAjvInstance = () => {
 	const ajv = new Ajv({
 		allErrors: true,
 		coerceTypes: true,
 		useDefaults: true,
 		removeAdditional: 'all'
 	});
-	createRouter(CustomerController, 'Customer', createContext, app, ajv);
+	addErrors(ajv);
+	addFormats(ajv);
+	return ajv;
+};
+
+createApp(expressApp, options, app => {
+	createRouter(CustomerController, 'Customer', createContext, app, createAjvInstance);
 });
 
 if (require.main === module) {
