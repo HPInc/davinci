@@ -1,0 +1,29 @@
+{
+	"name": "@davinci/example-rest-custom-ajv",
+	"version": "0.14.7",
+	"private": true,
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"build": "tsc -p ./tsconfig.release.json",
+		"dev": "DEBUG=* ts-node ./src/index.ts"
+	},
+	"keywords": [],
+	"author": "HP",
+	"license": "MIT",
+	"dependencies": {
+		"@davinci/core": "^1.5.5",
+		"@davinci/mongoose": "^0.16.7",
+		"debug": "^4.1.1",
+		"express": "4.16.4",
+		"lodash": "4.17.21",
+		"mongoose": "^5.11.15",
+		"swagger-ui-dist": "^3.35.1"
+	},
+	"devDependencies": {
+		"@types/express": "4.16.1",
+		"ts-node": "^8.1.0",
+		"tslib": "^1.9.3",
+		"typescript": "^3.7.5"
+	}
+}

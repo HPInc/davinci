@@ -25,7 +25,7 @@ class BirthType {
 }
 
 @mgoose.index({ firstname: 1, lastname: 1 }, { unique: true })
-@openapi.definition({ title: 'Customer' })
+@openapi.definition({ title: 'Customer', errorMessage: "Should be an adult with correct firstName and lastName" })
 export default class Customer {
 	@mgoose.prop({ required: true })
 	@openapi.prop({ required: true })
@@ -37,7 +37,8 @@ export default class Customer {
 
 	@mgoose.prop()
 	@openapi.prop({
-		minimum: 18
+		minimum: 18,
+		errorMessage: "Should be an adult"
 	})
 	age: number;
 
