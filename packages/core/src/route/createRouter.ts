@@ -5,6 +5,7 @@
 
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
+import addErrors from 'ajv-errors';
 import Debug from 'debug';
 import express, { NextFunction, Response, Router } from 'express';
 import _ from 'lodash';
@@ -67,17 +68,11 @@ type ProcessMethodParameters = {
 	config: ISchema;
 	definitions: ISwaggerDefinitions;
 	validationOptions: MethodValidation;
+	ajv: Ajv;
 };
 
-const performAjvValidation = ({ value, config: cfg, definitions, validationOptions }: ProcessMethodParameters) => {
+const performAjvValidation = ({ value, config: cfg, definitions, validationOptions, ajv }: ProcessMethodParameters) => {
 	const config = transformDefinitionToValidAJVSchemas(cfg, validationOptions);
-	const ajv = new Ajv({
-		allErrors: true,
-		coerceTypes: true,
-		useDefaults: true,
-		removeAdditional: 'all'
-	});
-	addFormats(ajv);
 	let required = [];
 	if (!(validationOptions && validationOptions.partial) && config.required) {
 		required = [config.name];
@@ -103,7 +98,7 @@ const performAjvValidation = ({ value, config: cfg, definitions, validationOptio
 	return { value: data[config.name], errors };
 };
 
-const attemptJsonParsing = ({ value, config, definitions, validationOptions }: ProcessMethodParameters) => {
+const attemptJsonParsing = ({ value, config, definitions, validationOptions, ajv }: ProcessMethodParameters) => {
 	if (_.startsWith(value, '{') && _.endsWith(value, '}')) {
 		try {
 			return {
@@ -122,13 +117,13 @@ const attemptJsonParsing = ({ value, config, definitions, validationOptions }: P
 		}
 	}
 
-	return { value, config, definitions, validationOptions };
+	return { value, config, definitions, validationOptions, ajv };
 };
 
-const validateAndCoerce = ({ value, config, definitions, validationOptions }: ProcessMethodParameters) => {
+const validateAndCoerce = ({ value, config, definitions, validationOptions, ajv }: ProcessMethodParameters) => {
 	const isUndefinedButNotRequired = !config.required && typeof value === 'undefined';
 	if (config.schema && !isUndefinedButNotRequired) {
-		const { value: val, errors } = performAjvValidation({ value, config, definitions, validationOptions });
+		const { value: val, errors } = performAjvValidation({ value, config, definitions, validationOptions, ajv });
 		if (errors) {
 			throw new BadRequest('Validation error', { errors });
 		}
@@ -139,7 +134,7 @@ const validateAndCoerce = ({ value, config, definitions, validationOptions }: Pr
 	return { value, config };
 };
 
-const processParameter = ({ value, config, definitions, validationOptions }: ProcessMethodParameters) =>
+const processParameter = ({ value, config, definitions, validationOptions, ajv }: ProcessMethodParameters) =>
 	_fp.flow(
 		attemptJsonParsing,
 		validateAndCoerce,
@@ -148,7 +143,8 @@ const processParameter = ({ value, config, definitions, validationOptions }: Pro
 		value,
 		config,
 		definitions,
-		validationOptions
+		validationOptions,
+		ajv
 	});
 
 type ContextFactory<ContextReturnType = any> = ({
@@ -161,13 +157,28 @@ type ContextFactory<ContextReturnType = any> = ({
 
 const defaultContextFactory: ContextFactory = ({ req, res }) => ({ req, res });
 
+type AjvFactory = () => Ajv;
+
+const createDefaultAjvInstance: AjvFactory = () => {
+	const ajv = new Ajv({
+		allErrors: true,
+		coerceTypes: true,
+		useDefaults: true,
+		removeAdditional: 'all'
+	});
+	addErrors(ajv);
+	addFormats(ajv);
+	return ajv;
+};
+
 function mapReqToParameters<ContextType>(
 	req: DaVinciRequest,
 	res: Response,
 	parameters = [],
 	definitions,
 	methodValidationOptions: MethodValidation,
-	contextFactory: ContextFactory<ContextType> = defaultContextFactory
+	contextFactory: ContextFactory<ContextType> = defaultContextFactory,
+	ajv: AjvFactory = createDefaultAjvInstance
 ) {
 	const context = contextFactory({ req, res });
 
@@ -196,7 +207,8 @@ function mapReqToParameters<ContextType>(
 				value,
 				config: p,
 				definitions,
-				validationOptions: methodValidationOptions
+				validationOptions: methodValidationOptions,
+				ajv: ajv()
 			});
 		}
 		return acc;
@@ -225,7 +237,8 @@ const makeHandlerFunction = (
 	functionName: string,
 	definitions,
 	methodValidationOptions: MethodValidation,
-	contextFactory: ContextFactory
+	contextFactory: ContextFactory,
+	ajv: AjvFactory
 ) => {
 	// @ts-ignore-next-line
 	const successCode = _.findKey(operation.responses, (obj, key) => +key >= 200 && +key < 400);
@@ -257,7 +270,8 @@ const makeHandlerFunction = (
 				operation.parameters,
 				definitions,
 				methodValidationOptions,
-				contextFactory
+				contextFactory,
+				ajv
 			);
 			debug('calling ', functionName);
 			// the controller functions return a promise
@@ -290,7 +304,8 @@ export const createRouteHandlers = (
 	controller: InstanceType<ClassType>,
 	definition,
 	validationOptions: PathsValidationOptions,
-	contextFactory?: ContextFactory
+	contextFactory?: ContextFactory,
+	ajv?: AjvFactory
 ) => {
 	const routeHandlers = [];
 	const methods = Reflector.getMetadata('davinci:openapi:methods', controller.constructor) || [];
@@ -315,7 +330,8 @@ export const createRouteHandlers = (
 			method.methodName,
 			definition.definitions,
 			_.get(validationOptions, `[${method.path}][${method.verb}]`, {}) as MethodValidation,
-			contextFactory
+			contextFactory,
+			ajv
 		);
 		routeHandlers.push({ method: method.verb, path: thePath, handlers });
 	});
@@ -323,17 +339,61 @@ export const createRouteHandlers = (
 };
 
 const validateController = (Controller: ClassType) => {
-	if (!Controller) throw new Error('Invalid Controller - missing Controller');
 	if (typeof Controller !== 'function') throw new Error('Invalid Controller - not function');
 };
 
-const createRouterAndSwaggerDoc = (
-	Controller: ClassType,
-	rsName?: string | null,
-	contextFactory?: ContextFactory | null,
-	router: Router = express.Router()
-): Router | DaVinciExpress => {
+function processParameters(params: [CreateRouterParameters] | CreateRouterParametersArray): CreateRouterParameters {
 	// need to validate the inputs here
+	if (!params?.[0]) throw new Error('Invalid Controller - missing Controller');
+
+	// object parameter, returning it
+	if ('Controller' in params?.[0]) return params?.[0];
+
+	return {
+		Controller: params[0],
+		resourceName: params[1],
+		contextFactory: params[2],
+		router: params[3]
+	};
+}
+
+type CreateRouterParameters = {
+	Controller: ClassType;
+	resourceName?: string | null;
+	contextFactory?: ContextFactory | null;
+	router?: Router;
+	ajvFactory?: AjvFactory | null;
+};
+
+type CreateRouterParametersArray = [
+	ClassType,
+	string | null | undefined,
+	ContextFactory | null | undefined,
+	Router | undefined
+];
+
+function createRouterAndSwaggerDoc(Controller: CreateRouterParameters): Router | DaVinciExpress;
+/**
+ * The base class for controls that can be rendered.
+ *
+ * @deprecated pass arguments using a parameter object: createRouter({ Controller: MyController })
+ */
+function createRouterAndSwaggerDoc(
+	Controller: ClassType,
+	resourceName?: string | null,
+	contextFactory?: ContextFactory | null,
+	router?: Router
+): Router | DaVinciExpress;
+
+function createRouterAndSwaggerDoc(...options): Router | DaVinciExpress {
+	const {
+		Controller,
+		resourceName: rsName,
+		contextFactory,
+		router = express.Router(),
+		ajvFactory
+	} = processParameters(options as [CreateRouterParameters] | CreateRouterParametersArray);
+
 	validateController(Controller);
 
 	// get a resource name either supplied or derive from Controller name
@@ -368,7 +428,7 @@ const createRouterAndSwaggerDoc = (
 	};
 
 	// now process the swagger structure and get an array of method/path mappings to handlers
-	const routes = createRouteHandlers(controller, definition, validationOptions, contextFactory);
+	const routes = createRouteHandlers(controller, definition, validationOptions, contextFactory, ajvFactory);
 
 	// add them to the router
 	routes.forEach(route => {
@@ -379,6 +439,6 @@ const createRouterAndSwaggerDoc = (
 	openapiDocs.addResource(definition, resourceName, basepath);
 
 	return router;
-};
+}
 
 export default createRouterAndSwaggerDoc;
