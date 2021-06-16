@@ -382,8 +382,7 @@ function createRouterAndSwaggerDoc(
 	Controller: ClassType,
 	resourceName?: string | null,
 	contextFactory?: ContextFactory | null,
-	router?: Router,
-	ajvFactory?: AjvFactory | null
+	router?: Router
 ): Router | DaVinciExpress;
 
 function createRouterAndSwaggerDoc(...options): Router | DaVinciExpress {
