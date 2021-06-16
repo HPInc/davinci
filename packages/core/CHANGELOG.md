@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.6.1](https://github.com/HPInc/davinci/compare/@davinci/core@1.6.0...@davinci/core@1.6.1) (2021-06-16)
+
+
+### Bug Fixes
+
+* pass ajv instance on json parsing ([2aa39b3](https://github.com/HPInc/davinci/commit/2aa39b3f956932fea4b4eaa34b60b36bf3b157dd))
+
+
+
+
+
 # [1.6.0](https://github.com/HPInc/davinci/compare/@davinci/core@1.5.5...@davinci/core@1.6.0) (2021-06-16)
 
 
