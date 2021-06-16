@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.15.0 (2021-06-16)
+
+
+### Features
+
+* added processParameter function, added rest-custom-ajv example pkg ([1f6c6cf](https://github.com/HPInc/davinci/commit/1f6c6cf93be9e279cb08ab72fe3fd092e12d9c3f))
+
+
+
+
+
 ## [0.14.7](https://github.com/HPInc/davinci/compare/@davinci/example-rest@0.14.6...@davinci/example-rest@0.14.7) (2021-05-12)
 
 **Note:** Version bump only for package @davinci/example-rest

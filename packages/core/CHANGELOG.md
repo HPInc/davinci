@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.6.0](https://github.com/HPInc/davinci/compare/@davinci/core@1.5.5...@davinci/core@1.6.0) (2021-06-16)
+
+
+### Features
+
+* added processParameter function, added rest-custom-ajv example pkg ([1f6c6cf](https://github.com/HPInc/davinci/commit/1f6c6cf93be9e279cb08ab72fe3fd092e12d9c3f))
+* pass ajv instance and use ajv-errors ([4ce46d0](https://github.com/HPInc/davinci/commit/4ce46d02c2a08b83be8aec4e4bb32eb9e9d656e9))
+
+
+
+
+
 ## [1.5.5](https://github.com/HPInc/davinci/compare/@davinci/core@1.5.4...@davinci/core@1.5.5) (2021-05-12)
 
 **Note:** Version bump only for package @davinci/core
