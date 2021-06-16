@@ -339,18 +339,49 @@ export const createRouteHandlers = (
 };
 
 const validateController = (Controller: ClassType) => {
-	if (!Controller) throw new Error('Invalid Controller - missing Controller');
 	if (typeof Controller !== 'function') throw new Error('Invalid Controller - not function');
 };
 
-const createRouterAndSwaggerDoc = (
+type CreateRouterParameters = {
+	Controller: ClassType;
+	rsName?: string | null;
+	contextFactory?: ContextFactory | null;
+	router?: Router;
+	ajv?: AjvFactory | null;
+};
+
+function createRouterAndSwaggerDoc(Controller: CreateRouterParameters) : Router | DaVinciExpress;
+function createRouterAndSwaggerDoc(
 	Controller: ClassType,
 	rsName?: string | null,
 	contextFactory?: ContextFactory | null,
-	router: Router = express.Router(),
-	ajv?: AjvFactory | null
-): Router | DaVinciExpress => {
+	router?: Router) : Router | DaVinciExpress;
+
+function createRouterAndSwaggerDoc(
+	ControllerInput: ClassType | CreateRouterParameters,
+	rsNameInput?: string | null,
+	contextFactoryInput?: ContextFactory | null,
+	routerInput: Router = express.Router()
+): Router | DaVinciExpress {
+	let Controller: ClassType;
+	let rsName: string | null;
+	let contextFactory: ContextFactory | null;
+	let router: Router;
+	let ajv: AjvFactory;
+
 	// need to validate the inputs here
+	if (!ControllerInput) throw new Error('Invalid Controller - missing Controller');
+
+	if ('Controller' in ControllerInput) {
+		({ Controller, rsName, contextFactory, router = routerInput, ajv } = ControllerInput);
+	}
+	else {
+		Controller = ControllerInput;
+		rsName = rsNameInput;
+		contextFactory = contextFactoryInput;
+		router = routerInput;
+	}
+
 	validateController(Controller);
 
 	// get a resource name either supplied or derive from Controller name

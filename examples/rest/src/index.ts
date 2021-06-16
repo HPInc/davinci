@@ -55,7 +55,13 @@ const createAjvInstance = () => {
 };
 
 createApp(expressApp, options, app => {
-	createRouter(CustomerController, 'Customer', createContext, app, createAjvInstance);
+	createRouter({
+		Controller: CustomerController,
+		rsName: 'Customer',
+		contextFactory: createContext,
+		router: app,
+		ajv: createAjvInstance
+	});
 });
 
 if (require.main === module) {

@@ -96,7 +96,12 @@ describe('createRouter', () => {
 				useDefaults: true,
 				removeAdditional: 'all'
 			});
-			const router = createRouter(mockClass, 'test', null, undefined, factory);
+			const router = createRouter({ 
+				Controller: mockClass, 
+				rsName: 'test', 
+				contextFactory: null, 
+				router: undefined, 
+				ajv: factory });
 			should(router).have.property('params');
 			should(router.name).be.equal('router');
 		});
