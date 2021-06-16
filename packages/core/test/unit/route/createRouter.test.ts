@@ -90,18 +90,20 @@ describe('createRouter', () => {
 		it('should accept ajv factory provided as parameter', () => {
 			const model = {};
 			const mockClass = utils.makeMockControllerClass(model, TestController);
-			const factory = () => new Ajv({
-				allErrors: true,
-				coerceTypes: true,
-				useDefaults: true,
-				removeAdditional: 'all'
+			const factory = () =>
+				new Ajv({
+					allErrors: true,
+					coerceTypes: true,
+					useDefaults: true,
+					removeAdditional: 'all'
+				});
+			const router = createRouter({
+				Controller: mockClass,
+				resourceName: 'test',
+				contextFactory: null,
+				router: undefined,
+				ajvFactory: factory
 			});
-			const router = createRouter({ 
-				Controller: mockClass, 
-				rsName: 'test', 
-				contextFactory: null, 
-				router: undefined, 
-				ajv: factory });
 			should(router).have.property('params');
 			should(router.name).be.equal('router');
 		});
@@ -261,13 +263,14 @@ describe('createRouter', () => {
 			reqMock.result.should.be.deepEqual(reqMock.body);
 		});
 
-		it('should use the ajv factory provided as parameter',  async () => {	
-			const factory = () => new Ajv({
-				allErrors: true,
-				coerceTypes: true,
-				useDefaults: true,
-				removeAdditional: 'all'
-			});
+		it('should use the ajv factory provided as parameter', async () => {
+			const factory = () =>
+				new Ajv({
+					allErrors: true,
+					coerceTypes: true,
+					useDefaults: true,
+					removeAdditional: 'all'
+				});
 			const factorySpy = sinon.spy(factory);
 
 			const model = {};

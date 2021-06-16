@@ -5,7 +5,7 @@
 
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-import addErrors from 'ajv-errors'
+import addErrors from 'ajv-errors';
 import Debug from 'debug';
 import express, { NextFunction, Response, Router } from 'express';
 import _ from 'lodash';
@@ -143,7 +143,7 @@ const processParameter = ({ value, config, definitions, validationOptions, ajv }
 		value,
 		config,
 		definitions,
-		validationOptions, 
+		validationOptions,
 		ajv
 	});
 
@@ -342,45 +342,57 @@ const validateController = (Controller: ClassType) => {
 	if (typeof Controller !== 'function') throw new Error('Invalid Controller - not function');
 };
 
+function processParameters(params: [CreateRouterParameters] | CreateRouterParametersArray): CreateRouterParameters {
+	// need to validate the inputs here
+	if (!params?.[0]) throw new Error('Invalid Controller - missing Controller');
+
+	// object parameter, returning it
+	if ('Controller' in params?.[0]) return params?.[0];
+
+	return {
+		Controller: params[0],
+		resourceName: params[1],
+		contextFactory: params[2],
+		router: params[3]
+	};
+}
+
 type CreateRouterParameters = {
 	Controller: ClassType;
-	rsName?: string | null;
+	resourceName?: string | null;
 	contextFactory?: ContextFactory | null;
 	router?: Router;
-	ajv?: AjvFactory | null;
+	ajvFactory?: AjvFactory | null;
 };
 
-function createRouterAndSwaggerDoc(Controller: CreateRouterParameters) : Router | DaVinciExpress;
+type CreateRouterParametersArray = [
+	ClassType,
+	string | null | undefined,
+	ContextFactory | null | undefined,
+	Router | undefined
+];
+
+function createRouterAndSwaggerDoc(Controller: CreateRouterParameters): Router | DaVinciExpress;
+/**
+ * The base class for controls that can be rendered.
+ *
+ * @deprecated pass arguments using a parameter object: createRouter({ Controller: MyController })
+ */
 function createRouterAndSwaggerDoc(
 	Controller: ClassType,
-	rsName?: string | null,
+	resourceName?: string | null,
 	contextFactory?: ContextFactory | null,
-	router?: Router) : Router | DaVinciExpress;
+	router?: Router
+): Router | DaVinciExpress;
 
-function createRouterAndSwaggerDoc(
-	ControllerInput: ClassType | CreateRouterParameters,
-	rsNameInput?: string | null,
-	contextFactoryInput?: ContextFactory | null,
-	routerInput: Router = express.Router()
-): Router | DaVinciExpress {
-	let Controller: ClassType;
-	let rsName: string | null;
-	let contextFactory: ContextFactory | null;
-	let router: Router;
-	let ajv: AjvFactory;
-
-	// need to validate the inputs here
-	if (!ControllerInput) throw new Error('Invalid Controller - missing Controller');
-
-	if ('Controller' in ControllerInput) {
-		({ Controller, rsName, contextFactory, router = routerInput, ajv } = ControllerInput);
-	}
-	else {
-		Controller = ControllerInput;
-		rsName = rsNameInput;
-		contextFactory = contextFactoryInput;
-		router = routerInput;
-	}
+function createRouterAndSwaggerDoc(...options): Router | DaVinciExpress {
+	const {
+		Controller,
+		resourceName: rsName,
+		contextFactory,
+		router = express.Router(),
+		ajvFactory
+	} = processParameters(options as [CreateRouterParameters] | CreateRouterParametersArray);
 
 	validateController(Controller);
 
@@ -416,7 +428,7 @@ function createRouterAndSwaggerDoc(
 	};
 
 	// now process the swagger structure and get an array of method/path mappings to handlers
-	const routes = createRouteHandlers(controller, definition, validationOptions, contextFactory, ajv);
+	const routes = createRouteHandlers(controller, definition, validationOptions, contextFactory, ajvFactory);
 
 	// add them to the router
 	routes.forEach(route => {
@@ -427,6 +439,6 @@ function createRouterAndSwaggerDoc(
 	openapiDocs.addResource(definition, resourceName, basepath);
 
 	return router;
-};
+}
 
 export default createRouterAndSwaggerDoc;
