@@ -104,15 +104,15 @@ const attemptJsonParsing = ({ value, config, definitions, validationOptions, ajv
 			return {
 				value: JSON.parse(value),
 				config,
-
-				definitions
+				definitions,
+				ajv
 			};
 		} catch (err) {
 			return {
 				value,
 				config,
-
-				definitions
+				definitions,
+				ajv
 			};
 		}
 	}
