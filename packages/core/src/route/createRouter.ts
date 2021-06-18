@@ -157,8 +157,8 @@ type ContextFactory<ContextReturnType = any> = ({
 
 const defaultContextFactory: ContextFactory = ({ req, res }) => ({ req, res });
 
-type AjvFactoryParameters = { parameter };
-type AjvFactory = (parameters: AjvFactoryParameters) => Ajv;
+export type AjvFactoryParameters = { parameter };
+export type AjvFactory = (parameters: AjvFactoryParameters) => Ajv;
 
 const createDefaultAjvInstance: AjvFactory = () => {
 	const ajv = new Ajv({
@@ -358,7 +358,7 @@ function processParameters(params: [CreateRouterParameters] | CreateRouterParame
 	};
 }
 
-type CreateRouterParameters = {
+export type CreateRouterParameters = {
 	Controller: ClassType;
 	resourceName?: string | null;
 	contextFactory?: ContextFactory | null;
@@ -373,7 +373,7 @@ type CreateRouterParametersArray = [
 	Router | undefined
 ];
 
-function createRouterAndSwaggerDoc(Controller: CreateRouterParameters): Router | DaVinciExpress;
+function createRouterAndSwaggerDoc(parameters: CreateRouterParameters): Router | DaVinciExpress;
 /**
  * The base class for controls that can be rendered.
  *
