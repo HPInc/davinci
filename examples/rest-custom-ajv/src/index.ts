@@ -42,10 +42,11 @@ const expressApp: Express = express();
 
 const contextFactory = ({ req }): Context => ({ accountId: req.headers['x-custom-accountid'] });
 
-const ajvFactory = () => {
+const ajvFactory = ({ parameter }) => {
+	const coerceTypesIn: string[] = ['header', 'query'];
 	const ajv = new Ajv({
 		allErrors: true,
-		coerceTypes: false,
+		coerceTypes: coerceTypesIn.includes(parameter.in),
 		useDefaults: true,
 		removeAdditional: 'all'
 	});
