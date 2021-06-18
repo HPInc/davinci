@@ -157,7 +157,7 @@ type ContextFactory<ContextReturnType = any> = ({
 
 const defaultContextFactory: ContextFactory = ({ req, res }) => ({ req, res });
 
-type AjvFactory = (section?: string) => Ajv;
+type AjvFactory = (section: string) => Ajv;
 
 const createDefaultAjvInstance: AjvFactory = () => {
 	const ajv = new Ajv({
