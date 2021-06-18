@@ -157,7 +157,8 @@ type ContextFactory<ContextReturnType = any> = ({
 
 const defaultContextFactory: ContextFactory = ({ req, res }) => ({ req, res });
 
-type AjvFactory = (section: string) => Ajv;
+type AjvFactoryParameters = { parameter };
+type AjvFactory = (parameters: AjvFactoryParameters) => Ajv;
 
 const createDefaultAjvInstance: AjvFactory = () => {
 	const ajv = new Ajv({
@@ -208,7 +209,7 @@ function mapReqToParameters<ContextType>(
 				config: p,
 				definitions,
 				validationOptions: methodValidationOptions,
-				ajv: ajv(p.in)
+				ajv: ajv({ parameter: p })
 			});
 		}
 		return acc;
