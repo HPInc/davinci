@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.15.2](https://github.com/HPInc/davinci/compare/@davinci/example-rest-custom-ajv@0.15.1...@davinci/example-rest-custom-ajv@0.15.2) (2021-06-18)
+
+
+### Bug Fixes
+
+* section name to ajv instance / update example ([14a9dcc](https://github.com/HPInc/davinci/commit/14a9dcc4ac1a693f9f60f1d0b4fd788d47f9e0ce))
+
+
+
+
+
 ## [0.15.1](https://github.com/HPInc/davinci/compare/@davinci/example-rest-custom-ajv@0.15.0...@davinci/example-rest-custom-ajv@0.15.1) (2021-06-16)
 
 **Note:** Version bump only for package @davinci/example-rest-custom-ajv

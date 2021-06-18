@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.6.2](https://github.com/HPInc/davinci/compare/@davinci/core@1.6.1...@davinci/core@1.6.2) (2021-06-18)
+
+
+### Bug Fixes
+
+* do not declare as optional in type signature ([9381db7](https://github.com/HPInc/davinci/commit/9381db7431c765f76b88a720cb2b3ea3a4a8e64e))
+* export types used in creation ([fa971f2](https://github.com/HPInc/davinci/commit/fa971f21f7dde35193a18c7f77648b3ccf9795f0))
+* section name to ajv instance / update example ([14a9dcc](https://github.com/HPInc/davinci/commit/14a9dcc4ac1a693f9f60f1d0b4fd788d47f9e0ce))
+
+
+
+
+
 ## [1.6.1](https://github.com/HPInc/davinci/compare/@davinci/core@1.6.0...@davinci/core@1.6.1) (2021-06-16)
 
 
