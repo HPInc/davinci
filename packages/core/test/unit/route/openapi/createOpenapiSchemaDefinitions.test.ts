@@ -450,27 +450,28 @@ describe('createOpenapiSchemaDefinitions', () => {
 		});
 
 		should(swagger).be.match({
-			swagger: '2.0',
+			openapi: '3.0.3',
 			info: {
 				version: '1.0.0',
 				title: 'API'
 			},
-			definitions: {
-				Customer: {
-					type: 'object',
-					title: 'Customer',
-					properties: {
-						firstname: {
-							type: 'string'
+			components: {
+				schemas: {
+					Customer: {
+						type: 'object',
+						title: 'Customer',
+						properties: {
+							firstname: {
+								type: 'string'
+							},
+							lastname: {
+								type: 'string'
+							}
 						},
-						lastname: {
-							type: 'string'
-						}
-					},
-					required: ['lastname']
+						required: ['lastname']
+					}
 				}
-			},
-			parameters: {}
+			}
 		});
 	});
 });
