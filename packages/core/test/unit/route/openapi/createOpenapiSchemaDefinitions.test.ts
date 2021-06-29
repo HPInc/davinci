@@ -445,8 +445,7 @@ describe('createOpenapiSchemaDefinitions', () => {
 
 		const definitions = createOpenapiSchemaDefinitions(Customer);
 		openapiDocs.addResource({ definitions });
-		const swagger = openapiDocs.generateFullSwagger({
-			basePath: '/api',
+		const swagger = openapiDocs.generateOpenAPIv3({
 			info: { version: '1.0.0', title: 'API' }
 		});
 

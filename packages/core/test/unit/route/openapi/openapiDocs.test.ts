@@ -8,42 +8,16 @@ describe('openapiDocs', () => {
 	});
 
 	it('should add a resource using a swagger document', () => {
-		openapiDocs.generateFullSwagger({
-			discoveryUrl: '/api-doc.json',
-			version: '1.0', // read from package.json
-			basePath: '/api'
+		openapiDocs.generateOpenAPIv3({
+			info: {
+				title: 'API',
+				version: '1.0'
+			}
 		});
 	});
 
-	it('should add a resource using a swagger document', () => {
-		openapiDocs.generateFullSwagger({
-			discoveryUrl: '/api-doc.json',
-			version: '1.0', // read from package.json
-			basePath: '/api',
-			protocol: 'https'
-		});
-	});
-
-	it('should add a resource using a swagger document', () => {
-		openapiDocs.generateFullSwagger({
-			discoveryUrl: '/api-doc.json',
-			version: '1.0', // read from package.json
-			basePath: '/api',
-			protocol: 'http'
-		});
-	});
-
-	it('should add a resource using a swagger document', () => {
-		openapiDocs.generateFullSwagger({
-			discoveryUrl: '/api-doc.json',
-			version: '1.0', // read from package.json
-			basePath: null,
-			protocol: 'https'
-		});
-	});
-
-	describe('#generateFullSwagger', () => {
-		it('should generate a swagger doc', () => {
+	describe('#generateOpenAPIv3', () => {
+		it('should generate an OpenAPI doc', () => {
 			openapiDocs.addResource(
 				{
 					definitions: { Customer: { type: 'object' } },
@@ -64,12 +38,11 @@ describe('openapiDocs', () => {
 				},
 				'customer'
 			);
-			const swagger = openapiDocs.generateFullSwagger({
-				basePath: '/api',
+			const swagger = openapiDocs.generateOpenAPIv3({
 				info: { version: '1.0.0', title: 'API' }
 			});
 			should(swagger).be.match({
-				swagger: '2.0',
+				openapi: '3.0.3',
 				info: {
 					version: '1.0.0',
 					title: 'API'
@@ -99,12 +72,13 @@ describe('openapiDocs', () => {
 						}
 					}
 				},
-				definitions: {
-					Customer: {
-						type: 'object'
+				components: {
+					schemas: {
+						Customer: {
+							type: 'object'
+						}
 					}
-				},
-				parameters: {}
+				}
 			});
 		});
 
@@ -135,8 +109,7 @@ describe('openapiDocs', () => {
 				},
 				'customer'
 			);
-			const swagger = openapiDocs.generateFullSwagger({
-				basePath: '/api',
+			const swagger = openapiDocs.generateOpenAPIv3({
 				info: { version: '1.0.0', title: 'API' }
 			});
 			should(swagger.paths['/customer'].get.parameters).have.length(2);
@@ -189,8 +162,7 @@ describe('openapiDocs', () => {
 				},
 				'customer'
 			);
-			const swagger = openapiDocs.generateFullSwagger({
-				basePath: '/api',
+			const swagger = openapiDocs.generateOpenAPIv3({
 				info: { version: '1.0.0', title: 'API' }
 			});
 
@@ -241,12 +213,11 @@ describe('openapiDocs', () => {
 				},
 				'customer'
 			);
-			const swagger = openapiDocs.generateFullSwagger({
-				basePath: '/api',
+			const swagger = openapiDocs.generateOpenAPIv3({
 				info: { version: '1.0.0', title: 'API' }
 			});
 
-			should(swagger.definitions).be.deepEqual({
+			should(swagger.components.schemas).be.deepEqual({
 				Animal: {
 					type: 'object'
 				},

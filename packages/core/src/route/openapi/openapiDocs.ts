@@ -5,11 +5,12 @@
 
 import Debug from 'debug';
 import _ from 'lodash';
+import { OpenAPIV3 } from 'openapi-types';
 import Resource from './Resource';
 
 const debug = new Debug('davinci:openapi');
 
-const SWAGGER_VERSION = '2.0';
+const OPENAPI_VERSION = '3.0.3';
 
 export const resources = [];
 
@@ -48,26 +49,20 @@ export const sanitiseResourcePath = resourcePaths => {
 	);
 };
 
-export const generateFullSwagger = opts => {
-	const fullSwagger = _.merge({}, opts, {
-		swagger: SWAGGER_VERSION,
-		paths: {},
-		definitions: {},
-		parameters: {}
+export const generateOpenAPIv3 = (opts: Partial<OpenAPIV3.Document>): OpenAPIV3.Document => {
+	const fullDoc: OpenAPIV3.Document = _.defaults({}, opts, {
+		openapi: OPENAPI_VERSION,
+		info: { title: 'unnamed', version: '1.0.0' },
+		components: { schemas: {} },
+		paths: {}
 	});
 
 	resources.forEach(resource => {
-		// add definitions
+		// add schemas
 		_.each(resource.definitions, (resourceDefinition, defName) => {
 			if (!resourceDefinition.hidden) {
-				fullSwagger.definitions[defName] = sanitiseResource(resourceDefinition);
+				fullDoc.components.schemas[defName] = sanitiseResource(resourceDefinition);
 			}
-		});
-
-		// TODO is this actually used, it is not part of the openAPI specification
-		// add parameters
-		_.each(resource.parameters, (resourceParameter, paramName) => {
-			fullSwagger.parameters[paramName] = resourceParameter;
 		});
 
 		// add paths
@@ -77,10 +72,10 @@ export const generateFullSwagger = opts => {
 			if (pathName === '/') fullPath = `/${trimmedBasePath}`;
 			const path = sanitiseResourcePath(resourcePath);
 			if (!_.isEmpty(path)) {
-				fullSwagger.paths[fullPath] = path;
+				fullDoc.paths[fullPath] = path;
 			}
 		});
 	});
 
-	return fullSwagger;
+	return fullDoc;
 };
