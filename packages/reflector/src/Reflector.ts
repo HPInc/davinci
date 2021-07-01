@@ -7,21 +7,6 @@ import 'reflect-metadata';
 
 const getParameterNameCache = new Map();
 
-// logic from https://github.com/goatslacker/get-parameter-names
-function cleanUp(fn: string) {
-	return (
-		fn
-			// strive comments
-			.replace(/((\/\/.*$)|(\/\*[\s\S]*?\*\/))/gm, '')
-			// strive rest parameter
-			.replace(/\.{3}/gm, '')
-			// strive lambda
-			.replace(/=>.*$/gm, '')
-			// strive default params
-			.replace(/=[^,]+/gm, '')
-	);
-}
-
 export default class Reflector {
 	static getMetadata<ReturnType = any>(metadataKey: any, target: any, propertyKey?: string | symbol): ReturnType {
 		return Reflect.getMetadata(metadataKey, target, propertyKey);
@@ -45,15 +30,24 @@ export default class Reflector {
 		return Reflector.defineMetadata(metadataKey, newMetadataValue, target, propertyKey);
 	}
 
-	static getParameterNames(fn: Function) {
+	static getParameterNames(fn: Function): string[] {
 		const cached = getParameterNameCache.get(fn);
 		if (cached) return cached;
 
-		const regex = /\(\s*([^]*?)\)\s*\{/gm;
-		const result = regex.exec(fn.toString());
+		// stringify the function and strip out the comments
+		const fs = fn.toString().replace(/((\/\/.*$)|(\/\*[\s\S]*?\*\/))/gm, '');
+
+		// first, try and match regular functions
+		const result = fs.match(/\(\s*([^]*?)\)\s*\{/)?.[1] ||
+			// arrow functions with multiple arguments  like `(arg1, arg2) => {}`
+			fs.match(/^\s*\(([^)]*)\)\s*=>/)?.[1] ||
+			// arrow functions with single argument without parens like `arg => {}`
+			fs.match(/^\s*([^=]*)=>/)?.[1];
+
 		if (!result) return [];
-		const match = cleanUp(result![1]);
-		const parameters = match
+		const parameters = result
+			.replace(/\.{3}/gm, '')		// strip rest parameter (...)
+			.replace(/=[^,]+/gm, '')	// strip parameter defaults
 			.split(',')
 			.map(x => x.trim())
 			.filter(x => !!x);

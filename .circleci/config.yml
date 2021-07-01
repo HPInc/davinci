@@ -3,9 +3,9 @@ version: 2.1
 jobs:
   checkout_and_test:
     parameters:
-      mongo-version: 
+      mongo-version:
         type: string
-      node-version: 
+      node-version:
         type: string
     docker:
       - image: circleci/node:<< parameters.node-version >>
@@ -50,7 +50,7 @@ jobs:
                   - "~"
   publish:
     docker:
-      - image: circleci/node:8-stretch
+      - image: cimg/node:16.4
     steps:
       - restore_cache:
           key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
@@ -70,7 +70,7 @@ jobs:
 
   publish_docs:
     docker:
-      - image: circleci/node:8-stretch
+      - image: cimg/node:16.4
     steps:
       - restore_cache:
           key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
@@ -88,8 +88,8 @@ workflows:
       - checkout_and_test:
           matrix:
             parameters:
-              mongo-version: ["3.6-jessie", "4.4"]
-              node-version: ["10", "12", "14"]
+              mongo-version: ["4.2", "4.4"]
+              node-version: ["12", "14", "16"]
       - publish:
           requires:
             - checkout_and_test
