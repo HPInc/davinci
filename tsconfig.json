@@ -1,6 +1,6 @@
 {
 	"compilerOptions": {
-		"target": "es5",
+		"target": "es2019",
 		"module": "commonjs",
 		"moduleResolution": "node",
 		"allowSyntheticDefaultImports": true,
@@ -22,7 +22,7 @@
 		"emitDecoratorMetadata": true,
 		"esModuleInterop": true,
 		"removeComments": false,
-		"lib": ["es7"]
+		"lib": ["es2019", "es2020.string", "es2020.symbol.wellknown"]
 	},
 	"include": ["packages/**/*", "examples/**/*"]
 }

@@ -49,7 +49,7 @@ export default class Reflector {
 		const cached = getParameterNameCache.get(fn);
 		if (cached) return cached;
 
-		const regex = /\(\s*([^]*?)\)\s*\{/gm;
+		const regex = /\(\s*([^]*?)\)\s*(=>)?\s*\{/gm;
 		const result = regex.exec(fn.toString());
 		if (!result) return [];
 		const match = cleanUp(result![1]);
