@@ -64,7 +64,17 @@
 
 		"@typescript-eslint/interface-name-prefix": 0,
 
-		"@typescript-eslint/ban-ts-ignore": 1,
+		"@typescript-eslint/ban-ts-comment": 1,
+
+		"@typescript-eslint/no-empty-function": 0,
+
+		"@typescript-eslint/ban-types": [2, {
+			"types": {
+				"Function": false,
+				"object": false,
+				"{}": false
+			}
+		}],
 
 		"import/prefer-default-export": 0,
 

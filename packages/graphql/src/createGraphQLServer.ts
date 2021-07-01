@@ -115,13 +115,7 @@ export const createGraphQLServer = (
 
 	const writeSDLtoFile = async path => {
 		const sdl = printSDL();
-		return new Promise((resolve, reject) =>
-			fs.writeFile(path, sdl, err => {
-				if (err) return reject(err);
-
-				return resolve();
-			})
-		);
+		await fs.promises.writeFile(path, sdl);
 	};
 
 	return { app, schema, printSDL, writeSDLtoFile };

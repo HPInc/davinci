@@ -51,9 +51,9 @@ export const createControllerSchemas = (
 	Controller: ClassType,
 	{ queries: q, mutations: m, schemas: s } = { queries: {}, mutations: {}, schemas: {} }
 ) => {
-	// eslint-disable-next-line @typescript-eslint/no-use-before-define
+	// eslint-disable-next-line no-use-before-define
 	const { queries, schemas: queriesSchemas } = createResolversAndSchemas(Controller, 'queries', s);
-	// eslint-disable-next-line @typescript-eslint/no-use-before-define
+	// eslint-disable-next-line no-use-before-define
 	const { mutations, schemas: allSchemas } = createResolversAndSchemas(Controller, 'mutations', queriesSchemas);
 
 	return { queries: { ...q, ...queries }, mutations: { ...m, ...mutations }, schemas: allSchemas };

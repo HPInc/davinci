@@ -35,6 +35,13 @@ export interface IFieldDecoratorOptions {
 	asInput?: boolean;
 }
 
+export interface IResolverDecoratorMetadata {
+	name: string;
+	methodName: string;
+	returnType: any;
+	handler: Function;
+}
+
 export interface IFieldDecoratorOptionsFactoryArgs {
 	isInput: boolean;
 	operationType: OperationType;
@@ -47,13 +54,6 @@ export interface IFieldDecoratorMetadata {
 	key: any;
 	opts?: IFieldDecoratorOptions;
 	optsFactory?: FieldDecoratorOptionsFactory;
-}
-
-export interface IResolverDecoratorMetadata {
-	name: string;
-	methodName: string;
-	returnType: any;
-	handler: Function;
 }
 
 export type SelectionSet<T> = { [P in keyof T]?: boolean | SelectionSet<T[P]> };

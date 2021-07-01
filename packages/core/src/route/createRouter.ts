@@ -343,21 +343,6 @@ const validateController = (Controller: ClassType) => {
 	if (typeof Controller !== 'function') throw new Error('Invalid Controller - not function');
 };
 
-function processParameters(params: [CreateRouterParameters] | CreateRouterParametersArray): CreateRouterParameters {
-	// need to validate the inputs here
-	if (!params?.[0]) throw new Error('Invalid Controller - missing Controller');
-
-	// object parameter, returning it
-	if ('Controller' in params?.[0]) return params?.[0];
-
-	return {
-		Controller: params[0],
-		resourceName: params[1],
-		contextFactory: params[2],
-		router: params[3]
-	};
-}
-
 export type CreateRouterParameters = {
 	Controller: ClassType;
 	resourceName?: string | null;
@@ -372,6 +357,21 @@ type CreateRouterParametersArray = [
 	ContextFactory | null | undefined,
 	Router | undefined
 ];
+
+function processParameters(params: [CreateRouterParameters] | CreateRouterParametersArray): CreateRouterParameters {
+	// need to validate the inputs here
+	if (!params?.[0]) throw new Error('Invalid Controller - missing Controller');
+
+	// object parameter, returning it
+	if ('Controller' in params?.[0]) return params?.[0];
+
+	return {
+		Controller: params[0],
+		resourceName: params[1],
+		contextFactory: params[2],
+		router: params[3]
+	};
+}
 
 function createRouterAndSwaggerDoc(parameters: CreateRouterParameters): Router | DaVinciExpress;
 /**
