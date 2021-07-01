@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.3](https://github.com/HPInc/davinci/compare/@davinci/reflector@1.0.2...@davinci/reflector@1.0.3) (2021-07-01)
+
+
+### Bug Fixes
+
+* arrow functions in Reflector getParameterNames ([28f7475](https://github.com/HPInc/davinci/commit/28f74757eee13069dc4ce2ac8be6745603f86fc3))
+* update targets and fix reflection break ([f0efe92](https://github.com/HPInc/davinci/commit/f0efe92252e9ed2a9f43a672d5ab9afd023b7e7d))
+
+
+
+
+
 ## [1.0.2](https://github.com/HPInc/davinci/compare/@davinci/reflector@1.0.1...@davinci/reflector@1.0.2) (2021-01-26)
 
 

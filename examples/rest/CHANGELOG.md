@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.14.11](https://github.com/HPInc/davinci/compare/@davinci/example-rest@0.14.10...@davinci/example-rest@0.14.11) (2021-07-01)
+
+
+### Bug Fixes
+
+* update @types/express-serve-static-core to fix Node 16 ([de5265b](https://github.com/HPInc/davinci/commit/de5265b1fa63b371beaf702aac6e17a107c29015))
+
+
+
+
+
 ## [0.14.10](https://github.com/HPInc/davinci/compare/@davinci/example-rest@0.14.9...@davinci/example-rest@0.14.10) (2021-06-18)
 
 **Note:** Version bump only for package @davinci/example-rest

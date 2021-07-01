@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.15.3](https://github.com/HPInc/davinci/compare/@davinci/example-rest-custom-ajv@0.15.2...@davinci/example-rest-custom-ajv@0.15.3) (2021-07-01)
+
+
+### Bug Fixes
+
+* update @types/express-serve-static-core to fix Node 16 ([de5265b](https://github.com/HPInc/davinci/commit/de5265b1fa63b371beaf702aac6e17a107c29015))
+
+
+
+
+
 ## [0.15.2](https://github.com/HPInc/davinci/compare/@davinci/example-rest-custom-ajv@0.15.1...@davinci/example-rest-custom-ajv@0.15.2) (2021-06-18)
 
 

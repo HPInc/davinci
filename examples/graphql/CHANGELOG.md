@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.15](https://github.com/HPInc/davinci/compare/@davinci/example-graphql@1.1.14...@davinci/example-graphql@1.1.15) (2021-07-01)
+
+
+### Bug Fixes
+
+* update @types/express-serve-static-core to fix Node 16 ([de5265b](https://github.com/HPInc/davinci/commit/de5265b1fa63b371beaf702aac6e17a107c29015))
+
+
+
+
+
 ## [1.1.14](https://github.com/HPInc/davinci/compare/@davinci/example-graphql@1.1.13...@davinci/example-graphql@1.1.14) (2021-06-18)
 
 **Note:** Version bump only for package @davinci/example-graphql
