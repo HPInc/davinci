@@ -64,10 +64,10 @@
 
 		"@typescript-eslint/interface-name-prefix": 0,
 
-		"@typescript-eslint/ban-ts-comment": 1,
+		// discourage the use of @ts-ignore to hide TypeScript warnings/errors
+		"@typescript-eslint/ban-ts-comment": [1, { "ts-ignore": true }],
 
-		"@typescript-eslint/no-empty-function": 0,
-
+		// disable banning of specific types used in the codebase
 		"@typescript-eslint/ban-types": [2, {
 			"types": {
 				"Function": false,
