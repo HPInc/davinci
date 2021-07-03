@@ -121,7 +121,7 @@ export function arg(options?: IArgOptions): Function {
 export function fieldResolver<T = {}>(
 	resolverOf: ClassType,
 	fieldName: keyof T,
-	returnType: ClassType | ClassType[]
+	returnType: ReturnTypeFuncValue
 ): Function {
 	return function(prototype: object, methodName: string, index) {
 		// get the existing metadata props
