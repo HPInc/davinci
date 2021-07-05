@@ -12,7 +12,7 @@ import { IMethodParameter, IMethodParameterBase, IMethodDecoratorOptions, IMetho
  * @param verb
  */
 export const createRouteMethodDecorator = verb =>
-	function({ path, summary, description, responses, validation, hidden }: IMethodDecoratorOptions): Function {
+	function({ path, summary, description, responses, validation, hidden }: IMethodDecoratorOptions): MethodDecorator {
 		return function(prototype: object, methodName: string) {
 			// get the existing metadata props
 			const methods = Reflector.getMetadata('davinci:openapi:methods', prototype.constructor) || [];
@@ -49,7 +49,7 @@ export const head = createRouteMethodDecorator('head');
  * Decorator that annotate a method parameter
  * @param options
  */
-export function param(options: IMethodParameter): Function {
+export function param(options: IMethodParameter): ParameterDecorator {
 	return function(prototype: object, methodName: string, index) {
 		// get the existing metadata props
 		const methodParameters =
@@ -87,7 +87,7 @@ type CreateParamDecoratorFunctionArg = IMethodParameterBase | ParameterName;
 // TODO: use openApi 3 requestBody for 'body'
 export const createParamDecorator = (inKey: 'path' | 'query' | 'body') => (
 	opts?: CreateParamDecoratorFunctionArg
-): Function => {
+): ParameterDecorator => {
 	let options;
 	if (typeof opts === 'string') {
 		options = { name: opts, in: inKey };
@@ -114,7 +114,7 @@ export interface IControllerDecoratorArgs {
  * It allows setting the basepath, resourceSchema, etc
  * @param args
  */
-export function controller(args?: IControllerDecoratorArgs): Function {
+export function controller(args?: IControllerDecoratorArgs): ClassDecorator {
 	return function(target: Function) {
 		// define new metadata props
 		Reflector.defineMetadata('davinci:openapi:controller', args, target);

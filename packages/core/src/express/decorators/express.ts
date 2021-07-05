@@ -11,11 +11,11 @@ import { IHeaderDecoratorMetadata } from '../types';
  * Factory function that generates a `req` or `res` decorator
  * @param reqOrRes
  */
-export const createReqResExpressDecorator = (reqOrRes: 'req' | 'res') => () => (
+export const createReqResExpressDecorator = (reqOrRes: 'req' | 'res') => (): ParameterDecorator => (
 	prototype: Record<string, any>,
 	methodName: string,
 	index
-) => {
+): void => {
 	// get the existing metadata props
 	const methodParameters =
 		Reflector.getMetadata('davinci:openapi:method-parameters', prototype.constructor) || [];
@@ -93,7 +93,7 @@ export { middleware };
  * @param name
  * @param value
  */
-export const header = (name: string, value: string) => {
+export const header = (name: string, value: string): MethodDecorator => {
 	return function(prototype: Record<string, any>, methodName: string) {
 		const meta: IHeaderDecoratorMetadata = { name, value, handler: prototype[methodName] };
 		// define new metadata methods

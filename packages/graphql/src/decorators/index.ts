@@ -20,7 +20,7 @@ import {
  * It annotates a variable as schema prop
  * @param options
  */
-export function type(options?: ITypeDecoratorOptions) {
+export function type(options?: ITypeDecoratorOptions): ClassDecorator {
 	return function(target: Function): void {
 		const metadata: ITypeDecoratorOptions = options;
 		Reflector.defineMetadata('davinci:graphql:types', metadata, target);
@@ -34,7 +34,7 @@ const DEFAULT_FIELD_OPTIONS = {};
  * It annotates a variable as schema prop
  * @param opts
  */
-export function field(opts?: IFieldDecoratorOptions | FieldDecoratorOptionsFactory) {
+export function field(opts?: IFieldDecoratorOptions | FieldDecoratorOptionsFactory): PropertyDecorator {
 	return function(prototype: object, key: string | symbol): void {
 		const optsFactory = (args: IFieldDecoratorOptionsFactoryArgs) => {
 			const options = _.merge({}, DEFAULT_FIELD_OPTIONS, typeof opts === 'function' ? opts(args) : opts);
@@ -54,7 +54,7 @@ export function field(opts?: IFieldDecoratorOptions | FieldDecoratorOptionsFacto
  * @param returnType - The return type or class of the resolver
  * @param name - Optional name
  */
-export const query = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: string): Function => {
+export const query = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: string): MethodDecorator => {
 	return function(prototype: object, methodName: string) {
 		const metadata: IResolverDecoratorMetadata = {
 			name,
@@ -71,7 +71,7 @@ export const query = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: s
  * @param returnType - The return type or class of the resolver
  * @param name - Optional name
  */
-export const mutation = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: string): Function => {
+export const mutation = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: string): MethodDecorator => {
 	return function(prototype: object, methodName: string) {
 		const metadata: IResolverDecoratorMetadata = {
 			name,
@@ -87,7 +87,7 @@ export const mutation = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?
  * Decorator that annotate a method parameter
  * @param options
  */
-export function arg(options?: IArgOptions): Function {
+export function arg(options?: IArgOptions): ParameterDecorator {
 	return function(prototype: object, methodName: string, index) {
 		// get the existing metadata props
 		const methodParameters = Reflector.getMetadata('davinci:graphql:args', prototype.constructor) || [];
@@ -147,7 +147,7 @@ export function fieldResolver<T = {}>(
 	};
 }
 
-export function info() {
+export function info(): ParameterDecorator {
 	return function(prototype: object, methodName: string, index) {
 		// get the existing metadata props
 		const methodParameters = Reflector.getMetadata('davinci:graphql:args', prototype.constructor) || [];
@@ -164,7 +164,7 @@ export function info() {
 	};
 }
 
-export function selectionSet() {
+export function selectionSet(): ParameterDecorator {
 	return function(prototype: object, methodName: string, index) {
 		// get the existing metadata props
 		const methodParameters = Reflector.getMetadata('davinci:graphql:args', prototype.constructor) || [];
@@ -181,7 +181,7 @@ export function selectionSet() {
 	};
 }
 
-export function parent() {
+export function parent(): ParameterDecorator {
 	return function(prototype: object, methodName: string, index) {
 		// get the existing metadata props
 		const methodParameters = Reflector.getMetadata('davinci:graphql:args', prototype.constructor) || [];
