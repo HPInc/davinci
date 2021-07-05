@@ -70,6 +70,11 @@ export interface PathsDefinition {
 	};
 }
 
+export interface MethodValidation {
+	disable?: boolean;
+	partial?: boolean;
+}
+
 export interface PathsValidationOptions {
 	[key: string]: {
 		[key in Verb]: MethodValidation;
@@ -111,11 +116,6 @@ export interface IMethodResponseOutput {
 
 export interface IMethodResponses {
 	[key: number]: Function | IMethodResponseOutput | ((string) => IMethodResponseOutput);
-}
-
-export interface MethodValidation {
-	disable?: boolean;
-	partial?: boolean;
 }
 
 export interface IMethodDecoratorOptions {

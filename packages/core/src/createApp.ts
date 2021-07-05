@@ -66,7 +66,7 @@ export const processArgs = (...args) => {
 		runMiddlewares = options;
 	}
 	if (!options) options = {};
-	if (!runMiddlewares) runMiddlewares = () => {};
+	if (!runMiddlewares) runMiddlewares = () => undefined;
 	// if (args.length === 3) then no change
 
 	// for 3 arguments then we can assume app, options and callback are set

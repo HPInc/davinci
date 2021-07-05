@@ -10,7 +10,7 @@
 		"build": "npm run build-cj && npm run build-esm",
 		"build-cj": "tsc -p tsconfig.cjs.release.json",
 		"build-esm": "tsc -p tsconfig.esm.release.json",
-		"eslint": "../../node_modules/eslint/bin/eslint.js --c .eslintrc 'src/**/*.ts'",
+		"eslint": "../../node_modules/eslint/bin/eslint.js --color --c .eslintrc 'src/**/*.ts'",
 		"pretest": "npm run eslint && npm run build",
 		"test": "mocha --exit",
 		"cover": "nyc npm test"
@@ -31,7 +31,7 @@
 	"devDependencies": {
 		"@types/graphql": "14.5.0",
 		"@types/mocha": "^5.2.6",
-		"tslib": "^1.9.3",
-		"typescript": "^3.7.5"
+		"tslib": "^2.3.0",
+		"typescript": "^4.3.5"
 	}
 }
