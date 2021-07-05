@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.1.0](https://github.com/HPInc/davinci/compare/@davinci/reflector@1.0.3...@davinci/reflector@1.1.0) (2021-07-05)
+
+
+### Features
+
+* update to newest typescript, tslib & tslint ([1936fce](https://github.com/HPInc/davinci/commit/1936fce45b979c9689979afc2f6eb970b2059312))
+
+
+
+
+
 ## [1.0.3](https://github.com/HPInc/davinci/compare/@davinci/reflector@1.0.2...@davinci/reflector@1.0.3) (2021-07-01)
 
 

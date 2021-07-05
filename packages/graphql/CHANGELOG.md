@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.5.0](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.4.12...@davinci/graphql@1.5.0) (2021-07-05)
+
+
+### Features
+
+* update to newest typescript, tslib & tslint ([1936fce](https://github.com/HPInc/davinci/commit/1936fce45b979c9689979afc2f6eb970b2059312))
+
+
+
+
+
 ## [1.4.12](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.4.11...@davinci/graphql@1.4.12) (2021-07-01)
 
 **Note:** Version bump only for package @davinci/graphql

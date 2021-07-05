@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/mongoose",
-	"version": "0.16.11",
+	"version": "0.17.0",
 	"description": "Integration with Mongoose ODM",
 	"author": "HP",
 	"license": "MIT",
@@ -18,7 +18,7 @@
 		"cover": "nyc npm test"
 	},
 	"dependencies": {
-		"@davinci/reflector": "^1.0.3",
+		"@davinci/reflector": "^1.1.0",
 		"bluebird": "^3.7.2",
 		"debug": "^4.1.1",
 		"lodash": "^4.17.19"
@@ -28,7 +28,7 @@
 		"mongoose": "^5.11.0"
 	},
 	"optionalDependencies": {
-		"@davinci/core": "^1.6.3"
+		"@davinci/core": "^1.7.0"
 	},
 	"devDependencies": {
 		"@davinci/core": "^1.0.0",

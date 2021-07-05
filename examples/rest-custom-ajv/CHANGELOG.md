@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.16.0](https://github.com/HPInc/davinci/compare/@davinci/example-rest-custom-ajv@0.15.3...@davinci/example-rest-custom-ajv@0.16.0) (2021-07-05)
+
+
+### Features
+
+* update to newest typescript, tslib & tslint ([1936fce](https://github.com/HPInc/davinci/commit/1936fce45b979c9689979afc2f6eb970b2059312))
+
+
+
+
+
 ## [0.15.3](https://github.com/HPInc/davinci/compare/@davinci/example-rest-custom-ajv@0.15.2...@davinci/example-rest-custom-ajv@0.15.3) (2021-07-01)
 
 

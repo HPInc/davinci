@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.17.0](https://github.com/HPInc/davinci/compare/@davinci/mongoose@0.16.11...@davinci/mongoose@0.17.0) (2021-07-05)
+
+
+### Features
+
+* update to newest typescript, tslib & tslint ([1936fce](https://github.com/HPInc/davinci/commit/1936fce45b979c9689979afc2f6eb970b2059312))
+
+
+
+
+
 ## [0.16.11](https://github.com/HPInc/davinci/compare/@davinci/mongoose@0.16.10...@davinci/mongoose@0.16.11) (2021-07-01)
 
 **Note:** Version bump only for package @davinci/mongoose

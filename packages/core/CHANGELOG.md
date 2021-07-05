@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.7.0](https://github.com/HPInc/davinci/compare/@davinci/core@1.6.3...@davinci/core@1.7.0) (2021-07-05)
+
+
+### Bug Fixes
+
+* small changes to eslintrc ([518ec9f](https://github.com/HPInc/davinci/commit/518ec9f6018bf038a785a136f4e30995104d4603))
+
+
+### Features
+
+* update to newest typescript, tslib & tslint ([1936fce](https://github.com/HPInc/davinci/commit/1936fce45b979c9689979afc2f6eb970b2059312))
+
+
+
+
+
 ## [1.6.3](https://github.com/HPInc/davinci/compare/@davinci/core@1.6.2...@davinci/core@1.6.3) (2021-07-01)
 
 **Note:** Version bump only for package @davinci/core
