@@ -104,3 +104,4 @@ workflows:
             branches:
               only:
                 - master
+                - fix/vuepress-ga
