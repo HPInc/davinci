@@ -31,9 +31,6 @@ jobs:
           name: test
           command: |
            npx lerna run cover
-#      - run:
-#          name: upload coverage report
-#          command: bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
       - run:
           name: build
           command: |
@@ -44,6 +41,9 @@ jobs:
               - equal: [ "4.4", << parameters.mongo-version >> ]
               - equal: [ "14", << parameters.node-version >> ]
           steps:
+            - run:
+                name: upload coverage report
+                command: npx codecov
             - save_cache:
                 key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
                 paths:
