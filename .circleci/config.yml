@@ -75,12 +75,6 @@ jobs:
       - restore_cache:
           key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
       - add_ssh_keys
-      - checkout
-      - run:
-            name: install NPM dependencies
-            command: |
-                echo -e "//registry.npmjs.org/:_authToken=$NPM_TOKEN\nscope=@davinci" > .npmrc
-                npm install
       - run:
           name: Deploy docs
           command: |
@@ -91,9 +85,22 @@ workflows:
   version: 2
   build_and_publish:
     jobs:
-      - publish_docs:
+      - checkout_and_test:
+          matrix:
+            parameters:
+              mongo-version: ["4.2", "4.4"]
+              node-version: ["12", "14", "16"]
+      - publish:
+          requires:
+            - checkout_and_test
           filters:
             branches:
               only:
                 - master
-                - fix/vuepress-ga
+      - publish_docs:
+          requires:
+            - checkout_and_test
+          filters:
+            branches:
+              only:
+                - master
