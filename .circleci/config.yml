@@ -85,21 +85,7 @@ workflows:
   version: 2
   build_and_publish:
     jobs:
-      - checkout_and_test:
-          matrix:
-            parameters:
-              mongo-version: ["4.2", "4.4"]
-              node-version: ["12", "14", "16"]
-      - publish:
-          requires:
-            - checkout_and_test
-          filters:
-            branches:
-              only:
-                - master
       - publish_docs:
-          requires:
-            - checkout_and_test
           filters:
             branches:
               only:
