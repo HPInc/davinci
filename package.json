@@ -12,7 +12,7 @@
 		"bootstrap": "lerna bootstrap",
 		"bump": "lerna publish",
 		"docs:dev": "vuepress dev docs",
-		"docs:build": "vuepress build docs",
+		"docs:build": "vuepress build docs --debug",
 		"semantic-release": "lerna version --conventional-commits --create-release github -y && lerna publish from-package -y"
 	},
 	"devDependencies": {
