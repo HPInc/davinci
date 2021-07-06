@@ -1,0 +1,21 @@
+{
+    "extension": [
+        ".ts",
+        ".js"
+    ],
+    "require": [
+        "ts-node/register"
+    ],
+    "reporter": [
+        "lcov",
+        "text-summary"
+    ],
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.js"
+    ],
+    "exclude": [
+        "**/*.d.ts"
+    ],
+    "all": true
+}
