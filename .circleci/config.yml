@@ -75,6 +75,12 @@ jobs:
       - restore_cache:
           key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
       - add_ssh_keys
+      - checkout
+      - run:
+            name: install NPM dependencies
+            command: |
+                echo -e "//registry.npmjs.org/:_authToken=$NPM_TOKEN\nscope=@davinci" > .npmrc
+                npm install
       - run:
           name: Deploy docs
           command: |
