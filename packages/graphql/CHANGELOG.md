@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.2](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.5.1...@davinci/graphql@1.5.2) (2021-07-06)
+
+
+### Bug Fixes
+
+* **graphql:** resolverOf can now return an UnionType ([6d9b3f1](https://github.com/HPInc/davinci/commit/6d9b3f1cabbc047844166b0ca21b76730547ad23))
+
+
+
+
+
 ## [1.5.1](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.5.0...@davinci/graphql@1.5.1) (2021-07-06)
 
 **Note:** Version bump only for package @davinci/graphql
