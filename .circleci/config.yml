@@ -30,7 +30,7 @@ jobs:
       - run:
           name: test
           command: |
-           npx lerna run test
+           npx lerna run cover
 #      - run:
 #          name: upload coverage report
 #          command: bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
