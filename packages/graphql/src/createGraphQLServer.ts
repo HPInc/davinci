@@ -51,9 +51,9 @@ export const createGraphQLServer = (
 	);
 
 	const allSchemas = { queries: {}, mutations: {}, schemas: {} };
-	const { queries: queryFields, mutations: mutationsFields, schemas: controllerSchemas } = (controllers || []).reduce(
+	const { queries: queryFields, mutations: mutationsFields } = (controllers || []).reduce(
 		(acc, controller) => {
-			_.merge(allSchemas, controllerSchemas);
+			_.merge(allSchemas, acc.schemas);
 			const { queries, mutations, schemas } = createControllerSchemas(controller, allSchemas);
 			if (queries) {
 				acc.queries = _.merge({}, acc.queries || {}, queries);
