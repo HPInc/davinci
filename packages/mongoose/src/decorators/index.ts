@@ -11,7 +11,7 @@ import { IPropDecoratorOptions, IPropDecoratorOptionsFactory, IPropDecoratorMeta
  * Decorate a props as mongoose schema property
  * @param options
  */
-export function prop(options?: IPropDecoratorOptions | IPropDecoratorOptionsFactory) {
+export function prop(options?: IPropDecoratorOptions | IPropDecoratorOptionsFactory): PropertyDecorator {
 	return (prototype: object, key: string): void => {
 		const optsFactory = () => (typeof options === 'function' ? options() : options);
 
@@ -27,7 +27,7 @@ export function prop(options?: IPropDecoratorOptions | IPropDecoratorOptionsFact
  * @param options
  */
 // eslint-disable-next-line no-shadow
-export function index(index, options?: any) {
+export function index(index, options?: any): ClassDecorator {
 	return (target: Function): void => {
 		Reflector.pushMetadata('davinci:mongoose:indexes', { index, options }, target);
 	};
@@ -38,7 +38,7 @@ export function index(index, options?: any) {
  * - mongoose static method is the class method is `static`
  * - mongoose method is the class method is a `prototype` method
  */
-export function method() {
+export function method(): MethodDecorator {
 	return (target: Function | object, key: string): void => {
 		const isPrototype = typeof target === 'object' && typeof target.constructor === 'function';
 		const isStatic = typeof target === 'function' && typeof target.prototype === 'object';
@@ -76,7 +76,7 @@ export interface IVirtualArgs {
  * @param name
  * @param opts
  */
-export function populate({ name, opts }: { name: string; opts: IVirtualArgs }) {
+export function populate({ name, opts }: { name: string; opts: IVirtualArgs }): PropertyDecorator {
 	return (target: object, key: string): void => {
 		const options = { ...opts, localField: key };
 		Reflector.pushMetadata('davinci:mongoose:populates', { name, options }, target.constructor);
@@ -87,7 +87,7 @@ export function populate({ name, opts }: { name: string; opts: IVirtualArgs }) {
  * Decorator that annotates a method marking it as virtual.
  * The annotated method will be used as the `getter` of the virtual
  */
-export function virtual(options?: IVirtualArgs) {
+export function virtual(options?: IVirtualArgs): MethodDecorator {
 	return (target: object, key: string): void => {
 		const handler = target[key];
 		if (options?.ref && typeof handler === 'function') {
@@ -103,7 +103,7 @@ export function virtual(options?: IVirtualArgs) {
 /**
  * Decorator that annotates a schema, allowing to pass options to the mongoose 'Schema' constructor
  */
-export function schema(options?: SchemaOptions) {
+export function schema(options?: SchemaOptions): ClassDecorator {
 	return (target: Function): void => {
 		Reflector.defineMetadata('davinci:mongoose:schemaOptions', options, target);
 	};
