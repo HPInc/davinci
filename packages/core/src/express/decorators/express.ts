@@ -48,8 +48,8 @@ type Stage = 'before' | 'after';
  * @param middlewareFunction
  * @param stage
  */
-const middleware = (middlewareFunction, stage: Stage = 'before'): Function => {
-	return function(target: Record<string, any> | Function, methodName: string) {
+const middleware = (middlewareFunction, stage: Stage = 'before'): ClassDecorator & MethodDecorator => {
+	return function(target: Record<string, any> | Function, methodName?: string) {
 		const args: {
 			middlewareFunction: Function;
 			stage: Stage;
@@ -69,8 +69,6 @@ const middleware = (middlewareFunction, stage: Stage = 'before'): Function => {
 
 		// define new metadata methods
 		Reflector.unshiftMetadata('davinci:express:method-middleware', args, realTarget);
-
-		return target;
 	};
 };
 
