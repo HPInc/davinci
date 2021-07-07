@@ -43,7 +43,11 @@ jobs:
           steps:
             - run:
                 name: upload coverage report
-                command: npx codecov
+                command: |
+                  npx codecov -f packages/core/coverage/lcov.info -F core
+                  npx codecov -f packages/graphql/coverage/lcov.info -F graphql
+                  npx codecov -f packages/mongoose/coverage/lcov.info -F mongoose
+                  npx codecov -f packages/reflector/coverage/lcov.info -F reflector
             - save_cache:
                 key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
                 paths:

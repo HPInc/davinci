@@ -1,0 +1,42 @@
+coverage:
+  status:
+    project:
+      default:
+        target: 80%
+      core:
+        flags:
+          - core
+      reflector:
+        flags:
+          - reflector
+      mongoose:
+        flags:
+          - mongoose
+      graphql:
+        flags:
+          - graphql
+
+comment:
+  layout: "reach, diff, flags, files"
+  behavior: default
+  require_changes: false
+  require_base: no
+  require_head: yes
+
+flags:
+  core:
+    paths:
+      - packages/core
+    carryforward: true
+  graphql:
+    paths:
+      - packages/graphql
+    carryforward: true
+  mongoose:
+    paths:
+      - packages/mongoose
+    carryforward: true
+  reflector:
+    paths:
+      - packages/reflector
+    carryforward: true
