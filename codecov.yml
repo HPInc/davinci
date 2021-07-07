@@ -27,12 +27,16 @@ flags:
   core:
     paths:
       - packages/core
+    carryforward: true
   graphql:
     paths:
       - packages/graphql
+    carryforward: true
   mongoose:
     paths:
       - packages/mongoose
+    carryforward: true
   reflector:
     paths:
       - packages/reflector
+    carryforward: true
