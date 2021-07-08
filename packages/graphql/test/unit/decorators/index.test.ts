@@ -51,33 +51,67 @@ describe('decorators', () => {
 			});
 		});
 
-		it('should ignore duplicate decorators for the same fieldName', () => {
+		it('should allow multiple decorators for the different resolverOf & fieldName', () => {
+			class Book {}
+			class Film {}
+			class Author {
+				@graphql.field()
+				title: string;
+			}
+
+			class AuthorController {
+				@graphql.fieldResolver(Film, 'writers', [Author])
+				@graphql.fieldResolver(Book, 'authors', [Author])
+				getAuthors() {}
+			}
+
+			const bookResolvers = Reflector.getMetadata('davinci:graphql:field-resolvers', Book);
+			bookResolvers.should.have.length(1);
+			bookResolvers[0].should.be.deepEqual({
+				fieldName: 'authors',
+				handler: AuthorController.prototype.getAuthors,
+				methodName: 'getAuthors',
+				prototype: AuthorController.prototype,
+				resolverOf: Book,
+				returnType: [Author]
+			});
+
+			const filmResolvers = Reflector.getMetadata('davinci:graphql:field-resolvers', Film);
+			filmResolvers.should.have.length(1);
+			filmResolvers[0].should.be.deepEqual({
+				fieldName: 'writers',
+				handler: AuthorController.prototype.getAuthors,
+				methodName: 'getAuthors',
+				prototype: AuthorController.prototype,
+				resolverOf: Film,
+				returnType: [Author]
+			});
+		});
+
+		it('throws an error when additional fieldResolvers are defined for the same resolverOf+fieldName', () => {
 			class Book {}
 			class Author {
 				@graphql.field()
 				title: string;
 			}
-			class Nope {}
 
 			// @ts-ignore
 			class AuthorController {
-				// decorators of the same type are executed from bottom to top. see:
-				// https://www.typescriptlang.org/docs/handbook/decorators.html#decorator-composition
-				@graphql.fieldResolver(Book, 'authors', [Nope])
 				@graphql.fieldResolver(Book, 'authors', [Author])
 				getBookAuthors() {}
 			}
 
-			const middlewares = Reflector.getMetadata('davinci:graphql:field-resolvers', Book);
-			middlewares.should.have.length(1);
-			middlewares[0].should.be.deepEqual({
-				fieldName: 'authors',
-				handler: AuthorController.prototype.getBookAuthors,
-				methodName: 'getBookAuthors',
-				prototype: AuthorController.prototype,
-				resolverOf: Book,
-				returnType: [Author]
-			});
+			try {
+				// @ts-ignore
+				class AnotherController {
+					@graphql.fieldResolver(Book, 'authors', [Author])
+					getOtherBookAuthors() {}
+				}
+				throw new Error('the above code should have thrown an error');
+
+			} catch (err) {
+				err.should.have.property('message').equal('\'Book.authors\' already resolved by AuthorController.getBookAuthors');
+			}
 		});
 	});
 });
