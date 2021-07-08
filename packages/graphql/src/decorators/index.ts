@@ -125,15 +125,21 @@ export function fieldResolver<T = {}>(
 	returnType: ReturnTypeFuncValue
 ): MethodDecorator {
 	return function(prototype: object, methodName: string) {
-		const resolver: IExternalFieldResolverDecoratorMetadata = {
+		// get the existing metadata props
+		const resolvers: IExternalFieldResolverDecoratorMetadata[] =
+			Reflector.getMetadata('davinci:graphql:field-resolvers', resolverOf.prototype.constructor) || [];
+		const isAlreadySet = !!_.find(resolvers, { methodName, fieldName });
+		if (isAlreadySet) return;
+
+		resolvers.unshift({
 			prototype,
 			methodName,
 			resolverOf,
 			fieldName,
 			returnType,
 			handler: prototype[methodName]
-		};
-		Reflector.pushMetadata('davinci:graphql:field-resolvers', resolver, resolverOf.prototype.constructor);
+		});
+		Reflector.defineMetadata('davinci:graphql:field-resolvers', resolvers, resolverOf.prototype.constructor);
 	};
 }
 
