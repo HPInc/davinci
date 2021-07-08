@@ -25,7 +25,7 @@ describe('decorators', () => {
 		});
 	});
 
-	describe('@graphResolver()', () => {
+	describe('@fieldResolver()', () => {
 		it('should decorate a method correctly', () => {
 			class Book {}
 			class Author {
