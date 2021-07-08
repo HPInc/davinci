@@ -95,20 +95,13 @@ describe('decorators', () => {
 				title: string;
 			}
 
-			// @ts-ignore
-			class AuthorController {
-				@graphql.fieldResolver(Book, 'authors', [Author])
-				getBookAuthors() {}
-			}
+			class AuthorController { getBookAuthors() {} }
+			class AnotherController { getMoreAuthors() {} }
 
 			try {
-				// @ts-ignore
-				class AnotherController {
-					@graphql.fieldResolver(Book, 'authors', [Author])
-					getOtherBookAuthors() {}
-				}
+				graphql.fieldResolver(Book, 'authors', [Author])(AuthorController.prototype, 'getBookAuthors', null);
+				graphql.fieldResolver(Book, 'authors', [Author])(AnotherController.prototype, 'getMoreAuthors', null);
 				throw new Error('the above code should have thrown an error');
-
 			} catch (err) {
 				err.should.have.property('message').equal('\'Book.authors\' already resolved by AuthorController.getBookAuthors');
 			}
