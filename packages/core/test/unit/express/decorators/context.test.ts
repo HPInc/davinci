@@ -32,4 +32,22 @@ describe('@context()', () => {
 			type: 'context'
 		});
 	});
+
+	it('should ignore a duplicate decorator', () => {
+		class MyClass {
+			myMethod(@context() @context() context) {
+				return context;
+			}
+		}
+
+		const contextMetadata = Reflector.getMetadata('davinci:context', MyClass.prototype.constructor);
+
+		should(contextMetadata).have.length(1);
+		should(contextMetadata[0]).be.deepEqual({
+			handler: MyClass.prototype.myMethod,
+			methodName: 'myMethod',
+			index: 0,
+			type: 'context'
+		});
+	});
 });

@@ -199,8 +199,8 @@ type Stage = 'before' | 'after';
 const middleware = <TSource = any, TContext = any>(
 	middlewareFunction: ResolverMiddleware<TSource, TContext>,
 	stage: Stage = 'before'
-): Function => {
-	return function(target: Record<string, any> | Function, methodName: string) {
+): ClassDecorator & MethodDecorator => {
+	return function(target: Record<string, any> | Function, methodName?: string) {
 		const args: {
 			middlewareFunction: Function;
 			stage: Stage;
@@ -227,8 +227,6 @@ const middleware = <TSource = any, TContext = any>(
 
 		// define new metadata methods
 		Reflector.defineMetadata('davinci:graphql:middleware', middlewares, realTarget);
-
-		return target;
 	};
 };
 
