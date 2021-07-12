@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.3](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.5.2...@davinci/graphql@1.5.3) (2021-07-12)
+
+
+### Bug Fixes
+
+* correct fieldResolver to be a MethodDecorator ([f1de9c3](https://github.com/HPInc/davinci/commit/f1de9c3faf26c7b3927c22c4a7e89b5a756bd468))
+* duplicate check on fieldResolver (+ tests) ([1a14e40](https://github.com/HPInc/davinci/commit/1a14e40dcb3a54728becfd3f51a666081f55821b))
+* throw when defining a fieldResolver twice ([0e88ee5](https://github.com/HPInc/davinci/commit/0e88ee53ac912df664ad195164c1ae72e43d86ff))
+
+
+
+
+
 ## [1.5.2](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.5.1...@davinci/graphql@1.5.2) (2021-07-06)
 
 
