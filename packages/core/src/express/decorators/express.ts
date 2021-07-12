@@ -11,11 +11,11 @@ import { IHeaderDecoratorMetadata } from '../types';
  * Factory function that generates a `req` or `res` decorator
  * @param reqOrRes
  */
-export const createReqResExpressDecorator = (reqOrRes: 'req' | 'res') => () => (
+export const createReqResExpressDecorator = (reqOrRes: 'req' | 'res') => (): ParameterDecorator => (
 	prototype: Record<string, any>,
 	methodName: string,
 	index
-) => {
+): void => {
 	// get the existing metadata props
 	const methodParameters =
 		Reflector.getMetadata('davinci:openapi:method-parameters', prototype.constructor) || [];
@@ -48,8 +48,8 @@ type Stage = 'before' | 'after';
  * @param middlewareFunction
  * @param stage
  */
-const middleware = (middlewareFunction, stage: Stage = 'before'): Function => {
-	return function(target: Record<string, any> | Function, methodName: string) {
+const middleware = (middlewareFunction, stage: Stage = 'before'): ClassDecorator & MethodDecorator => {
+	return function(target: Record<string, any> | Function, methodName?: string) {
 		const args: {
 			middlewareFunction: Function;
 			stage: Stage;
@@ -69,8 +69,6 @@ const middleware = (middlewareFunction, stage: Stage = 'before'): Function => {
 
 		// define new metadata methods
 		Reflector.unshiftMetadata('davinci:express:method-middleware', args, realTarget);
-
-		return target;
 	};
 };
 
@@ -93,7 +91,7 @@ export { middleware };
  * @param name
  * @param value
  */
-export const header = (name: string, value: string) => {
+export const header = (name: string, value: string): MethodDecorator => {
 	return function(prototype: Record<string, any>, methodName: string) {
 		const meta: IHeaderDecoratorMetadata = { name, value, handler: prototype[methodName] };
 		// define new metadata methods

@@ -20,6 +20,24 @@ describe('express decorators', () => {
 				type: 'req'
 			});
 		});
+
+		it('should ignore a duplicate decorator', () => {
+			class MyClass {
+				myMethod(@express.req() @express.req() req) {
+					return req.accountId;
+				}
+			}
+
+			const methodParameters = Reflect.getMetadata('davinci:openapi:method-parameters', MyClass.prototype.constructor);
+
+			should(methodParameters).have.length(1);
+			should(methodParameters[0]).be.deepEqual({
+				handler: MyClass.prototype.myMethod,
+				methodName: 'myMethod',
+				index: 0,
+				type: 'req'
+			});
+		});
 	});
 
 	describe('@res()', () => {
@@ -43,7 +61,7 @@ describe('express decorators', () => {
 	});
 
 	describe('@middleware()', () => {
-		it('should decorate correctly', () => {
+		it('should decorate a method correctly', () => {
 			class MyClass {
 				@express.middleware(middlewareFn)
 				myMethod(res) {

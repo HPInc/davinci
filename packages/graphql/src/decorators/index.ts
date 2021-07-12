@@ -13,14 +13,15 @@ import {
 	FieldDecoratorOptionsFactory,
 	IFieldDecoratorOptionsFactoryArgs,
 	IResolverDecoratorMetadata,
-	ResolverMiddleware
+	ResolverMiddleware,
+	IExternalFieldResolverDecoratorMetadata
 } from '../types';
 
 /**
  * It annotates a variable as schema prop
  * @param options
  */
-export function type(options?: ITypeDecoratorOptions) {
+export function type(options?: ITypeDecoratorOptions): ClassDecorator {
 	return function(target: Function): void {
 		const metadata: ITypeDecoratorOptions = options;
 		Reflector.defineMetadata('davinci:graphql:types', metadata, target);
@@ -34,7 +35,7 @@ const DEFAULT_FIELD_OPTIONS = {};
  * It annotates a variable as schema prop
  * @param opts
  */
-export function field(opts?: IFieldDecoratorOptions | FieldDecoratorOptionsFactory) {
+export function field(opts?: IFieldDecoratorOptions | FieldDecoratorOptionsFactory): PropertyDecorator {
 	return function(prototype: object, key: string | symbol): void {
 		const optsFactory = (args: IFieldDecoratorOptionsFactoryArgs) => {
 			const options = _.merge({}, DEFAULT_FIELD_OPTIONS, typeof opts === 'function' ? opts(args) : opts);
@@ -54,7 +55,7 @@ export function field(opts?: IFieldDecoratorOptions | FieldDecoratorOptionsFacto
  * @param returnType - The return type or class of the resolver
  * @param name - Optional name
  */
-export const query = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: string): Function => {
+export const query = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: string): MethodDecorator => {
 	return function(prototype: object, methodName: string) {
 		const metadata: IResolverDecoratorMetadata = {
 			name,
@@ -71,7 +72,7 @@ export const query = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: s
  * @param returnType - The return type or class of the resolver
  * @param name - Optional name
  */
-export const mutation = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: string): Function => {
+export const mutation = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?: string): MethodDecorator => {
 	return function(prototype: object, methodName: string) {
 		const metadata: IResolverDecoratorMetadata = {
 			name,
@@ -87,7 +88,7 @@ export const mutation = (returnType: ReturnTypeFunc | ReturnTypeFuncValue, name?
  * Decorator that annotate a method parameter
  * @param options
  */
-export function arg(options?: IArgOptions): Function {
+export function arg(options?: IArgOptions): ParameterDecorator {
 	return function(prototype: object, methodName: string, index) {
 		// get the existing metadata props
 		const methodParameters = Reflector.getMetadata('davinci:graphql:args', prototype.constructor) || [];
@@ -122,32 +123,29 @@ export function fieldResolver<T = {}>(
 	resolverOf: ClassType,
 	fieldName: keyof T,
 	returnType: ReturnTypeFuncValue
-): Function {
-	return function(prototype: object, methodName: string, index) {
+): MethodDecorator {
+	return function(prototype: object, methodName: string) {
 		// get the existing metadata props
-		const methodParameters =
+		const resolvers: IExternalFieldResolverDecoratorMetadata[] =
 			Reflector.getMetadata('davinci:graphql:field-resolvers', resolverOf.prototype.constructor) || [];
-		const paramtypes = Reflector.getMetadata('design:paramtypes', prototype, methodName);
-		const isAlreadySet = !!_.find(methodParameters, { methodName, index });
-		if (isAlreadySet) return;
+		const existing = _.find(resolvers, { fieldName }) as IExternalFieldResolverDecoratorMetadata;
+		if (existing) {
+			throw new Error(`'${resolverOf.prototype.constructor.name}.${fieldName}' already resolved by ${existing.prototype.constructor.name}.${existing.methodName}`);
+		}
 
-		methodParameters.unshift({
+		resolvers.unshift({
 			prototype,
 			methodName,
 			resolverOf,
-			index,
 			fieldName,
 			returnType,
-			// name,
-			// opts: options,
-			handler: prototype[methodName],
-			type: paramtypes && paramtypes[index]
+			handler: prototype[methodName]
 		});
-		Reflector.defineMetadata('davinci:graphql:field-resolvers', methodParameters, resolverOf.prototype.constructor);
+		Reflector.defineMetadata('davinci:graphql:field-resolvers', resolvers, resolverOf.prototype.constructor);
 	};
 }
 
-export function info() {
+export function info(): ParameterDecorator {
 	return function(prototype: object, methodName: string, index) {
 		// get the existing metadata props
 		const methodParameters = Reflector.getMetadata('davinci:graphql:args', prototype.constructor) || [];
@@ -164,7 +162,7 @@ export function info() {
 	};
 }
 
-export function selectionSet() {
+export function selectionSet(): ParameterDecorator {
 	return function(prototype: object, methodName: string, index) {
 		// get the existing metadata props
 		const methodParameters = Reflector.getMetadata('davinci:graphql:args', prototype.constructor) || [];
@@ -181,7 +179,7 @@ export function selectionSet() {
 	};
 }
 
-export function parent() {
+export function parent(): ParameterDecorator {
 	return function(prototype: object, methodName: string, index) {
 		// get the existing metadata props
 		const methodParameters = Reflector.getMetadata('davinci:graphql:args', prototype.constructor) || [];
@@ -203,8 +201,8 @@ type Stage = 'before' | 'after';
 const middleware = <TSource = any, TContext = any>(
 	middlewareFunction: ResolverMiddleware<TSource, TContext>,
 	stage: Stage = 'before'
-): Function => {
-	return function(target: Record<string, any> | Function, methodName: string) {
+): ClassDecorator & MethodDecorator => {
+	return function(target: Record<string, any> | Function, methodName?: string) {
 		const args: {
 			middlewareFunction: Function;
 			stage: Stage;
@@ -231,8 +229,6 @@ const middleware = <TSource = any, TContext = any>(
 
 		// define new metadata methods
 		Reflector.defineMetadata('davinci:graphql:middleware', middlewares, realTarget);
-
-		return target;
 	};
 };
 

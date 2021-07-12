@@ -183,8 +183,8 @@ describe('createRouter', () => {
 				}
 			};
 
-			route.get({ path: '/syncMethod', summary: '' })(TestController.prototype, 'syncMethod');
-			route.get({ path: '/asyncMethod', summary: '' })(TestController.prototype, 'asyncMethod');
+			route.get({ path: '/syncMethod', summary: '' })(TestController.prototype, 'syncMethod', null);
+			route.get({ path: '/asyncMethod', summary: '' })(TestController.prototype, 'asyncMethod', null);
 		});
 
 		it('should correctly coerce synchronous controller methods to return a promise', async () => {

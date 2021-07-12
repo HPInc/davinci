@@ -16,7 +16,7 @@ import {
  * It annotates a variable as swagger definition property
  * @param {IPropDecoratorOptions} opts
  */
-export function prop<T = any>(opts?: IPropDecoratorOptions<T> | IPropDecoratorOptionsFactory<T>) {
+export function prop<T = any>(opts?: IPropDecoratorOptions<T> | IPropDecoratorOptionsFactory<T>): PropertyDecorator {
 	return function(prototype: Record<string, any>, key: string): void {
 		const optsFactory = () => {
 			const options = typeof opts === 'function' ? opts() : opts;
@@ -36,7 +36,7 @@ export function prop<T = any>(opts?: IPropDecoratorOptions<T> | IPropDecoratorOp
  * Its definition will be added in the `definitions` property
  * @param options
  */
-export function definition<T = any>(options?: IDefinitionDecoratorOptions<T>) {
+export function definition<T = any>(options?: IDefinitionDecoratorOptions<T>): ClassDecorator {
 	return function(target: Function): void {
 		Reflector.defineMetadata('davinci:openapi:definition', options ?? {}, target);
 	};

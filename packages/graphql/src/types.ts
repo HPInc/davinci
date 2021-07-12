@@ -36,10 +36,16 @@ export interface IFieldDecoratorOptions {
 }
 
 export interface IResolverDecoratorMetadata {
-	name: string;
+	name?: string;
 	methodName: string;
 	returnType: any;
 	handler: Function;
+}
+
+export interface IExternalFieldResolverDecoratorMetadata extends IResolverDecoratorMetadata {
+	prototype: any;
+	resolverOf: any;
+	fieldName: any;
 }
 
 export interface IFieldDecoratorOptionsFactoryArgs {

@@ -18,7 +18,7 @@ import { GraphQLJSON } from 'graphql-type-json';
 import _fp from 'lodash/fp';
 import _ from 'lodash';
 import { Reflector } from '@davinci/reflector';
-import { IFieldDecoratorMetadata, IResolverDecoratorMetadata, OperationType } from './types';
+import { IExternalFieldResolverDecoratorMetadata, IFieldDecoratorMetadata, IResolverDecoratorMetadata, OperationType } from './types';
 import { UnionType } from './gqlTypes';
 import { createExecutableSchema } from './createControllerSchemas';
 
@@ -198,7 +198,7 @@ const createObjectFields = ({
 		resolverMetadata
 	);
 
-	const externalFieldsResolvers =
+	const externalFieldsResolvers: IExternalFieldResolverDecoratorMetadata[] =
 		Reflector.getMetadata('davinci:graphql:field-resolvers', parentType.prototype.constructor) || [];
 
 	return () => {
