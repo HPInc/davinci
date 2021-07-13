@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.7.3](https://github.com/HPInc/davinci/compare/@davinci/core@1.7.2...@davinci/core@1.7.3) (2021-07-13)
+
+
+### Bug Fixes
+
+* correctly handle controllers with no basepath ([b7b67e1](https://github.com/HPInc/davinci/commit/b7b67e1f30613856d55a6eb60f813dd4c688e9bd))
+
+
+
+
+
 ## [1.7.2](https://github.com/HPInc/davinci/compare/@davinci/core@1.7.1...@davinci/core@1.7.2) (2021-07-12)
 
 
