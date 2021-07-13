@@ -8,6 +8,7 @@ import createRouter, { createRouteHandlers } from '../../../src/route/createRout
 import { route, openapi } from '../../../src/route';
 import * as utils from '../../support/utils';
 import createPathsDefinition from '../../../src/route/openapi/createPaths';
+import { generateFullSwagger, resources } from '../../../src/route/openapi/openapiDocs';
 
 const sinon = Sinon.createSandbox();
 
@@ -42,6 +43,44 @@ describe('createRouter', () => {
 				err.should.have.property('message').equal('Invalid Controller - missing Controller');
 				done();
 			}
+		});
+
+		it('should have correct routes when no basepath defined on the controller', () => {
+			const app = express();
+
+			@route.controller() // no 'basepath' set, derive from controller name instead ('greet')
+			class GreetController {
+				@route.get({ path: '/hello', summary: 'Oh hello!' })
+				hello() {}
+			}
+			createRouter({ Controller: GreetController, router: app });
+			const swagger = generateFullSwagger({});
+			resources.pop(); // this is global, so reset for next test
+
+			const expectedPath = '/greet/hello';
+			const expressPath = app._router.stack[2].route.path;
+			const openapiPath = Object.keys(swagger.paths)[0];
+			expressPath.should.eql(expectedPath);
+			openapiPath.should.eql(expectedPath);
+		});
+
+		it('should have correct routes when basepath IS defined on the controller', () => {
+			const app = express();
+
+			@route.controller({ basepath: '/foo' })
+			class GreetController {
+				@route.get({ path: '/hello', summary: 'Oh hello!' })
+				hello() {}
+			}
+			createRouter({ Controller: GreetController, router: app });
+			const swagger = generateFullSwagger({});
+			resources.pop(); // this is global, so reset for next test
+
+			const expectedPath = '/foo/hello';
+			const expressPath = app._router.stack[2].route.path;
+			const openapiPath = Object.keys(swagger.paths)[0];
+			expressPath.should.eql(expectedPath);
+			openapiPath.should.eql(expectedPath);
 		});
 
 		it('should succeed even with invalid controller definitions', done => {
