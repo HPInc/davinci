@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.7.4](https://github.com/HPInc/davinci/compare/@davinci/core@1.7.3...@davinci/core@1.7.4) (2021-07-14)
+
+
+### Bug Fixes
+
+* default basepath to / instead of resource name ([152822b](https://github.com/HPInc/davinci/commit/152822b66897de7d68f140da6a50eca10bc605f1))
+* handle one more edge case with / basepath ([998b57e](https://github.com/HPInc/davinci/commit/998b57e4ac7e22d6e7128477f5117529437d25bd))
+
+
+
+
+
 ## [1.7.3](https://github.com/HPInc/davinci/compare/@davinci/core@1.7.2...@davinci/core@1.7.3) (2021-07-13)
 
 
