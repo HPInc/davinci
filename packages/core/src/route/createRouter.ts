@@ -402,7 +402,7 @@ function createRouterAndSwaggerDoc(...options): Router | DaVinciExpress {
 
 	// get controller metadata
 	const metadata: IControllerDecoratorArgs = Reflector.getMetadata('davinci:openapi:controller', Controller) || {};
-	const basepath = metadata.basepath || `/${resourceName}`;
+	const basepath = metadata.basepath || '/';
 	const { resourceSchema } = metadata;
 	const { additionalSchemas } = metadata;
 

@@ -255,5 +255,80 @@ describe('openapiDocs', () => {
 				}
 			});
 		});
+
+		it('should generate the correct route without a basepath', () => {
+			openapiDocs.addResource(
+				{
+					paths: {
+						'/bar': { get: { operationId: 'operationId' } }
+					}
+				},
+				'customer' // resourceName
+				// <- no basepath
+			);
+			const swagger = openapiDocs.generateFullSwagger({});
+
+			swagger.paths.should.have.property('/customer/bar');
+		});
+
+		it('should generate the correct route with a basepath', () => {
+			openapiDocs.addResource(
+				{
+					paths: {
+						'/bar': { get: { operationId: 'operationId' } }
+					}
+				},
+				'customer', // resourceName
+				'foo' // basepath without leading slash
+			);
+			const swagger = openapiDocs.generateFullSwagger({});
+
+			swagger.paths.should.have.property('/foo/bar');
+		});
+
+		it('should generate the correct route with basepath and "/" path', () => {
+			openapiDocs.addResource(
+				{
+					paths: {
+						'/': { get: { operationId: 'operationId' } }
+					}
+				},
+				'customer', // resourceName
+				'foo' // basepath without leading slash
+			);
+			const swagger = openapiDocs.generateFullSwagger({});
+
+			swagger.paths.should.have.property('/foo');
+		});
+
+		it('should generate the correct route with basepath with a leading slash', () => {
+			openapiDocs.addResource(
+				{
+					paths: {
+						'/baz': { get: { operationId: 'operationId' } }
+					}
+				},
+				'customer', // resourceName
+				'/foo' // basepath with leading slash
+			);
+			const swagger = openapiDocs.generateFullSwagger({});
+
+			swagger.paths.should.have.property('/foo/baz');
+		});
+
+		it('should generate the correct route with "/" basepath and "/" path', () => {
+			openapiDocs.addResource(
+				{
+					paths: {
+						'/': { get: { operationId: 'operationId' } }
+					}
+				},
+				'customer', // resourceName
+				'/' // basepath with leading slash
+			);
+			const swagger = openapiDocs.generateFullSwagger({});
+
+			swagger.paths.should.have.property('/');
+		});
 	});
 });
