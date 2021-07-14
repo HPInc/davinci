@@ -5,6 +5,7 @@
 
 import Debug from 'debug';
 import _ from 'lodash';
+import path from 'path';
 import Resource from './Resource';
 
 const debug = new Debug('davinci:openapi');
@@ -72,12 +73,10 @@ export const generateFullSwagger = opts => {
 
 		// add paths
 		_.each(resource.paths, (resourcePath, pathName) => {
-			const trimmedBasePath = _.trim(resource.basePath, '/');
-			let fullPath = `/${trimmedBasePath}${pathName}`;
-			if (pathName === '/') fullPath = `/${trimmedBasePath}`;
-			const path = sanitiseResourcePath(resourcePath);
-			if (!_.isEmpty(path)) {
-				fullSwagger.paths[fullPath] = path;
+			const fullPath = _.trimEnd(path.join('/', resource.basePath || '', pathName || ''), '/');
+			const sanitisedPath = sanitiseResourcePath(resourcePath);
+			if (!_.isEmpty(sanitisedPath)) {
+				fullSwagger.paths[fullPath] = sanitisedPath;
 			}
 		});
 	});

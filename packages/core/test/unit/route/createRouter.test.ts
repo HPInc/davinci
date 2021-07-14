@@ -52,6 +52,7 @@ describe('createRouter', () => {
 		it('should have correct routes when controller has no decorator', () => {
 			const app = express();
 
+			// no controller, so 'basepath' should default to '/'
 			class GreetController {
 				@route.get({ path: '/hello', summary: 'Oh hello!' })
 				hello() {}
@@ -59,17 +60,18 @@ describe('createRouter', () => {
 			createRouter({ Controller: GreetController, router: app });
 			const swagger = openapiDocs.generateFullSwagger({});
 
-			const expectedPath = '/greet/hello';
+			const expectedPath = '/hello';
 			const expressPath = app._router.stack[2].route.path;
+			console.log(JSON.stringify(swagger.paths,null,2));
 			const openapiPath = Object.keys(swagger.paths)[0];
-			expressPath.should.eql(expectedPath);
-			openapiPath.should.eql(expectedPath);
+			expressPath.should.eql(expectedPath, 'express path');
+			openapiPath.should.eql(expectedPath, 'openAPI path');
 		});
 
 		it('should have correct routes when no basepath defined on the controller', () => {
 			const app = express();
 
-			@route.controller() // derives 'basepath' from controller name (ie. 'greet')
+			@route.controller() // 'basepath' should default to '/'
 			class GreetController {
 				@route.get({ path: '/hello', summary: 'Oh hello!' })
 				hello() {}
@@ -77,11 +79,11 @@ describe('createRouter', () => {
 			createRouter({ Controller: GreetController, router: app });
 			const swagger = openapiDocs.generateFullSwagger({});
 
-			const expectedPath = '/greet/hello';
+			const expectedPath = '/hello';
 			const expressPath = app._router.stack[2].route.path;
 			const openapiPath = Object.keys(swagger.paths)[0];
-			expressPath.should.eql(expectedPath);
-			openapiPath.should.eql(expectedPath);
+			expressPath.should.eql(expectedPath, 'express path');
+			openapiPath.should.eql(expectedPath, 'openAPI path');
 		});
 
 		it('should have correct routes when basepath IS defined on the controller', () => {
@@ -98,8 +100,8 @@ describe('createRouter', () => {
 			const expectedPath = '/foo/hello';
 			const expressPath = app._router.stack[2].route.path;
 			const openapiPath = Object.keys(swagger.paths)[0];
-			expressPath.should.eql(expectedPath);
-			openapiPath.should.eql(expectedPath);
+			expressPath.should.eql(expectedPath, 'express path');
+			openapiPath.should.eql(expectedPath, 'openAPI path');
 		});
 
 		it('should succeed even with invalid controller definitions', done => {
@@ -121,7 +123,7 @@ describe('createRouter', () => {
 				.have.property('stack')
 				.of.length(5);
 			router.stack[0].should.have.property('route');
-			router.stack[0].route.should.have.property('path').equal('/param/:id');
+			router.stack[0].route.should.have.property('path').equal('/:id');
 			router.stack[0].route.should.have.property('methods').deepEqual({ delete: true });
 			done();
 		});
