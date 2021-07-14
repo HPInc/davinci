@@ -73,10 +73,10 @@ export const generateFullSwagger = opts => {
 
 		// add paths
 		_.each(resource.paths, (resourcePath, pathName) => {
-			const fullPath = _.trimEnd(path.join('/', resource.basePath || '', pathName || ''), '/');
-			const sanitisedPath = sanitiseResourcePath(resourcePath);
-			if (!_.isEmpty(sanitisedPath)) {
-				fullSwagger.paths[fullPath] = sanitisedPath;
+			const pathObject = sanitiseResourcePath(resourcePath);
+			if (!_.isEmpty(pathObject)) {
+				const fullPath = _.trim(path.join(resource.basePath, pathName), '/');
+				fullSwagger.paths[`/${fullPath}`] = pathObject;
 			}
 		});
 	});
