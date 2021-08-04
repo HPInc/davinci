@@ -54,39 +54,90 @@ export const createMongooseController = <T extends Constructor<{}>>(
 		@openapi.prop()
 		path: string;
 
-		@openapi.prop()
-		$limit?: number;
+		@openapi.prop({
+			rawSchemaOptions: {
+				properties: {
+					_id: {
+						type: 'number'
+					}
+				}
+			}
+		})
+		$sort?: Record<string, number>;
 
 		@openapi.prop()
 		$skip?: number;
 
 		@openapi.prop()
-		$where?: object;
+		$limit?: number;
 
 		@openapi.prop({
+			type: null,
+			rawSchemaOptions: {
+				oneOf: [
+					{
+						type: 'string'
+					},
+					{
+						type: 'array',
+						items: { type: 'string' }
+					}
+				]
+			}
+		})
+		$select?: string | string[];
+
+		@openapi.prop({
+			rawSchemaOptions: {
+				properties: {}
+			}
+		})
+		$where?: Record<string, unknown>;
+
+		@openapi.prop({
+			type: null,
 			oneOf: [
 				{
-					type: 'object'
+					type: 'string'
+				},
+				{
+					$ref: '#/definitions/PopulateQueryParameter'
 				},
 				{
 					type: 'array',
-					items: { type: 'string' }
+					items: {
+						anyOf: [{ type: 'string' }, { $ref: '#/definitions/PopulateQueryParameter' }]
+					}
 				}
 			]
 		})
-		$select?: object | string[];
-
-		@openapi.prop()
-		$sort?: object;
-
-		@openapi.prop()
-		$populate?: PopulateQueryParameter;
+		$populate?: PopulateQueryParameter | string | (PopulateQueryParameter | string)[];
 	}
 
 	@openapi.definition({ title: 'QueryParameters' })
 	class QueryParameters {
-		@openapi.prop({ type: PopulateQueryParameter })
-		$populate?: PopulateQueryParameter;
+		// davinci doesn't support class definitions in oneOf yet
+		// add a fakePopulate so that PopulateQueryParameter definition is created
+		// TODO: add support to davinci
+		@openapi.prop()
+		fakePopulate?: PopulateQueryParameter;
+
+		@openapi.prop({
+			type: null,
+			oneOf: [
+				{
+					type: 'array',
+					items: {
+						anyOf: [{ type: 'string' }, { $ref: '#/definitions/PopulateQueryParameter' }]
+					}
+				},
+				{
+					type: 'string'
+				},
+				{ $ref: '#/definitions/PopulateQueryParameter' }
+			]
+		})
+		$populate?: PopulateQueryParameter | string | (PopulateQueryParameter | string)[];
 
 		@openapi.prop()
 		$limit?: number;
