@@ -55,11 +55,9 @@ export const createMongooseController = <T extends Constructor<{}>>(
 		path: string;
 
 		@openapi.prop({
-			rawSchemaOptions: {
-				properties: {
-					_id: {
-						type: 'number'
-					}
+			properties: {
+				_id: {
+					type: 'number'
 				}
 			}
 		})
@@ -73,24 +71,20 @@ export const createMongooseController = <T extends Constructor<{}>>(
 
 		@openapi.prop({
 			type: null,
-			rawSchemaOptions: {
-				oneOf: [
-					{
-						type: 'string'
-					},
-					{
-						type: 'array',
-						items: { type: 'string' }
-					}
-				]
-			}
+			oneOf: [
+				{
+					type: 'string'
+				},
+				{
+					type: 'array',
+					items: { type: 'string' }
+				}
+			]
 		})
 		$select?: string | string[];
 
 		@openapi.prop({
-			rawSchemaOptions: {
-				properties: {}
-			}
+			properties: {}
 		})
 		$where?: Record<string, unknown>;
 
