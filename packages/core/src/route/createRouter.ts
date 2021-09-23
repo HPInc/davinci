@@ -11,7 +11,7 @@ import express, { NextFunction, Response, Router } from 'express';
 import _ from 'lodash';
 import _fp from 'lodash/fp';
 import Promise from 'bluebird';
-import path from 'path';
+import urlJoin from 'url-join';
 import { ClassType, Reflector } from '@davinci/reflector';
 import { DaVinciRequest, IHeaderDecoratorMetadata } from '../express/types';
 import { NotImplemented, BadRequest } from '../errors/httpErrors';
@@ -433,7 +433,7 @@ function createRouterAndSwaggerDoc(...options): Router | DaVinciExpress {
 
 	// add them to the router
 	routes.forEach(route => {
-		const routePath = path.join(basepath, route.path);
+		const routePath = urlJoin(basepath, route.path);
 		return router[route.method](routePath, ...route.handlers);
 	});
 
