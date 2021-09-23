@@ -5,7 +5,7 @@
 
 import Debug from 'debug';
 import _ from 'lodash';
-import path from 'path';
+import urlJoin from 'url-join';
 import Resource from './Resource';
 
 const debug = new Debug('davinci:openapi');
@@ -75,7 +75,7 @@ export const generateFullSwagger = opts => {
 		_.each(resource.paths, (resourcePath, pathName) => {
 			const pathObject = sanitiseResourcePath(resourcePath);
 			if (!_.isEmpty(pathObject)) {
-				const fullPath = _.trim(path.join(resource.basePath, pathName), '/');
+				const fullPath = _.trim(urlJoin(resource.basePath, pathName), '/');
 				fullSwagger.paths[`/${fullPath}`] = pathObject;
 			}
 		});
