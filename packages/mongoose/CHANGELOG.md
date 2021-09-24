@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.17.5](https://github.com/HPInc/davinci/compare/@davinci/mongoose@0.17.4...@davinci/mongoose@0.17.5) (2021-09-24)
+
+**Note:** Version bump only for package @davinci/mongoose
+
+
+
+
+
 ## [0.17.4](https://github.com/HPInc/davinci/compare/@davinci/mongoose@0.17.3...@davinci/mongoose@0.17.4) (2021-07-14)
 
 **Note:** Version bump only for package @davinci/mongoose

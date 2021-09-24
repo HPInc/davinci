@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/example-rest-custom-ajv",
-	"version": "0.16.4",
+	"version": "0.16.5",
 	"private": true,
 	"description": "",
 	"main": "index.js",
@@ -12,8 +12,8 @@
 	"author": "HP",
 	"license": "MIT",
 	"dependencies": {
-		"@davinci/core": "^1.7.4",
-		"@davinci/mongoose": "^0.17.4",
+		"@davinci/core": "^1.7.5",
+		"@davinci/mongoose": "^0.17.5",
 		"debug": "^4.1.1",
 		"express": "4.16.4",
 		"lodash": "4.17.21",

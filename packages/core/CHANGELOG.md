@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.7.5](https://github.com/HPInc/davinci/compare/@davinci/core@1.7.4...@davinci/core@1.7.5) (2021-09-24)
+
+
+### Bug Fixes
+
+* open generate swagger use the same urlJoin library ([9e813d6](https://github.com/HPInc/davinci/commit/9e813d636ba26322a6d81d2dd2156fb4b9c6b86d))
+* use url join instead path join to fix OS coupled api paths ([2d1b7fc](https://github.com/HPInc/davinci/commit/2d1b7fc8590ad1f48f9f19b3364fc4c6aed40a09))
+
+
+
+
+
 ## [1.7.4](https://github.com/HPInc/davinci/compare/@davinci/core@1.7.3...@davinci/core@1.7.4) (2021-07-14)
 
 
