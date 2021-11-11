@@ -25,8 +25,8 @@ interface HealthChecksOptions {
 }
 
 interface DaVinciTlsOptions {
-	key?: string | Buffer | Array<string | Buffer>;
-	cert?: string | Buffer | Array<string | Buffer>;
+	key?: string | Buffer | Array<any>;
+	cert?: string | Buffer | Array<any>;
 }
 
 export interface DaVinciOptions {
