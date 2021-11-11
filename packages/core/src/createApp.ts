@@ -6,6 +6,7 @@
 import Debug from 'debug';
 import express, { Express } from 'express';
 import http from 'http';
+import https from 'https';
 import bluebird from 'bluebird';
 import { createTerminus, TerminusOptions } from '@godaddy/terminus';
 
@@ -21,6 +22,11 @@ const debug = new Debug('davinci:init');
 interface HealthChecksOptions {
 	livenessEndpoint?: string;
 	readynessEndpoint?: string;
+}
+
+interface DaVinciTlsOptions {
+	key?: string | Buffer | Array<string | Buffer>;
+	cert?: string | Buffer | Array<string | Buffer>;
 }
 
 export interface DaVinciOptions {
@@ -39,6 +45,7 @@ export interface DaVinciOptions {
 			options?: any;
 		};
 	};
+	tls?: DaVinciTlsOptions;
 	keepAliveTimeout?: number;
 }
 
@@ -93,7 +100,7 @@ export const configureExpress = async (app, options: DaVinciOptions = {}, runMid
 			// eslint-disable-next-line
 			const swaggerUi = require('swagger-ui-express');
 			app.use(swaggerUIPath, swaggerUi.serve, swaggerUi.setup(fullSwaggerDoc, swaggerUIOpts));
-			console.log(`--- Swagger UI available at ${swaggerUIPath}`);
+			debug(`--- Swagger UI available at ${swaggerUIPath}`);
 		}
 	}
 
@@ -130,6 +137,16 @@ export const configureTerminus = (app, healthChecks: HealthChecksOptions = {}) =
 	return createTerminus(app.server, terminusOptions);
 };
 
+const existsTlsOptions = (options: DaVinciOptions) => options.tls && options.tls.key && options.tls.cert;
+
+const createServer = (options: DaVinciOptions, app: Express): http.Server | https.Server => {
+	if (existsTlsOptions(options)) {
+		return https.createServer(options.tls, app);
+	}
+
+	return http.createServer(app);
+};
+
 export const createApp = (...args: CreateAppArgs): Promise<DaVinciExpress> => {
 	// process the arguments
 	const [app, options, addMiddlewares] = processArgs(...args);
@@ -139,7 +156,7 @@ export const createApp = (...args: CreateAppArgs): Promise<DaVinciExpress> => {
 		await execBootScripts(app, options.boot);
 
 		debug('create the server');
-		const server = http.createServer(app);
+		const server = createServer(options, app);
 
 		server.timeout = options.keepAliveTimeout || 61000;
 		server.keepAliveTimeout = options.keepAliveTimeout || 61000;
@@ -153,7 +170,7 @@ export const createApp = (...args: CreateAppArgs): Promise<DaVinciExpress> => {
 
 		await new Promise<void>(resolve =>
 			server.listen(config.PORT, () => {
-				console.log(`--- Server listening on ${config.PORT}`);
+				debug(`--- Server listening on ${config.PORT}`);
 				resolve();
 			})
 		);
