@@ -132,7 +132,7 @@ export const configureTerminus = (app, healthChecks: HealthChecksOptions = {}) =
 	return createTerminus(app.server, terminusOptions);
 };
 
-const hasHttpsOptions = (options: DaVinciOptions) => options.https;
+const hasHttpsOptions = (options: DaVinciOptions) => options.https && options.https.key && options.https.cert;
 
 const createServer = (options: DaVinciOptions, app: Express): http.Server | https.Server => {
 	if (hasHttpsOptions(options)) {

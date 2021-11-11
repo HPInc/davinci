@@ -112,6 +112,28 @@ describe('createApp', () => {
 			should(app.server).have.property('listen');
 		});
 
+		it('Should successfully configure a http express app with middleware', async () => {
+			const myApp = express();
+			const middlewares = app => {
+				should(app).have.property('use');
+			};
+			const myOptions = { https: {} };
+			app = await createApp(myApp, myOptions, middlewares);
+			await app.start();
+			should(app.server).have.property('listen');
+		});
+
+		it('Should successfully configure a http express app with middleware', async () => {
+			const myApp = express();
+			const middlewares = app => {
+				should(app).have.property('use');
+			};
+			const myOptions = { https: { key: 'key' } };
+			app = await createApp(myApp, myOptions, middlewares);
+			await app.start();
+			should(app.server).have.property('listen');
+		});
+
 		it('Should successfully configure a https express app with middleware', async () => {
 			const myApp = express();
 			const middlewares = app => {
