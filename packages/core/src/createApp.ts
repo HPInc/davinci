@@ -24,11 +24,6 @@ interface HealthChecksOptions {
 	readynessEndpoint?: string;
 }
 
-interface DaVinciTlsOptions {
-	key?: string | Buffer | Array<any>;
-	cert?: string | Buffer | Array<any>;
-}
-
 export interface DaVinciOptions {
 	version?: string | number;
 	boot?: {
@@ -45,7 +40,7 @@ export interface DaVinciOptions {
 			options?: any;
 		};
 	};
-	tls?: DaVinciTlsOptions;
+	https?: https.ServerOptions;
 	keepAliveTimeout?: number;
 }
 
@@ -100,7 +95,7 @@ export const configureExpress = async (app, options: DaVinciOptions = {}, runMid
 			// eslint-disable-next-line
 			const swaggerUi = require('swagger-ui-express');
 			app.use(swaggerUIPath, swaggerUi.serve, swaggerUi.setup(fullSwaggerDoc, swaggerUIOpts));
-			debug(`--- Swagger UI available at ${swaggerUIPath}`);
+			console.log(`--- Swagger UI available at ${swaggerUIPath}`);
 		}
 	}
 
@@ -137,11 +132,11 @@ export const configureTerminus = (app, healthChecks: HealthChecksOptions = {}) =
 	return createTerminus(app.server, terminusOptions);
 };
 
-const existsTlsOptions = (options: DaVinciOptions) => options.tls && options.tls.key && options.tls.cert;
+const hasHttpsOptions = (options: DaVinciOptions) => options.https;
 
 const createServer = (options: DaVinciOptions, app: Express): http.Server | https.Server => {
-	if (existsTlsOptions(options)) {
-		return https.createServer(options.tls, app);
+	if (hasHttpsOptions(options)) {
+		return https.createServer(options.https, app);
 	}
 
 	return http.createServer(app);
@@ -170,7 +165,7 @@ export const createApp = (...args: CreateAppArgs): Promise<DaVinciExpress> => {
 
 		await new Promise<void>(resolve =>
 			server.listen(config.PORT, () => {
-				debug(`--- Server listening on ${config.PORT}`);
+				console.log(`--- Server listening on ${config.PORT}`);
 				resolve();
 			})
 		);
