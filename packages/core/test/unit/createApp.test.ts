@@ -179,8 +179,7 @@ describe('createApp', () => {
 			Y7wQXTECgYEAnmVqADicvCDt+odEzDZTklPxWNg7QIzqpNO/I1BCRHdeIU+1r3cZ
 			kYexKuCpFlnLId5DsMbDiR1GTpWLLq8A9qWbNioJI7uShkf1pp6RWPCVq6Oa/uvS
 			7+6/GPfLO9hPa+g3NBQhb/g7nhmlLGaVRxYAF8Q3g7TX5aBvtqG1T2s=
-			-----END RSA PRIVATE KEY-----
-			`;
+			-----END RSA PRIVATE KEY-----`;
 
 			const myApp = express();
 			const middlewares = app => {
