@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.8.0](https://github.com/HPInc/davinci/compare/@davinci/core@1.7.5...@davinci/core@1.8.0) (2021-11-11)
+
+
+### Features
+
+* davinci with https support ([ea72d7b](https://github.com/HPInc/davinci/commit/ea72d7b910c319309a57c1975cadb13ed3c96463))
+
+
+
+
+
 ## [1.7.5](https://github.com/HPInc/davinci/compare/@davinci/core@1.7.4...@davinci/core@1.7.5) (2021-09-24)
 
 
