@@ -134,7 +134,7 @@ describe('createApp', () => {
 		});
 
 		it('Should successfully configure a https express app with middleware', async () => {
-			const key = `-----BEGIN CERTIFICATE-----
+			const cert = `-----BEGIN CERTIFICATE-----
 			MIIC3jCCAcagAwIBAgIJAJ2dp74JjAGKMA0GCSqGSIb3DQEBBQUAMB0xGzAZBgNV
 			BAMTEnd3dy5mYWtlZG9tYWluLmNvbTAeFw0yMTExMTExMDMwMTdaFw0zMTExMDkx
 			MDMwMTdaMB0xGzAZBgNVBAMTEnd3dy5mYWtlZG9tYWluLmNvbTCCASIwDQYJKoZI
@@ -153,7 +153,7 @@ describe('createApp', () => {
 			Vxso2OZv7sb4rdB3TlM2ymlD
 			-----END CERTIFICATE-----`;
 
-			const cert = `-----BEGIN RSA PRIVATE KEY-----
+			const key = `-----BEGIN RSA PRIVATE KEY-----
 			MIIEpQIBAAKCAQEAwx8pun1Dl1vvMDk7mO+02ZG6RIBmoY/7YDNGFcjSdExIlStS
 			QoAG6Cu/22R5T6q9UHT/eWR0aEixLQDBSheCrJUslqkIqfCMre92aTPMtTuZZXbQ
 			AU10YIy+zKul9F2ZucZIkHjqnS0UkNJTNXwONEda6Gd3Byw0UjEYL1pdE0f5I0+v
