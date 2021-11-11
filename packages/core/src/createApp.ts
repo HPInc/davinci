@@ -6,6 +6,7 @@
 import Debug from 'debug';
 import express, { Express } from 'express';
 import http from 'http';
+import https from 'https';
 import bluebird from 'bluebird';
 import { createTerminus, TerminusOptions } from '@godaddy/terminus';
 
@@ -39,6 +40,7 @@ export interface DaVinciOptions {
 			options?: any;
 		};
 	};
+	https?: https.ServerOptions;
 	keepAliveTimeout?: number;
 }
 
@@ -130,6 +132,16 @@ export const configureTerminus = (app, healthChecks: HealthChecksOptions = {}) =
 	return createTerminus(app.server, terminusOptions);
 };
 
+const hasHttpsOptions = (options: DaVinciOptions) => options.https && options.https.key && options.https.cert;
+
+const createServer = (options: DaVinciOptions, app: Express): http.Server | https.Server => {
+	if (hasHttpsOptions(options)) {
+		return https.createServer(options.https, app);
+	}
+
+	return http.createServer(app);
+};
+
 export const createApp = (...args: CreateAppArgs): Promise<DaVinciExpress> => {
 	// process the arguments
 	const [app, options, addMiddlewares] = processArgs(...args);
@@ -139,7 +151,7 @@ export const createApp = (...args: CreateAppArgs): Promise<DaVinciExpress> => {
 		await execBootScripts(app, options.boot);
 
 		debug('create the server');
-		const server = http.createServer(app);
+		const server = createServer(options, app);
 
 		server.timeout = options.keepAliveTimeout || 61000;
 		server.keepAliveTimeout = options.keepAliveTimeout || 61000;
