@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.9.0](https://github.com/HPInc/davinci/compare/@davinci/core@1.8.0...@davinci/core@1.9.0) (2021-11-19)
+
+
+### Features
+
+* adding port configuration on davinci options ([79408f6](https://github.com/HPInc/davinci/commit/79408f63e7d24b73d64df618b4f29a4db50698da))
+
+
+
+
+
 # [1.8.0](https://github.com/HPInc/davinci/compare/@davinci/core@1.7.5...@davinci/core@1.8.0) (2021-11-11)
 
 
