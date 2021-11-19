@@ -26,7 +26,7 @@ interface HealthChecksOptions {
 
 export interface DaVinciOptions {
 	version?: string | number;
-	port?: string | number;
+	port?: number;
 	boot?: {
 		dirPath?: string;
 	};
