@@ -144,5 +144,16 @@ describe('createApp', () => {
 			await app.start();
 			should(app.server).have.property('listen');
 		});
+		it('Should successfully configure a port with middleware', async () => {
+			const myApp = express();
+			const middlewares = app => {
+				should(app).have.property('use');
+			};
+			const myOptions = { port: 8080 };
+			app = await createApp(myApp, myOptions, middlewares);
+			await app.start();
+			should(app.server).have.property('listen');
+			should(app.server.address().port).equal(8080);
+		});
 	});
 });
