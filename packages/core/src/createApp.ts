@@ -26,6 +26,7 @@ interface HealthChecksOptions {
 
 export interface DaVinciOptions {
 	version?: string | number;
+	port?: string | number;
 	boot?: {
 		dirPath?: string;
 	};
@@ -163,9 +164,10 @@ export const createApp = (...args: CreateAppArgs): Promise<DaVinciExpress> => {
 		debug('configure terminus');
 		await configureTerminus(app, options.healthChecks);
 
+		const port = options.port || config.PORT;
 		await new Promise<void>(resolve =>
-			server.listen(config.PORT, () => {
-				console.log(`--- Server listening on ${config.PORT}`);
+			server.listen(port, () => {
+				console.log(`--- Server listening on ${port}`);
 				resolve();
 			})
 		);
