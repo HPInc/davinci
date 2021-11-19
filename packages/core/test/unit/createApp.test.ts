@@ -144,7 +144,7 @@ describe('createApp', () => {
 			await app.start();
 			should(app.server).have.property('listen');
 		});
-		it('Should successfully configure a port with middleware', async () => {
+		it('Should successfully configure a http express app with a custom port', async () => {
 			const myApp = express();
 			const middlewares = app => {
 				should(app).have.property('use');
