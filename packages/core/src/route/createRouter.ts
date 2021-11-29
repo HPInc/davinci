@@ -71,7 +71,16 @@ type ProcessMethodParameters = {
 	ajv: Ajv;
 };
 
-const performAjvValidation = ({ value, config: cfg, definitions, validationOptions, ajv }: ProcessMethodParameters) => {
+// TODO: This is a temporary workaround
+const schemasCache = {};
+
+export const performAjvValidation = ({
+	value,
+	config: cfg,
+	definitions,
+	validationOptions,
+	ajv
+}: ProcessMethodParameters) => {
 	const config = transformDefinitionToValidAJVSchemas(cfg, validationOptions);
 	let required = [];
 	if (!(validationOptions && validationOptions.partial) && config.required) {
@@ -82,17 +91,25 @@ const performAjvValidation = ({ value, config: cfg, definitions, validationOptio
 		properties: { [config.name]: config.schema },
 		required
 	};
+	const serializedSchema = JSON.stringify(schema);
+	let ajvInstance = schemasCache[serializedSchema];
 	const data = { [config.name]: value };
 
-	_.forEach(definitions, (theSchema, name) => {
-		const parsedSchema = transformDefinitionToValidAJVSchemas(theSchema, validationOptions, 'definition');
-		ajv.addSchema(parsedSchema, name);
-	});
+	if (!ajvInstance) {
+		ajvInstance = ajv;
+		_.forEach(definitions, (theSchema, name) => {
+			const parsedSchema = transformDefinitionToValidAJVSchemas(theSchema, validationOptions, 'definition');
+			ajvInstance.addSchema(parsedSchema, name);
+		});
+
+		ajvInstance.addSchema({ ...schema }, 'schema');
+		schemasCache[serializedSchema] = ajvInstance;
+	}
 
 	let errors;
-	const valid = ajv.addSchema({ ...schema }, 'schema').validate('schema', data);
+	const valid = ajvInstance.validate('schema', data);
 	if (!valid) {
-		errors = ajv.errors;
+		errors = ajvInstance.errors;
 	}
 
 	return { value: data[config.name], errors };
