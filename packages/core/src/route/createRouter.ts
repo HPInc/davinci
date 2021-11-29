@@ -280,7 +280,7 @@ const makeHandlerFunction = (
 
 	return [
 		..._.map(beforeMiddlewares, ({ middlewareFunction }) => wrapMiddleware(middlewareFunction)),
-		(req, res, next) => {
+		function davinciHandler(req, res, next) {
 			if (req.requestHandled) return next();
 			const parameterList = mapReqToParameters(
 				req,
