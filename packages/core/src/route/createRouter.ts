@@ -72,7 +72,7 @@ type ProcessMethodParameters = {
 };
 
 // TODO: This is a temporary workaround
-const schemasCache = {};
+export const ajvCache = {};
 
 export const performAjvValidation = ({
 	value,
@@ -92,7 +92,7 @@ export const performAjvValidation = ({
 		required
 	};
 	const serializedSchema = JSON.stringify(schema);
-	let ajvInstance = schemasCache[serializedSchema];
+	let ajvInstance = ajvCache[serializedSchema];
 	const data = { [config.name]: value };
 
 	if (!ajvInstance) {
@@ -103,7 +103,7 @@ export const performAjvValidation = ({
 		});
 
 		ajvInstance.addSchema({ ...schema }, 'schema');
-		schemasCache[serializedSchema] = ajvInstance;
+		ajvCache[serializedSchema] = ajvInstance;
 	}
 
 	let errors;

@@ -4,11 +4,13 @@ import should from 'should';
 import Sinon from 'sinon';
 import express from 'express';
 import MongooseController from '../../support/MongooseController';
-import createRouter, { createRouteHandlers, performAjvValidation } from '../../../src/route/createRouter';
+import createRouter, * as createRouterModules from '../../../src/route/createRouter';
 import { route, openapi } from '../../../src/route';
 import * as utils from '../../support/utils';
 import createPathsDefinition from '../../../src/route/openapi/createPaths';
 import * as openapiDocs from '../../../src/route/openapi/openapiDocs';
+
+const { createRouteHandlers, performAjvValidation } = createRouterModules;
 
 const sinon = Sinon.createSandbox();
 
@@ -359,6 +361,11 @@ describe('createRouter', () => {
 	});
 
 	describe('performAjvValidation', () => {
+		beforeEach(() => {
+			// @ts-ignore
+			createRouterModules.ajvCache = {};
+		});
+
 		it('should make use of the cached schemas', () => {
 			const value = { firstname: 'Max', lastname: 'Payne' };
 			const config = {
