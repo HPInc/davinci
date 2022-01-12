@@ -17,7 +17,7 @@
 		"debug": "^4.1.1",
 		"express": "4.16.4",
 		"lodash": "4.17.21",
-		"mongoose": "^5.11.15",
+		"mongoose": "^5.13.14",
 		"swagger-ui-dist": "^3.35.1"
 	},
 	"devDependencies": {
