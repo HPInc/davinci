@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.9](https://github.com/HPInc/davinci/compare/@davinci/example-graphql@1.2.8...@davinci/example-graphql@1.2.9) (2022-01-21)
+
+
+### Bug Fixes
+
+* update mongoose ([e738307](https://github.com/HPInc/davinci/commit/e7383075fb9482c1bc408decab3c53682fc60342))
+
+
+
+
+
 ## [1.2.8](https://github.com/HPInc/davinci/compare/@davinci/example-graphql@1.2.7...@davinci/example-graphql@1.2.8) (2021-11-19)
 
 **Note:** Version bump only for package @davinci/example-graphql

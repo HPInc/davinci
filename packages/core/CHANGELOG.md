@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.9.1](https://github.com/HPInc/davinci/compare/@davinci/core@1.9.0...@davinci/core@1.9.1) (2022-01-21)
+
+
+### Bug Fixes
+
+* update mongoose ([e738307](https://github.com/HPInc/davinci/commit/e7383075fb9482c1bc408decab3c53682fc60342))
+
+
+
+
+
 # [1.9.0](https://github.com/HPInc/davinci/compare/@davinci/core@1.8.0...@davinci/core@1.9.0) (2021-11-19)
 
 

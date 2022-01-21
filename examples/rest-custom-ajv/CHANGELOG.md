@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.16.8](https://github.com/HPInc/davinci/compare/@davinci/example-rest-custom-ajv@0.16.7...@davinci/example-rest-custom-ajv@0.16.8) (2022-01-21)
+
+
+### Bug Fixes
+
+* update mongoose ([e738307](https://github.com/HPInc/davinci/commit/e7383075fb9482c1bc408decab3c53682fc60342))
+* update swagger-ui-dist ([1b0fc99](https://github.com/HPInc/davinci/commit/1b0fc994fbfcd64ef3a0ffbe8c795feab48631d8))
+
+
+
+
+
 ## [0.16.7](https://github.com/HPInc/davinci/compare/@davinci/example-rest-custom-ajv@0.16.6...@davinci/example-rest-custom-ajv@0.16.7) (2021-11-19)
 
 **Note:** Version bump only for package @davinci/example-rest-custom-ajv

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.17.8](https://github.com/HPInc/davinci/compare/@davinci/mongoose@0.17.7...@davinci/mongoose@0.17.8) (2022-01-21)
+
+
+### Bug Fixes
+
+* update mongoose ([e738307](https://github.com/HPInc/davinci/commit/e7383075fb9482c1bc408decab3c53682fc60342))
+
+
+
+
+
 ## [0.17.7](https://github.com/HPInc/davinci/compare/@davinci/mongoose@0.17.6...@davinci/mongoose@0.17.7) (2021-11-19)
 
 **Note:** Version bump only for package @davinci/mongoose
