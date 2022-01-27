@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.17.9](https://github.com/HPInc/davinci/compare/@davinci/mongoose@0.17.8...@davinci/mongoose@0.17.9) (2022-01-27)
+
+
+### Bug Fixes
+
+* virtual as property decorator ([c53170f](https://github.com/HPInc/davinci/commit/c53170f2eb97fb1485af895b1599ee641c37cb17))
+
+
+
+
+
 ## [0.17.8](https://github.com/HPInc/davinci/compare/@davinci/mongoose@0.17.7...@davinci/mongoose@0.17.8) (2022-01-21)
 
 

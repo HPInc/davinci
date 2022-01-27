@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/mongoose",
-	"version": "0.17.8",
+	"version": "0.17.9",
 	"description": "Integration with Mongoose ODM",
 	"author": "HP",
 	"license": "MIT",
