@@ -15,14 +15,4 @@ export default class CustomerController extends createMongooseController(model, 
 		console.log(firstname, age, context);
 		return firstname;
 	}
-
-	@get({ path: '/customMiddlewares', summary: 'This is a method with custom middlewares' })
-	pathWithCustomMiddleware() {
-		return { result: 1 };
-	}
-
-	@get({ path: '/customHeader', summary: 'This is a method with custom header' })
-	customHeader() {
-		return { result: 1 };
-	}
 }
