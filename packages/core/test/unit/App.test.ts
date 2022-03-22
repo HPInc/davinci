@@ -47,7 +47,9 @@ describe('App', () => {
 		const app = createApp();
 		class MyModule implements Module {
 			app: App;
-			getModuleId: () => 'myModule';
+			getModuleId() {
+				return 'myModule';
+			}
 
 			onRegister(app: App) {
 				this.app = app;
@@ -61,16 +63,25 @@ describe('App', () => {
 
 	it('should be able to register multiple modules #1', async () => {
 		const app = createApp();
-		class MyModule implements Module {
+		class MyModule1 implements Module {
 			app: App;
-			getModuleId: () => 'myModule';
+			getModuleId() {
+				return 'myModule1';
+			}
 
 			onRegister(app: App) {
 				this.app = app;
 			}
 		}
-		const myModule1 = new MyModule();
-		const myModule2 = new MyModule();
+
+		class MyModule2 extends MyModule1 {
+			getModuleId() {
+				return 'myModule2';
+			}
+		}
+
+		const myModule1 = new MyModule1();
+		const myModule2 = new MyModule2();
 		await app.register(myModule1, myModule2);
 
 		should(myModule1.app).be.equal(app);
@@ -79,27 +90,57 @@ describe('App', () => {
 
 	it('should be able to register multiple modules #2', async () => {
 		const app = createApp();
-		class MyModule implements Module {
+		class MyModule1 implements Module {
 			app: App;
-			getModuleId: () => 'myModule';
+			getModuleId() {
+				return 'myModule1';
+			}
 
 			onRegister(app: App) {
 				this.app = app;
 			}
 		}
-		const myModule1 = new MyModule();
-		const myModule2 = new MyModule();
+
+		class MyModule2 extends MyModule1 {
+			getModuleId() {
+				return 'myModule2';
+			}
+		}
+
+		const myModule1 = new MyModule1();
+		const myModule2 = new MyModule2();
 		await app.register([myModule1, myModule2]);
 
 		should(myModule1.app).be.equal(app);
 		should(myModule2.app).be.equal(app);
 	});
 
+	it('should error trying to register multiple modules with same identifier', async () => {
+		const app = createApp();
+		class MyModule1 implements Module {
+			app: App;
+			getModuleId() {
+				return ['myModule'];
+			}
+		}
+
+		class MyModule2 extends MyModule1 {}
+
+		const myModule1 = new MyModule1();
+		const myModule2 = new MyModule2();
+
+		await should(app.register(myModule1, myModule2)).be.rejectedWith({
+			message: /A module with the same identifier (.+) has already been registered/,
+		});
+	});
+
 	it("should execute the modules' onInit hook", async () => {
 		const app = createApp();
 		class MyModule implements Module {
 			app: App;
-			getModuleId: () => 'myModule';
+			getModuleId() {
+				return 'myModule';
+			}
 
 			onInit(app: App) {
 				this.app = app;
@@ -116,7 +157,9 @@ describe('App', () => {
 		const app = createApp();
 		class MyModule implements Module {
 			app: App;
-			getModuleId: () => 'myModule';
+			getModuleId() {
+				return 'myModule';
+			}
 
 			onDestroy(app: App) {
 				this.app = app;
