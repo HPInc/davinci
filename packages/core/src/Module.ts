@@ -18,7 +18,10 @@ export abstract class Module {
 		this.controllers = options?.controllers ?? [];
 	}
 
-	abstract getModuleId(): string;
+	/**
+	 * @returns {string | string[]} the identifier (or identifiers) of the module
+	 */
+	abstract getModuleId(): string | string[];
 
 	onRegister?(app: App): void;
 

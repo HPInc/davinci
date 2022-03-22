@@ -5,4 +5,4 @@
 
 export * from './App';
 export * from './Module';
-export * from './lib/async';
+export * from './lib/async-utils';
