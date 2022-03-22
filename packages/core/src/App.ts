@@ -5,12 +5,14 @@
 
 import pino from 'pino';
 import { Module } from './Module';
-import { mapSeries } from './lib/async';
+import { mapSeries } from './lib/async-utils';
+import { coerceArray } from './lib/array-utils';
 
 const logger = pino({ name: 'app' });
 
 export class App extends Module {
 	private modules: Module[] = [];
+	private modulesDic: Record<string, Module> = {};
 
 	getModuleId(): string {
 		return 'app';
@@ -25,12 +27,21 @@ export class App extends Module {
 		if (args.length > 1) {
 			modules = args;
 		} else if (args) {
-			modules = Array.isArray(args[0]) ? args[0] : [args[0]];
+			modules = coerceArray(args[0]);
 		}
 
 		try {
 			return await mapSeries(modules, mod => {
+				const moduleIds = coerceArray(mod.getModuleId());
+				moduleIds.forEach(id => {
+					if (this.modulesDic[id]) {
+						throw new Error(`A module with the same identifier "${id}" has already been registered`);
+					}
+
+					this.modulesDic[id] = mod;
+				});
 				this.modules.push(mod);
+
 				return mod.onRegister?.(this);
 			});
 		} catch (err) {

@@ -4,7 +4,7 @@
  */
 
 import should from 'should';
-import { mapParallel, mapSeries } from '../../../src/lib/async';
+import { mapParallel, mapSeries } from '../../../src/lib/async-utils';
 
 describe('async mappers', () => {
 	describe('mapSeries', () => {
