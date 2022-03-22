@@ -7,10 +7,14 @@ import pino from 'pino';
 import { Module } from './Module';
 import { mapSeries } from './lib/async';
 
-const logger = pino({ name: 'App' });
+const logger = pino({ name: 'app' });
 
-export class App {
+export class App extends Module {
 	private modules: Module[] = [];
+
+	getModuleId(): string {
+		return 'app';
+	}
 
 	async register(modules: Module[]): Promise<unknown>;
 	async register(...modules: Module[]): Promise<unknown>;
@@ -30,24 +34,28 @@ export class App {
 				return mod.onRegister?.(this);
 			});
 		} catch (err) {
-			// some logging
-			logger.error({ error: err }, 'Fatal error');
+			logger.error({ error: err }, 'Fatal error during module registration');
 			throw err;
 		}
 	}
 
 	async init() {
+		logger.debug('App initialization. Executing onInit hooks');
+
 		try {
+			await this.onInit?.(this);
 			return await mapSeries(this.modules, module => module.onInit?.(this));
 		} catch (err) {
-			// some logging
-			logger.error({ error: err }, 'Fatal error');
+			logger.error({ error: err }, 'Fatal error during module init');
 			throw err;
 		}
 	}
 
 	async shutdown() {
+		logger.debug('App shutdown. Executing onDestroy hooks');
+
 		try {
+			await this.onDestroy?.(this);
 			return await mapSeries(this.modules, module => module.onDestroy?.(this));
 		} catch (err) {
 			// some logging
