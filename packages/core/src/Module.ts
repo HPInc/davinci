@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { App } from './App';
+import type { App } from './App';
 
 type ClassType = new (...args: any[]) => any;
 
@@ -20,9 +20,9 @@ export abstract class Module {
 
 	abstract getModuleId(): string;
 
-	abstract onRegister?(app: App): void;
+	onRegister?(app: App): void;
 
-	abstract onInit?(app: App): void;
+	onInit?(app: App): void;
 
-	abstract onDestroy?(app: App): void;
+	onDestroy?(app: App): void;
 }
