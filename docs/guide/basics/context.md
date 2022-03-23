@@ -28,7 +28,7 @@ function createContext({ req }: { req: Request }): Context {
 }
 
 createApp(expressApp, app => {
-	app.use(createRouter(CustomerController, 'Customer', createContext));
+	app.use(createRouter({ Controller: CustomerController, resourceName: 'Customer', contextFactory: createContext }));
 });
 
 if (require.main === module) {
