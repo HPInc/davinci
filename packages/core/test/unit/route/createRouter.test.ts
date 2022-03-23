@@ -34,7 +34,7 @@ describe('createRouter', () => {
 		it('should successfully create a router', done => {
 			const model = {};
 			const mockClass = utils.makeMockControllerClass(model, TestController);
-			const router = createRouter(mockClass, 'test');
+			const router = createRouter({ Controller: mockClass, resourceName: 'test' });
 			should(router).have.property('params');
 			should(router.name).be.equal('router');
 			done();
@@ -42,7 +42,7 @@ describe('createRouter', () => {
 
 		it('should fail with missing controller', done => {
 			try {
-				createRouter(null, 'test');
+				createRouter({ Controller: null, resourceName: 'test' });
 			} catch (err) {
 				err.should.have.property('message').equal('Invalid Controller - missing Controller');
 				done();
@@ -117,7 +117,7 @@ describe('createRouter', () => {
 				}
 			}
 
-			const router = createRouter(ParamController);
+			const router = createRouter({ Controller: ParamController });
 
 			should(router)
 				.have.property('stack')
@@ -136,8 +136,13 @@ describe('createRouter', () => {
 				@route.get({ path: '/hello', summary: 'Find' })
 				find() {}
 			}
-			const router = createRouter(TestController, 'test', null, app);
-
+			const router = createRouter({
+				Controller: TestController,
+				resourceName: 'test',
+				contextFactory: null,
+				router: app
+			});
+			
 			should(router).be.equal(app);
 			should(app._router.stack[2].route).match({
 				path: '/api/test/hello',
@@ -183,7 +188,7 @@ describe('createRouter', () => {
 		}
 
 		it('should use the specified success response code', async () => {
-			const router = createRouter(MockController);
+			const router = createRouter({ Controller: MockController });
 
 			const req = {
 				params: {}
@@ -205,7 +210,7 @@ describe('createRouter', () => {
 		});
 
 		it('should use a default response code when none specified', async () => {
-			const router = createRouter(MockController);
+			const router = createRouter({ Controller: MockController });
 
 			const req = {};
 			const res = {
