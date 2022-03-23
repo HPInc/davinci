@@ -42,9 +42,18 @@ describe('createRouter', () => {
 
 		it('should fail with missing controller', done => {
 			try {
-				createRouter({ Controller: null, resourceName: 'test' });
+				createRouter(null, 'test');
 			} catch (err) {
 				err.should.have.property('message').equal('Invalid Controller - missing Controller');
+				done();
+			}
+		});
+
+		it('should fail with null controller', done => {
+			try {
+				createRouter({ Controller: null, resourceName: 'test' });
+			} catch (err) {
+				err.should.have.property('message').equal('Invalid Controller - not function');
 				done();
 			}
 		});
