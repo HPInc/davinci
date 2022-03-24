@@ -3,16 +3,28 @@
  * SPDX-License-Identifier: MIT
  */
 import { Module } from '@davinci/core';
-import { RequestHandler, HttpModuleOptions /* CorsOptions */ } from './types';
+import { RequestHandler, HttpServerModuleOptions /* CorsOptions */ } from './types';
 
-export abstract class HttpModule<Request = unknown, Response = unknown, Server = unknown> implements Module {
+export abstract class HttpServerModule<Request = unknown, Response = unknown, Server = unknown> implements Module {
 	protected httpServer: Server;
 
 	getModuleId() {
 		return 'http';
 	}
 
-	constructor(protected moduleOptions?: HttpModuleOptions) {}
+	constructor(protected moduleOptions?: HttpServerModuleOptions) {}
+
+	getModuleOptions() {
+		return this.moduleOptions;
+	}
+
+	public getHttpServer(): Server {
+		return this.httpServer as Server;
+	}
+
+	public setHttpServer(httpServer: Server) {
+		this.httpServer = httpServer;
+	}
 
 	// abstract get(handler: Function);
 	abstract get(path: unknown, handler: RequestHandler<Request, Response>);
@@ -40,14 +52,6 @@ export abstract class HttpModule<Request = unknown, Response = unknown, Server =
 
 	abstract listen(port: string | number, callback?: () => void);
 	abstract listen(port: string | number, hostname: string, callback?: () => void);
-
-	public getHttpServer(): Server {
-		return this.httpServer as Server;
-	}
-
-	public setHttpServer(httpServer: Server) {
-		this.httpServer = httpServer;
-	}
 
 	abstract initHttpServer(): void;
 	abstract setInstance(instance: unknown): void;

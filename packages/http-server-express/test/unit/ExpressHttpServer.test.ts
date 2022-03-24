@@ -4,10 +4,10 @@
  */
 import { App } from '@davinci/core';
 import axios from 'axios';
-import { ExpressHttpModule } from '../../src/ExpressHttpModule';
+import { ExpressHttpServer } from '../../src/ExpressHttpServer';
 import should from 'should';
 
-describe('ExpressHttpModule', () => {
+describe('ExpressHttpServer', () => {
 	let app: App;
 
 	beforeEach(() => {
@@ -19,8 +19,8 @@ describe('ExpressHttpModule', () => {
 	});
 
 	it('should initialize a listening server', async () => {
-		const expressHttpModule = new ExpressHttpModule({ port: 3000 });
-		app.register(expressHttpModule);
+		const expressHttpServer = new ExpressHttpServer({ port: 3000 });
+		app.register(expressHttpServer);
 
 		await app.init();
 
@@ -33,8 +33,8 @@ describe('ExpressHttpModule', () => {
 	});
 
 	it('should shutdown the listening server', async () => {
-		const expressHttpModule = new ExpressHttpModule({ port: 3000 });
-		app.register(expressHttpModule);
+		const expressHttpServer = new ExpressHttpServer({ port: 3000 });
+		app.register(expressHttpServer);
 
 		await app.init();
 		await app.shutdown().catch(err => err);

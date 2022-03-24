@@ -2,19 +2,19 @@
  * © Copyright 2022 HP Development Company, L.P.
  * SPDX-License-Identifier: MIT
  */
-import { HttpModule, HttpModuleOptions, RequestHandler } from '@davinci/http';
+import { HttpServerModule, HttpServerModuleOptions, RequestHandler } from '@davinci/http-server';
 import express, { Express, Request, Response } from 'express';
 import http, { Server as HttpServer } from 'http';
 import https, { Server as HttpsServer } from 'https';
 
 type Server = HttpServer | HttpsServer;
 
-type ExpressHttpModuleOptions = { app?: Express } & HttpModuleOptions;
+type ExpressHttpServerModuleOptions = { app?: Express } & HttpServerModuleOptions;
 
-export class ExpressHttpModule extends HttpModule<Request, Response, Server> {
+export class ExpressHttpServer extends HttpServerModule<Request, Response, Server> {
 	instance: Express;
 
-	constructor(options?: ExpressHttpModuleOptions) {
+	constructor(options?: ExpressHttpServerModuleOptions) {
 		const { app, ...moduleOptions } = options ?? {};
 		super(moduleOptions);
 		this.instance = app ?? express();
