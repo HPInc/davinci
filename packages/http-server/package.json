@@ -1,5 +1,5 @@
 {
-	"name": "@davinci/http",
+	"name": "@davinci/http-server",
 	"version": "0.0.1",
 	"description": "Framework for rapid and consistent API development",
 	"main": "build-cjs/index.js",
