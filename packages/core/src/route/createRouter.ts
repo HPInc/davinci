@@ -382,7 +382,7 @@ function processParameters(params: [CreateRouterParameters] | CreateRouterParame
 
 /**
  * The base class for controls that can be rendered.
- * @param {CreateRouterParameters} options createRouter options
+ * @param {CreateRouterParameters} parameters createRouter options
  *
  * @return the express app router
  */
