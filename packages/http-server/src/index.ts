@@ -3,5 +3,5 @@
  * SPDX-License-Identifier: MIT
  */
 
-export * from './HttpModule';
+export * from './HttpServerModule';
 export * from './types';
