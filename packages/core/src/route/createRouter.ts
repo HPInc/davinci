@@ -343,6 +343,13 @@ const validateController = (Controller: ClassType) => {
 	if (typeof Controller !== 'function') throw new Error('Invalid Controller - not function');
 };
 
+/**
+ * @property {ClassType} Controller - The controller class
+ * @property {string | null} resourceName - The controller name
+ * @property {ContextFactory | null} contextFactory - A factory to obtain the request context
+ * @property {Router} router - The express router app
+ * @property {AjvFactory | null} [ajvFactory] - A factory to obtain Ajv instance
+ */
 export type CreateRouterParameters = {
 	Controller: ClassType;
 	resourceName?: string | null;
@@ -373,6 +380,12 @@ function processParameters(params: [CreateRouterParameters] | CreateRouterParame
 	};
 }
 
+/**
+ * The base class for controls that can be rendered.
+ * @param {CreateRouterParameters} parameters createRouter options
+ *
+ * @return the express app router
+ */
 function createRouterAndSwaggerDoc(parameters: CreateRouterParameters): Router | DaVinciExpress;
 /**
  * The base class for controls that can be rendered.

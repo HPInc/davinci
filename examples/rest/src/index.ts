@@ -40,7 +40,12 @@ const expressApp: Express = express();
 const createContext = ({ req }): Context => ({ accountId: req.headers['x-custom-accountid'] });
 
 createApp(expressApp, options, app => {
-	createRouter(CustomerController, 'Customer', createContext, app);
+	createRouter({
+		Controller: CustomerController,
+		resourceName : 'Customer',
+		contextFactory : createContext,
+		router: app
+	});
 });
 
 if (require.main === module) {

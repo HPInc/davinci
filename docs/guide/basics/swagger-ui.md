@@ -36,7 +36,7 @@ const options = {
 const expressApp: Express = express();
 
 createApp(expressApp, options, app => {
-	app.use(createRouter(CustomerController, 'Customer'));
+	app.use(createRouter({ Controller: CustomerController, resourceName: 'Customer' }));
 });
 
 if (require.main === module) {
