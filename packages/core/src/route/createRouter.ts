@@ -348,7 +348,7 @@ const validateController = (Controller: ClassType) => {
  * @property {string | null} resourceName - The controller name
  * @property {ContextFactory | null} contextFactory - A factory to obtain the request context
  * @property {Router} router - The express router app
- * @prop {AjvFactory | null} [ajvFactory] - A factory to obtain Ajv instance
+ * @property {AjvFactory | null} [ajvFactory] - A factory to obtain Ajv instance
  */
 export type CreateRouterParameters = {
 	Controller: ClassType;
