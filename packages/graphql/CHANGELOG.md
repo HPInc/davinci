@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.10](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.5.9...@davinci/graphql@1.5.10) (2022-03-24)
+
+**Note:** Version bump only for package @davinci/graphql
+
+
+
+
+
 ## [1.5.9](https://github.com/HPInc/davinci/compare/@davinci/graphql@1.5.8...@davinci/graphql@1.5.9) (2022-01-21)
 
 **Note:** Version bump only for package @davinci/graphql

@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.9.2](https://github.com/HPInc/davinci/compare/@davinci/core@1.9.1...@davinci/core@1.9.2) (2022-03-24)
+
+
+### Bug Fixes
+
+* test ([a0ddcc8](https://github.com/HPInc/davinci/commit/a0ddcc82e79d605cf5a6b03f32897c0b9bcfde59))
+* typo ([1deca06](https://github.com/HPInc/davinci/commit/1deca0693db8adca937909d03e9a35c2c316ff2f))
+* typo ([ecee118](https://github.com/HPInc/davinci/commit/ecee1185383e6b288cb57f7a8cd29eb8c274a48b))
+* use latest createRouter in examples and update doc ([4a9c56b](https://github.com/HPInc/davinci/commit/4a9c56b4e59898e1a9b5d0955e8ede7aefd4c87a))
+
+
+
+
+
 ## [1.9.1](https://github.com/HPInc/davinci/compare/@davinci/core@1.9.0...@davinci/core@1.9.1) (2022-01-21)
 
 

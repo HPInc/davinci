@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.15.10](https://github.com/HPInc/davinci/compare/@davinci/example-rest@0.15.9...@davinci/example-rest@0.15.10) (2022-03-24)
+
+
+### Bug Fixes
+
+* use latest createRouter in examples and update doc ([4a9c56b](https://github.com/HPInc/davinci/commit/4a9c56b4e59898e1a9b5d0955e8ede7aefd4c87a))
+
+
+
+
+
 ## [0.15.9](https://github.com/HPInc/davinci/compare/@davinci/example-rest@0.15.8...@davinci/example-rest@0.15.9) (2022-01-27)
 
 **Note:** Version bump only for package @davinci/example-rest
