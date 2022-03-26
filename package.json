@@ -9,7 +9,7 @@
 		"build": "lerna run build",
 		"test": "lerna run test",
 		"cover": "lerna run cover",
-		"bootstrap": "lerna bootstrap",
+		"bootstrap": "lerna bootstrap --ignore '@davinci/example*'",
 		"bump": "lerna publish",
 		"docs:dev": "vuepress dev docs",
 		"docs:build": "vuepress build docs --debug",
