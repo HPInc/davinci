@@ -6,7 +6,7 @@
 	},
 	"scripts": {
 		"postinstall": "npm run bootstrap",
-		"build": "lerna run build",
+		"build": "lerna run build --ignore '@davinci/example*'",
 		"test": "lerna run test",
 		"cover": "lerna run cover",
 		"bootstrap": "lerna bootstrap --ignore '@davinci/example*'",
