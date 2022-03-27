@@ -5,16 +5,18 @@
 import { Module } from '@davinci/core';
 import { RequestHandler, HttpServerModuleOptions /* CorsOptions */ } from './types';
 
-export abstract class HttpServerModule<Request = unknown, Response = unknown, Server = unknown> implements Module {
+export abstract class HttpServerModule<Request = unknown, Response = unknown, Server = unknown> extends Module {
 	protected httpServer: Server;
 
 	getModuleId() {
 		return 'http';
 	}
 
-	constructor(protected moduleOptions?: HttpServerModuleOptions) {}
+	constructor(protected moduleOptions?: HttpServerModuleOptions) {
+		super();
+	}
 
-	getModuleOptions() {
+	public getModuleOptions() {
 		return this.moduleOptions;
 	}
 

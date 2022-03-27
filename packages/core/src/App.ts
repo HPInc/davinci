@@ -4,24 +4,36 @@
  */
 
 import pino from 'pino';
+import { ClassType, ClassReflection, reflect } from '@davinci/reflector';
 import { Module } from './Module';
 import { mapSeries } from './lib/async-utils';
 import { coerceArray } from './lib/array-utils';
 
 const logger = pino({ name: 'app' });
 
+export interface AppOptions {
+	controllers?: ClassType[];
+}
+
 export class App extends Module {
 	private modules: Module[] = [];
+	private controllers: ClassType[];
+	private controllersReflectionCache = new Map<ClassType, ClassReflection>();
 	private modulesDic: Record<string, Module> = {};
 
-	getModuleId(): string {
+	constructor(options?: AppOptions) {
+		super();
+		this.controllers = options?.controllers ?? [];
+	}
+
+	public getModuleId(): string {
 		return 'app';
 	}
 
-	async register(modules: Module[]): Promise<unknown>;
-	async register(...modules: Module[]): Promise<unknown>;
-	async register(module: Module): Promise<unknown>;
-	async register(...args: any[]) {
+	public async registerModule(modules: Module[]): Promise<unknown>;
+	public async registerModule(...modules: Module[]): Promise<unknown>;
+	public async registerModule(module: Module): Promise<unknown>;
+	public async registerModule(...args: any[]) {
 		let modules: Module[] = [];
 
 		if (args.length > 1) {
@@ -50,7 +62,22 @@ export class App extends Module {
 		}
 	}
 
-	async init() {
+	public async registerController(controllers: ClassType[]): Promise<unknown>;
+	public async registerController(...controllers: ClassType[]): Promise<unknown>;
+	public async registerController(controller: ClassType): Promise<unknown>;
+	public async registerController(...args: any[]) {
+		let controllers: ClassType[] = [];
+
+		if (args.length > 1) {
+			controllers = args;
+		} else if (args) {
+			controllers = coerceArray(args[0]);
+		}
+
+		this.controllers.push(...controllers);
+	}
+
+	public async init() {
 		logger.debug('App initialization. Executing onInit hooks');
 
 		try {
@@ -62,7 +89,7 @@ export class App extends Module {
 		}
 	}
 
-	async shutdown() {
+	public async shutdown() {
 		logger.debug('App shutdown. Executing onDestroy hooks');
 
 		try {
@@ -75,9 +102,31 @@ export class App extends Module {
 		}
 	}
 
-	getModules() {
+	public getModules() {
 		return this.modules;
+	}
+
+	public getControllers() {
+		return this.controllers;
+	}
+
+	public getControllersReflection() {
+		return (
+			this.controllers?.map(controller => {
+				const cached = this.controllersReflectionCache.get(controller);
+				if (cached) return cached;
+
+				const controllerReflection = this.getControllerReflection(controller);
+				this.controllersReflectionCache.set(controller, controllerReflection);
+
+				return controllerReflection;
+			}) ?? []
+		);
+	}
+
+	public getControllerReflection(controller: ClassType) {
+		return reflect(controller);
 	}
 }
 
-export const createApp = () => new App();
+export const createApp = (options?: AppOptions) => new App(options);

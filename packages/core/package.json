@@ -18,6 +18,7 @@
 	"author": "HP",
 	"license": "MIT",
 	"dependencies": {
+		"@davinci/reflector": "^1.1.1",
 		"pino": "7.9.1"
 	},
 	"devDependencies": {

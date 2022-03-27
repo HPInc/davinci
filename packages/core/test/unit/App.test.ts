@@ -6,12 +6,48 @@
 import should from 'should';
 import sinon from 'sinon';
 import { App, Module, createApp } from '../../src';
+import { decorate } from '@davinci/reflector';
+import { decorateParameter } from '../../../reflector/src';
 
 describe('App', () => {
 	it('should initialize correctly', () => {
-		const app = createApp();
+		class MyController {}
+		const app = createApp({ controllers: [MyController] });
 
 		should(app.getModules()).be.Array();
+		should(app.getControllers()).be.deepEqual([MyController]);
+	});
+
+	it('should return the controllers reflection', () => {
+		@decorate({ isMyClass: true })
+		class MyController {
+			@decorate({ isMyMethod: true })
+			myMethod(@decorateParameter({ isMyParam: true }) param: string) {
+				return param;
+			}
+		}
+		const app = createApp({ controllers: [MyController] });
+
+		const controllersReflection = app.getControllersReflection();
+
+		should(controllersReflection).be.Array();
+	});
+
+	it('should cache the reflection result', () => {
+		@decorate({ isMyClass: true })
+		class MyController {
+			@decorate({ isMyMethod: true })
+			myMethod(@decorateParameter({ isMyParam: true }) param: string) {
+				return param;
+			}
+		}
+		const app = createApp({ controllers: [MyController] });
+
+		const getControllerReflectionSpy = sinon.spy(app, 'getControllerReflection');
+		app.getControllersReflection();
+		app.getControllersReflection();
+
+		should(getControllerReflectionSpy.callCount).be.equal(1);
 	});
 
 	it('should execute the onInit hook', async () => {
@@ -56,7 +92,7 @@ describe('App', () => {
 			}
 		}
 		const myModule = new MyModule();
-		await app.register(myModule);
+		await app.registerModule(myModule);
 
 		should(myModule.app).be.equal(app);
 	});
@@ -82,7 +118,7 @@ describe('App', () => {
 
 		const myModule1 = new MyModule1();
 		const myModule2 = new MyModule2();
-		await app.register(myModule1, myModule2);
+		await app.registerModule(myModule1, myModule2);
 
 		should(myModule1.app).be.equal(app);
 		should(myModule2.app).be.equal(app);
@@ -109,7 +145,7 @@ describe('App', () => {
 
 		const myModule1 = new MyModule1();
 		const myModule2 = new MyModule2();
-		await app.register([myModule1, myModule2]);
+		await app.registerModule([myModule1, myModule2]);
 
 		should(myModule1.app).be.equal(app);
 		should(myModule2.app).be.equal(app);
@@ -129,8 +165,8 @@ describe('App', () => {
 		const myModule1 = new MyModule1();
 		const myModule2 = new MyModule2();
 
-		await should(app.register(myModule1, myModule2)).be.rejectedWith({
-			message: /A module with the same identifier (.+) has already been registered/,
+		await should(app.registerModule(myModule1, myModule2)).be.rejectedWith({
+			message: /A module with the same identifier (.+) has already been registered/
 		});
 	});
 
@@ -147,7 +183,7 @@ describe('App', () => {
 			}
 		}
 		const myModule = new MyModule();
-		await app.register(myModule);
+		await app.registerModule(myModule);
 		await app.init();
 
 		should(myModule.app).be.equal(app);
@@ -166,7 +202,7 @@ describe('App', () => {
 			}
 		}
 		const myModule = new MyModule();
-		await app.register(myModule);
+		await app.registerModule(myModule);
 		await app.init();
 		await app.shutdown();
 
