@@ -13,7 +13,9 @@
 	"author": "HP",
 	"license": "MIT",
 	"dependencies": {
-		"@plumier/reflect": "1.0.6",
-		"reflect-metadata": "^0.1.13"
+		"@plumier/reflect": "1.0.6"
+	},
+	"devDependencies": {
+		"typescript": "^4.6.3"
 	}
 }
