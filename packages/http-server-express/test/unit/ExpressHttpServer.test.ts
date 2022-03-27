@@ -20,7 +20,7 @@ describe('ExpressHttpServer', () => {
 
 	it('should initialize a listening server', async () => {
 		const expressHttpServer = new ExpressHttpServer({ port: 3000 });
-		app.register(expressHttpServer);
+		app.registerModule(expressHttpServer);
 
 		await app.init();
 
@@ -34,7 +34,7 @@ describe('ExpressHttpServer', () => {
 
 	it('should shutdown the listening server', async () => {
 		const expressHttpServer = new ExpressHttpServer({ port: 3000 });
-		app.register(expressHttpServer);
+		app.registerModule(expressHttpServer);
 
 		await app.init();
 		await app.shutdown().catch(err => err);
