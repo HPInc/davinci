@@ -4,4 +4,5 @@
  */
 
 export * from './HttpServerModule';
+export * from './decorators';
 export * from './types';
