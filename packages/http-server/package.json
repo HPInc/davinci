@@ -18,7 +18,8 @@
 	"author": "HP",
 	"license": "MIT",
 	"dependencies": {
-		"@davinci/core": "^1.9.1"
+		"@davinci/core": "^1.9.1",
+		"@davinci/reflector": "^1.1.1"
 	},
 	"devDependencies": {
 		"typescript": "^4.6.2"
