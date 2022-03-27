@@ -5,19 +5,7 @@
 
 import type { App } from './App';
 
-type ClassType = new (...args: any[]) => any;
-
-interface ModuleOptions {
-	controllers: ClassType[];
-}
-
 export abstract class Module {
-	controllers?: ClassType[];
-
-	constructor(options?: ModuleOptions) {
-		this.controllers = options?.controllers ?? [];
-	}
-
 	/**
 	 * @returns {string | string[]} the identifier (or identifiers) of the module
 	 */
