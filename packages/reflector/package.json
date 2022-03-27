@@ -5,7 +5,7 @@
 	"main": "build/index.js",
 	"types": "build/index.d.ts",
 	"scripts": {
-		"build": "tsc -p ./tsconfig.release.json",
+		"build": "../../node_modules/typescript/bin/tsc -p ./tsconfig.release.json",
 		"eslint": "../../node_modules/eslint/bin/eslint.js --color --c .eslintrc 'src/**/*.ts'",
 		"pretest": "npm run eslint && npm run build",
 		"test": "mocha --exit",
@@ -15,8 +15,5 @@
 	"license": "MIT",
 	"dependencies": {
 		"@plumier/reflect": "1.0.6"
-	},
-	"devDependencies": {
-		"typescript": "^4.6.3"
 	}
 }
