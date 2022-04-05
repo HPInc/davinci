@@ -5,7 +5,7 @@
 // const createAppInstance = (options) => {
 // 	const app = express();
 // 	boot(app, { ...options, bootDirPath: './examples/rest/boot' }, app => {
-// 		app.use('/api/customer', createRouter(CustomerController));
+// 		app.use('/api/customer', createRouter({ Controller: CustomerController }));
 // 	});
 
 // 	return app;

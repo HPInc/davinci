@@ -87,7 +87,7 @@ export function populate({ name, opts }: { name: string; opts: IVirtualArgs }): 
  * Decorator that annotates a method marking it as virtual.
  * The annotated method will be used as the `getter` of the virtual
  */
-export function virtual(options?: IVirtualArgs): MethodDecorator {
+export function virtual(options?: IVirtualArgs): MethodDecorator & PropertyDecorator {
 	return (target: object, key: string): void => {
 		const handler = target[key];
 		if (options?.ref && typeof handler === 'function') {
