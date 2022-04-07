@@ -63,15 +63,29 @@ const transformDefinitionToValidAJVSchemas = (
 	return schema;
 };
 
+export type AjvFactoryParameters = { parameter };
+export type AjvFactory = (parameters: AjvFactoryParameters) => Ajv;
+
 type ProcessMethodParameters = {
 	value: any;
 	config: ISchema;
 	definitions: ISwaggerDefinitions;
 	validationOptions: MethodValidation;
-	ajv: Ajv;
+	ajv: AjvFactory;
+	parameter: any;
 };
 
-const performAjvValidation = ({ value, config: cfg, definitions, validationOptions, ajv }: ProcessMethodParameters) => {
+// TODO: This is a temporary workaround
+export const ajvCache = {};
+
+export const performAjvValidation = ({
+	value,
+	config: cfg,
+	definitions,
+	validationOptions,
+	ajv,
+	parameter
+}: ProcessMethodParameters) => {
 	const config = transformDefinitionToValidAJVSchemas(cfg, validationOptions);
 	let required = [];
 	if (!(validationOptions && validationOptions.partial) && config.required) {
@@ -82,37 +96,47 @@ const performAjvValidation = ({ value, config: cfg, definitions, validationOptio
 		properties: { [config.name]: config.schema },
 		required
 	};
+	const cacheKey = JSON.stringify({ schema, parameter });
+	let ajvInstance = ajvCache[cacheKey];
 	const data = { [config.name]: value };
 
-	_.forEach(definitions, (theSchema, name) => {
-		const parsedSchema = transformDefinitionToValidAJVSchemas(theSchema, validationOptions, 'definition');
-		ajv.addSchema(parsedSchema, name);
-	});
+	if (!ajvInstance) {
+		ajvInstance = ajv({ parameter });
+		_.forEach(definitions, (theSchema, name) => {
+			const parsedSchema = transformDefinitionToValidAJVSchemas(theSchema, validationOptions, 'definition');
+			ajvInstance.addSchema(parsedSchema, name);
+		});
+
+		ajvInstance.addSchema({ ...schema }, 'schema');
+		ajvCache[cacheKey] = ajvInstance;
+	}
 
 	let errors;
-	const valid = ajv.addSchema({ ...schema }, 'schema').validate('schema', data);
+	const valid = ajvInstance.validate('schema', data);
 	if (!valid) {
-		errors = ajv.errors;
+		errors = ajvInstance.errors;
 	}
 
 	return { value: data[config.name], errors };
 };
 
-const attemptJsonParsing = ({ value, config, definitions, validationOptions, ajv }: ProcessMethodParameters) => {
+const attemptJsonParsing = ({ value, config, definitions, validationOptions, ajv, parameter }: ProcessMethodParameters) => {
 	if (_.startsWith(value, '{') && _.endsWith(value, '}')) {
 		try {
 			return {
 				value: JSON.parse(value),
 				config,
 				definitions,
-				ajv
+				ajv,
+				parameter
 			};
 		} catch (err) {
 			return {
 				value,
 				config,
 				definitions,
-				ajv
+				ajv,
+				parameter
 			};
 		}
 	}
@@ -120,10 +144,10 @@ const attemptJsonParsing = ({ value, config, definitions, validationOptions, ajv
 	return { value, config, definitions, validationOptions, ajv };
 };
 
-const validateAndCoerce = ({ value, config, definitions, validationOptions, ajv }: ProcessMethodParameters) => {
+const validateAndCoerce = ({ value, config, definitions, validationOptions, ajv, parameter }: ProcessMethodParameters) => {
 	const isUndefinedButNotRequired = !config.required && typeof value === 'undefined';
 	if (config.schema && !isUndefinedButNotRequired) {
-		const { value: val, errors } = performAjvValidation({ value, config, definitions, validationOptions, ajv });
+		const { value: val, errors } = performAjvValidation({ value, config, definitions, validationOptions, ajv, parameter });
 		if (errors) {
 			throw new BadRequest('Validation error', { errors });
 		}
@@ -134,7 +158,7 @@ const validateAndCoerce = ({ value, config, definitions, validationOptions, ajv 
 	return { value, config };
 };
 
-const processParameter = ({ value, config, definitions, validationOptions, ajv }: ProcessMethodParameters) =>
+const processParameter = ({ value, config, definitions, validationOptions, ajv, parameter }: ProcessMethodParameters) =>
 	_fp.flow(
 		attemptJsonParsing,
 		validateAndCoerce,
@@ -144,7 +168,8 @@ const processParameter = ({ value, config, definitions, validationOptions, ajv }
 		config,
 		definitions,
 		validationOptions,
-		ajv
+		ajv,
+		parameter
 	});
 
 type ContextFactory<ContextReturnType = any> = ({
@@ -156,9 +181,6 @@ type ContextFactory<ContextReturnType = any> = ({
 }) => ContextReturnType;
 
 const defaultContextFactory: ContextFactory = ({ req, res }) => ({ req, res });
-
-export type AjvFactoryParameters = { parameter };
-export type AjvFactory = (parameters: AjvFactoryParameters) => Ajv;
 
 const createDefaultAjvInstance: AjvFactory = () => {
 	const ajv = new Ajv({
@@ -209,7 +231,8 @@ function mapReqToParameters<ContextType>(
 				config: p,
 				definitions,
 				validationOptions: methodValidationOptions,
-				ajv: ajv({ parameter: p })
+				ajv,
+				parameter: p
 			});
 		}
 		return acc;
@@ -263,7 +286,7 @@ const makeHandlerFunction = (
 
 	return [
 		..._.map(beforeMiddlewares, ({ middlewareFunction }) => wrapMiddleware(middlewareFunction)),
-		(req, res, next) => {
+		function davinciHandler(req, res, next) {
 			if (req.requestHandled) return next();
 			const parameterList = mapReqToParameters(
 				req,

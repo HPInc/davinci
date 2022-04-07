@@ -4,11 +4,13 @@ import should from 'should';
 import Sinon from 'sinon';
 import express from 'express';
 import MongooseController from '../../support/MongooseController';
-import createRouter, { createRouteHandlers } from '../../../src/route/createRouter';
+import createRouter, * as createRouterModules from '../../../src/route/createRouter';
 import { route, openapi } from '../../../src/route';
 import * as utils from '../../support/utils';
 import createPathsDefinition from '../../../src/route/openapi/createPaths';
 import * as openapiDocs from '../../../src/route/openapi/openapiDocs';
+
+const { createRouteHandlers, performAjvValidation } = createRouterModules;
 
 const sinon = Sinon.createSandbox();
 
@@ -71,7 +73,7 @@ describe('createRouter', () => {
 
 			const expectedPath = '/hello';
 			const expressPath = app._router.stack[2].route.path;
-			console.log(JSON.stringify(swagger.paths,null,2));
+			console.log(JSON.stringify(swagger.paths, null, 2));
 			const openapiPath = Object.keys(swagger.paths)[0];
 			expressPath.should.eql(expectedPath, 'express path');
 			openapiPath.should.eql(expectedPath, 'openAPI path');
@@ -337,7 +339,7 @@ describe('createRouter', () => {
 			reqMock.result.should.be.deepEqual(reqMock.body);
 		});
 
-		it('should use the ajv factory provided as parameter', async () => {
+		it('should pass the ajv factory provided as parameter', async () => {
 			const factory = () =>
 				new Ajv({
 					allErrors: true,
@@ -368,7 +370,160 @@ describe('createRouter', () => {
 			const handler = _.find(routeHandlers, { path: '/createSomething' }).handlers[0];
 			const reqMock = { body: { name: 'test' }, result: null, statusCode: null };
 			await handler(reqMock, {}, () => {});
-			factorySpy.callCount.should.be.equal(1);
+			factorySpy.callCount.should.be.equal(0);
+		});
+	});
+
+	describe('performAjvValidation', () => {
+		beforeEach(() => {
+			// @ts-ignore
+			createRouterModules.ajvCache = {};
+		});
+
+		it('should make use of the cached schemas', () => {
+			const value = { firstname: 'Max', lastname: 'Payne' };
+			const config = {
+				name: 'Person',
+				schema: {
+					type: 'object',
+					properties: {
+						firstname: {
+							type: 'string'
+						},
+						lastname: {
+							type: 'string'
+						}
+					},
+					required: ['firstname', 'lastname']
+				}
+			};
+			const definitions = {};
+			const validationOptions = {};
+			const ajv = new Ajv({ allErrors: true, coerceTypes: true, useDefaults: true, removeAdditional: 'all' });
+			const addSchemaSpy = sinon.spy(ajv, 'addSchema');
+
+			const result1 = performAjvValidation({ value, config, definitions, validationOptions, ajv: () => ajv, parameter: {} });
+			const result2 = performAjvValidation({
+				value: { firstname: 'Max' },
+				config,
+				definitions,
+				validationOptions,
+				ajv: () => ajv,
+				parameter: {}
+			});
+
+			should(addSchemaSpy.callCount).be.equal(1);
+			should(result1.value).be.equal(value);
+			should(result1.errors).be.Undefined();
+			should(result2.errors?.[0]).match({
+				keyword: 'required',
+				params: {
+					missingProperty: 'lastname'
+				}
+			});
+		});
+
+		it('different schemas should not use the same cache record', () => {
+			const ajv1 = new Ajv({ allErrors: true, coerceTypes: true, useDefaults: true, removeAdditional: 'all' });
+			const addSchemaSpy1 = sinon.spy(ajv1, 'addSchema');
+
+			const result1 = performAjvValidation({
+				value: { firstname: 'Max', lastname: 'Payne' },
+				config: {
+					name: 'Person',
+					schema: {
+						type: 'object',
+						properties: {
+							firstname: {
+								type: 'string'
+							},
+							lastname: {
+								type: 'string'
+							}
+						},
+						required: ['firstname', 'lastname']
+					}
+				},
+				definitions: {},
+				validationOptions: {},
+				ajv: () => ajv1,
+				parameter: {}
+			});
+
+			const ajv2 = new Ajv({ allErrors: true, coerceTypes: true, useDefaults: true, removeAdditional: 'all' });
+			const addSchemaSpy2 = sinon.spy(ajv2, 'addSchema');
+			const result2 = performAjvValidation({
+				value: {
+					name: 'Lampino',
+					breed: 'Labrador'
+				},
+				config: {
+					name: 'Animal',
+					schema: {
+						type: 'object',
+						properties: {
+							name: {
+								type: 'string'
+							},
+							breed: {
+								type: 'string'
+							}
+						},
+						required: ['name', 'breed']
+					}
+				},
+				definitions: {},
+				validationOptions: {},
+				ajv: () => ajv2,
+				parameter: {}
+			});
+
+			should(addSchemaSpy1.callCount).be.equal(1);
+			should(addSchemaSpy2.callCount).be.equal(1);
+			should(result1).be.deepEqual({ value: { firstname: 'Max', lastname: 'Payne' }, errors: undefined });
+			should(result2).be.deepEqual({ value: { name: 'Lampino', breed: 'Labrador' }, errors: undefined });
+		});
+
+		it('different parameters should not use the same cache record', () => {
+			const value = { firstname: 'Max', lastname: 'Payne' };
+			const config = {
+				name: 'Person',
+				schema: {
+					type: 'object',
+					properties: {
+						firstname: {
+							type: 'string'
+						},
+						lastname: {
+							type: 'string'
+						}
+					},
+					required: ['firstname', 'lastname']
+				}
+			};
+			const definitions = {};
+			const validationOptions = {};
+			const ajv = new Ajv({ allErrors: true, coerceTypes: true, useDefaults: true, removeAdditional: 'all' });
+			const ajv2 = new Ajv({ allErrors: true, coerceTypes: true, useDefaults: true, removeAdditional: 'all' });
+			const addSchemaSpy1 = sinon.spy(ajv, 'addSchema');
+			const addSchemaSpy2 = sinon.spy(ajv2, 'addSchema');
+
+			const result1 = performAjvValidation({ value, config, definitions, validationOptions, ajv: () => ajv, parameter: {} });
+			const result2 = performAjvValidation({
+				value,
+				config,
+				definitions,
+				validationOptions,
+				ajv: () => ajv2,
+				parameter: { name: 'p', in: 'query' }
+			});
+
+			should(addSchemaSpy1.callCount).be.equal(1);
+			should(addSchemaSpy2.callCount).be.equal(1);
+			should(result1.value).be.equal(value);
+			should(result1.errors).be.Undefined();
+			should(result2.value).be.equal(value);
+			should(result2.errors).be.Undefined();
 		});
 	});
 });
