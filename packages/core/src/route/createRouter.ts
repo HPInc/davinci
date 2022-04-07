@@ -63,6 +63,9 @@ const transformDefinitionToValidAJVSchemas = (
 	return schema;
 };
 
+export type AjvFactoryParameters = { parameter };
+export type AjvFactory = (parameters: AjvFactoryParameters) => Ajv;
+
 type ProcessMethodParameters = {
 	value: any;
 	config: ISchema;
@@ -178,9 +181,6 @@ type ContextFactory<ContextReturnType = any> = ({
 }) => ContextReturnType;
 
 const defaultContextFactory: ContextFactory = ({ req, res }) => ({ req, res });
-
-export type AjvFactoryParameters = { parameter };
-export type AjvFactory = (parameters: AjvFactoryParameters) => Ajv;
 
 const createDefaultAjvInstance: AjvFactory = () => {
 	const ajv = new Ajv({
