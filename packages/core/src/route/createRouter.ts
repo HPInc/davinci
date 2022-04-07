@@ -96,7 +96,7 @@ export const performAjvValidation = ({
 		properties: { [config.name]: config.schema },
 		required
 	};
-	const cacheKey = `${JSON.stringify(schema)}:${JSON.stringify(parameter)}`;
+	const cacheKey = JSON.stringify({ schema, parameter });
 	let ajvInstance = ajvCache[cacheKey];
 	const data = { [config.name]: value };
 
