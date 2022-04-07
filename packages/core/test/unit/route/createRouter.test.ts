@@ -483,5 +483,47 @@ describe('createRouter', () => {
 			should(result1).be.deepEqual({ value: { firstname: 'Max', lastname: 'Payne' }, errors: undefined });
 			should(result2).be.deepEqual({ value: { name: 'Lampino', breed: 'Labrador' }, errors: undefined });
 		});
+
+		it('different parameters should not use the same cache record', () => {
+			const value = { firstname: 'Max', lastname: 'Payne' };
+			const config = {
+				name: 'Person',
+				schema: {
+					type: 'object',
+					properties: {
+						firstname: {
+							type: 'string'
+						},
+						lastname: {
+							type: 'string'
+						}
+					},
+					required: ['firstname', 'lastname']
+				}
+			};
+			const definitions = {};
+			const validationOptions = {};
+			const ajv = new Ajv({ allErrors: true, coerceTypes: true, useDefaults: true, removeAdditional: 'all' });
+			const ajv2 = new Ajv({ allErrors: true, coerceTypes: true, useDefaults: true, removeAdditional: 'all' });
+			const addSchemaSpy1 = sinon.spy(ajv, 'addSchema');
+			const addSchemaSpy2 = sinon.spy(ajv2, 'addSchema');
+
+			const result1 = performAjvValidation({ value, config, definitions, validationOptions, ajv: () => ajv, parameter: {} });
+			const result2 = performAjvValidation({
+				value,
+				config,
+				definitions,
+				validationOptions,
+				ajv: () => ajv2,
+				parameter: { name: 'p', in: 'query' }
+			});
+
+			should(addSchemaSpy1.callCount).be.equal(1);
+			should(addSchemaSpy2.callCount).be.equal(1);
+			should(result1.value).be.equal(value);
+			should(result1.errors).be.Undefined();
+			should(result2.value).be.equal(value);
+			should(result2.errors).be.Undefined();
+		});
 	});
 });

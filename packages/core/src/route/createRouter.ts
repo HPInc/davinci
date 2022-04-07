@@ -96,8 +96,8 @@ export const performAjvValidation = ({
 		properties: { [config.name]: config.schema },
 		required
 	};
-	const serializedSchema = JSON.stringify(schema);
-	let ajvInstance = ajvCache[serializedSchema];
+	const cacheKey = `${JSON.stringify(schema)}:${JSON.stringify(parameter)}`;
+	let ajvInstance = ajvCache[cacheKey];
 	const data = { [config.name]: value };
 
 	if (!ajvInstance) {
@@ -108,7 +108,7 @@ export const performAjvValidation = ({
 		});
 
 		ajvInstance.addSchema({ ...schema }, 'schema');
-		ajvCache[serializedSchema] = ajvInstance;
+		ajvCache[cacheKey] = ajvInstance;
 	}
 
 	let errors;
