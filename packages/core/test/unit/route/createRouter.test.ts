@@ -339,7 +339,7 @@ describe('createRouter', () => {
 			reqMock.result.should.be.deepEqual(reqMock.body);
 		});
 
-		it('should use the ajv factory provided as parameter', async () => {
+		it('should pass the ajv factory provided as parameter', async () => {
 			const factory = () =>
 				new Ajv({
 					allErrors: true,
@@ -370,7 +370,7 @@ describe('createRouter', () => {
 			const handler = _.find(routeHandlers, { path: '/createSomething' }).handlers[0];
 			const reqMock = { body: { name: 'test' }, result: null, statusCode: null };
 			await handler(reqMock, {}, () => {});
-			factorySpy.callCount.should.be.equal(1);
+			factorySpy.callCount.should.be.equal(0);
 		});
 	});
 
@@ -402,13 +402,14 @@ describe('createRouter', () => {
 			const ajv = new Ajv({ allErrors: true, coerceTypes: true, useDefaults: true, removeAdditional: 'all' });
 			const addSchemaSpy = sinon.spy(ajv, 'addSchema');
 
-			const result1 = performAjvValidation({ value, config, definitions, validationOptions, ajv });
+			const result1 = performAjvValidation({ value, config, definitions, validationOptions, ajv: () => ajv, parameter: {} });
 			const result2 = performAjvValidation({
 				value: { firstname: 'Max' },
 				config,
 				definitions,
 				validationOptions,
-				ajv
+				ajv: () => ajv,
+				parameter: {}
 			});
 
 			should(addSchemaSpy.callCount).be.equal(1);
@@ -445,7 +446,8 @@ describe('createRouter', () => {
 				},
 				definitions: {},
 				validationOptions: {},
-				ajv: ajv1
+				ajv: () => ajv1,
+				parameter: {}
 			});
 
 			const ajv2 = new Ajv({ allErrors: true, coerceTypes: true, useDefaults: true, removeAdditional: 'all' });
@@ -472,13 +474,56 @@ describe('createRouter', () => {
 				},
 				definitions: {},
 				validationOptions: {},
-				ajv: ajv2
+				ajv: () => ajv2,
+				parameter: {}
 			});
 
 			should(addSchemaSpy1.callCount).be.equal(1);
 			should(addSchemaSpy2.callCount).be.equal(1);
 			should(result1).be.deepEqual({ value: { firstname: 'Max', lastname: 'Payne' }, errors: undefined });
 			should(result2).be.deepEqual({ value: { name: 'Lampino', breed: 'Labrador' }, errors: undefined });
+		});
+
+		it('different parameters should not use the same cache record', () => {
+			const value = { firstname: 'Max', lastname: 'Payne' };
+			const config = {
+				name: 'Person',
+				schema: {
+					type: 'object',
+					properties: {
+						firstname: {
+							type: 'string'
+						},
+						lastname: {
+							type: 'string'
+						}
+					},
+					required: ['firstname', 'lastname']
+				}
+			};
+			const definitions = {};
+			const validationOptions = {};
+			const ajv = new Ajv({ allErrors: true, coerceTypes: true, useDefaults: true, removeAdditional: 'all' });
+			const ajv2 = new Ajv({ allErrors: true, coerceTypes: true, useDefaults: true, removeAdditional: 'all' });
+			const addSchemaSpy1 = sinon.spy(ajv, 'addSchema');
+			const addSchemaSpy2 = sinon.spy(ajv2, 'addSchema');
+
+			const result1 = performAjvValidation({ value, config, definitions, validationOptions, ajv: () => ajv, parameter: {} });
+			const result2 = performAjvValidation({
+				value,
+				config,
+				definitions,
+				validationOptions,
+				ajv: () => ajv2,
+				parameter: { name: 'p', in: 'query' }
+			});
+
+			should(addSchemaSpy1.callCount).be.equal(1);
+			should(addSchemaSpy2.callCount).be.equal(1);
+			should(result1.value).be.equal(value);
+			should(result1.errors).be.Undefined();
+			should(result2.value).be.equal(value);
+			should(result2.errors).be.Undefined();
 		});
 	});
 });
