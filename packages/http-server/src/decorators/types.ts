@@ -12,13 +12,13 @@ export interface MethodValidation {
 	partial?: boolean;
 }
 
-export interface IMethodResponseOutput {
+export interface MethodResponseOutput {
 	description?: string;
 	schema?: { $ref: string };
 }
 
 export interface MethodResponses {
-	[key: number]: Function | IMethodResponseOutput | ((string) => IMethodResponseOutput);
+	[key: number]: Function | MethodResponseOutput | ((string) => MethodResponseOutput);
 }
 
 export interface MethodDecoratorOptions {
@@ -30,7 +30,14 @@ export interface MethodDecoratorOptions {
 	hidden?: boolean;
 }
 
-export interface MethodParameterBase {
+export interface MethodDecoratorMetadata {
+	module: string;
+	type: string;
+	verb: Verb;
+	options: MethodDecoratorOptions;
+}
+
+export interface ParameterDecoratorBaseOptions {
 	name?: string;
 	type?: TypeValue;
 	enum?: TypeValue[];
@@ -38,8 +45,14 @@ export interface MethodParameterBase {
 	required?: boolean;
 }
 
-export interface MethodParameter extends MethodParameterBase {
+export interface ParameterDecoratorOptions extends ParameterDecoratorBaseOptions {
 	in: 'body' | 'path' | 'query' | 'header';
+}
+
+export interface ParameterDecoratorMetadata {
+	module: string;
+	type: string;
+	options: ParameterDecoratorOptions;
 }
 
 export interface ControllerDecoratorOptions {
@@ -48,4 +61,10 @@ export interface ControllerDecoratorOptions {
 	 */
 	basepath?: string;
 	basePath?: string;
+}
+
+export interface ControllerDecoratorMetadata {
+	module: string;
+	type: string;
+	options: ControllerDecoratorOptions;
 }

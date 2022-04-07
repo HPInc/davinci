@@ -19,6 +19,8 @@ export interface HttpServerModuleOptions {
 	https?: ServerOptions;
 }
 
+export type ParameterSource = 'path' | 'query' | 'body' | 'header';
+
 type OriginCallback = (err: Error | null, allow: boolean) => void;
 export type OriginFunction = (origin: string, callback: OriginCallback) => void;
 type OriginType = string | boolean | RegExp;
