@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: MIT
  */
 import should from 'should';
-import { route } from '../../src';
 import { reflect } from '@davinci/reflector';
+import { route } from '../../src';
 
 describe('decorators', () => {
 	describe('controller', () => {
@@ -106,6 +106,9 @@ describe('decorators', () => {
 			class CustomerController {
 				@route.get({ path: '/', summary: 'Get customers', description: 'Get a list of customers' })
 				get() {}
+
+				@route.post({ path: '/', summary: 'Create customers', description: 'Create customers' })
+				post() {}
 			}
 
 			const reflection = reflect(CustomerController);
@@ -125,6 +128,23 @@ describe('decorators', () => {
 									path: '/',
 									summary: 'Get customers',
 									description: 'Get a list of customers'
+								}
+							}
+						]
+					},
+					{
+						kind: 'Method',
+						name: 'post',
+						parameters: [],
+						decorators: [
+							{
+								module: 'http-server',
+								type: 'route',
+								verb: 'post',
+								options: {
+									path: '/',
+									summary: 'Create customers',
+									description: 'Create customers'
 								}
 							}
 						]

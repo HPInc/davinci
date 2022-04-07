@@ -110,16 +110,16 @@ export class App extends Module {
 		return this.controllers;
 	}
 
-	public getControllersReflection() {
+	public getControllersWithReflection() {
 		return (
-			this.controllers?.map(controller => {
-				const cached = this.controllersReflectionCache.get(controller);
-				if (cached) return cached;
+			this.controllers?.map(Controller => {
+				const cached = this.controllersReflectionCache.get(Controller);
+				if (cached) return { Controller, reflection: cached };
 
-				const controllerReflection = this.getControllerReflection(controller);
-				this.controllersReflectionCache.set(controller, controllerReflection);
+				const controllerReflection = this.getControllerReflection(Controller);
+				this.controllersReflectionCache.set(Controller, controllerReflection);
 
-				return controllerReflection;
+				return { Controller, reflection: controllerReflection };
 			}) ?? []
 		);
 	}

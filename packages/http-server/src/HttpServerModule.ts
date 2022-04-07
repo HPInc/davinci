@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 import { Module } from '@davinci/core';
-import { RequestHandler, HttpServerModuleOptions /* CorsOptions */ } from './types';
+import { RequestHandler, HttpServerModuleOptions, ParameterSource /* CorsOptions */ } from './types';
 
 export abstract class HttpServerModule<Request = unknown, Response = unknown, Server = unknown> extends Module {
 	protected httpServer: Server;
@@ -60,9 +60,10 @@ export abstract class HttpServerModule<Request = unknown, Response = unknown, Se
 	abstract getInstance(): void;
 	abstract reply(response, body: unknown, statusCode?: number);
 	abstract close();
-	abstract getRequestHostname(request);
-	abstract getRequestMethod(request);
-	abstract getRequestUrl(request);
+	abstract getRequestHostname(request: Request);
+	abstract getRequestMethod(request: Request);
+	abstract getRequestUrl(request: Request);
+	abstract getRequestParameter(args: { source: ParameterSource; name?: string; request: Request });
 	abstract status(response, statusCode: number);
 	abstract redirect(response, statusCode: number, url: string);
 	abstract setErrorHandler(handler: Function, prefix?: string);

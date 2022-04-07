@@ -2,10 +2,22 @@
  * © Copyright 2022 HP Development Company, L.P.
  * SPDX-License-Identifier: MIT
  */
-import { HttpServerModule, HttpServerModuleOptions, RequestHandler } from '@davinci/http-server';
+import {
+	ControllerDecoratorMetadata,
+	HttpServerModule,
+	HttpServerModuleOptions,
+	MethodDecoratorMetadata,
+	ParameterDecoratorMetadata,
+	ParameterSource,
+	RequestHandler
+} from '@davinci/http-server';
 import express, { Express, Request, Response } from 'express';
 import http, { Server as HttpServer } from 'http';
 import https, { Server as HttpsServer } from 'https';
+import pathUtils from 'path';
+import type { App } from '@davinci/core';
+import { mapSeries } from '@davinci/core';
+import { ClassType, MethodReflection } from '@davinci/reflector';
 
 type Server = HttpServer | HttpsServer;
 
@@ -13,6 +25,7 @@ type ExpressHttpServerModuleOptions = { app?: Express } & HttpServerModuleOption
 
 export class ExpressHttpServer extends HttpServerModule<Request, Response, Server> {
 	instance: Express;
+	app: App;
 
 	constructor(options?: ExpressHttpServerModuleOptions) {
 		const { app, ...moduleOptions } = options ?? {};
@@ -20,7 +33,9 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 		this.instance = app ?? express();
 	}
 
-	onInit() {
+	async onInit(app) {
+		this.app = app;
+		await this.createRoutes();
 		this.initHttpServer();
 		return super.getHttpServer().listen(super.moduleOptions?.port ?? 3000);
 	}
@@ -42,6 +57,52 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 			: http.createServer(this.getInstance());
 
 		super.setHttpServer(server);
+	}
+
+	createRoutes() {
+		const controllersReflection = this.app
+			.getControllersWithReflection()
+			.filter(
+				({ reflection }) =>
+					reflection.decorators.some(d => d.module === 'http-server') ||
+					reflection.methods.some(m => m.decorators.some(d => d.module === 'http-server'))
+			);
+
+		return mapSeries(controllersReflection, ({ Controller, reflection: controllerReflection }) => {
+			const controllerDecoratorMetadata: ControllerDecoratorMetadata = controllerReflection.decorators.find(
+				d => d.module === 'http-server' && d.type === 'controller'
+			);
+			const basePath =
+				controllerDecoratorMetadata?.options?.basePath ?? controllerDecoratorMetadata?.options?.basepath ?? '/';
+
+			let ctrlInstance: typeof Controller;
+			const getControllerInstance = () => {
+				if (ctrlInstance) return ctrlInstance;
+
+				ctrlInstance = new Controller();
+
+				return ctrlInstance;
+			};
+
+			return mapSeries(controllerReflection.methods, methodReflection => {
+				const methodDecoratorMetadata: MethodDecoratorMetadata = methodReflection.decorators.find(
+					d => d.module === 'http-server' && d.type === 'method'
+				);
+				const methodName = methodReflection.name;
+
+				if (!methodDecoratorMetadata) return null;
+
+				const {
+					verb,
+					options: { path }
+				} = methodDecoratorMetadata;
+
+				const controller = getControllerInstance();
+				const fullPath = pathUtils.join(basePath, path);
+
+				return this[verb](fullPath, this.createRequestHandler(controller, methodName, methodReflection));
+			});
+		});
 	}
 
 	public reply(response: Response, body: unknown, statusCode?: number) {
@@ -146,5 +207,54 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 
 	public getRequestUrl(request: Request): string {
 		return request.originalUrl;
+	}
+
+	createRequestHandler(controller: InstanceType<ClassType>, methodName: string, methodReflection: MethodReflection) {
+		return async (req: Request, res: Response) => {
+			const parameters = methodReflection.parameters.map(parameterReflection => {
+				const parameterDecoratorMetadata: ParameterDecoratorMetadata = parameterReflection.decorators.find(
+					d => d.module === 'http-server' && d.type === 'parameter'
+				);
+
+				if (parameterDecoratorMetadata) {
+					const { options } = parameterDecoratorMetadata;
+					return this.getRequestParameter({
+						source: options.in,
+						name: options.name ?? parameterReflection.name,
+						request: req
+					});
+				}
+
+				return undefined;
+			});
+
+			try {
+				const result = await controller[methodName](...parameters);
+
+				return this.reply(res, result);
+			} catch (err) {
+				return this.reply(res, { error: true, message: err.message }, 500);
+			}
+		};
+	}
+
+	getRequestParameter({ source, name, request }: { source: ParameterSource; name?: string; request: Request }) {
+		switch (source) {
+			case 'path':
+				return request.params[name];
+				break;
+			case 'header':
+				return request.header(name);
+				break;
+			case 'query':
+				return request.query[name];
+				break;
+			case 'body':
+				return request.body;
+				break;
+			default:
+				return undefined;
+				break;
+		}
 	}
 }

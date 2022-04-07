@@ -2,49 +2,110 @@
  * © Copyright 2022 HP Development Company, L.P.
  * SPDX-License-Identifier: MIT
  */
+import { expect } from 'chai';
 import { App } from '@davinci/core';
+import { route } from '@davinci/http-server';
 import axios from 'axios';
+import { createSandbox } from 'sinon';
+import { reflect } from '@davinci/reflector';
 import { ExpressHttpServer } from '../../src/ExpressHttpServer';
-import should from 'should';
+
+const sinon = createSandbox();
 
 describe('ExpressHttpServer', () => {
-	let app: App;
-
-	beforeEach(() => {
-		app = new App();
+	afterEach(() => {
+		sinon.restore();
 	});
 
-	afterEach(async () => {
-		await app.shutdown().catch(() => {});
+	describe('lifecycle', () => {
+		let app: App;
+
+		beforeEach(() => {
+			app = new App();
+		});
+
+		afterEach(async () => {
+			await app.shutdown().catch(() => {});
+		});
+
+		it('should initialize a listening server', async () => {
+			const expressHttpServer = new ExpressHttpServer({ port: 3000 });
+			app.registerModule(expressHttpServer);
+
+			await app.init();
+
+			const { error } = await axios
+				.get('http://localhost:3000')
+				.then(response => ({ error: null, response }))
+				.catch(error => ({ error }));
+
+			expect(error.response).to.have.property('status').equal(404);
+		});
+
+		it('should shutdown the listening server', async () => {
+			const expressHttpServer = new ExpressHttpServer({ port: 3000 });
+			app.registerModule(expressHttpServer);
+
+			await app.init();
+			await app.shutdown().catch(err => err);
+
+			const { error } = await axios
+				.get('http://localhost:3000')
+				.then(response => ({ error: null, response }))
+				.catch(error => ({ error }));
+
+			expect(error.response).to.be.undefined;
+			expect(error.code).be.equal('ECONNREFUSED');
+		});
 	});
 
-	it('should initialize a listening server', async () => {
-		const expressHttpServer = new ExpressHttpServer({ port: 3000 });
-		app.registerModule(expressHttpServer);
+	describe('#createRequestHandler', () => {
+		it('should create a request handler for a controller method that succeed', async () => {
+			const expressHttpServer = new ExpressHttpServer();
+			class MyController {
+				@route.get({ path: '/all' })
+				getAll(@route.query() filter: string) {
+					return { filter };
+				}
+			}
+			const controller = new MyController();
+			const replySpy = sinon.spy(expressHttpServer, 'reply');
+			const controllerReflection = reflect(MyController);
+			const methodReflection = controllerReflection.methods[0];
+			const req = { query: { filter: 'myFilter' } };
+			const res = { status: sinon.stub(), send: sinon.stub(), json: sinon.stub() };
 
-		await app.init();
+			const handler = expressHttpServer.createRequestHandler(controller, 'getAll', methodReflection);
+			// @ts-ignore
+			await handler(req, res);
 
-		const { error } = await axios
-			.get('http://localhost:3000')
-			.then(response => ({ error: null, response }))
-			.catch(error => ({ error }));
+			expect(res.json.args[0][0]).to.be.deep.equal({ filter: 'myFilter' });
+			expect(replySpy.called).to.be.true;
+		});
 
-		should(error.response).have.property('status').equal(404);
-	});
+		it('should create a request handler for a controller method that fails', async () => {
+			const expressHttpServer = new ExpressHttpServer();
+			class MyController {
+				@route.get({ path: '/all' })
+				getAll(@route.query() filter: string) {
+					throw new Error('Invalid');
+					return { filter };
+				}
+			}
+			const controller = new MyController();
+			const replySpy = sinon.spy(expressHttpServer, 'reply');
+			const controllerReflection = reflect(MyController);
+			const methodReflection = controllerReflection.methods[0];
+			const req = { query: { filter: 'myFilter' } };
+			const res = { status: sinon.stub(), send: sinon.stub(), json: sinon.stub() };
 
-	it('should shutdown the listening server', async () => {
-		const expressHttpServer = new ExpressHttpServer({ port: 3000 });
-		app.registerModule(expressHttpServer);
+			const handler = expressHttpServer.createRequestHandler(controller, 'getAll', methodReflection);
+			// @ts-ignore
+			await handler(req, res);
 
-		await app.init();
-		await app.shutdown().catch(err => err);
-
-		const { error } = await axios
-			.get('http://localhost:3000')
-			.then(response => ({ error: null, response }))
-			.catch(error => ({ error }));
-
-		should(error.response).be.undefined();
-		should(error.code).be.equal('ECONNREFUSED');
+			expect(res.status.args[0][0]).to.be.equal(500);
+			expect(res.json.args[0][0]).to.be.deep.equal({ error: true, message: 'Invalid' });
+			expect(replySpy.called).to.be.true;
+		});
 	});
 });
