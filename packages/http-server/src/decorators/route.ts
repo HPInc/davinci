@@ -7,8 +7,8 @@ import { decorateClass, decorateMethod, decorateParameter, DecoratorId } from '@
 import {
 	ControllerDecoratorOptions,
 	MethodDecoratorOptions,
-	MethodParameter,
-	MethodParameterBase,
+	ParameterDecoratorOptions,
+	ParameterDecoratorBaseOptions,
 	Verb
 } from './types';
 
@@ -32,7 +32,7 @@ export const patch = createRouteMethodDecorator('patch');
 export const del = createRouteMethodDecorator('delete');
 export const head = createRouteMethodDecorator('head');
 
-export function param(options: MethodParameter) {
+export function param(options: ParameterDecoratorOptions) {
 	return decorateParameter(
 		{
 			[DecoratorId]: 'http-server.parameter',
@@ -45,7 +45,7 @@ export function param(options: MethodParameter) {
 }
 
 const createParameterDecorator = (inKey: 'path' | 'query' | 'body' | 'header') => {
-	return (options?: MethodParameterBase) => param({ in: inKey, ...options });
+	return (options?: ParameterDecoratorBaseOptions) => param({ in: inKey, ...options });
 };
 
 export const path = createParameterDecorator('path');

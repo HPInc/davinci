@@ -7,7 +7,7 @@ import should from 'should';
 import sinon from 'sinon';
 import { App, Module, createApp } from '../../src';
 import { decorate } from '@davinci/reflector';
-import { decorateParameter } from '../../../reflector/src';
+import { decorateParameter, reflect } from '../../../reflector/src';
 
 describe('App', () => {
 	it('should initialize correctly', () => {
@@ -26,11 +26,12 @@ describe('App', () => {
 				return param;
 			}
 		}
+		const myControllerReflection = reflect(MyController);
 		const app = createApp({ controllers: [MyController] });
 
-		const controllersReflection = app.getControllersReflection();
+		const controllersReflection = app.getControllersWithReflection();
 
-		should(controllersReflection).be.Array();
+		should(controllersReflection).be.deepEqual([{ controller: MyController, reflection: myControllerReflection }]);
 	});
 
 	it('should cache the reflection result', () => {
@@ -44,8 +45,8 @@ describe('App', () => {
 		const app = createApp({ controllers: [MyController] });
 
 		const getControllerReflectionSpy = sinon.spy(app, 'getControllerReflection');
-		app.getControllersReflection();
-		app.getControllersReflection();
+		app.getControllersWithReflection();
+		app.getControllersWithReflection();
 
 		should(getControllerReflectionSpy.callCount).be.equal(1);
 	});
