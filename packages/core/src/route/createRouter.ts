@@ -101,7 +101,7 @@ export const performAjvValidation = ({
 	const data = { [config.name]: value };
 
 	if (!ajvInstance) {
-		ajvInstance = ajv(parameter);
+		ajvInstance = ajv({ parameter });
 		_.forEach(definitions, (theSchema, name) => {
 			const parsedSchema = transformDefinitionToValidAJVSchemas(theSchema, validationOptions, 'definition');
 			ajvInstance.addSchema(parsedSchema, name);
@@ -232,7 +232,7 @@ function mapReqToParameters<ContextType>(
 				definitions,
 				validationOptions: methodValidationOptions,
 				ajv,
-				parameter: { parameter: p }
+				parameter: p
 			});
 		}
 		return acc;
