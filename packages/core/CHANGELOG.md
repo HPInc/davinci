@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.10.0](https://github.com/HPInc/davinci/compare/@davinci/core@1.9.2...@davinci/core@1.10.0) (2022-04-07)
+
+
+### Bug Fixes
+
+* davinciHandler now is a named function ([f2b6cb5](https://github.com/HPInc/davinci/commit/f2b6cb585189440d7b27a18da1f1ab41567ca945))
+* fixed tests ([6b568f3](https://github.com/HPInc/davinci/commit/6b568f3b12a2530282ba64b694e13c84fb493412))
+* include parameter in cache ([0db15a8](https://github.com/HPInc/davinci/commit/0db15a8c9d13911ec82ca4e2ebafd21223f13bcf))
+* tests ([d7554fb](https://github.com/HPInc/davinci/commit/d7554fbb8097a5ee46398994a5771f96a3a7b668))
+
+
+### Features
+
+* added ajv instance and schema caching ([0ff3edc](https://github.com/HPInc/davinci/commit/0ff3edc708518ee4155597cc9d780b9e5c852946))
+* delay ajv instantiation ([fa964ad](https://github.com/HPInc/davinci/commit/fa964ad896a280e79c22b7181809668af4087a52))
+
+
+
+
+
 ## [1.9.2](https://github.com/HPInc/davinci/compare/@davinci/core@1.9.1...@davinci/core@1.9.2) (2022-03-24)
 
 
