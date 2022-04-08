@@ -35,6 +35,7 @@ describe('HttpServerModule', () => {
 			reply() {}
 			close() {}
 			getRequestHostname() {}
+			getRequestParameter() {}
 			getRequestMethod() {}
 			getRequestUrl() {}
 			status() {}
@@ -66,6 +67,7 @@ describe('HttpServerModule', () => {
 			reply() {}
 			close() {}
 			getRequestHostname() {}
+			getRequestParameter() {}
 			getRequestMethod() {}
 			getRequestUrl() {}
 			status() {}
@@ -97,6 +99,7 @@ describe('HttpServerModule', () => {
 			reply() {}
 			close() {}
 			getRequestHostname() {}
+			getRequestParameter() {}
 			getRequestMethod() {}
 			getRequestUrl() {}
 			status() {}

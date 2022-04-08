@@ -31,7 +31,7 @@ describe('App', () => {
 
 		const controllersReflection = app.getControllersWithReflection();
 
-		should(controllersReflection).be.deepEqual([{ controller: MyController, reflection: myControllerReflection }]);
+		should(controllersReflection).be.deepEqual([{ Controller: MyController, reflection: myControllerReflection }]);
 	});
 
 	it('should cache the reflection result', () => {
