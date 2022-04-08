@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.15.12](https://github.com/HPInc/davinci/compare/@davinci/example-rest@0.15.11...@davinci/example-rest@0.15.12) (2022-04-08)
+
+**Note:** Version bump only for package @davinci/example-rest
+
+
+
+
+
 ## [0.15.11](https://github.com/HPInc/davinci/compare/@davinci/example-rest@0.15.10...@davinci/example-rest@0.15.11) (2022-04-07)
 
 **Note:** Version bump only for package @davinci/example-rest
