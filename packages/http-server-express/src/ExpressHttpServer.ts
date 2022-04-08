@@ -85,7 +85,7 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 
 			return controllerReflection.methods.map(methodReflection => {
 				const methodDecoratorMetadata: MethodDecoratorMetadata = methodReflection.decorators.find(
-					d => d.module === 'http-server' && d.type === 'method'
+					d => d.module === 'http-server' && d.type === 'route'
 				);
 				const methodName = methodReflection.name;
 
