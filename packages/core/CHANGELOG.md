@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.10.1](https://github.com/HPInc/davinci/compare/@davinci/core@1.10.0...@davinci/core@1.10.1) (2022-04-08)
+
+
+### Bug Fixes
+
+* ajv custom instance parameters ([d9a2cfb](https://github.com/HPInc/davinci/commit/d9a2cfb02e4366a79f5b294c14cb32de6a34f626))
+* cache key to include definitions ([80151ad](https://github.com/HPInc/davinci/commit/80151ada17a48691fcac5b770b73de90e52f44fe))
+
+
+### Reverts
+
+* no need to include definitions (schemas should not share same name) ([2e3e6de](https://github.com/HPInc/davinci/commit/2e3e6de3bd415203d26b73cb00ee841f88fdadad))
+
+
+
+
+
 # [1.10.0](https://github.com/HPInc/davinci/compare/@davinci/core@1.9.2...@davinci/core@1.10.0) (2022-04-07)
 
 
