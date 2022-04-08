@@ -141,7 +141,7 @@ const attemptJsonParsing = ({ value, config, definitions, validationOptions, ajv
 		}
 	}
 
-	return { value, config, definitions, validationOptions, ajv };
+	return { value, config, definitions, validationOptions, ajv, parameter };
 };
 
 const validateAndCoerce = ({ value, config, definitions, validationOptions, ajv, parameter }: ProcessMethodParameters) => {
