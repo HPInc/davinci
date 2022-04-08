@@ -13,21 +13,21 @@ import { ExpressHttpServer } from '../../src/ExpressHttpServer';
 const sinon = createSandbox();
 
 describe('ExpressHttpServer', () => {
+	let app: App;
+
+	beforeEach(() => {
+		app = new App();
+	});
+
+	afterEach(async () => {
+		await app.shutdown().catch(() => {});
+	});
+
 	afterEach(() => {
 		sinon.restore();
 	});
 
 	describe('lifecycle', () => {
-		let app: App;
-
-		beforeEach(() => {
-			app = new App();
-		});
-
-		afterEach(async () => {
-			await app.shutdown().catch(() => {});
-		});
-
 		it('should initialize a listening server', async () => {
 			const expressHttpServer = new ExpressHttpServer({ port: 3000 });
 			app.registerModule(expressHttpServer);
@@ -106,6 +106,48 @@ describe('ExpressHttpServer', () => {
 			expect(res.status.args[0][0]).to.be.equal(500);
 			expect(res.json.args[0][0]).to.be.deep.equal({ error: true, message: 'Invalid' });
 			expect(replySpy.called).to.be.true;
+		});
+	});
+
+	describe('#createRoutes', () => {
+		it('should walk the controller reflection and register routes in express', async () => {
+			class MyController {
+				@route.get({ path: '/' })
+				getAll(@route.query() filter: string) {
+					return { filter };
+				}
+
+				@route.patch({ path: '/:id' })
+				update(@route.path() id: string, @route.body() data: object) {
+					return { id, data };
+				}
+
+				@route.post({ path: '/create' })
+				create(@route.path() id: string, @route.body() data: object) {
+					return { id, data };
+				}
+
+				@route.del({ path: '/:id' })
+				delete(@route.path() id: string) {
+					return { id };
+				}
+			}
+
+			const expressHttpServer = new ExpressHttpServer();
+			await app.registerController(MyController);
+			await app.registerModule(expressHttpServer);
+			await app.init();
+
+			const express = expressHttpServer.getInstance();
+
+			expect(express._router.stack[2].route).to.have.property('path').equal('/');
+			expect(express._router.stack[2].route).to.have.property('methods').deep.equal({ get: true });
+			expect(express._router.stack[3].route).to.have.property('path').equal('/:id');
+			expect(express._router.stack[3].route).to.have.property('methods').deep.equal({ patch: true });
+			expect(express._router.stack[4].route).to.have.property('path').equal('/create');
+			expect(express._router.stack[4].route).to.have.property('methods').deep.equal({ post: true });
+			expect(express._router.stack[5].route).to.have.property('path').equal('/:id');
+			expect(express._router.stack[5].route).to.have.property('methods').deep.equal({ delete: true });
 		});
 	});
 });
