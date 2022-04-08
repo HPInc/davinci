@@ -16,7 +16,6 @@ import http, { Server as HttpServer } from 'http';
 import https, { Server as HttpsServer } from 'https';
 import pathUtils from 'path';
 import type { App } from '@davinci/core';
-import { mapSeries } from '@davinci/core';
 import { ClassType, MethodReflection } from '@davinci/reflector';
 
 type Server = HttpServer | HttpsServer;
@@ -35,7 +34,7 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 
 	async onInit(app) {
 		this.app = app;
-		await this.createRoutes();
+		this.createRoutes();
 		this.initHttpServer();
 		return super.getHttpServer().listen(super.moduleOptions?.port ?? 3000);
 	}
@@ -68,7 +67,7 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 					reflection.methods.some(m => m.decorators.some(d => d.module === 'http-server'))
 			);
 
-		return mapSeries(controllersReflection, ({ Controller, reflection: controllerReflection }) => {
+		return controllersReflection.map(({ Controller, reflection: controllerReflection }) => {
 			const controllerDecoratorMetadata: ControllerDecoratorMetadata = controllerReflection.decorators.find(
 				d => d.module === 'http-server' && d.type === 'controller'
 			);
@@ -84,7 +83,7 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 				return ctrlInstance;
 			};
 
-			return mapSeries(controllerReflection.methods, methodReflection => {
+			return controllerReflection.methods.map(methodReflection => {
 				const methodDecoratorMetadata: MethodDecoratorMetadata = methodReflection.decorators.find(
 					d => d.module === 'http-server' && d.type === 'method'
 				);
