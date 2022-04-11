@@ -15,6 +15,7 @@ export function executeInterceptorsStack<Arguments>(
 		(wrapperFunction: InterceptorNext<Arguments>, interceptor) => {
 			return () => interceptor(wrapperFunction, initialArguments);
 		},
+		// eslint-disable-next-line @typescript-eslint/no-empty-function
 		() => {}
 	)();
 }
