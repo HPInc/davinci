@@ -8,7 +8,7 @@ import { expect } from 'chai';
 type InterceptorArgs = { calls: string[] };
 
 describe('interceptors', () => {
-	it('should execute the interceptor using the onion-principle', async () => {
+	it('should execute the interceptor using the onion principle', async () => {
 		const calls = [];
 		const interceptor1: Interceptor<InterceptorArgs> = async (next, state: InterceptorArgs) => {
 			state.calls.push('interceptor1 before');
@@ -64,7 +64,7 @@ describe('interceptors', () => {
 		});
 	});
 
-	it('should be able to stop the execution stack', async () => {
+	it('should be able to stop the execution stack by not calling the next interceptor', async () => {
 		const calls = [];
 		const interceptor1: Interceptor<InterceptorArgs> = async (next, state: InterceptorArgs) => {
 			state.calls.push('interceptor1 before');
@@ -76,6 +76,7 @@ describe('interceptors', () => {
 		const interceptor2 = async (_next, state) => {
 			state.calls.push('interceptor2 before');
 
+			// not calling next() here
 			return { success: true };
 		};
 		const interceptor3 = async (next, state) => {
