@@ -117,6 +117,6 @@ export interface IControllerDecoratorArgs {
 export function controller(args?: IControllerDecoratorArgs): ClassDecorator {
 	return function(target: Function) {
 		// define new metadata props
-		Reflector.defineMetadata('davinci:openapi:controller', args, target);
+		Reflector.pushMetadata('davinci:openapi:controller', args, target);
 	};
 }

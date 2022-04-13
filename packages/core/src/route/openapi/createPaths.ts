@@ -57,8 +57,10 @@ const createPathsDefinition = (
 	definitions: ISwaggerDefinitions;
 	validationOptions: PathsValidationOptions;
 } => {
-	const controllerMetadata: IControllerDecoratorArgs =
-		Reflector.getMetadata('davinci:openapi:controller', theClass) || {};
+	const controllerMetadata: IControllerDecoratorArgs = Reflector.getMetadata(
+		'davinci:openapi:controller',
+		theClass
+	).reduce((acc, controllerMeta) => Object.assign(acc, controllerMeta), {});
 	const { excludedMethods = [] } = controllerMetadata;
 	const methods: IMethodDecoratorMetadata[] = (
 		Reflector.getMetadata('davinci:openapi:methods', theClass.prototype.constructor) || []
