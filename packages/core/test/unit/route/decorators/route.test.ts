@@ -280,7 +280,7 @@ describe('route decorators', () => {
 			// @ts-ignore
 			should(Reflector.defineMetadata.getCall(0).args[0]).be.equal('davinci:openapi:controller');
 			// @ts-ignore
-			should(Reflector.defineMetadata.getCall(0).args[1]).be.deepEqual(decoratorArg);
+			should(Reflector.defineMetadata.getCall(0).args[1]).be.deepEqual([decoratorArg]);
 		});
 	});
 });

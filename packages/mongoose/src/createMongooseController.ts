@@ -49,9 +49,9 @@ export const createMongooseController = <T extends Constructor<{}>>(
 	// eslint-disable-next-line @typescript-eslint/no-var-requires,global-require
 	const { context, route, httpErrors, openapi, express } = require('@davinci/core');
 
-	@openapi.definition({ title: 'PopulateQueryParameter' })
+	@openapi.definition({ title: `${Model.modelName}PopulateQueryParameter` })
 	class PopulateQueryParameter {
-		@openapi.prop()
+		@openapi.prop({ required: true })
 		path: string;
 
 		@openapi.prop()
@@ -79,14 +79,32 @@ export const createMongooseController = <T extends Constructor<{}>>(
 		@openapi.prop()
 		$sort?: object;
 
-		@openapi.prop()
-		$populate?: PopulateQueryParameter;
+		@openapi.prop({
+			type: null,
+			oneOf: [
+				{ $ref: `${Model.modelName}PopulateQueryParameter` },
+				{
+					type: 'array',
+					items: { $ref: `${Model.modelName}PopulateQueryParameter` }
+				}
+			]
+		})
+		$populate?: PopulateQueryParameter | PopulateQueryParameter[];
 	}
 
-	@openapi.definition({ title: 'QueryParameters' })
+	@openapi.definition({ title: `${Model.modelName}QueryParameters` })
 	class QueryParameters {
-		@openapi.prop({ type: PopulateQueryParameter })
-		$populate?: PopulateQueryParameter;
+		@openapi.prop({
+			type: null,
+			oneOf: [
+				{ $ref: `${Model.modelName}PopulateQueryParameter` },
+				{
+					type: 'array',
+					items: { $ref: `${Model.modelName}PopulateQueryParameter` }
+				}
+			]
+		})
+		$populate?: PopulateQueryParameter | PopulateQueryParameter[];
 
 		@openapi.prop()
 		$limit?: number;
@@ -144,6 +162,7 @@ export const createMongooseController = <T extends Constructor<{}>>(
 
 		return next(err);
 	})
+	@route.controller({ additionalSchemas: [PopulateQueryParameter] })
 	class MongooseController implements IMongooseController {
 		maxLimit: number;
 
