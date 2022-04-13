@@ -107,7 +107,7 @@ describe('interceptors', () => {
 				throw new Error(`Interceptor 2 error + ${err.message}`);
 			}
 		};
-		const interceptor3: Interceptor<InterceptorArgsErrors> = async _next => {
+		const interceptor3: Interceptor<InterceptorArgsErrors> = async () => {
 			throw new Error('Interceptor 3 error');
 		};
 
