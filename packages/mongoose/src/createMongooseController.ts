@@ -51,7 +51,7 @@ export const createMongooseController = <T extends Constructor<{}>>(
 
 	@openapi.definition({ title: `${Model.modelName}PopulateQueryParameter` })
 	class PopulateQueryParameter {
-		@openapi.prop()
+		@openapi.prop({ required: true })
 		path: string;
 
 		@openapi.prop()
@@ -82,9 +82,7 @@ export const createMongooseController = <T extends Constructor<{}>>(
 		@openapi.prop({
 			type: null,
 			oneOf: [
-				{
-					type: 'object'
-				},
+				{ $ref: `${Model.modelName}PopulateQueryParameter` },
 				{
 					type: 'array',
 					items: { $ref: `${Model.modelName}PopulateQueryParameter` }
@@ -99,9 +97,7 @@ export const createMongooseController = <T extends Constructor<{}>>(
 		@openapi.prop({
 			type: null,
 			oneOf: [
-				{
-					type: 'object'
-				},
+				{ $ref: `${Model.modelName}PopulateQueryParameter` },
 				{
 					type: 'array',
 					items: { $ref: `${Model.modelName}PopulateQueryParameter` }
