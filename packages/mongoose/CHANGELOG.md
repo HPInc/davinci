@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.17.13](https://github.com/HPInc/davinci/compare/@davinci/mongoose@0.17.12...@davinci/mongoose@0.17.13) (2022-04-13)
+
+
+### Bug Fixes
+
+* added correct single populate type ([c543e56](https://github.com/HPInc/davinci/commit/c543e56e6a3c76e3b188b2aaa6e672ed97a94153))
+* createMongooseController now produces definitions with prefixed names ([d778d11](https://github.com/HPInc/davinci/commit/d778d11a907884eb19e421bd783ceb7ecbc8a88f))
+
+
+
+
+
 ## [0.17.12](https://github.com/HPInc/davinci/compare/@davinci/mongoose@0.17.11...@davinci/mongoose@0.17.12) (2022-04-08)
 
 **Note:** Version bump only for package @davinci/mongoose

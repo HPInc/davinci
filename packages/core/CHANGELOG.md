@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.10.2](https://github.com/HPInc/davinci/compare/@davinci/core@1.10.1...@davinci/core@1.10.2) (2022-04-13)
+
+
+### Bug Fixes
+
+* added nullish check ([491d585](https://github.com/HPInc/davinci/commit/491d585ba351901ef6e703fe075c403e5a41a3ec))
+* createMongooseController now produces definitions with prefixed names ([d778d11](https://github.com/HPInc/davinci/commit/d778d11a907884eb19e421bd783ceb7ecbc8a88f))
+
+
+
+
+
 ## [1.10.1](https://github.com/HPInc/davinci/compare/@davinci/core@1.10.0...@davinci/core@1.10.1) (2022-04-08)
 
 
