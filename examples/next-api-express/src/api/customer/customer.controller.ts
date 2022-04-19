@@ -9,6 +9,6 @@ export default class CustomerController {
 	@get({ path: '/hello', summary: 'That is a hello method' })
 	hello(@query() firstname: string, @query() age: number) {
 		console.log(firstname, age);
-		return { success: true, firstname };
+		return { success: true, firstname, age };
 	}
 }
