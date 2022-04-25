@@ -6,10 +6,10 @@
 	},
 	"scripts": {
 		"postinstall": "npm run bootstrap",
-		"build": "lerna run build --ignore '@davinci/example*'",
+		"build": "lerna run build",
 		"test": "lerna run test",
 		"cover": "lerna run cover",
-		"bootstrap": "lerna bootstrap --ignore '@davinci/example*'",
+		"bootstrap": "lerna bootstrap",
 		"bump": "lerna publish",
 		"docs:dev": "vuepress dev docs",
 		"docs:build": "vuepress build docs --debug",
