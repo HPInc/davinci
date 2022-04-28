@@ -3,31 +3,35 @@
  * SPDX-License-Identifier: MIT
  */
 import { expect } from '../../support/chai';
-import { executeInterceptorsStack, Interceptor } from '../../../src/lib/interceptors';
+import { executeInterceptorsStack, Interceptor } from '../../../src';
 
-type InterceptorArgsCalls = { calls: string[] };
+type InterceptorArgsCalls = { state: { calls: string[] } };
 type InterceptorArgsErrors = { errorMessages: string[] };
 
 describe('interceptors', () => {
 	it('should execute the interceptor using the onion principle', async () => {
 		const calls = [];
-		const interceptor1: Interceptor<InterceptorArgsCalls> = async (next, state) => {
+		const interceptor1: Interceptor<InterceptorArgsCalls> = async (next, { state }) => {
 			state.calls.push('interceptor1 before');
 			await next();
 			state.calls.push('interceptor1 after');
 		};
-		const interceptor2: Interceptor<InterceptorArgsCalls> = async (next, state) => {
+		const interceptor2: Interceptor<InterceptorArgsCalls> = async (next, { state }) => {
 			state.calls.push('interceptor2 before');
 			await next();
 			state.calls.push('interceptor2 after');
 		};
-		const interceptor3: Interceptor<InterceptorArgsCalls> = async (next, state) => {
+		const interceptor3: Interceptor<InterceptorArgsCalls> = async (next, { state }) => {
 			state.calls.push('interceptor3 before');
 			await next();
 			state.calls.push('interceptor3 after');
 		};
 
-		await executeInterceptorsStack([interceptor1, interceptor2, interceptor3], { calls });
+		await executeInterceptorsStack([interceptor1, interceptor2, interceptor3], {
+			module: '',
+			handlerArgs: [],
+			state: { calls }
+		});
 
 		expect(calls).to.be.deep.equal([
 			'interceptor1 before',
@@ -67,26 +71,30 @@ describe('interceptors', () => {
 
 	it('should be able to stop the execution stack by not calling the next interceptor', async () => {
 		const calls = [];
-		const interceptor1: Interceptor<InterceptorArgsCalls> = async (next, state) => {
+		const interceptor1: Interceptor<InterceptorArgsCalls> = async (next, { state }) => {
 			state.calls.push('interceptor1 before');
 			const result = await next();
 			state.calls.push('interceptor1 after');
 
 			return result;
 		};
-		const interceptor2: Interceptor<InterceptorArgsCalls> = async (_next, state) => {
+		const interceptor2: Interceptor<InterceptorArgsCalls> = async (_next, { state }) => {
 			state.calls.push('interceptor2 before');
 
 			// not calling next() here
 			return { success: true };
 		};
-		const interceptor3: Interceptor<InterceptorArgsCalls> = async (next, state) => {
+		const interceptor3: Interceptor<InterceptorArgsCalls> = async (next, { state }) => {
 			state.calls.push('interceptor3 before');
 			await next();
 			state.calls.push('interceptor3 after');
 		};
 
-		const result = await executeInterceptorsStack([interceptor1, interceptor2, interceptor3], { calls });
+		const result = await executeInterceptorsStack([interceptor1, interceptor2, interceptor3], {
+			module: '',
+			handlerArgs: [],
+			state: { calls }
+		});
 
 		expect(result).to.be.deep.equal({ success: true });
 		expect(calls).to.be.deep.equal(['interceptor1 before', 'interceptor2 before', 'interceptor1 after']);
