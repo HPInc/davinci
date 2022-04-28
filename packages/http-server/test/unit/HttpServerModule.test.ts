@@ -37,6 +37,9 @@ describe('HttpServerModule', () => {
 			getRequestHostname() {}
 			getRequestParameter() {}
 			getRequestMethod() {}
+			getRequestHeaders() {}
+			getRequestBody() {}
+			getRequestQuerystring() {}
 			getRequestUrl() {}
 			status() {}
 			redirect() {}
@@ -69,6 +72,9 @@ describe('HttpServerModule', () => {
 			getRequestHostname() {}
 			getRequestParameter() {}
 			getRequestMethod() {}
+			getRequestHeaders() {}
+			getRequestBody() {}
+			getRequestQuerystring() {}
 			getRequestUrl() {}
 			status() {}
 			redirect() {}
@@ -101,6 +107,9 @@ describe('HttpServerModule', () => {
 			getRequestHostname() {}
 			getRequestParameter() {}
 			getRequestMethod() {}
+			getRequestHeaders() {}
+			getRequestBody() {}
+			getRequestQuerystring() {}
 			getRequestUrl() {}
 			status() {}
 			redirect() {}

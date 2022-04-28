@@ -8,7 +8,7 @@ import { route } from '@davinci/http-server';
 import axios from 'axios';
 import { createSandbox } from 'sinon';
 import { reflect } from '@davinci/reflector';
-import { ExpressHttpServer } from '../../src/ExpressHttpServer';
+import { ExpressHttpServer } from '../../src';
 
 const sinon = createSandbox();
 
@@ -30,7 +30,7 @@ describe('ExpressHttpServer', () => {
 	describe('lifecycle', () => {
 		it('should initialize a listening server', async () => {
 			const expressHttpServer = new ExpressHttpServer({ port: 3000 });
-			app.registerModule(expressHttpServer);
+			await app.registerModule(expressHttpServer);
 
 			await app.init();
 
@@ -44,7 +44,7 @@ describe('ExpressHttpServer', () => {
 
 		it('should shutdown the listening server', async () => {
 			const expressHttpServer = new ExpressHttpServer({ port: 3000 });
-			app.registerModule(expressHttpServer);
+			await app.registerModule(expressHttpServer);
 
 			await app.init();
 			await app.shutdown().catch(err => err);
@@ -75,7 +75,10 @@ describe('ExpressHttpServer', () => {
 			const req = { query: { filter: 'myFilter' } };
 			const res = { status: sinon.stub(), send: sinon.stub(), json: sinon.stub() };
 
-			const handler = expressHttpServer.createRequestHandler(controller, 'getAll', methodReflection);
+			const handler = expressHttpServer.createRequestHandler(controller, 'getAll', {
+				controllerReflection,
+				methodReflection
+			});
 			// @ts-ignore
 			await handler(req, res);
 
@@ -99,7 +102,10 @@ describe('ExpressHttpServer', () => {
 			const req = { query: { filter: 'myFilter' } };
 			const res = { status: sinon.stub(), send: sinon.stub(), json: sinon.stub() };
 
-			const handler = expressHttpServer.createRequestHandler(controller, 'getAll', methodReflection);
+			const handler = expressHttpServer.createRequestHandler(controller, 'getAll', {
+				controllerReflection,
+				methodReflection
+			});
 			// @ts-ignore
 			await handler(req, res);
 

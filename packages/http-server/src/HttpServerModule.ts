@@ -2,9 +2,9 @@
  * © Copyright 2022 HP Development Compunknown, L.P.
  * SPDX-License-Identifier: MIT
  */
-import { App, Module } from '@davinci/core';
+import { App, executeInterceptorsStack, getInterceptorsHandlers, Module } from '@davinci/core';
 import pathUtils from 'path';
-import { ClassType, MethodReflection } from '@davinci/reflector';
+import { ClassReflection, ClassType, MethodReflection } from '@davinci/reflector';
 import { HttpServerModuleOptions, ParameterSource, RequestHandler } from './types';
 import { ControllerDecoratorMetadata, MethodDecoratorMetadata, ParameterDecoratorMetadata } from './decorators';
 
@@ -73,7 +73,13 @@ export abstract class HttpServerModule<Request = unknown, Response = unknown, Se
 				const controller = getControllerInstance();
 				const fullPath = pathUtils.join(basePath, path);
 
-				return this[verb](fullPath, this.createRequestHandler(controller, methodName, methodReflection));
+				return this[verb](
+					fullPath,
+					this.createRequestHandler(controller, methodName, {
+						methodReflection,
+						controllerReflection
+					})
+				);
 			});
 		});
 	}
@@ -81,13 +87,18 @@ export abstract class HttpServerModule<Request = unknown, Response = unknown, Se
 	public createRequestHandler(
 		controller: InstanceType<ClassType>,
 		methodName: string,
-		methodReflection: MethodReflection
+		reflections: { methodReflection: MethodReflection; controllerReflection: ClassReflection }
 	) {
+		const { methodReflection, controllerReflection } = reflections;
 		// eslint-disable-next-line @typescript-eslint/no-this-alias
 		const that = this;
+		const interceptors = [
+			...getInterceptorsHandlers(controllerReflection),
+			...getInterceptorsHandlers(methodReflection)
+		];
 
 		// using a named function here for better instrumentation and reporting
-		return async function expressRequestHandler(req: Request, res: Response) {
+		return async function davinciHttpRequestHandler(req: Request, res: Response) {
 			const parameters = methodReflection.parameters.map(parameterReflection => {
 				const parameterDecoratorMetadata: ParameterDecoratorMetadata = parameterReflection.decorators.find(
 					d => d.module === 'http-server' && d.type === 'parameter'
@@ -106,11 +117,29 @@ export abstract class HttpServerModule<Request = unknown, Response = unknown, Se
 			});
 
 			try {
-				const result = await controller[methodName](...parameters);
+				const result = await executeInterceptorsStack(
+					[...interceptors, (_next, context) => controller[methodName](...context.handlerArgs)],
+					that.prepareInterceptorBag({
+						request: req,
+						parameters
+					})
+				);
 
 				return that.reply(res, result);
 			} catch (err) {
 				return that.reply(res, { error: true, message: err.message }, 500);
+			}
+		};
+	}
+
+	private prepareInterceptorBag({ request, parameters }: { request: Request; parameters: any[] }) {
+		return {
+			module: 'http-server',
+			handlerArgs: parameters,
+			request: {
+				headers: this.getRequestHeaders(request),
+				body: this.getRequestBody(request),
+				query: this.getRequestQuerystring(request)
 			}
 		};
 	}
@@ -159,6 +188,12 @@ export abstract class HttpServerModule<Request = unknown, Response = unknown, Se
 	abstract getRequestUrl(request: Request);
 
 	abstract getRequestParameter(args: { source: ParameterSource; name?: string; request: Request });
+
+	abstract getRequestHeaders(request: Request);
+
+	abstract getRequestBody(request: Request);
+
+	abstract getRequestQuerystring(request: Request);
 
 	abstract status(response, statusCode: number);
 

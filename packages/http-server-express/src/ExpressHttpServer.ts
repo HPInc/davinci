@@ -152,6 +152,18 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 		return request.originalUrl;
 	}
 
+	public getRequestHeaders(request: Request) {
+		return request.headers;
+	}
+
+	public getRequestBody(request: Request) {
+		return request.body;
+	}
+
+	public getRequestQuerystring(request: Request) {
+		return request.query;
+	}
+
 	getRequestParameter({ source, name, request }: { source: ParameterSource; name?: string; request: Request }) {
 		switch (source) {
 			case 'path':
