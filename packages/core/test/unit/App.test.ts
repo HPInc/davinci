@@ -111,7 +111,7 @@ describe('App', () => {
 
 		const myModule1 = new MyModule1();
 		const myModule2 = new MyModule2();
-		await app.registerModule([myModule1, myModule2]);
+		app.registerModule([myModule1, myModule2]);
 
 		should(app.getModules()).be.deepEqual([myModule1, myModule2]);
 	});
@@ -153,7 +153,7 @@ describe('App', () => {
 			}
 		}
 		const myModule = new MyModule();
-		await app.registerModule(myModule);
+		app.registerModule(myModule);
 		await app.init();
 
 		should(myModule.app).be.equal(app);
@@ -172,7 +172,7 @@ describe('App', () => {
 			}
 		}
 		const myModule = new MyModule();
-		await app.registerModule(myModule);
+		app.registerModule(myModule);
 		await app.init();
 		await app.shutdown();
 

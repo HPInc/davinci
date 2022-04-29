@@ -30,7 +30,7 @@ describe('ExpressHttpServer', () => {
 	describe('lifecycle', () => {
 		it('should initialize a listening server', async () => {
 			const expressHttpServer = new ExpressHttpServer({ port: 3000 });
-			await app.registerModule(expressHttpServer);
+			app.registerModule(expressHttpServer);
 
 			await app.init();
 
@@ -44,7 +44,7 @@ describe('ExpressHttpServer', () => {
 
 		it('should shutdown the listening server', async () => {
 			const expressHttpServer = new ExpressHttpServer({ port: 3000 });
-			await app.registerModule(expressHttpServer);
+			app.registerModule(expressHttpServer);
 
 			await app.init();
 			await app.shutdown().catch(err => err);
@@ -140,8 +140,8 @@ describe('ExpressHttpServer', () => {
 			}
 
 			const expressHttpServer = new ExpressHttpServer();
-			await app.registerController(MyController);
-			await app.registerModule(expressHttpServer);
+			app.registerController(MyController);
+			app.registerModule(expressHttpServer);
 			await app.init();
 
 			const express = expressHttpServer.getInstance();
