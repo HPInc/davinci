@@ -225,7 +225,7 @@ describe('App', () => {
 
 		const myModule1 = new MyModule1();
 		const myModule2 = new MyModule2();
-		await app.registerModule([myModule1, myModule2]);
+		app.registerModule([myModule1, myModule2]);
 
 		expect(app.getModules()).to.be.deep.equal([myModule1, myModule2]);
 	});
@@ -265,7 +265,7 @@ describe('App', () => {
 			}
 		}
 		const myModule = new MyModule();
-		await app.registerModule(myModule);
+		app.registerModule(myModule);
 		await app.init();
 
 		expect(myModule.app).to.be.equal(app);
@@ -284,7 +284,7 @@ describe('App', () => {
 			}
 		}
 		const myModule = new MyModule();
-		await app.registerModule(myModule);
+		app.registerModule(myModule);
 		await app.init();
 		await app.shutdown();
 
