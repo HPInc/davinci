@@ -2,7 +2,7 @@
  * © Copyright 2022 HP Development Company, L.P.
  * SPDX-License-Identifier: MIT
  */
-import { App, interceptor } from '@davinci/core';
+import { App, context, interceptor } from '@davinci/core';
 import should from 'should';
 import { HttpServerModule, route } from '../../src';
 import * as http from 'http';
@@ -13,7 +13,9 @@ const sinon = require('sinon').createSandbox();
 describe('HttpServerModule', () => {
 	let app: App;
 
-	class DummyHttpServer extends HttpServerModule {
+	type Request = { headers?: Record<string, string> };
+
+	class DummyHttpServer extends HttpServerModule<Request> {
 		onInit(app: App) {
 			this.app = app;
 		}
@@ -38,7 +40,9 @@ describe('HttpServerModule', () => {
 			return source;
 		}
 		getRequestMethod() {}
-		getRequestHeaders() {}
+		getRequestHeaders(request) {
+			return request.headers;
+		}
 		getRequestBody() {}
 		getRequestQuerystring() {}
 		getRequestUrl() {}
@@ -189,6 +193,46 @@ describe('HttpServerModule', () => {
 			});
 			should(interceptor1.called).be.True();
 			should(interceptor2.called).be.True();
+		});
+
+		it('should be able to process the context parameter', async () => {
+			@route.controller({ basePath: '/api/customers' })
+			class CustomerController {
+				@route.get({ path: '/all' })
+				find(@route.body() body, @route.query() query, @context() ctx) {
+					return { body, query, ctx };
+				}
+			}
+
+			const contextFactory = sinon.stub().callsFake(({ request }) => ({ userId: request.headers['x-userid'] }));
+			const dummyHttpServer = new DummyHttpServer().setContextFactory(contextFactory);
+			const controllerReflection = reflect(CustomerController);
+			const methodReflection = controllerReflection.methods[0];
+			const requestHandler = dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+				controllerReflection,
+				methodReflection
+			});
+			const reqMock = {
+				headers: {
+					'x-userid': '123'
+				}
+			};
+			const resMock = {};
+			const result = await requestHandler(reqMock, resMock);
+
+			should(result[1]).be.match({
+				body: 'body',
+				query: 'query',
+				ctx: {
+					userId: '123'
+				}
+			});
+
+			should(contextFactory.getCall(0).args[0]).have.property('reflection');
+			should(contextFactory.getCall(0).args[0].reflection).have.properties([
+				'controllerReflection',
+				'methodReflection'
+			]);
 		});
 	});
 });

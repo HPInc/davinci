@@ -4,13 +4,19 @@
  */
 import { App, executeInterceptorsStack, getInterceptorsHandlers, Module } from '@davinci/core';
 import pathUtils from 'path';
-import { ClassReflection, ClassType, MethodReflection } from '@davinci/reflector';
+import { ClassReflection, ClassType, DecoratorId, MethodReflection } from '@davinci/reflector';
 import { HttpServerModuleOptions, ParameterSource, RequestHandler } from './types';
 import { ControllerDecoratorMetadata, MethodDecoratorMetadata, ParameterDecoratorMetadata } from './decorators';
+
+type ContextFactory<Context, Request = any> = (args: {
+	request: Request;
+	reflection: { controllerReflection: ClassReflection; methodReflection: MethodReflection };
+}) => Context;
 
 export abstract class HttpServerModule<Request = unknown, Response = unknown, Server = unknown> extends Module {
 	protected httpServer: Server;
 	app: App;
+	contextFactory?: ContextFactory<unknown>;
 
 	getModuleId() {
 		return 'http';
@@ -30,6 +36,12 @@ export abstract class HttpServerModule<Request = unknown, Response = unknown, Se
 
 	public setHttpServer(httpServer: Server) {
 		this.httpServer = httpServer;
+	}
+
+	public setContextFactory<Context>(contextFactory: ContextFactory<Context, Request>): this {
+		this.contextFactory = contextFactory;
+
+		return this;
 	}
 
 	public createRoutes() {
@@ -98,19 +110,26 @@ export abstract class HttpServerModule<Request = unknown, Response = unknown, Se
 		];
 
 		// using a named function here for better instrumentation and reporting
-		return async function davinciHttpRequestHandler(req: Request, res: Response) {
+		return async function davinciHttpRequestHandler(request: Request, response: Response) {
 			const parameters = methodReflection.parameters.map(parameterReflection => {
 				const parameterDecoratorMetadata: ParameterDecoratorMetadata = parameterReflection.decorators.find(
-					d => d.module === 'http-server' && d.type === 'parameter'
+					d => d[DecoratorId] === 'http-server.parameter' || d[DecoratorId] === 'core.parameter.context'
 				);
 
-				if (parameterDecoratorMetadata) {
+				if (parameterDecoratorMetadata && parameterDecoratorMetadata[DecoratorId] === 'http-server.parameter') {
 					const { options } = parameterDecoratorMetadata;
 					return that.getRequestParameter({
 						source: options.in,
 						name: options.name ?? parameterReflection.name,
-						request: req
+						request
 					});
+				}
+
+				if (
+					parameterDecoratorMetadata &&
+					parameterDecoratorMetadata[DecoratorId] === 'core.parameter.context'
+				) {
+					return that.contextFactory?.({ request, reflection: { controllerReflection, methodReflection } });
 				}
 
 				return undefined;
@@ -120,14 +139,14 @@ export abstract class HttpServerModule<Request = unknown, Response = unknown, Se
 				const result = await executeInterceptorsStack(
 					[...interceptors, (_next, context) => controller[methodName](...context.handlerArgs)],
 					that.prepareInterceptorBag({
-						request: req,
+						request,
 						parameters
 					})
 				);
 
-				return that.reply(res, result);
+				return that.reply(response, result);
 			} catch (err) {
-				return that.reply(res, { error: true, message: err.message }, 500);
+				return that.reply(response, { error: true, message: err.message }, 500);
 			}
 		};
 	}
