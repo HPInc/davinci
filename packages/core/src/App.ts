@@ -50,10 +50,10 @@ export class App extends Module {
 		return this;
 	}
 
-	public async registerController(controllers: ClassType[]): Promise<unknown>;
-	public async registerController(...controllers: ClassType[]): Promise<unknown>;
-	public async registerController(controller: ClassType): Promise<unknown>;
-	public async registerController(...args: any[]) {
+	public registerController(controllers: ClassType[]): this;
+	public registerController(...controllers: ClassType[]): this;
+	public registerController(controller: ClassType): this;
+	public registerController(...args: any[]) {
 		let controllers: ClassType[] = [];
 
 		if (args.length > 1) {
@@ -63,6 +63,8 @@ export class App extends Module {
 		}
 
 		this.controllers.push(...controllers);
+
+		return this;
 	}
 
 	public async init() {
