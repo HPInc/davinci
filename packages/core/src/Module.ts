@@ -11,8 +11,6 @@ export abstract class Module {
 	 */
 	abstract getModuleId(): string | string[];
 
-	onRegister?(app: App): void;
-
 	onInit?(app: App): void;
 
 	onDestroy?(app: App): void;

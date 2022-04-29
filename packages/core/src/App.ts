@@ -4,7 +4,7 @@
  */
 
 import pino from 'pino';
-import { ClassType, ClassReflection, reflect } from '@davinci/reflector';
+import { ClassReflection, ClassType, reflect } from '@davinci/reflector';
 import { Module } from './Module';
 import { mapSeries } from './lib/async-utils';
 import { coerceArray } from './lib/array-utils';
@@ -30,36 +30,24 @@ export class App extends Module {
 		return 'app';
 	}
 
-	public async registerModule(modules: Module[]): Promise<unknown>;
-	public async registerModule(...modules: Module[]): Promise<unknown>;
-	public async registerModule(module: Module): Promise<unknown>;
-	public async registerModule(...args: any[]) {
-		let modules: Module[] = [];
+	public registerModule(modules: Module[]): this;
+	public registerModule(module: Module): this;
+	public registerModule(module: Module | Module[]) {
+		const modules: Module[] = coerceArray(module);
 
-		if (args.length > 1) {
-			modules = args;
-		} else if (args) {
-			modules = coerceArray(args[0]);
-		}
+		modules.forEach(mod => {
+			const moduleIds = coerceArray(mod.getModuleId());
+			moduleIds.forEach(id => {
+				if (this.modulesDic[id]) {
+					throw new Error(`A module with the same identifier "${id}" has already been registered`);
+				}
 
-		try {
-			return await mapSeries(modules, mod => {
-				const moduleIds = coerceArray(mod.getModuleId());
-				moduleIds.forEach(id => {
-					if (this.modulesDic[id]) {
-						throw new Error(`A module with the same identifier "${id}" has already been registered`);
-					}
-
-					this.modulesDic[id] = mod;
-				});
-				this.modules.push(mod);
-
-				return mod.onRegister?.(this);
+				this.modulesDic[id] = mod;
 			});
-		} catch (err) {
-			logger.error({ error: err }, 'Fatal error during module registration');
-			throw err;
-		}
+			this.modules.push(mod);
+		});
+
+		return this;
 	}
 
 	public async registerController(controllers: ClassType[]): Promise<unknown>;

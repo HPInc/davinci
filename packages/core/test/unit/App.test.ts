@@ -5,7 +5,7 @@
 
 import should from 'should';
 import sinon from 'sinon';
-import { App, Module, createApp } from '../../src';
+import { App, createApp, Module } from '../../src';
 import { decorate } from '@davinci/reflector';
 import { decorateParameter, reflect } from '../../../reflector/src';
 
@@ -87,15 +87,11 @@ describe('App', () => {
 			getModuleId() {
 				return 'myModule';
 			}
-
-			onRegister(app: App) {
-				this.app = app;
-			}
 		}
 		const myModule = new MyModule();
-		await app.registerModule(myModule);
+		app.registerModule(myModule);
 
-		should(myModule.app).be.equal(app);
+		should(app.getModules()[0]).be.equal(myModule);
 	});
 
 	it('should be able to register multiple modules #1', async () => {
@@ -104,37 +100,6 @@ describe('App', () => {
 			app: App;
 			getModuleId() {
 				return 'myModule1';
-			}
-
-			onRegister(app: App) {
-				this.app = app;
-			}
-		}
-
-		class MyModule2 extends MyModule1 {
-			getModuleId() {
-				return 'myModule2';
-			}
-		}
-
-		const myModule1 = new MyModule1();
-		const myModule2 = new MyModule2();
-		await app.registerModule(myModule1, myModule2);
-
-		should(myModule1.app).be.equal(app);
-		should(myModule2.app).be.equal(app);
-	});
-
-	it('should be able to register multiple modules #2', async () => {
-		const app = createApp();
-		class MyModule1 implements Module {
-			app: App;
-			getModuleId() {
-				return 'myModule1';
-			}
-
-			onRegister(app: App) {
-				this.app = app;
 			}
 		}
 
@@ -148,8 +113,7 @@ describe('App', () => {
 		const myModule2 = new MyModule2();
 		await app.registerModule([myModule1, myModule2]);
 
-		should(myModule1.app).be.equal(app);
-		should(myModule2.app).be.equal(app);
+		should(app.getModules()).be.deepEqual([myModule1, myModule2]);
 	});
 
 	it('should error trying to register multiple modules with same identifier', async () => {
@@ -166,9 +130,14 @@ describe('App', () => {
 		const myModule1 = new MyModule1();
 		const myModule2 = new MyModule2();
 
-		await should(app.registerModule(myModule1, myModule2)).be.rejectedWith({
-			message: /A module with the same identifier (.+) has already been registered/
-		});
+		try {
+			app.registerModule([myModule1, myModule2]);
+			throw new Error('failed test');
+		} catch (err) {
+			should(err).match({
+				message: /A module with the same identifier (.+) has already been registered/
+			});
+		}
 	});
 
 	it("should execute the modules' onInit hook", async () => {
