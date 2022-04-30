@@ -10,8 +10,7 @@
 		"build": "npm run build-cj && npm run build-esm",
 		"build-cj": "../../node_modules/typescript/bin/tsc -p tsconfig.cjs.release.json",
 		"build-esm": "../../node_modules/typescript/bin/tsc -p tsconfig.esm.release.json",
-		"eslint": "../../node_modules/eslint/bin/eslint.js --color --c .eslintrc 'src/**/*.ts'",
-		"pretest": "npm run eslint && npm run build",
+		"lint": "../../node_modules/eslint/bin/eslint.js --color --c .eslintrc 'src/**/*.ts'",
 		"test": "mocha --exit",
 		"cover": "nyc npm test"
 	},
