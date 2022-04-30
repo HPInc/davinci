@@ -1,12 +1,13 @@
-export type InterceptorBag<ModuleInterceptorBag> = {
+export type InterceptorBag<Context = unknown, State = unknown> = {
 	module: string;
 	handlerArgs: unknown[];
-	state?: any;
-} & ModuleInterceptorBag;
+	context?: Context;
+	state?: State;
+};
 
-export type Interceptor<ModuleInterceptorBag = Map<string, any>> = (
+export type Interceptor<Context, State> = (
 	// eslint-disable-next-line no-use-before-define
-	next: InterceptorNext<ModuleInterceptorBag>,
-	interceptorBag?: InterceptorBag<ModuleInterceptorBag>
+	next: InterceptorNext<Context, State>,
+	interceptorBag?: InterceptorBag<Context, State>
 ) => any;
-export type InterceptorNext<ModuleInterceptorBag> = () => ReturnType<Interceptor<ModuleInterceptorBag>>;
+export type InterceptorNext<Context, State> = () => ReturnType<Interceptor<Context, State>>;

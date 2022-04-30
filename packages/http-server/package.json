@@ -19,7 +19,8 @@
 	"license": "MIT",
 	"dependencies": {
 		"@davinci/core": "^1.9.1",
-		"@davinci/reflector": "^1.1.1"
+		"@davinci/reflector": "^1.1.1",
+		"pino": "^7.11.0"
 	},
 	"devDependencies": {
 		"typescript": "^4.6.2"
