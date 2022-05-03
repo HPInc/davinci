@@ -2,8 +2,11 @@
  * © Copyright 2022 HP Development Company, L.P.
  * SPDX-License-Identifier: MIT
  */
+import { DecoratorId, reflect } from '@davinci/reflector';
 import { expect } from '../../support/chai';
-import { executeInterceptorsStack, Interceptor } from '../../../src';
+import { executeInterceptorsStack, Interceptor, interceptor } from '../../../src';
+
+const sinon = require('sinon').createSandbox();
 
 type InterceptorArgsCalls = { state: { calls: string[] } };
 type InterceptorArgsErrors = { errorMessages: string[] };
@@ -122,5 +125,18 @@ describe('interceptors', () => {
 		await expect(executeInterceptorsStack([interceptor1, interceptor2, interceptor3])).to.be.rejectedWith(
 			'Interceptor 1 error + Interceptor 2 error + Interceptor 3 error'
 		);
+	});
+
+	it('should decorate correctly', () => {
+		@interceptor(sinon.stub())
+		class MyController {
+			@interceptor(sinon.stub())
+			myMethod() {}
+		}
+
+		const controllerReflection = reflect(MyController);
+
+		expect(controllerReflection.decorators[0][DecoratorId]).to.be.equal('interceptor');
+		expect(controllerReflection.methods[0].decorators[0][DecoratorId]).to.be.equal('interceptor');
 	});
 });
