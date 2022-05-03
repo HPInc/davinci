@@ -6,15 +6,15 @@ coverage:
       core:
         flags:
           - core
+      http-server:
+        flags:
+          - http-server
+      http-server-express:
+        flags:
+          - http-server-express
       reflector:
-        flags:
-          - reflector
-      mongoose:
-        flags:
-          - mongoose
-      graphql:
-        flags:
-          - graphql
+          flags:
+              - reflector
 
 comment:
   layout: "reach, diff, flags, files"
@@ -28,13 +28,13 @@ flags:
     paths:
       - packages/core
     carryforward: true
-  graphql:
+  http-server:
     paths:
-      - packages/graphql
+      - packages/http-server
     carryforward: true
-  mongoose:
+  http-server-express:
     paths:
-      - packages/mongoose
+      - packages/http-server-express
     carryforward: true
   reflector:
     paths:
