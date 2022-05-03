@@ -168,19 +168,18 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 		switch (source) {
 			case 'path':
 				return request.params[name];
-				break;
+
 			case 'header':
 				return request.header(name);
-				break;
+
 			case 'query':
 				return request.query[name];
-				break;
+
 			case 'body':
 				return request.body;
-				break;
+
 			default:
 				return undefined;
-				break;
 		}
 	}
 }

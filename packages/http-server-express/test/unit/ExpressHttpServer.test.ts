@@ -64,15 +64,25 @@ describe('ExpressHttpServer', () => {
 			const expressHttpServer = new ExpressHttpServer();
 			class MyController {
 				@route.get({ path: '/all' })
-				getAll(@route.query() filter: string) {
-					return { filter };
+				getAll(
+					@route.path() path: string,
+					@route.query() filter: string,
+					@route.body() body: object,
+					@route.header({ name: 'x-accountid' }) accountId: string
+				) {
+					return { path, filter, body, accountId };
 				}
 			}
 			const controller = new MyController();
 			const replySpy = sinon.spy(expressHttpServer, 'reply');
 			const controllerReflection = reflect(MyController);
 			const methodReflection = controllerReflection.methods[0];
-			const req = { query: { filter: 'myFilter' } };
+			const req = {
+				params: { path: 'path' },
+				query: { filter: 'myFilter' },
+				header: () => 123,
+				body: { isBody: true }
+			};
 			const res = { status: sinon.stub(), send: sinon.stub(), json: sinon.stub() };
 
 			const handler = expressHttpServer.createRequestHandler(controller, 'getAll', {
@@ -82,7 +92,14 @@ describe('ExpressHttpServer', () => {
 			// @ts-ignore
 			await handler(req, res);
 
-			expect(res.json.args[0][0]).to.be.deep.equal({ filter: 'myFilter' });
+			expect(res.json.args[0][0]).to.be.deep.equal({
+				path: 'path',
+				accountId: 123,
+				body: {
+					isBody: true
+				},
+				filter: 'myFilter'
+			});
 			expect(replySpy.called).to.be.true;
 		});
 

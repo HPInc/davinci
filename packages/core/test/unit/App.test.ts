@@ -5,9 +5,8 @@
 
 import should from 'should';
 import sinon from 'sinon';
+import { decorate, decorateParameter, reflect } from '@davinci/reflector';
 import { App, createApp, Module } from '../../src';
-import { decorate } from '@davinci/reflector';
-import { decorateParameter, reflect } from '../../../reflector/src';
 
 describe('App', () => {
 	it('should initialize correctly', () => {
@@ -16,6 +15,38 @@ describe('App', () => {
 
 		should(app.getModules()).be.Array();
 		should(app.getControllers()).be.deepEqual([MyController]);
+	});
+
+	it('should throw and exception and exit if an error happens during init', async () => {
+		class MyModule implements Module {
+			getModuleId() {
+				return 'myModule';
+			}
+
+			onInit() {
+				throw new Error('Error within MyModule');
+			}
+		}
+		const app = createApp().registerModule([new MyModule()]);
+
+		await should(app.init()).be.rejectedWith('Error within MyModule');
+	});
+
+	it('should register controllers', () => {
+		class MyController {}
+		const app = createApp();
+		app.registerController(MyController);
+		app.registerController([MyController, MyController]);
+		app.registerController(MyController, MyController);
+
+		should(app.getModules()).be.Array();
+		should(app.getControllers()).be.deepEqual([
+			MyController,
+			MyController,
+			MyController,
+			MyController,
+			MyController
+		]);
 	});
 
 	it('should return the controllers reflection', () => {
