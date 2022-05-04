@@ -141,7 +141,12 @@ describe('ExpressHttpServer', () => {
 				}
 
 				@route.patch({ path: '/:id' })
-				update(@route.path() id: string, @route.body() data: object) {
+				patch(@route.path() id: string, @route.body() data: object) {
+					return { id, data };
+				}
+
+				@route.put({ path: '/:id' })
+				put(@route.path() id: string, @route.body() data: object) {
 					return { id, data };
 				}
 
@@ -153,6 +158,16 @@ describe('ExpressHttpServer', () => {
 				@route.del({ path: '/:id' })
 				delete(@route.path() id: string) {
 					return { id };
+				}
+
+				@route.head({ path: '/' })
+				head() {
+					return {};
+				}
+
+				@route.options({ path: '/' })
+				options() {
+					return {};
 				}
 			}
 
@@ -167,10 +182,59 @@ describe('ExpressHttpServer', () => {
 			expect(express._router.stack[2].route).to.have.property('methods').deep.equal({ get: true });
 			expect(express._router.stack[3].route).to.have.property('path').equal('/:id');
 			expect(express._router.stack[3].route).to.have.property('methods').deep.equal({ patch: true });
-			expect(express._router.stack[4].route).to.have.property('path').equal('/create');
-			expect(express._router.stack[4].route).to.have.property('methods').deep.equal({ post: true });
-			expect(express._router.stack[5].route).to.have.property('path').equal('/:id');
-			expect(express._router.stack[5].route).to.have.property('methods').deep.equal({ delete: true });
+			expect(express._router.stack[4].route).to.have.property('path').equal('/:id');
+			expect(express._router.stack[4].route).to.have.property('methods').deep.equal({ put: true });
+			expect(express._router.stack[5].route).to.have.property('path').equal('/create');
+			expect(express._router.stack[5].route).to.have.property('methods').deep.equal({ post: true });
+			expect(express._router.stack[6].route).to.have.property('path').equal('/:id');
+			expect(express._router.stack[6].route).to.have.property('methods').deep.equal({ delete: true });
+			expect(express._router.stack[7].route).to.have.property('path').equal('/');
+			expect(express._router.stack[7].route).to.have.property('methods').deep.equal({ head: true });
+			expect(express._router.stack[8].route).to.have.property('path').equal('/');
+			expect(express._router.stack[8].route).to.have.property('methods').deep.equal({ options: true });
+		});
+	});
+
+	describe('propagation', () => {
+		it('should propagate the calls to the underlying express instance', async () => {
+			const expressHttpServer = new ExpressHttpServer();
+			const express = expressHttpServer.getInstance();
+			const expressMocks = {
+				listen: sinon.stub(express, 'listen'),
+				use: sinon.stub(express, 'use'),
+				all: sinon.stub(express, 'all')
+			};
+			const cb = () => {};
+
+			expressHttpServer.use('/', cb);
+			expect(expressMocks.use.firstCall.args).to.be.deep.equal(['/', cb]);
+			expressHttpServer.all('/', cb);
+			expect(expressMocks.all.firstCall.args).to.be.deep.equal(['/', cb]);
+			expressHttpServer.listen(3000, cb);
+			expect(expressMocks.listen.firstCall.args).to.be.deep.equal([3000, cb]);
+		});
+
+		it('should propagate the calls to the underlying response', async () => {
+			const expressHttpServer = new ExpressHttpServer();
+			const responseMock = {
+				status: sinon.stub(),
+				render: sinon.stub(),
+				redirect: sinon.stub(),
+				set: sinon.stub()
+			};
+
+			// @ts-ignore
+			expressHttpServer.status(responseMock, 200);
+			expect(responseMock.status.firstCall.args).to.be.deep.equal([200]);
+			// @ts-ignore
+			expressHttpServer.render(responseMock, 'view', {});
+			expect(responseMock.render.firstCall.args).to.be.deep.equal(['view', {}]);
+			// @ts-ignore
+			expressHttpServer.redirect(responseMock, 301, 'http://redirect.url');
+			expect(responseMock.redirect.firstCall.args).to.be.deep.equal([301, 'http://redirect.url']);
+			// @ts-ignore
+			expressHttpServer.setHeader(responseMock, 'x-my-header', '123');
+			expect(responseMock.set.firstCall.args).to.be.deep.equal(['x-my-header', '123']);
 		});
 	});
 });

@@ -5,7 +5,7 @@
 
 import { TypeValue } from '@davinci/reflector';
 
-export type Verb = 'get' | 'post' | 'put' | 'patch' | 'head' | 'delete';
+export type Verb = 'get' | 'post' | 'put' | 'patch' | 'head' | 'delete' | 'options';
 
 export interface MethodValidation {
 	disable?: boolean;

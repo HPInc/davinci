@@ -30,13 +30,7 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 	}
 
 	onDestroy() {
-		return new Promise((resolve, reject) => {
-			return super.getHttpServer()?.close(err => {
-				if (err) return reject(err);
-
-				return resolve(null);
-			});
-		});
+		return this.close();
 	}
 
 	initHttpServer() {
@@ -59,9 +53,9 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 		return typeof body === 'object' ? response.json(body) : response.send(String(body));
 	}
 
-	public use(...args: any[]) {
+	public use: Express['use'] = (...args) => {
 		return this.instance.use(...args);
-	}
+	};
 
 	public get(path: string, handler: RequestHandler<Request, Response>) {
 		this.instance.get(path, handler);
@@ -97,8 +91,8 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 
 	public listen(port: string | number, callback?: () => void);
 	public listen(port: string | number, hostname: string, callback?: () => void);
-	public listen(...args: unknown[]) {
-		this.instance.listen(args[0] as number, args[1] as string, args[2] as () => void);
+	public listen(...args: any[]) {
+		return this.instance.listen(...args);
 	}
 
 	getInstance() {
@@ -134,10 +128,13 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 	}
 
 	public close() {
-		if (!super.httpServer) {
-			return undefined;
-		}
-		return new Promise(resolve => super.httpServer.close(resolve));
+		return new Promise((resolve, reject) => {
+			return super.getHttpServer()?.close(err => {
+				if (err) return reject(err);
+
+				return resolve(null);
+			});
+		});
 	}
 
 	public getRequestHostname(request: Request): string {

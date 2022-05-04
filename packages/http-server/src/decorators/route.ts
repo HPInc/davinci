@@ -2,13 +2,14 @@
  * © Copyright 2022 HP Development Company, L.P.
  * SPDX-License-Identifier: MIT
  */
+/* eslint-disable no-shadow */
 
 import { decorateClass, decorateMethod, decorateParameter, DecoratorId } from '@davinci/reflector';
 import {
 	ControllerDecoratorOptions,
 	MethodDecoratorOptions,
-	ParameterDecoratorOptions,
 	ParameterDecoratorBaseOptions,
+	ParameterDecoratorOptions,
 	Verb
 } from './types';
 
@@ -31,6 +32,7 @@ export const put = createRouteMethodDecorator('put');
 export const patch = createRouteMethodDecorator('patch');
 export const del = createRouteMethodDecorator('delete');
 export const head = createRouteMethodDecorator('head');
+export const options = createRouteMethodDecorator('options');
 
 export function param(options: ParameterDecoratorOptions) {
 	return decorateParameter(

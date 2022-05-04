@@ -6,8 +6,6 @@ import { DecoratorId, reflect } from '@davinci/reflector';
 import { expect } from '../../support/chai';
 import { executeInterceptorsStack, Interceptor, interceptor } from '../../../src';
 
-const sinon = require('sinon').createSandbox();
-
 type InterceptorArgsCalls = { state: { calls: string[] } };
 type InterceptorArgsErrors = { errorMessages: string[] };
 
@@ -128,15 +126,19 @@ describe('interceptors', () => {
 	});
 
 	it('should decorate correctly', () => {
-		@interceptor(sinon.stub())
+		const handler = () => {};
+		@interceptor(handler)
 		class MyController {
-			@interceptor(sinon.stub())
+			@interceptor(handler)
 			myMethod() {}
 		}
 
 		const controllerReflection = reflect(MyController);
 
-		expect(controllerReflection.decorators[0][DecoratorId]).to.be.equal('interceptor');
-		expect(controllerReflection.methods[0].decorators[0][DecoratorId]).to.be.equal('interceptor');
+		expect(controllerReflection.decorators[0]).to.be.deep.equal({ [DecoratorId]: 'interceptor', handler });
+		expect(controllerReflection.methods[0].decorators[0]).to.be.deep.equal({
+			[DecoratorId]: 'interceptor',
+			handler
+		});
 	});
 });
