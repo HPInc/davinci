@@ -114,20 +114,12 @@ export abstract class HttpServerModule<Request = unknown, Response = unknown, Se
 
 		// using a named function here for better instrumentation and reporting
 		return async function davinciHttpRequestHandler(request: Request, response: Response) {
-			let contextFactoryExecuted = false;
-			let contextFactoryResult;
 			const createContext = async () => {
 				try {
-					if (contextFactoryExecuted) {
-						return await contextFactoryResult;
-					}
-					contextFactoryResult = httpServerModule.contextFactory?.({
+					return httpServerModule.contextFactory?.({
 						request,
 						reflection: { controllerReflection, methodReflection }
 					});
-					contextFactoryExecuted = true;
-
-					return await contextFactoryResult;
 				} catch (err) {
 					logger.error({ err }, 'An error happened during the creation of the context');
 					throw err;

@@ -2,7 +2,7 @@
  * © Copyright 2022 HP Development Company, L.P.
  * SPDX-License-Identifier: MIT
  */
-import { App, context, interceptor } from '@davinci/core';
+import { App, context, interceptor, InterceptorBag, InterceptorNext } from '@davinci/core';
 import should from 'should';
 import { HttpServerModule, route } from '../../src';
 import * as http from 'http';
@@ -233,6 +233,39 @@ describe('HttpServerModule', () => {
 				'controllerReflection',
 				'methodReflection'
 			]);
+		});
+
+		it('should inject the context as parameter in the interceptors', async () => {
+			type Context = { userId: string };
+			const handler = sinon.stub().callsFake((next: InterceptorNext<Context>, bag: InterceptorBag<Context>) => {
+				should(bag.context).be.deepEqual({ userId: '123' });
+				return next();
+			});
+			@interceptor(handler)
+			class CustomerController {
+				@interceptor(handler)
+				@route.get({ path: '/all' })
+				find(@route.body() body, @route.query() query, @context() ctx) {
+					return { body, query, ctx };
+				}
+			}
+
+			const contextFactory = sinon.stub().callsFake(({ request }) => ({ userId: request.headers['x-userid'] }));
+			const dummyHttpServer = new DummyHttpServer().setContextFactory(contextFactory);
+			const controllerReflection = reflect(CustomerController);
+			const methodReflection = controllerReflection.methods[0];
+			const requestHandler = dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+				controllerReflection,
+				methodReflection
+			});
+			const reqMock = {
+				headers: {
+					'x-userid': '123'
+				}
+			};
+			const resMock = {};
+			await requestHandler(reqMock, resMock);
+			should(handler.callCount).be.equal(2);
 		});
 	});
 });
