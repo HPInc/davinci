@@ -267,5 +267,28 @@ describe('HttpServerModule', () => {
 			await requestHandler(reqMock, resMock);
 			should(handler.callCount).be.equal(2);
 		});
+
+		it('should log exceptions happening in the contextFactory', async () => {
+			class CustomerController {
+				@route.get({ path: '/all' })
+				find(@route.body() body, @route.query() query, @context() ctx) {
+					return { body, query, ctx };
+				}
+			}
+
+			const contextFactory = sinon.stub().callsFake(() => {
+				throw new Error('A bad error here');
+			});
+			const dummyHttpServer = new DummyHttpServer().setContextFactory(contextFactory);
+			const errorMock = sinon.stub(dummyHttpServer.logger, 'error');
+			const controllerReflection = reflect(CustomerController);
+			const methodReflection = controllerReflection.methods[0];
+			const requestHandler = dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+				controllerReflection,
+				methodReflection
+			});
+			await requestHandler({}, {});
+			should(errorMock.getCall(0).args[1]).be.equal('An error happened during the creation of the context');
+		});
 	});
 });

@@ -9,8 +9,6 @@ import { ClassReflection, ClassType, DecoratorId, MethodReflection } from '@davi
 import { HttpServerModuleOptions, ParameterSource, RequestHandler } from './types';
 import { ControllerDecoratorMetadata, MethodDecoratorMetadata, ParameterDecoratorMetadata } from './decorators';
 
-const logger = pino({ name: 'http-server' });
-
 type ContextFactory<Context, Request = any> = (args: {
 	request: Request;
 	reflection: { controllerReflection: ClassReflection; methodReflection: MethodReflection };
@@ -19,6 +17,7 @@ type ContextFactory<Context, Request = any> = (args: {
 export abstract class HttpServerModule<Request = unknown, Response = unknown, Server = unknown> extends Module {
 	app: App;
 	contextFactory?: ContextFactory<unknown>;
+	logger = pino({ name: 'http-server' });
 	protected httpServer: Server;
 
 	constructor(protected moduleOptions?: HttpServerModuleOptions) {
@@ -121,7 +120,7 @@ export abstract class HttpServerModule<Request = unknown, Response = unknown, Se
 						reflection: { controllerReflection, methodReflection }
 					});
 				} catch (err) {
-					logger.error({ err }, 'An error happened during the creation of the context');
+					httpServerModule.logger.error({ err }, 'An error happened during the creation of the context');
 					throw err;
 				}
 			};
