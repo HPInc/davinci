@@ -2,22 +2,30 @@
  * © Copyright 2022 HP Development Compunknown, L.P.
  * SPDX-License-Identifier: MIT
  */
-import { App, executeInterceptorsStack, getInterceptorsHandlers, Module } from '@davinci/core';
+import { App, executeInterceptorsStack, getInterceptorsHandlers, mapParallel, Module } from '@davinci/core';
 import pathUtils from 'path';
-import { ClassReflection, ClassType, MethodReflection } from '@davinci/reflector';
+import pino from 'pino';
+import { ClassReflection, ClassType, DecoratorId, MethodReflection } from '@davinci/reflector';
 import { HttpServerModuleOptions, ParameterSource, RequestHandler } from './types';
 import { ControllerDecoratorMetadata, MethodDecoratorMetadata, ParameterDecoratorMetadata } from './decorators';
 
-export abstract class HttpServerModule<Request = unknown, Response = unknown, Server = unknown> extends Module {
-	protected httpServer: Server;
-	app: App;
+type ContextFactory<Context, Request = any> = (args: {
+	request: Request;
+	reflection: { controllerReflection: ClassReflection; methodReflection: MethodReflection };
+}) => Context;
 
-	getModuleId() {
-		return 'http';
-	}
+export abstract class HttpServerModule<Request = unknown, Response = unknown, Server = unknown> extends Module {
+	app: App;
+	contextFactory?: ContextFactory<unknown>;
+	logger = pino({ name: 'http-server' });
+	protected httpServer: Server;
 
 	constructor(protected moduleOptions?: HttpServerModuleOptions) {
 		super();
+	}
+
+	getModuleId() {
+		return 'http';
 	}
 
 	public getModuleOptions() {
@@ -30,6 +38,12 @@ export abstract class HttpServerModule<Request = unknown, Response = unknown, Se
 
 	public setHttpServer(httpServer: Server) {
 		this.httpServer = httpServer;
+	}
+
+	public setContextFactory<Context>(contextFactory: ContextFactory<Context, Request>): this {
+		this.contextFactory = contextFactory;
+
+		return this;
 	}
 
 	public createRoutes() {
@@ -91,55 +105,62 @@ export abstract class HttpServerModule<Request = unknown, Response = unknown, Se
 	) {
 		const { methodReflection, controllerReflection } = reflections;
 		// eslint-disable-next-line @typescript-eslint/no-this-alias
-		const that = this;
+		const httpServerModule = this;
 		const interceptors = [
 			...getInterceptorsHandlers(controllerReflection),
 			...getInterceptorsHandlers(methodReflection)
 		];
 
 		// using a named function here for better instrumentation and reporting
-		return async function davinciHttpRequestHandler(req: Request, res: Response) {
-			const parameters = methodReflection.parameters.map(parameterReflection => {
-				const parameterDecoratorMetadata: ParameterDecoratorMetadata = parameterReflection.decorators.find(
-					d => d.module === 'http-server' && d.type === 'parameter'
-				);
-
-				if (parameterDecoratorMetadata) {
-					const { options } = parameterDecoratorMetadata;
-					return that.getRequestParameter({
-						source: options.in,
-						name: options.name ?? parameterReflection.name,
-						request: req
+		return async function davinciHttpRequestHandler(request: Request, response: Response) {
+			const createContext = async () => {
+				try {
+					return httpServerModule.contextFactory?.({
+						request,
+						reflection: { controllerReflection, methodReflection }
 					});
+				} catch (err) {
+					httpServerModule.logger.error({ err }, 'An error happened during the creation of the context');
+					throw err;
 				}
-
-				return undefined;
-			});
+			};
 
 			try {
+				const parameters = await mapParallel(methodReflection.parameters, parameterReflection => {
+					const parameterDecoratorMetadata: ParameterDecoratorMetadata = parameterReflection.decorators.find(
+						d => d[DecoratorId] === 'http-server.parameter' || d[DecoratorId] === 'core.parameter.context'
+					);
+
+					if (parameterDecoratorMetadata?.[DecoratorId] === 'http-server.parameter') {
+						const { options } = parameterDecoratorMetadata;
+						return httpServerModule.getRequestParameter({
+							source: options.in,
+							name: options.name ?? parameterReflection.name,
+							request
+						});
+					}
+
+					if (parameterDecoratorMetadata?.[DecoratorId] === 'core.parameter.context') {
+						return createContext();
+					}
+
+					return undefined;
+				});
+
+				const interceptorsBag = httpServerModule.prepareInterceptorBag({
+					request,
+					parameters,
+					context: await createContext()
+				});
+
 				const result = await executeInterceptorsStack(
 					[...interceptors, (_next, context) => controller[methodName](...context.handlerArgs)],
-					that.prepareInterceptorBag({
-						request: req,
-						parameters
-					})
+					interceptorsBag
 				);
 
-				return that.reply(res, result);
+				return httpServerModule.reply(response, result);
 			} catch (err) {
-				return that.reply(res, { error: true, message: err.message }, 500);
-			}
-		};
-	}
-
-	private prepareInterceptorBag({ request, parameters }: { request: Request; parameters: any[] }) {
-		return {
-			module: 'http-server',
-			handlerArgs: parameters,
-			request: {
-				headers: this.getRequestHeaders(request),
-				body: this.getRequestBody(request),
-				query: this.getRequestQuerystring(request)
+				return httpServerModule.reply(response, { error: true, message: err.message }, 500);
 			}
 		};
 	}
@@ -169,6 +190,7 @@ export abstract class HttpServerModule<Request = unknown, Response = unknown, Se
 	abstract options(path: unknown, handler: RequestHandler<Request, Response>);
 
 	abstract listen(port: string | number, callback?: () => void);
+
 	abstract listen(port: string | number, hostname: string, callback?: () => void);
 
 	abstract initHttpServer(): void;
@@ -204,6 +226,27 @@ export abstract class HttpServerModule<Request = unknown, Response = unknown, Se
 	abstract setNotFoundHandler(handler: Function, prefix?: string);
 
 	abstract setHeader(response, name: string, value: string);
+
+	private prepareInterceptorBag({
+		request,
+		parameters,
+		context
+	}: {
+		request: Request;
+		parameters: any[];
+		context: any;
+	}) {
+		return {
+			module: 'http-server',
+			handlerArgs: parameters,
+			context,
+			request: {
+				headers: this.getRequestHeaders(request),
+				body: this.getRequestBody(request),
+				query: this.getRequestQuerystring(request)
+			}
+		};
+	}
 
 	/* abstract render(response, view: string, options: unknown);
 	abstract useStaticAssets(...args: unknown[]);

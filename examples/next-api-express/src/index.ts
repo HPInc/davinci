@@ -3,9 +3,10 @@ import { ExpressHttpServer } from '@davinci/http-server-express';
 import { CustomerController } from './api/customer';
 
 const app = createApp();
-app.registerController([CustomerController]);
-app.registerModule(new ExpressHttpServer());
+const contextFactory = ({ request }) => ({ accountId: request.headers['x-accountid'] });
 
-app.init();
+app.registerController([CustomerController])
+	.registerModule(new ExpressHttpServer().setContextFactory(contextFactory))
+	.init();
 
 export default app;

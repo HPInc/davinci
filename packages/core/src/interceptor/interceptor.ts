@@ -6,18 +6,18 @@
 import { ClassReflection, DecoratorId, MethodReflection } from '@davinci/reflector';
 import { Interceptor, InterceptorBag, InterceptorNext } from './types';
 
-export function getInterceptorsHandlers<ModuleInterceptorBag>(
+export function getInterceptorsHandlers<Context, State>(
 	reflection: MethodReflection | ClassReflection
-): Interceptor<ModuleInterceptorBag>[] {
+): Interceptor<Context, State>[] {
 	return reflection.decorators.filter(decorator => decorator[DecoratorId] === 'interceptor').map(d => d.handler);
 }
 
-export function executeInterceptorsStack<ModuleInterceptorBag = Map<string, any>>(
-	interceptors: Interceptor<ModuleInterceptorBag>[],
-	interceptorBag?: InterceptorBag<ModuleInterceptorBag>
-): ReturnType<InterceptorNext<ModuleInterceptorBag>> {
+export function executeInterceptorsStack<Context, State = Map<string, any>>(
+	interceptors: Interceptor<Context, State>[],
+	interceptorBag?: InterceptorBag<Context, State>
+): ReturnType<InterceptorNext<Context, State>> {
 	return interceptors.reverse().reduce(
-		(wrapperFunction: InterceptorNext<ModuleInterceptorBag>, interceptor) => {
+		(wrapperFunction: InterceptorNext<Context, State>, interceptor) => {
 			return () => interceptor(wrapperFunction, interceptorBag);
 		},
 		// eslint-disable-next-line @typescript-eslint/no-empty-function
