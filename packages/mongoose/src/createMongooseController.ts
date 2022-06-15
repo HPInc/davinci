@@ -8,7 +8,7 @@ import _ from 'lodash';
 import bluebird from 'bluebird';
 
 export interface Constructor<T> {
-	new (...args: any[]): T;
+	new(...args: any[]): T;
 }
 
 interface IParsedMongooseFilters {
@@ -31,6 +31,16 @@ export interface IMongooseController {
 }
 
 /**
+ * Allows to pass additional options to the createMongooseController
+ * 
+ * useEstimatedDocumentCount: gets an estimation of the collection size using the collection's
+ * 		metadata instead of searching the collection when no where clause is provided
+ */
+interface AdditionalOptions {
+	useEstimatedDocumentCount?: boolean
+}
+
+/**
  * We use a factory to pass Model and ResourceSchema.
  * This allow us to use ResourceSchema to define some request types, and build the openaapi specification
  * correctly
@@ -44,10 +54,13 @@ export interface IMongooseController {
  */
 export const createMongooseController = <T extends Constructor<{}>>(
 	Model,
-	ResourceSchema
+	ResourceSchema,
+	options?: AdditionalOptions
 ): Constructor<IMongooseController> & T => {
 	// eslint-disable-next-line @typescript-eslint/no-var-requires,global-require
 	const { context, route, httpErrors, openapi, express } = require('@davinci/core');
+
+	const { useEstimatedDocumentCount } = { useEstimatedDocumentCount: true, ...options };
 
 	@openapi.definition({ title: `${Model.modelName}PopulateQueryParameter` })
 	class PopulateQueryParameter {
@@ -134,7 +147,7 @@ export const createMongooseController = <T extends Constructor<{}>>(
 	}
 
 	// Let's create a usable resource schema
-	class RSchema extends ResourceSchema {}
+	class RSchema extends ResourceSchema { }
 
 	// This is the response type of a find request
 	@openapi.definition({ title: `${Model.modelName}ListResponse` })
@@ -184,7 +197,9 @@ export const createMongooseController = <T extends Constructor<{}>>(
 
 			const [data, total] = await bluebird.all([
 				populate ? mQuery.populate(populate) : mQuery,
-				this.model.countDocuments(where).setOptions({ context: ctx })
+				(_.isEmpty(where) && useEstimatedDocumentCount) ?
+					this.model.estimatedDocumentCount().setOptions({ context: ctx })
+					: this.model.countDocuments(where).setOptions({ context: ctx })
 			]);
 
 			return {
