@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.18.0](https://github.com/HPInc/davinci/compare/@davinci/mongoose@0.17.13...@davinci/mongoose@0.18.0) (2022-06-15)
+
+
+### Bug Fixes
+
+* allow estimated doc count for mongoose find ([0402621](https://github.com/HPInc/davinci/commit/04026213105907f0f0a81ef0b0b193590ab13259))
+* make useEstimatedDocumentCount optional ([677965d](https://github.com/HPInc/davinci/commit/677965da6facff1442879438486e771fa69bfed4))
+* remove unused where ([2cbf47b](https://github.com/HPInc/davinci/commit/2cbf47b5ebab4c042f88816460d4aa694ce5d16c))
+
+
+### Features
+
+* introduced useEstimatedDocumentCount parameter ([6c2397c](https://github.com/HPInc/davinci/commit/6c2397c630e1cfed8865e0cbd0321ab786e918a1))
+
+
+### BREAKING CHANGES
+
+* now using the estimated document count by default
+
+
+
+
+
 ## [0.17.13](https://github.com/HPInc/davinci/compare/@davinci/mongoose@0.17.12...@davinci/mongoose@0.17.13) (2022-04-13)
 
 
