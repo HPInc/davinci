@@ -6,10 +6,9 @@
 // eslint-disable-next-line max-classes-per-file
 import _ from 'lodash';
 import bluebird from 'bluebird';
-import config from './config';
 
 export interface Constructor<T> {
-	new (...args: any[]): T;
+	new(...args: any[]): T;
 }
 
 interface IParsedMongooseFilters {
@@ -31,6 +30,10 @@ export interface IMongooseController {
 	updateById(id: string, data: any, context: object): Promise<any>;
 }
 
+interface AdditionalOptions {
+	useEstimatedDocumentCount: boolean
+}
+
 /**
  * We use a factory to pass Model and ResourceSchema.
  * This allow us to use ResourceSchema to define some request types, and build the openaapi specification
@@ -45,10 +48,13 @@ export interface IMongooseController {
  */
 export const createMongooseController = <T extends Constructor<{}>>(
 	Model,
-	ResourceSchema
+	ResourceSchema,
+	options: AdditionalOptions
 ): Constructor<IMongooseController> & T => {
 	// eslint-disable-next-line @typescript-eslint/no-var-requires,global-require
 	const { context, route, httpErrors, openapi, express } = require('@davinci/core');
+
+	const { useEstimatedDocumentCount } = { useEstimatedDocumentCount: true, ...options };
 
 	@openapi.definition({ title: `${Model.modelName}PopulateQueryParameter` })
 	class PopulateQueryParameter {
@@ -135,7 +141,7 @@ export const createMongooseController = <T extends Constructor<{}>>(
 	}
 
 	// Let's create a usable resource schema
-	class RSchema extends ResourceSchema {}
+	class RSchema extends ResourceSchema { }
 
 	// This is the response type of a find request
 	@openapi.definition({ title: `${Model.modelName}ListResponse` })
@@ -185,7 +191,7 @@ export const createMongooseController = <T extends Constructor<{}>>(
 
 			const [data, total] = await bluebird.all([
 				populate ? mQuery.populate(populate) : mQuery,
-				(_.isEmpty(where) && config.ALLOW_ESTIMATED_DOCUMENT_COUNT) ?
+				(_.isEmpty(where) && useEstimatedDocumentCount) ?
 					this.model.estimatedDocumentCount().setOptions({ context: ctx })
 					: this.model.countDocuments(where).setOptions({ context: ctx })
 			]);
