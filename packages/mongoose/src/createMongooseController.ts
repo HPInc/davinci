@@ -186,7 +186,7 @@ export const createMongooseController = <T extends Constructor<{}>>(
 			const [data, total] = await bluebird.all([
 				populate ? mQuery.populate(populate) : mQuery,
 				(_.isEmpty(where) && config.ALLOW_ESTIMATED_DOCUMENT_COUNT) ?
-					this.model.estimatedDocumentCount(where).setOptions({ context: ctx })
+					this.model.estimatedDocumentCount().setOptions({ context: ctx })
 					: this.model.countDocuments(where).setOptions({ context: ctx })
 			]);
 
