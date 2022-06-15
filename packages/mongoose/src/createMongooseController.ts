@@ -49,7 +49,7 @@ interface AdditionalOptions {
 export const createMongooseController = <T extends Constructor<{}>>(
 	Model,
 	ResourceSchema,
-	options: AdditionalOptions
+	options?: AdditionalOptions
 ): Constructor<IMongooseController> & T => {
 	// eslint-disable-next-line @typescript-eslint/no-var-requires,global-require
 	const { context, route, httpErrors, openapi, express } = require('@davinci/core');
