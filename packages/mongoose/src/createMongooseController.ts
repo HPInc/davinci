@@ -31,7 +31,7 @@ export interface IMongooseController {
 }
 
 interface AdditionalOptions {
-	useEstimatedDocumentCount: boolean
+	useEstimatedDocumentCount?: boolean
 }
 
 /**
