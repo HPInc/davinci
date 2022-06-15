@@ -30,6 +30,12 @@ export interface IMongooseController {
 	updateById(id: string, data: any, context: object): Promise<any>;
 }
 
+/**
+ * Allows to pass additional options to the createMongooseController
+ * 
+ * useEstimatedDocumentCount: gets an estimation of the collection size using the collection's
+ * 		metadata instead of searching the collection when no where clause is provided
+ */
 interface AdditionalOptions {
 	useEstimatedDocumentCount?: boolean
 }
