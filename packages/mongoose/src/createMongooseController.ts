@@ -6,6 +6,7 @@
 // eslint-disable-next-line max-classes-per-file
 import _ from 'lodash';
 import bluebird from 'bluebird';
+import config from './config';
 
 export interface Constructor<T> {
 	new (...args: any[]): T;
@@ -184,7 +185,9 @@ export const createMongooseController = <T extends Constructor<{}>>(
 
 			const [data, total] = await bluebird.all([
 				populate ? mQuery.populate(populate) : mQuery,
-				this.model.countDocuments(where).setOptions({ context: ctx })
+				(_.isEmpty(where) && config.ALLOW_ESTIMATED_DOCUMENT_COUNT) ?
+					this.model.estimatedDocumentCount(where).setOptions({ context: ctx })
+					: this.model.countDocuments(where).setOptions({ context: ctx })
 			]);
 
 			return {
