@@ -4,6 +4,7 @@
  */
 
 import { ServerOptions } from 'https';
+import { ClassReflection, MethodReflection } from '@davinci/reflector';
 
 export type ErrorHandler<TRequest = any, TResponse = any> = (
 	error: any,
@@ -84,3 +85,10 @@ export interface CorsOptions {
 	 */
 	hideOptionsRoute?: boolean;
 }
+
+export interface ContextFactoryArguments<Request> {
+	request: Request;
+	reflection: { controllerReflection: ClassReflection; methodReflection: MethodReflection };
+}
+
+export type ContextFactory<Context, Request = any> = (args: ContextFactoryArguments<Request>) => Context;

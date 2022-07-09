@@ -43,9 +43,15 @@ describe('HttpServerModule', () => {
 		getRequestHeaders(request) {
 			return request.headers;
 		}
-		getRequestBody() {}
-		getRequestQuerystring() {}
-		getRequestUrl() {}
+		getRequestBody(request) {
+			return request.body;
+		}
+		getRequestQuerystring(request) {
+			return request.query;
+		}
+		getRequestUrl(request) {
+			return request.originalUrl;
+		}
 		status() {}
 		redirect() {}
 		setErrorHandler() {}
@@ -183,7 +189,12 @@ describe('HttpServerModule', () => {
 				controllerReflection,
 				methodReflection
 			});
-			const reqMock = {};
+			const reqMock = {
+				headers: { 'x-my-header': '1' },
+				body: { myBody: true },
+				query: { myQuery: 'query' },
+				originalUrl: 'http://path/to/url'
+			};
 			const resMock = {};
 			const result = await requestHandler(reqMock, resMock);
 
@@ -192,7 +203,26 @@ describe('HttpServerModule', () => {
 				query: 'query'
 			});
 			should(interceptor1.called).be.True();
+			const interceptorArgs = {
+				module: 'http-server',
+				handlerArgs: ['body', 'query'],
+				context: undefined,
+				request: {
+					headers: {
+						'x-my-header': '1'
+					},
+					body: {
+						myBody: true
+					},
+					query: {
+						myQuery: 'query'
+					},
+					url: 'http://path/to/url'
+				}
+			};
+			should(interceptor1.getCall(0).args[1]).be.deepEqual(interceptorArgs);
 			should(interceptor2.called).be.True();
+			should(interceptor2.getCall(0).args[1]).be.deepEqual(interceptorArgs);
 		});
 
 		it('should be able to process the context parameter', async () => {

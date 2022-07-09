@@ -6,13 +6,14 @@ import { App, executeInterceptorsStack, getInterceptorsHandlers, mapParallel, Mo
 import pathUtils from 'path';
 import pino from 'pino';
 import { ClassReflection, ClassType, DecoratorId, MethodReflection } from '@davinci/reflector';
-import { HttpServerModuleOptions, ParameterSource, RequestHandler } from './types';
+import {
+	ContextFactory,
+	ContextFactoryArguments,
+	HttpServerModuleOptions,
+	ParameterSource,
+	RequestHandler
+} from './types';
 import { ControllerDecoratorMetadata, MethodDecoratorMetadata, ParameterDecoratorMetadata } from './decorators';
-
-type ContextFactory<Context, Request = any> = (args: {
-	request: Request;
-	reflection: { controllerReflection: ClassReflection; methodReflection: MethodReflection };
-}) => Context;
 
 export abstract class HttpServerModule<Request = unknown, Response = unknown, Server = unknown> extends Module {
 	app: App;
@@ -113,18 +114,6 @@ export abstract class HttpServerModule<Request = unknown, Response = unknown, Se
 
 		// using a named function here for better instrumentation and reporting
 		return async function davinciHttpRequestHandler(request: Request, response: Response) {
-			const createContext = async () => {
-				try {
-					return httpServerModule.contextFactory?.({
-						request,
-						reflection: { controllerReflection, methodReflection }
-					});
-				} catch (err) {
-					httpServerModule.logger.error({ err }, 'An error happened during the creation of the context');
-					throw err;
-				}
-			};
-
 			try {
 				const parameters = await mapParallel(methodReflection.parameters, parameterReflection => {
 					const parameterDecoratorMetadata: ParameterDecoratorMetadata = parameterReflection.decorators.find(
@@ -141,7 +130,10 @@ export abstract class HttpServerModule<Request = unknown, Response = unknown, Se
 					}
 
 					if (parameterDecoratorMetadata?.[DecoratorId] === 'core.parameter.context') {
-						return createContext();
+						return httpServerModule.createContext({
+							request,
+							reflection: { controllerReflection, methodReflection }
+						});
 					}
 
 					return undefined;
@@ -150,7 +142,10 @@ export abstract class HttpServerModule<Request = unknown, Response = unknown, Se
 				const interceptorsBag = httpServerModule.prepareInterceptorBag({
 					request,
 					parameters,
-					context: await createContext()
+					context: await httpServerModule.createContext({
+						request,
+						reflection: { controllerReflection, methodReflection }
+					})
 				});
 
 				const result = await executeInterceptorsStack(
@@ -170,6 +165,8 @@ export abstract class HttpServerModule<Request = unknown, Response = unknown, Se
 
 	// abstract post(handler: RequestHandler<Request, Response>);
 	abstract post(path: unknown, handler: RequestHandler<Request, Response>);
+
+	// public createNotFoundHandler() {}
 
 	// abstract head(handler: RequestHandler<Request, Response>);
 	abstract head(path: unknown, handler: RequestHandler<Request, Response>);
@@ -243,9 +240,25 @@ export abstract class HttpServerModule<Request = unknown, Response = unknown, Se
 			request: {
 				headers: this.getRequestHeaders(request),
 				body: this.getRequestBody(request),
-				query: this.getRequestQuerystring(request)
+				query: this.getRequestQuerystring(request),
+				url: this.getRequestUrl(request)
 			}
 		};
+	}
+
+	private async createContext({
+		request,
+		reflection: { controllerReflection, methodReflection }
+	}: ContextFactoryArguments<Request>) {
+		try {
+			return await this.contextFactory?.({
+				request,
+				reflection: { controllerReflection, methodReflection }
+			});
+		} catch (err) {
+			this.logger.error({ err }, 'An error happened during the creation of the context');
+			throw err;
+		}
 	}
 
 	/* abstract render(response, view: string, options: unknown);
