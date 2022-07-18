@@ -7,12 +7,19 @@ import express, { Express, Request, Response } from 'express';
 import http, { Server as HttpServer } from 'http';
 import https, { Server as HttpsServer } from 'https';
 import type { App } from '@davinci/core';
+import type { OptionsJson, OptionsUrlencoded } from 'body-parser';
 
 type Server = HttpServer | HttpsServer;
 
-type ExpressHttpServerModuleOptions = { app?: Express } & HttpServerModuleOptions;
+type ExpressHttpServerModuleOptions = {
+	app?: Express;
+	middlewares?: {
+		json?: OptionsJson;
+		urlencoded?: OptionsUrlencoded;
+	};
+} & HttpServerModuleOptions;
 
-export class ExpressHttpServer extends HttpServerModule<Request, Response, Server> {
+export class ExpressHttpServer extends HttpServerModule<Request, Response, Server, ExpressHttpServerModuleOptions> {
 	instance: Express;
 	app: App;
 
@@ -24,6 +31,7 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 
 	async onInit(app) {
 		this.app = app;
+		this.registerMiddlewares();
 		super.createRoutes();
 		// this.registerErrorHandlers();
 		this.initHttpServer();
@@ -32,6 +40,11 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 
 	onDestroy() {
 		return this.close();
+	}
+
+	registerMiddlewares() {
+		this.instance.use(express.json({ ...this.moduleOptions?.middlewares?.json }));
+		this.instance.use(express.urlencoded({ extended: true, ...this.moduleOptions?.middlewares?.urlencoded }));
 	}
 
 	initHttpServer() {

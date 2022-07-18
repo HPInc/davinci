@@ -6,5 +6,6 @@
 export * from './App';
 export * from './Module';
 export * from './interceptor';
+export * from './entity';
 export * from './context';
 export * from './lib/async-utils';

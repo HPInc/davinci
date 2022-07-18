@@ -15,13 +15,18 @@ import {
 } from './types';
 import { ControllerDecoratorMetadata, MethodDecoratorMetadata, ParameterDecoratorMetadata } from './decorators';
 
-export abstract class HttpServerModule<Request = unknown, Response = unknown, Server = unknown> extends Module {
+export abstract class HttpServerModule<
+	Request = unknown,
+	Response = unknown,
+	Server = unknown,
+	ModuleOptions = HttpServerModuleOptions
+> extends Module {
 	app: App;
 	contextFactory?: ContextFactory<unknown>;
 	logger = pino({ name: 'http-server' });
 	protected httpServer: Server;
 
-	constructor(protected moduleOptions?: HttpServerModuleOptions) {
+	constructor(protected moduleOptions?: ModuleOptions) {
 		super();
 	}
 
