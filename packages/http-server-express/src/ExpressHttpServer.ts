@@ -43,8 +43,10 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 	}
 
 	registerMiddlewares() {
-		this.instance.use(express.json({ ...this.moduleOptions?.middlewares?.json }));
-		this.instance.use(express.urlencoded({ extended: true, ...this.moduleOptions?.middlewares?.urlencoded }));
+		const { json, urlencoded } = this.moduleOptions?.middlewares ?? {};
+
+		this.instance.use(express.json({ ...json }));
+		this.instance.use(express.urlencoded({ extended: true, ...urlencoded }));
 	}
 
 	initHttpServer() {
@@ -72,7 +74,7 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 	};
 
 	public get(path: string, handler: RequestHandler<Request, Response>) {
-		this.instance.get(path, handler);
+		return this.instance.get(path, handler);
 	}
 
 	public post(path: string, handler: RequestHandler<Request, Response>) {

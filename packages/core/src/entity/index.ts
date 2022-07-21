@@ -4,5 +4,7 @@
  */
 
 export * from './decorators';
+export * from './EntityRegistry';
+export * from './EntityDefinition';
 
 export * from './types';

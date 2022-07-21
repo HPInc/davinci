@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { EntityDefinition } from '../../../src/entity/EntityDefinition';
-import { entity } from '../../../src';
+import { entity, EntityDefinition } from '../../../src';
 import { expect } from '../../support/chai';
 
 const sinon = require('sinon').createSandbox();
@@ -14,7 +13,7 @@ describe('EntityDefinition', () => {
 		sinon.restore();
 	});
 
-	it('should reflect and generate a json schema', () => {
+	it('should reflect a class and generate a json schema', () => {
 		class Phone {
 			@entity.prop()
 			isDefault: boolean;
@@ -84,7 +83,7 @@ describe('EntityDefinition', () => {
 			.to.be.instanceof(EntityDefinition);
 	});
 
-	it('should reflect and generate a json schema using the entity definition cache', () => {
+	it('should reflect a class and generate a json schema using the entity definition cache', () => {
 		@entity()
 		class Birth {
 			@entity.prop()

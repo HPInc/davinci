@@ -5,6 +5,7 @@
 
 import { ServerOptions } from 'https';
 import { ClassReflection, MethodReflection } from '@davinci/reflector';
+import { ParameterDecoratorOptions } from './decorators';
 
 export type ErrorHandler<TRequest = any, TResponse = any> = (
 	error: any,
@@ -92,3 +93,17 @@ export interface ContextFactoryArguments<Request> {
 }
 
 export type ContextFactory<Context, Request = any> = (args: ContextFactoryArguments<Request>) => Context;
+
+export type ParameterConfiguration<Request> =
+	| {
+			source: ParameterDecoratorOptions['in'];
+			name: string;
+			request?: Request;
+			value?: unknown;
+	  }
+	| {
+			source: 'context';
+			reflection: { controllerReflection: ClassReflection; methodReflection: MethodReflection };
+			request?: Request;
+			value?: unknown;
+	  };
