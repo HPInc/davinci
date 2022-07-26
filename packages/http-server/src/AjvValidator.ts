@@ -18,7 +18,7 @@ export interface AjvValidatorOptions {
 
 export class AjvValidator<Request = unknown> {
 	ajv: Ajv;
-	entitiesMap = new Map<string, JSONSchema>();
+	jsonSchemasMap = new Map<string, JSONSchema>();
 
 	constructor(options: AjvValidatorOptions, private entityRegistry: EntityRegistry) {
 		this.ajv = new Ajv({
@@ -67,11 +67,11 @@ export class AjvValidator<Request = unknown> {
 								return mapObject(p, propValue => {
 									if (propValue._$ref) {
 										const refEntityDefinitionJson = createJsonSchema(
-											this.entitiesMap.get(propValue._$ref) ?? propValue._$ref?.getJsonSchema()
+											this.jsonSchemasMap.get(propValue._$ref) ?? propValue._$ref?.getJsonSchema()
 										);
 
-										if (!this.entitiesMap.has(propValue._$ref)) {
-											this.entitiesMap.set(propValue._$ref, refEntityDefinitionJson);
+										if (!this.jsonSchemasMap.has(propValue._$ref)) {
+											this.jsonSchemasMap.set(propValue._$ref, refEntityDefinitionJson);
 											if (refEntityDefinitionJson?.$id) {
 												this.ajv.addSchema(refEntityDefinitionJson);
 												return { $ref: refEntityDefinitionJson.$id };
@@ -93,13 +93,11 @@ export class AjvValidator<Request = unknown> {
 				return jsonSchema;
 			};
 
-			const entityDefinition = this.entityRegistry.getEntityDefinitionMap().get(parameterConfig.type);
+			const entityJsonSchema = this.entityRegistry.getJsonSchema(parameterConfig.type);
 
-			const jsonSchema =
-				this.entitiesMap.get(entityDefinition.getJsonSchema().title) ??
-				createJsonSchema(entityDefinition.getJsonSchema());
-			if (!this.entitiesMap.has(entityDefinition.getJsonSchema().title) && jsonSchema.$id) {
-				this.entitiesMap.set(jsonSchema.$id, jsonSchema);
+			const jsonSchema = this.jsonSchemasMap.get(entityJsonSchema.title) ?? createJsonSchema(entityJsonSchema);
+			if (!this.jsonSchemasMap.has(entityJsonSchema.title) && jsonSchema.$id) {
+				this.jsonSchemasMap.set(jsonSchema.$id, jsonSchema);
 				this.ajv.addSchema(jsonSchema);
 			}
 

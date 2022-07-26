@@ -339,9 +339,9 @@ export abstract class HttpServerModule<
 					type: parameterType
 				});
 
-				if (typeof parameterType === 'function') {
+				/* if (typeof parameterType === 'function') {
 					this.entityRegistry.addEntity(parameterType as ClassType);
-				}
+				} */
 			}
 
 			if (parameterDecoratorMetadata?.[DecoratorId] === 'core.parameter.context') {

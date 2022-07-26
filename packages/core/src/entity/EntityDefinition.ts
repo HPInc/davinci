@@ -22,13 +22,14 @@ interface EntityDefinitionOptions {
 	entityDefinitionsMapCache?: Map<TypeValue, EntityDefinition>;
 }
 
+const primitiveTypes = [String, Number, Boolean, Date] as unknown[];
+
 export class EntityDefinition {
-	private name?: string;
-	private type?: TypeValue;
-	private jsonSchema?: JSONSchema;
+	private readonly name?: string;
+	private readonly type?: TypeValue;
+	private readonly jsonSchema?: JSONSchema;
 	private relatedEntityDefinitionsMap = new Map<TypeValue, EntityDefinition>();
 	private entityDefinitionsMapCache = new Map<TypeValue, EntityDefinition>();
-	private isPrimitiveType: boolean;
 
 	constructor(options: EntityDefinitionOptions) {
 		if (!options.type && !options.jsonSchema) {
@@ -40,10 +41,23 @@ export class EntityDefinition {
 		this.jsonSchema = this.reflect(/* options.jsonSchema */);
 	}
 
-	reflect(/* jsonSchema?: JSONSchema */) {
-		const primitiveTypes = [String, Number, Boolean, Date] as unknown[];
-		this.isPrimitiveType = primitiveTypes.includes(this.type);
+	public getRelatedEntityDefinitionsMap() {
+		return this.relatedEntityDefinitionsMap;
+	}
 
+	public setRelatedEntityDefinitionsMap(map: Map<TypeValue, EntityDefinition>) {
+		this.relatedEntityDefinitionsMap = map;
+	}
+
+	public getName() {
+		return this.name;
+	}
+
+	public getJsonSchema() {
+		return this.jsonSchema;
+	}
+
+	private reflect(/* jsonSchema?: JSONSchema */) {
 		const makeSchema = (typeOrClass: TypeValue | string | number | boolean | Date, key?: string) => {
 			// it's a primitive type, simple case
 			if (primitiveTypes.includes(typeOrClass)) {
@@ -125,26 +139,6 @@ export class EntityDefinition {
 		};
 
 		return makeSchema(this.type);
-	}
-
-	public getRelatedEntityDefinitionsMap() {
-		return this.relatedEntityDefinitionsMap;
-	}
-
-	public setRelatedEntityDefinitionsMap(map: Map<TypeValue, EntityDefinition>) {
-		this.relatedEntityDefinitionsMap = map;
-	}
-
-	public getName() {
-		return this.name;
-	}
-
-	public getJsonSchema() {
-		return this.jsonSchema;
-	}
-
-	public getIsPrimitiveType() {
-		return this.isPrimitiveType;
 	}
 
 	private findEntityDecorator(reflection: ClassReflection): Maybe<{ [DecoratorId]: string; options: EntityOptions }> {

@@ -43,9 +43,6 @@ describe('AjvValidator', () => {
 
 	const initAjvValidator = () => {
 		const entityRegistry = new EntityRegistry();
-		entityRegistry.addEntity(Customer);
-		entityRegistry.addEntity(Number);
-		entityRegistry.addEntity(String);
 		const ajvValidator = new AjvValidator({}, entityRegistry);
 
 		const parametersConfig: ParameterConfiguration<any>[] = [

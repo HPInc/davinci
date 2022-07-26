@@ -6,7 +6,7 @@
 import { DecoratorId, TypeValue } from '@davinci/reflector';
 import { UncheckedJSONSchemaType } from './jsonSchemaTypes';
 
-export type JSONSchema<T = unknown> = UncheckedJSONSchemaType<T, true>;
+export type JSONSchema<T = any> = UncheckedJSONSchemaType<T, true>;
 
 export type EntityPropOptions<T = unknown> = {
 	type?: TypeValue | UncheckedJSONSchemaType<T, true>['type'];
