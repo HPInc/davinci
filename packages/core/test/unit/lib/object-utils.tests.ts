@@ -4,7 +4,7 @@
  */
 
 import { expect } from 'chai';
-import { mapObject } from '../../../src/lib/object-utils';
+import { mapObject } from '../../../src';
 
 describe('object-utils', () => {
 	describe('mapValues', () => {
@@ -14,7 +14,7 @@ describe('object-utils', () => {
 				b: 2
 			};
 
-			const result = mapObject<Record<string, string>>(input, (value, key) => {
+			const result = mapObject<Record<string, number>>(input, (value, key) => {
 				return `${key}${value}`;
 			});
 

@@ -2,12 +2,12 @@
  * © Copyright 2022 HP Development Company, L.P.
  * SPDX-License-Identifier: MIT
  */
-import { expect } from 'chai';
 import { App } from '@davinci/core';
 import { route } from '@davinci/http-server';
 import axios from 'axios';
 import { createSandbox } from 'sinon';
 import { reflect } from '@davinci/reflector';
+import { expect } from '../support/chai';
 import { ExpressHttpServer } from '../../src';
 
 const sinon = createSandbox();
@@ -85,7 +85,7 @@ describe('ExpressHttpServer', () => {
 			};
 			const res = { status: sinon.stub(), send: sinon.stub(), json: sinon.stub() };
 
-			const handler = expressHttpServer.createRequestHandler(controller, 'getAll', {
+			const handler = await expressHttpServer.createRequestHandler(controller, 'getAll', {
 				controllerReflection,
 				methodReflection
 			});
@@ -119,7 +119,7 @@ describe('ExpressHttpServer', () => {
 			const req = { query: { filter: 'myFilter' } };
 			const res = { status: sinon.stub(), send: sinon.stub(), json: sinon.stub() };
 
-			const handler = expressHttpServer.createRequestHandler(controller, 'getAll', {
+			const handler = await expressHttpServer.createRequestHandler(controller, 'getAll', {
 				controllerReflection,
 				methodReflection
 			});
@@ -127,7 +127,7 @@ describe('ExpressHttpServer', () => {
 			await handler(req, res);
 
 			expect(res.status.args[0][0]).to.be.equal(500);
-			expect(res.json.args[0][0]).to.be.deep.equal({ error: true, message: 'Invalid' });
+			expect(res.json.args[0][0]).to.containSubset({ error: true, message: 'Invalid' });
 			expect(replySpy.called).to.be.true;
 		});
 	});
@@ -178,20 +178,20 @@ describe('ExpressHttpServer', () => {
 
 			const express = expressHttpServer.getInstance();
 
-			expect(express._router.stack[2].route).to.have.property('path').equal('/');
-			expect(express._router.stack[2].route).to.have.property('methods').deep.equal({ get: true });
-			expect(express._router.stack[3].route).to.have.property('path').equal('/:id');
-			expect(express._router.stack[3].route).to.have.property('methods').deep.equal({ patch: true });
-			expect(express._router.stack[4].route).to.have.property('path').equal('/:id');
-			expect(express._router.stack[4].route).to.have.property('methods').deep.equal({ put: true });
-			expect(express._router.stack[5].route).to.have.property('path').equal('/create');
-			expect(express._router.stack[5].route).to.have.property('methods').deep.equal({ post: true });
+			expect(express._router.stack[4].route).to.have.property('path').equal('/');
+			expect(express._router.stack[4].route).to.have.property('methods').deep.equal({ get: true });
+			expect(express._router.stack[5].route).to.have.property('path').equal('/:id');
+			expect(express._router.stack[5].route).to.have.property('methods').deep.equal({ patch: true });
 			expect(express._router.stack[6].route).to.have.property('path').equal('/:id');
-			expect(express._router.stack[6].route).to.have.property('methods').deep.equal({ delete: true });
-			expect(express._router.stack[7].route).to.have.property('path').equal('/');
-			expect(express._router.stack[7].route).to.have.property('methods').deep.equal({ head: true });
-			expect(express._router.stack[8].route).to.have.property('path').equal('/');
-			expect(express._router.stack[8].route).to.have.property('methods').deep.equal({ options: true });
+			expect(express._router.stack[6].route).to.have.property('methods').deep.equal({ put: true });
+			expect(express._router.stack[7].route).to.have.property('path').equal('/create');
+			expect(express._router.stack[7].route).to.have.property('methods').deep.equal({ post: true });
+			expect(express._router.stack[8].route).to.have.property('path').equal('/:id');
+			expect(express._router.stack[8].route).to.have.property('methods').deep.equal({ delete: true });
+			expect(express._router.stack[9].route).to.have.property('path').equal('/');
+			expect(express._router.stack[9].route).to.have.property('methods').deep.equal({ head: true });
+			expect(express._router.stack[10].route).to.have.property('path').equal('/');
+			expect(express._router.stack[10].route).to.have.property('methods').deep.equal({ options: true });
 		});
 	});
 

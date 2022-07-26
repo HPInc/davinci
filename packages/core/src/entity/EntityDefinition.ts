@@ -16,18 +16,19 @@ import { EntityOptions, EntityPropReflection, JSONSchema } from './types';
 
 interface EntityDefinitionOptions {
 	name?: string;
-	type?: ClassType;
+	type?: TypeValue;
 	jsonSchema?: JSONSchema;
 	// eslint-disable-next-line no-use-before-define
-	entityDefinitionsMapCache?: Map<ClassType, EntityDefinition>;
+	entityDefinitionsMapCache?: Map<TypeValue, EntityDefinition>;
 }
 
 export class EntityDefinition {
 	private name?: string;
-	private type?: ClassType;
+	private type?: TypeValue;
 	private jsonSchema?: JSONSchema;
-	private relatedEntityDefinitionsMap = new Map<ClassType, EntityDefinition>();
-	private entityDefinitionsMapCache = new Map<ClassType, EntityDefinition>();
+	private relatedEntityDefinitionsMap = new Map<TypeValue, EntityDefinition>();
+	private entityDefinitionsMapCache = new Map<TypeValue, EntityDefinition>();
+	private isPrimitiveType: boolean;
 
 	constructor(options: EntityDefinitionOptions) {
 		if (!options.type && !options.jsonSchema) {
@@ -40,10 +41,12 @@ export class EntityDefinition {
 	}
 
 	reflect(/* jsonSchema?: JSONSchema */) {
+		const primitiveTypes = [String, Number, Boolean, Date] as unknown[];
+		this.isPrimitiveType = primitiveTypes.includes(this.type);
+
 		const makeSchema = (typeOrClass: TypeValue | string | number | boolean | Date, key?: string) => {
 			// it's a primitive type, simple case
-			// @ts-ignore
-			if ([String, Number, Boolean, Date].includes(typeOrClass)) {
+			if (primitiveTypes.includes(typeOrClass)) {
 				if (typeOrClass === Date) {
 					return { type: 'string', format: 'date-time' };
 				}
@@ -66,7 +69,7 @@ export class EntityDefinition {
 				const entityDecorator = this.findEntityDecorator(reflection);
 
 				if (entityDecorator && this.type !== typeOrClass) {
-					const theClass = <ClassType>typeOrClass;
+					const theClass = <TypeValue>typeOrClass;
 
 					if (this.entityDefinitionsMapCache?.has(theClass)) {
 						const entityDefinition = this.entityDefinitionsMapCache?.get(theClass);
@@ -92,22 +95,21 @@ export class EntityDefinition {
 				}
 
 				const entityProps = this.filterEntityPropDecorators(reflection);
-				const { properties, required } = entityProps.reduce<
-					Partial<Pick<JSONSchema, 'properties' | 'required'>>
-				>((acc, prop) => {
-					const accumulator = acc ?? { properties: {}, required: [] };
+				const { properties, required } =
+					entityProps.reduce<Partial<Pick<JSONSchema, 'properties' | 'required'>>>((acc, prop) => {
+						const accumulator = acc ?? { properties: {}, required: [] };
 
-					const entityPropDecorator = this.findEntityPropDecorator(prop);
-					accumulator.properties[prop.name] = makeSchema(
-						entityPropDecorator.options?.type ?? prop.type,
-						prop.name
-					);
-					if (entityPropDecorator.options?.required) {
-						accumulator.required.push(prop.name);
-					}
+						const entityPropDecorator = this.findEntityPropDecorator(prop);
+						accumulator.properties[prop.name] = makeSchema(
+							entityPropDecorator.options?.type ?? prop.type,
+							prop.name
+						);
+						if (entityPropDecorator.options?.required) {
+							accumulator.required.push(prop.name);
+						}
 
-					return accumulator;
-				}, null);
+						return accumulator;
+					}, null) ?? {};
 
 				const jsonSchema: JSONSchema = {
 					title: entityDecorator?.options?.title ?? key ?? typeOrClass.name,
@@ -129,7 +131,7 @@ export class EntityDefinition {
 		return this.relatedEntityDefinitionsMap;
 	}
 
-	public setRelatedEntityDefinitionsMap(map: Map<ClassType, EntityDefinition>) {
+	public setRelatedEntityDefinitionsMap(map: Map<TypeValue, EntityDefinition>) {
 		this.relatedEntityDefinitionsMap = map;
 	}
 
@@ -139,6 +141,10 @@ export class EntityDefinition {
 
 	public getJsonSchema() {
 		return this.jsonSchema;
+	}
+
+	public getIsPrimitiveType() {
+		return this.isPrimitiveType;
 	}
 
 	private findEntityDecorator(reflection: ClassReflection): Maybe<{ [DecoratorId]: string; options: EntityOptions }> {

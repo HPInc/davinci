@@ -4,16 +4,20 @@
  */
 import { App, context, interceptor, InterceptorBag, InterceptorNext } from '@davinci/core';
 import should from 'should';
-import { HttpServerModule, route } from '../../src';
 import * as http from 'http';
 import { reflect } from '@davinci/reflector';
+import { HttpServerModule, route } from '../../src';
 
 const sinon = require('sinon').createSandbox();
 
 describe('HttpServerModule', () => {
 	let app: App;
 
-	type Request = { headers?: Record<string, string> };
+	type Request = {
+		headers?: Record<string, string>;
+		body?: string | Record<string, unknown>;
+		query?: Record<string, string>;
+	};
 
 	class DummyHttpServer extends HttpServerModule<Request> {
 		onInit(app: App) {
@@ -36,7 +40,23 @@ describe('HttpServerModule', () => {
 		}
 		close() {}
 		getRequestHostname() {}
-		getRequestParameter({ source }) {
+		getRequestParameter({ source, name, request }) {
+			switch (source) {
+				case 'path':
+					return request.params[name];
+
+				case 'header':
+					return request.header(name);
+
+				case 'query':
+					return request.query[name];
+
+				case 'body':
+					return request.body;
+
+				default:
+					return undefined;
+			}
 			return source;
 		}
 		getRequestMethod() {}
@@ -110,7 +130,7 @@ describe('HttpServerModule', () => {
 			}
 			const dummyHttpServer = new MyDummyHttpServer();
 			await new App().registerController(CustomerController).registerModule(dummyHttpServer).init();
-			const [[getRoute, postRoute]] = dummyHttpServer.createRoutes();
+			const [[getRoute, postRoute]] = await dummyHttpServer.createRoutes();
 
 			should(getRoute[0]).be.equal('get');
 			should(getRoute[1]).be.equal('/api/customers/all');
@@ -124,24 +144,24 @@ describe('HttpServerModule', () => {
 			@route.controller({ basePath: '/api/customers' })
 			class CustomerController {
 				@route.get({ path: '/all' })
-				find(@route.body() body, @route.query() query) {
-					return { body, query };
+				find(@route.body() body, @route.query() where: string) {
+					return { body, where };
 				}
 			}
 			const dummyHttpServer = new DummyHttpServer();
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
 				controllerReflection,
 				methodReflection
 			});
-			const reqMock = {};
+			const reqMock: Request = { body: {}, query: { where: '' } };
 			const resMock = {};
 			const result = await requestHandler(reqMock, resMock);
 
 			should(result[1]).be.deepEqual({
-				body: 'body',
-				query: 'query'
+				body: {},
+				where: ''
 			});
 		});
 
@@ -149,23 +169,23 @@ describe('HttpServerModule', () => {
 			@route.controller({ basePath: '/api/customers' })
 			class CustomerController {
 				@route.get({ path: '/all' })
-				find(@route.body() body, @route.query() query) {
-					throw new Error(`Bad request with arguments: ${body}, ${query}`);
+				find(@route.body() body: string, @route.query() where: string) {
+					throw new Error(`Bad request with arguments: ${body}, ${where}`);
 				}
 			}
 			const dummyHttpServer = new DummyHttpServer();
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
 				controllerReflection,
 				methodReflection
 			});
-			const reqMock = {};
+			const reqMock = { body: 'body', query: { where: 'where' } };
 			const resMock = {};
 			const result = await requestHandler(reqMock, resMock);
 
 			should(result[1]).match({
-				message: 'Bad request with arguments: body, query'
+				message: 'Bad request with arguments: body, where'
 			});
 		});
 
@@ -178,34 +198,41 @@ describe('HttpServerModule', () => {
 			class CustomerController {
 				@interceptor(interceptor2)
 				@route.get({ path: '/all' })
-				find(@route.body() body, @route.query() query) {
-					return { body, query };
+				find(@route.body() body, @route.query() where: string) {
+					return { body, where };
 				}
 			}
 			const dummyHttpServer = new DummyHttpServer();
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
 				controllerReflection,
 				methodReflection
 			});
 			const reqMock = {
 				headers: { 'x-my-header': '1' },
 				body: { myBody: true },
-				query: { myQuery: 'query' },
+				query: { where: 'where' },
 				originalUrl: 'http://path/to/url'
 			};
 			const resMock = {};
 			const result = await requestHandler(reqMock, resMock);
 
 			should(result[1]).be.deepEqual({
-				body: 'body',
-				query: 'query'
+				body: {
+					myBody: true
+				},
+				where: 'where'
 			});
 			should(interceptor1.called).be.True();
 			const interceptorArgs = {
 				module: 'http-server',
-				handlerArgs: ['body', 'query'],
+				handlerArgs: [
+					{
+						myBody: true
+					},
+					'where'
+				],
 				context: undefined,
 				request: {
 					headers: {
@@ -215,10 +242,11 @@ describe('HttpServerModule', () => {
 						myBody: true
 					},
 					query: {
-						myQuery: 'query'
+						where: 'where'
 					},
 					url: 'http://path/to/url'
-				}
+				},
+				state: {}
 			};
 			should(interceptor1.getCall(0).args[1]).be.deepEqual(interceptorArgs);
 			should(interceptor2.called).be.True();
@@ -229,8 +257,8 @@ describe('HttpServerModule', () => {
 			@route.controller({ basePath: '/api/customers' })
 			class CustomerController {
 				@route.get({ path: '/all' })
-				find(@route.body() body, @route.query() query, @context() ctx) {
-					return { body, query, ctx };
+				find(@route.body() body: object, @route.query() where: string, @context() ctx) {
+					return { body, where, ctx };
 				}
 			}
 
@@ -238,11 +266,15 @@ describe('HttpServerModule', () => {
 			const dummyHttpServer = new DummyHttpServer().setContextFactory(contextFactory);
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
 				controllerReflection,
 				methodReflection
 			});
 			const reqMock = {
+				body: { prop: true },
+				query: {
+					where: 'where'
+				},
 				headers: {
 					'x-userid': '123'
 				}
@@ -251,8 +283,8 @@ describe('HttpServerModule', () => {
 			const result = await requestHandler(reqMock, resMock);
 
 			should(result[1]).be.match({
-				body: 'body',
-				query: 'query',
+				body: { prop: true },
+				where: 'where',
 				ctx: {
 					userId: '123'
 				}
@@ -271,12 +303,13 @@ describe('HttpServerModule', () => {
 				should(bag.context).be.deepEqual({ userId: '123' });
 				return next();
 			});
+
 			@interceptor(handler)
 			class CustomerController {
 				@interceptor(handler)
 				@route.get({ path: '/all' })
-				find(@route.body() body, @route.query() query, @context() ctx) {
-					return { body, query, ctx };
+				find(@route.body() body, @route.query() where: string, @context() ctx) {
+					return { body, where, ctx };
 				}
 			}
 
@@ -284,11 +317,15 @@ describe('HttpServerModule', () => {
 			const dummyHttpServer = new DummyHttpServer().setContextFactory(contextFactory);
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
 				controllerReflection,
 				methodReflection
 			});
 			const reqMock = {
+				body: { prop: true },
+				query: {
+					where: 'where'
+				},
 				headers: {
 					'x-userid': '123'
 				}
@@ -313,7 +350,7 @@ describe('HttpServerModule', () => {
 			const errorMock = sinon.stub(dummyHttpServer.logger, 'error');
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
 				controllerReflection,
 				methodReflection
 			});

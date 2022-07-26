@@ -1,3 +1,8 @@
+/*
+ * © Copyright 2022 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
+
 /* eslint-disable @typescript-eslint/no-empty-interface */
 type StrictNullChecksWrapper<Name extends string, Type> = undefined extends null
 	? `strictNullChecks must be true in tsconfig to use ${Name}`
@@ -110,10 +115,10 @@ export type UncheckedJSONSchemaType<T, IsPartial extends boolean> = (
 					minProperties?: number;
 					maxProperties?: number;
 			  } & (IsPartial extends true // "required" is not necessary if it's a non-partial type with no required keys // are listed it only asserts that optional cannot be listed. // "required" type does not guarantee that all required properties
-					? { required: Readonly<(keyof T)[]> }
+					? { required: (keyof T)[] }
 					: [UncheckedRequiredMembers<T>] extends [never]
-					? { required?: Readonly<UncheckedRequiredMembers<T>[]> }
-					: { required: Readonly<UncheckedRequiredMembers<T>[]> })
+					? { required?: UncheckedRequiredMembers<T>[] }
+					: { required: UncheckedRequiredMembers<T>[] })
 			: T extends null
 			? {
 					type: JSONType<'null', IsPartial>;

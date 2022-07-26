@@ -7,7 +7,10 @@ import {
 	EntityRegistry,
 	executeInterceptorsStack,
 	getInterceptorsHandlers,
+	Interceptor,
+	InterceptorNext,
 	mapParallel,
+	mapSeries,
 	Module
 } from '@davinci/core';
 import pathUtils from 'path';
@@ -22,21 +25,26 @@ import {
 	RequestHandler
 } from './types';
 import { ControllerDecoratorMetadata, MethodDecoratorMetadata, ParameterDecoratorMetadata } from './decorators';
+import { AjvValidator } from './AjvValidator';
+
+// const isPrimitive = typeValue => [Object, Number, String, Date].includes(typeValue);
 
 export abstract class HttpServerModule<
 	Request = unknown,
 	Response = unknown,
 	Server = unknown,
-	ModuleOptions = HttpServerModuleOptions
+	ModuleOptions extends HttpServerModuleOptions = HttpServerModuleOptions
 > extends Module {
 	app: App;
 	contextFactory?: ContextFactory<unknown>;
 	entityRegistry: EntityRegistry = new EntityRegistry();
+	validator: AjvValidator;
 	logger = pino({ name: 'http-server' });
 	protected httpServer: Server;
 
 	constructor(protected moduleOptions?: ModuleOptions) {
 		super();
+		this.validator = new AjvValidator(moduleOptions?.validatorOptions, this.entityRegistry);
 	}
 
 	getModuleId() {
@@ -61,7 +69,7 @@ export abstract class HttpServerModule<
 		return this;
 	}
 
-	public createRoutes() {
+	public async createRoutes() {
 		const controllersReflection = this.app
 			.getControllersWithReflection()
 			.filter(
@@ -70,7 +78,7 @@ export abstract class HttpServerModule<
 					reflection.methods.some(m => m.decorators.some(d => d.module === 'http-server'))
 			);
 
-		return controllersReflection.map(({ Controller, reflection: controllerReflection }) => {
+		return mapSeries(controllersReflection, ({ Controller, reflection: controllerReflection }) => {
 			const controllerDecoratorMetadata: ControllerDecoratorMetadata = controllerReflection.decorators.find(
 				d => d.module === 'http-server' && d.type === 'controller'
 			);
@@ -86,7 +94,7 @@ export abstract class HttpServerModule<
 				return ctrlInstance;
 			};
 
-			return controllerReflection.methods.map(methodReflection => {
+			return mapSeries(controllerReflection.methods, async methodReflection => {
 				const methodDecoratorMetadata: MethodDecoratorMetadata = methodReflection.decorators.find(
 					d => d[DecoratorId] === 'http-server.method'
 				);
@@ -104,7 +112,7 @@ export abstract class HttpServerModule<
 
 				return this[verb](
 					fullPath,
-					this.createRequestHandler(controller, methodName, {
+					await this.createRequestHandler(controller, methodName, {
 						methodReflection,
 						controllerReflection
 					})
@@ -113,7 +121,7 @@ export abstract class HttpServerModule<
 		});
 	}
 
-	public createRequestHandler(
+	public async createRequestHandler(
 		controller: InstanceType<ClassType>,
 		methodName: string,
 		reflections: { methodReflection: MethodReflection; controllerReflection: ClassReflection }
@@ -126,40 +134,52 @@ export abstract class HttpServerModule<
 			...getInterceptorsHandlers(methodReflection)
 		];
 
-		const parametersConfig = this.getParametersConfigurations({ controllerReflection, methodReflection });
+		const parametersConfig = await this.getParametersConfigurations({ controllerReflection, methodReflection });
+		const validatorFunction = await this.validator.createValidatorFunction({ parametersConfig });
 
 		// using a named function here for better instrumentation and reporting
 		return async function davinciHttpRequestHandler(request: Request, response: Response) {
 			try {
-				const parametersConfigWithValues = await mapParallel(parametersConfig, async parameterConfig => {
-					if (parameterConfig.source === 'context') {
-						const context = await httpServerModule.createContext({
-							request,
-							reflection: { controllerReflection, methodReflection }
+				// enrich the parameter configurations with the values
+				const parametersConfigWithValues: ParameterConfiguration<Request>[] = await mapParallel(
+					parametersConfig,
+					async parameterConfig => {
+						if (parameterConfig.source === 'context') {
+							const context = await httpServerModule.createContext({
+								request,
+								reflection: { controllerReflection, methodReflection }
+							});
+
+							return {
+								value: context,
+								source: 'context',
+								reflection: { controllerReflection, methodReflection },
+								request
+							};
+						}
+
+						const value = await httpServerModule.getRequestParameter({
+							source: parameterConfig.source,
+							name: parameterConfig.name,
+							request
 						});
 
 						return {
-							value: context,
-							source: 'context',
-							reflection: { controllerReflection, methodReflection },
+							value,
+							source: parameterConfig.source,
+							name: parameterConfig.name,
 							request
 						};
 					}
+				);
 
-					const value = await httpServerModule.getRequestParameter({
-						source: parameterConfig.source,
-						name: parameterConfig.name,
-						request
-					});
-
-					return {
-						value,
-						source: parameterConfig.source,
-						name: parameterConfig.name,
-						request
-					};
+				// create the validation interceptor
+				const validationInterceptor = await httpServerModule.createValidationInterceptor({
+					parametersConfig: parametersConfigWithValues,
+					validatorFunction
 				});
 
+				// create context for interceptors and parameters
 				const contextParameterConfig = parametersConfigWithValues.find(p => p.source === 'context');
 				const contextValue = contextParameterConfig
 					? contextParameterConfig.value
@@ -175,13 +195,22 @@ export abstract class HttpServerModule<
 				});
 
 				const result = await executeInterceptorsStack(
-					[...interceptors, (_next, context) => controller[methodName](...context.handlerArgs)],
+					[
+						validationInterceptor,
+						...interceptors,
+						(_next, context) => controller[methodName](...context.handlerArgs)
+					],
 					interceptorsBag
 				);
 
 				return httpServerModule.reply(response, result);
 			} catch (err) {
-				return httpServerModule.reply(response, { error: true, message: err.message }, 500);
+				// default error handler, can be overridden by a dedicated interceptor
+				return httpServerModule.reply(
+					response,
+					{ error: true, message: err.message, ...err?.toJSON?.(), stack: err.stack },
+					err?.statusCode ?? 500
+				);
 			}
 		};
 	}
@@ -195,10 +224,10 @@ export abstract class HttpServerModule<
 	// abstract head(handler: RequestHandler<Request, Response>);
 	abstract head(path: unknown, handler: RequestHandler<Request, Response>);
 
-	// public createNotFoundHandler() {}
-
 	// abstract delete(handler: RequestHandler<Request, Response>);
 	abstract delete(path: unknown, handler: RequestHandler<Request, Response>);
+
+	// public createNotFoundHandler() {}
 
 	// abstract put(handler: RequestHandler<Request, Response>);
 	abstract put(path: unknown, handler: RequestHandler<Request, Response>);
@@ -250,6 +279,43 @@ export abstract class HttpServerModule<
 
 	abstract setHeader(response, name: string, value: string);
 
+	private async createValidationInterceptor({
+		validatorFunction,
+		parametersConfig
+	}: {
+		validatorFunction;
+		parametersConfig: ParameterConfiguration<Request>[];
+	}): Promise<Interceptor> {
+		return async function validationInterceptor(next: InterceptorNext) {
+			const data = parametersConfig.reduce((acc, parameterConfig) => {
+				if (parameterConfig.source === 'path') {
+					acc.params = acc.params ?? {};
+					acc.params[parameterConfig.name] = parameterConfig.value;
+				}
+
+				if (parameterConfig.source === 'query') {
+					acc.querystring = acc.querystring ?? {};
+					acc.querystring[parameterConfig.name] = parameterConfig.value;
+				}
+
+				if (parameterConfig.source === 'body') {
+					acc.body = parameterConfig.value;
+				}
+
+				if (parameterConfig.source === 'header') {
+					acc.headers = acc.headers ?? {};
+					acc.headers[parameterConfig.name] = parameterConfig.value;
+				}
+
+				return acc;
+			}, {} as any);
+
+			await validatorFunction(data);
+
+			return next();
+		};
+	}
+
 	private getParametersConfigurations({
 		controllerReflection,
 		methodReflection
@@ -261,19 +327,27 @@ export abstract class HttpServerModule<
 			const parameterDecoratorMetadata: ParameterDecoratorMetadata = parameterReflection.decorators.find(
 				d => d[DecoratorId] === 'http-server.parameter' || d[DecoratorId] === 'core.parameter.context'
 			);
+			const parameterType = parameterDecoratorMetadata.options?.type ?? parameterReflection.type;
 
 			if (parameterDecoratorMetadata?.[DecoratorId] === 'http-server.parameter') {
 				const { options } = parameterDecoratorMetadata;
 
 				acc.push({
 					source: options.in,
-					name: options.name ?? parameterReflection.name
+					name: options.name ?? parameterReflection.name,
+					options,
+					type: parameterType
 				});
+
+				if (typeof parameterType === 'function') {
+					this.entityRegistry.addEntity(parameterType as ClassType);
+				}
 			}
 
 			if (parameterDecoratorMetadata?.[DecoratorId] === 'core.parameter.context') {
 				acc.push({
 					source: 'context',
+					options: parameterDecoratorMetadata.options,
 					reflection: { controllerReflection, methodReflection }
 				});
 			}
@@ -295,6 +369,7 @@ export abstract class HttpServerModule<
 			module: 'http-server',
 			handlerArgs: parameters,
 			context,
+			state: {},
 			request: {
 				headers: this.getRequestHeaders(request),
 				body: this.getRequestBody(request),

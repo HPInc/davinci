@@ -4,8 +4,10 @@
  */
 
 import { ServerOptions } from 'https';
-import { ClassReflection, MethodReflection } from '@davinci/reflector';
+import { ClassReflection, MethodReflection, TypeValue } from '@davinci/reflector';
+import { JSONSchema } from '@davinci/core';
 import { ParameterDecoratorOptions } from './decorators';
+import { AjvValidator, AjvValidatorOptions } from './AjvValidator';
 
 export type ErrorHandler<TRequest = any, TResponse = any> = (
 	error: any,
@@ -19,6 +21,8 @@ export type RequestHandler<TRequest = any, TResponse = any> = (req: TRequest, re
 export interface HttpServerModuleOptions {
 	port?: number | string;
 	https?: ServerOptions;
+	validator?: AjvValidator;
+	validatorOptions?: AjvValidatorOptions;
 }
 
 export type ParameterSource = 'path' | 'query' | 'body' | 'header';
@@ -96,14 +100,26 @@ export type ContextFactory<Context, Request = any> = (args: ContextFactoryArgume
 
 export type ParameterConfiguration<Request> =
 	| {
-			source: ParameterDecoratorOptions['in'];
 			name: string;
+			source: ParameterDecoratorOptions['in'];
 			request?: Request;
 			value?: unknown;
+			type?: TypeValue;
+			options?: ParameterDecoratorOptions;
 	  }
 	| {
 			source: 'context';
 			reflection: { controllerReflection: ClassReflection; methodReflection: MethodReflection };
 			request?: Request;
 			value?: unknown;
+			options?: ParameterDecoratorOptions;
 	  };
+
+export type EndpointValidationSchema = JSONSchema<any> & {
+	properties: {
+		body?: JSONSchema<any>;
+		params?: JSONSchema<any>;
+		querystring?: JSONSchema<any>;
+		headers?: JSONSchema<any>;
+	};
+};
