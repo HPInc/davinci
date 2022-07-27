@@ -11,7 +11,6 @@ import {
 	InterceptorBag,
 	InterceptorNext
 } from '@davinci/core';
-import should from 'should';
 import * as http from 'http';
 import { reflect } from '@davinci/reflector';
 import { HttpServerModule, ParameterConfiguration, route } from '../../src';
@@ -100,15 +99,15 @@ describe('HttpServerModule', () => {
 	it('should be extended by http server modules', async () => {
 		const dummyHttpServer = new DummyHttpServer({ port: 1234 });
 
-		should(dummyHttpServer.getModuleId()).be.equal('http');
-		should(dummyHttpServer.getModuleOptions()).be.deepEqual({ port: 1234 });
+		expect(dummyHttpServer.getModuleId()).to.be.equal('http');
+		expect(dummyHttpServer.getModuleOptions()).to.be.deep.equal({ port: 1234 });
 	});
 
 	it('should be extended by http server modules', async () => {
 		const dummyHttpServer = new DummyHttpServer({ port: 1234 });
 
-		should(dummyHttpServer.getModuleId()).be.equal('http');
-		should(dummyHttpServer.getModuleOptions()).be.deepEqual({ port: 1234 });
+		expect(dummyHttpServer.getModuleId()).to.be.equal('http');
+		expect(dummyHttpServer.getModuleOptions()).to.be.deep.equal({ port: 1234 });
 	});
 
 	it('should be able to set and get the underlying http server instance', async () => {
@@ -116,7 +115,7 @@ describe('HttpServerModule', () => {
 		const httpServer = http.createServer(() => {});
 		dummyHttpServer.setHttpServer(httpServer);
 
-		should(dummyHttpServer.getHttpServer()).be.equal(httpServer);
+		expect(dummyHttpServer.getHttpServer()).to.be.equal(httpServer);
 	});
 
 	describe('#createRoutes', () => {
@@ -141,10 +140,10 @@ describe('HttpServerModule', () => {
 			await new App().registerController(CustomerController).registerModule(dummyHttpServer).init();
 			const [[getRoute, postRoute]] = await dummyHttpServer.createRoutes();
 
-			should(getRoute[0]).be.equal('get');
-			should(getRoute[1]).be.equal('/api/customers/all');
-			should(postRoute[0]).be.equal('post');
-			should(postRoute[1]).be.equal('/api/customers/create');
+			expect(getRoute[0]).to.be.equal('get');
+			expect(getRoute[1]).to.be.equal('/api/customers/all');
+			expect(postRoute[0]).to.be.equal('post');
+			expect(postRoute[1]).to.be.equal('/api/customers/create');
 		});
 	});
 
@@ -168,7 +167,7 @@ describe('HttpServerModule', () => {
 			const resMock = {};
 			const result = await requestHandler(reqMock, resMock);
 
-			should(result[1]).be.deepEqual({
+			expect(result[1]).to.be.deep.equal({
 				body: {},
 				where: ''
 			});
@@ -193,7 +192,7 @@ describe('HttpServerModule', () => {
 			const resMock = {};
 			const result = await requestHandler(reqMock, resMock);
 
-			should(result[1]).match({
+			expect(result[1]).to.containSubset({
 				message: 'Bad request with arguments: body, where'
 			});
 		});
@@ -227,13 +226,13 @@ describe('HttpServerModule', () => {
 			const resMock = {};
 			const result = await requestHandler(reqMock, resMock);
 
-			should(result[1]).be.deepEqual({
+			expect(result[1]).to.be.deep.equal({
 				body: {
 					myBody: true
 				},
 				where: 'where'
 			});
-			should(interceptor1.called).be.True();
+			expect(interceptor1.called).to.be.true;
 			const interceptorArgs = {
 				module: 'http-server',
 				handlerArgs: [
@@ -257,9 +256,9 @@ describe('HttpServerModule', () => {
 				},
 				state: {}
 			};
-			should(interceptor1.getCall(0).args[1]).be.deepEqual(interceptorArgs);
-			should(interceptor2.called).be.True();
-			should(interceptor2.getCall(0).args[1]).be.deepEqual(interceptorArgs);
+			expect(interceptor1.getCall(0).args[1]).to.be.deep.equal(interceptorArgs);
+			expect(interceptor2.called).to.be.true;
+			expect(interceptor2.getCall(0).args[1]).to.be.deep.equal(interceptorArgs);
 		});
 
 		it('should be able to process the context parameter', async () => {
@@ -291,7 +290,7 @@ describe('HttpServerModule', () => {
 			const resMock = {};
 			const result = await requestHandler(reqMock, resMock);
 
-			should(result[1]).be.match({
+			expect(result[1]).to.containSubset({
 				body: { prop: true },
 				where: 'where',
 				ctx: {
@@ -299,17 +298,15 @@ describe('HttpServerModule', () => {
 				}
 			});
 
-			should(contextFactory.getCall(0).args[0]).have.property('reflection');
-			should(contextFactory.getCall(0).args[0].reflection).have.properties([
-				'controllerReflection',
-				'methodReflection'
-			]);
+			expect(contextFactory.getCall(0).args[0]).have.property('reflection');
+			expect(contextFactory.getCall(0).args[0].reflection).haveOwnProperty('controllerReflection');
+			expect(contextFactory.getCall(0).args[0].reflection).haveOwnProperty('methodReflection');
 		});
 
 		it('should inject the context as parameter in the interceptors', async () => {
 			type Context = { userId: string };
 			const handler = sinon.stub().callsFake((next: InterceptorNext<Context>, bag: InterceptorBag<Context>) => {
-				should(bag.context).be.deepEqual({ userId: '123' });
+				expect(bag.context).to.be.deep.equal({ userId: '123' });
 				return next();
 			});
 
@@ -341,7 +338,7 @@ describe('HttpServerModule', () => {
 			};
 			const resMock = {};
 			await requestHandler(reqMock, resMock);
-			should(handler.callCount).be.equal(2);
+			expect(handler.callCount).to.be.equal(2);
 		});
 
 		it('should log exceptions happening in the contextFactory', async () => {
@@ -364,7 +361,7 @@ describe('HttpServerModule', () => {
 				methodReflection
 			});
 			await requestHandler({}, {});
-			should(errorMock.getCall(0).args[1]).be.equal('An error happened during the creation of the context');
+			expect(errorMock.getCall(0).args[1]).to.be.equal('An error happened during the creation of the context');
 		});
 	});
 
@@ -420,7 +417,7 @@ describe('HttpServerModule', () => {
 					}
 				}
 			]);
-			expect(parameterConfigurations[0]).haveOwnProperty('type').be.equal(Customer);
+			expect(parameterConfigurations[0]).haveOwnProperty('type').to.be.equal(Customer);
 		});
 	});
 

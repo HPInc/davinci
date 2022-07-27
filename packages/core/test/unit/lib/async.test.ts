@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: MIT
  */
 
-import should from 'should';
-import { mapParallel, mapSeries } from '../../../src/lib/async-utils';
+import { mapParallel, mapSeries } from '../../../src';
+import { expect } from '../../support/chai';
 
 describe('async mappers', () => {
 	describe('mapSeries', () => {
@@ -13,7 +13,7 @@ describe('async mappers', () => {
 
 			let lock = false;
 			const result = await mapSeries(data, async item => {
-				should(lock).be.False();
+				expect(lock).to.be.false;
 				lock = true;
 
 				return new Promise<number>(resolve => {
@@ -24,7 +24,7 @@ describe('async mappers', () => {
 				});
 			});
 
-			should(result).be.deepEqual(data);
+			expect(result).to.be.deep.equal(data);
 		});
 	});
 
@@ -35,10 +35,10 @@ describe('async mappers', () => {
 			let lock = false;
 			const result = await mapParallel(data, async (item, index) => {
 				if (index === 0) {
-					should(lock).be.False();
+					expect(lock).to.be.false;
 				}
 				if (index > 0) {
-					should(lock).be.True();
+					expect(lock).to.be.true;
 				}
 				lock = true;
 
@@ -50,7 +50,7 @@ describe('async mappers', () => {
 				});
 			});
 
-			should(result).be.deepEqual(data);
+			expect(result).to.be.deep.equal(data);
 		});
 	});
 });

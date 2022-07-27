@@ -2,9 +2,10 @@
  * © Copyright 2022 HP Development Company, L.P.
  * SPDX-License-Identifier: MIT
  */
-import should from 'should';
+
 import { reflect } from '@davinci/reflector';
 import { route } from '../../src';
+import { expect } from '../support/chai';
 
 describe('decorators', () => {
 	describe('controller', () => {
@@ -14,7 +15,7 @@ describe('decorators', () => {
 
 			const reflection = reflect(CustomerController);
 
-			should(reflection).match({
+			expect(reflection).to.containSubset({
 				kind: 'Class',
 				name: 'CustomerController',
 				decorators: [
@@ -46,7 +47,7 @@ describe('decorators', () => {
 
 			const reflection = reflect(CustomerController);
 
-			should(reflection).match({
+			expect(reflection).to.containSubset({
 				kind: 'Class',
 				name: 'CustomerController',
 				decorators: [
@@ -77,7 +78,7 @@ describe('decorators', () => {
 
 			const reflection = reflect(CustomerController);
 
-			should(reflection).match({
+			expect(reflection).to.containSubset({
 				kind: 'Class',
 				name: 'CustomerController',
 				decorators: [
@@ -113,7 +114,7 @@ describe('decorators', () => {
 
 			const reflection = reflect(CustomerController);
 
-			should(reflection).match({
+			expect(reflection).to.containSubset({
 				methods: [
 					{
 						kind: 'Method',
@@ -166,7 +167,7 @@ describe('decorators', () => {
 
 			const reflection = reflect(CustomerController);
 
-			should(reflection).match({
+			expect(reflection).to.containSubset({
 				methods: [
 					{
 						kind: 'Method',
@@ -205,7 +206,7 @@ describe('decorators', () => {
 
 			const reflection = reflect(CustomerController);
 
-			should(reflection).match({
+			expect(reflection).to.containSubset({
 				methods: [
 					{
 						kind: 'Method',
@@ -286,7 +287,7 @@ describe('decorators', () => {
 
 			const reflection = reflect(CustomerController);
 
-			should(reflection).match({
+			expect(reflection).to.containSubset({
 				methods: [
 					{
 						kind: 'Method',
@@ -360,7 +361,7 @@ describe('decorators', () => {
 
 			const reflection = reflect(CustomerController);
 
-			should(reflection).match({
+			expect(reflection).to.containSubset({
 				methods: [
 					{
 						kind: 'Method',
@@ -425,7 +426,7 @@ describe('decorators', () => {
 
 			const reflection = reflect(CustomerController);
 
-			should(reflection).match({
+			expect(reflection).to.containSubset({
 				methods: [
 					{
 						kind: 'Method',
