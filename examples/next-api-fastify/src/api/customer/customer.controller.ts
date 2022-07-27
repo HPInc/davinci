@@ -7,7 +7,6 @@ import { route } from '@davinci/http-server';
 import { context, interceptor } from '@davinci/core';
 import { Context } from '../../types';
 import { Customer } from './customer.schema';
-import { healthCheck } from '@davinci/health-checks';
 
 @route.controller({
 	basePath: '/api/customers'
@@ -31,10 +30,5 @@ export default class CustomerController {
 	@route.post({ path: '/' })
 	create(@route.body({ required: true }) data: Customer) {
 		return { success: true, data };
-	}
-
-	@healthCheck('liveness')
-	liveness() {
-		return { success: true };
 	}
 }
