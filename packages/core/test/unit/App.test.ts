@@ -170,7 +170,7 @@ describe('App', () => {
 			expect(err.message).to.match(/A module with the same identifier (.+) has already been registered/);
 		}
 	});
-	v;
+
 	it("should execute the modules' onInit hook", async () => {
 		const app = createApp();
 		class MyModule implements Module {
