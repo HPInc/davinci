@@ -9,75 +9,66 @@ import {
 	ParameterSource,
 	RequestHandler
 } from '@davinci/http-server';
-import {
-	fastify,
-	FastifyInstance,
-	FastifyPluginCallback,
-	FastifyPluginOptions,
-	FastifyReply,
-	FastifyRequest
-} from 'fastify';
+import { fastify, FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { Server as HttpServer } from 'http';
 import { Server as HttpsServer } from 'https';
 import type { App } from '@davinci/core';
-import fastifyCors, { FastifyCorsOptions } from '@fastify/cors';
 
 type Server = HttpServer | HttpsServer;
 
-type FastifyHttpServerModuleOptions = {
+type ExpressHttpServerModuleOptions = {
 	app?: FastifyInstance;
 	middlewares?: {
-		cors?: FastifyCorsOptions;
+		/* json?: OptionsJson;
+		urlencoded?: OptionsUrlencoded; */
 	};
-	plugins?: [FastifyPluginCallback, FastifyPluginOptions?][];
 } & HttpServerModuleOptions;
 
 export class FastifyHttpServer extends HttpServerModule<
 	FastifyRequest,
 	FastifyReply,
 	Server,
-	FastifyHttpServerModuleOptions
+	ExpressHttpServerModuleOptions
 > {
 	instance: FastifyInstance;
 	app: App;
 
-	constructor(options?: FastifyHttpServerModuleOptions) {
+	constructor(options?: ExpressHttpServerModuleOptions) {
 		const { app, ...moduleOptions } = options ?? {};
 		super(moduleOptions);
 	}
 
-	async onRegister(app: App) {
+	async onInit(app) {
 		this.app = app;
-		this.logger.level = this.app.getOptions()?.logger?.level;
 		this.initHttpServer();
-		await this.registerMiddlewares();
-		await this.registerPlugins();
-
+		this.registerMiddlewares();
 		await super.createRoutes();
+		// this.registerErrorHandlers();
+		return this.instance.listen({ port: super.moduleOptions?.port ? Number(super.moduleOptions?.port) : 3000 });
 	}
 
-	async onInit() {
-		return this.listen();
+	onDestroy() {
+		return this.close();
 	}
 
-	async onDestroy() {
-		await this.close();
-		this.logger.info('Server stopped');
-	}
+	registerMiddlewares() {
+		/* const { json, urlencoded } = this.moduleOptions?.middlewares ?? {};
 
-	async registerMiddlewares() {
-		if (this.moduleOptions?.middlewares?.cors) {
-			await this.instance.register(fastifyCors, this.moduleOptions?.middlewares?.cors);
-		}
-	}
-
-	async registerPlugins() {
-		const promises =
-			this.moduleOptions?.plugins?.map(([plugin, options]) => this.instance.register(plugin, options)) ?? [];
-		return Promise.all(promises);
+		this.instance.use(express.json({ ...json }));
+		this.instance.use(express.urlencoded({ extended: true, ...urlencoded })); */
 	}
 
 	initHttpServer() {
+		/* const isHttpsEnabled = super.moduleOptions?.https;
+		const serverFactory: FastifyServerFactory = handler => {
+			const serverHandler = (req, res) => {
+				handler(req, res);
+			};
+			return isHttpsEnabled
+				? https.createServer(super.moduleOptions.https, serverHandler)
+				: http.createServer(serverHandler);
+		}; */
+
 		this.instance = fastify();
 		super.setHttpServer(this.instance.server);
 	}
@@ -122,10 +113,10 @@ export class FastifyHttpServer extends HttpServerModule<
 		return this.instance.options(path, handler);
 	}
 
-	async listen() {
-		const port = Number(this.moduleOptions?.port) || 3000;
-		await this.instance.listen({ port: Number(port) });
-		this.logger.info(`Server listening on port: ${port}`);
+	public listen(port: string | number, callback?: () => void);
+	public listen(port: string | number, hostname: string, callback?: () => void);
+	public listen(...args: any[]) {
+		return this.instance.listen(...args);
 	}
 
 	getInstance() {
@@ -157,7 +148,13 @@ export class FastifyHttpServer extends HttpServerModule<
 	}
 
 	public close() {
-		return this.instance.close();
+		return new Promise((resolve, reject) => {
+			return super.getHttpServer()?.close(err => {
+				if (err) return reject(err);
+
+				return resolve(null);
+			});
+		});
 	}
 
 	public getRequestHostname(request: FastifyRequest): string {

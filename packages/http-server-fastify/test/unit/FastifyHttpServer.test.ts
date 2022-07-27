@@ -16,7 +16,7 @@ describe('FastifyHttpServer', () => {
 	let app: App;
 
 	beforeEach(() => {
-		app = new App({ logger: { level: 'silent' } });
+		app = new App();
 	});
 
 	afterEach(async () => {
@@ -210,8 +210,8 @@ describe('FastifyHttpServer', () => {
 			expect(fastifyMocks.post.firstCall.args).to.be.deep.equal(['/', cb]);
 			fastifyHttpServer.all('/', cb);
 			expect(fastifyMocks.all.firstCall.args).to.be.deep.equal(['/', cb]);
-			fastifyHttpServer.listen();
-			expect(fastifyMocks.listen.firstCall.args).to.be.deep.equal([{ port: 3000 }]);
+			fastifyHttpServer.listen(3000, cb);
+			expect(fastifyMocks.listen.firstCall.args).to.be.deep.equal([3000, cb]);
 		});
 
 		it('should propagate the calls to the underlying response', async () => {
