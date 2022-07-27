@@ -2,11 +2,20 @@
  * © Copyright 2022 HP Development Company, L.P.
  * SPDX-License-Identifier: MIT
  */
-import { App, context, interceptor, InterceptorBag, InterceptorNext } from '@davinci/core';
+import {
+	App,
+	context,
+	entity,
+	executeInterceptorsStack,
+	interceptor,
+	InterceptorBag,
+	InterceptorNext
+} from '@davinci/core';
 import should from 'should';
 import * as http from 'http';
 import { reflect } from '@davinci/reflector';
-import { HttpServerModule, route } from '../../src';
+import { HttpServerModule, ParameterConfiguration, route } from '../../src';
+import { expect } from '../support/chai';
 
 const sinon = require('sinon').createSandbox();
 
@@ -356,6 +365,110 @@ describe('HttpServerModule', () => {
 			});
 			await requestHandler({}, {});
 			should(errorMock.getCall(0).args[1]).be.equal('An error happened during the creation of the context');
+		});
+	});
+
+	describe('#createParametersConfigurations', () => {
+		it('should generate the configuration for method parameters', () => {
+			@entity()
+			class Customer {
+				@entity.prop()
+				firstname: string;
+
+				@entity.prop()
+				lastname: string;
+			}
+
+			@route.controller({ basePath: '/customers' })
+			class CustomerController {
+				@route.get({ path: '/:id' })
+				updateById(@route.body() body: Customer, @route.query() query: string, @context() ctx) {
+					return { body, query, ctx };
+				}
+			}
+
+			const dummyHttpServer = new DummyHttpServer();
+			const controllerReflection = reflect(CustomerController);
+			const methodReflection = controllerReflection.methods.find(({ name }) => name === 'updateById');
+
+			const parameterConfigurations = dummyHttpServer.createParametersConfigurations({
+				controllerReflection,
+				methodReflection
+			});
+
+			expect(parameterConfigurations).to.containSubset([
+				{
+					source: 'body',
+					name: 'body',
+					options: {
+						in: 'body'
+					}
+				},
+				{
+					source: 'query',
+					name: 'query',
+					type: String,
+					options: {
+						in: 'query'
+					}
+				},
+				{
+					source: 'context',
+					reflection: {
+						controllerReflection,
+						methodReflection
+					}
+				}
+			]);
+			expect(parameterConfigurations[0]).haveOwnProperty('type').be.equal(Customer);
+		});
+	});
+
+	describe('#createValidationInterceptor', () => {
+		it('should create a validation interceptor', async () => {
+			// arrange
+			const dummyHttpServer = new DummyHttpServer();
+			const parametersConfig: ParameterConfiguration<any>[] = [
+				{ name: 'customerId', source: 'path', type: Number, value: { firstname: '4000' } },
+				{ name: 'data', source: 'body', type: Object, value: { firstname: 'John' } },
+				{ name: 'street', source: 'query', type: String, value: 'My Road' },
+				{
+					name: 'houseNumber',
+					source: 'query',
+					type: String,
+					options: { in: 'query', required: true },
+					value: '20'
+				},
+				{ name: 'accountId', source: 'header', type: Number, value: '1000' }
+			];
+			const validatorFunction = sinon.stub();
+			const validationInterceptor = await dummyHttpServer.createValidationInterceptor({
+				validatorFunction,
+				parametersConfig
+			});
+
+			//act
+			await executeInterceptorsStack([validationInterceptor]);
+
+			//assert
+			expect(validatorFunction.called).to.be.true;
+			expect(validatorFunction.getCall(0).args[0]).to.be.deep.equal({
+				params: {
+					customerId: {
+						firstname: '4000'
+					}
+				},
+				body: {
+					firstname: 'John'
+				},
+				querystring: {
+					street: 'My Road',
+					houseNumber: '20'
+				},
+				headers: {
+					accountId: '1000'
+				}
+			});
 		});
 	});
 });

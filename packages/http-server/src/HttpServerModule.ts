@@ -134,7 +134,7 @@ export abstract class HttpServerModule<
 			...getInterceptorsHandlers(methodReflection)
 		];
 
-		const parametersConfig = await this.getParametersConfigurations({ controllerReflection, methodReflection });
+		const parametersConfig = await this.createParametersConfigurations({ controllerReflection, methodReflection });
 		const validatorFunction = await this.validator.createValidatorFunction({ parametersConfig });
 
 		// using a named function here for better instrumentation and reporting
@@ -279,7 +279,7 @@ export abstract class HttpServerModule<
 
 	abstract setHeader(response, name: string, value: string);
 
-	private async createValidationInterceptor({
+	async createValidationInterceptor({
 		validatorFunction,
 		parametersConfig
 	}: {
@@ -316,7 +316,7 @@ export abstract class HttpServerModule<
 		};
 	}
 
-	private getParametersConfigurations({
+	createParametersConfigurations({
 		controllerReflection,
 		methodReflection
 	}: {
@@ -338,10 +338,6 @@ export abstract class HttpServerModule<
 					options,
 					type: parameterType
 				});
-
-				/* if (typeof parameterType === 'function') {
-					this.entityRegistry.addEntity(parameterType as ClassType);
-				} */
 			}
 
 			if (parameterDecoratorMetadata?.[DecoratorId] === 'core.parameter.context') {
