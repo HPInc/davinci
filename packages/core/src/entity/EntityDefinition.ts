@@ -22,8 +22,6 @@ interface EntityDefinitionOptions {
 	entityDefinitionsMapCache?: Map<TypeValue, EntityDefinition>;
 }
 
-const primitiveTypes = [String, Number, Boolean, Date] as unknown[];
-
 export class EntityDefinition {
 	private readonly name?: string;
 	private readonly type?: TypeValue;
@@ -58,15 +56,23 @@ export class EntityDefinition {
 	}
 
 	private reflect(/* jsonSchema?: JSONSchema */) {
-		const makeSchema = (typeOrClass: TypeValue | string | number | boolean | Date, key?: string) => {
+		const makeSchema = (
+			typeOrClass: TypeValue | StringConstructor | NumberConstructor | BooleanConstructor | Date,
+			key?: string
+		) => {
 			// it's a primitive type, simple case
-			if (primitiveTypes.includes(typeOrClass)) {
+			if (typeOrClass === String || typeOrClass === Number || typeOrClass === Boolean || typeOrClass === Date) {
+				const type = typeOrClass as
+					| StringConstructor
+					| NumberConstructor
+					| BooleanConstructor
+					| DateConstructor;
+
 				if (typeOrClass === Date) {
 					return { type: 'string', format: 'date-time' };
 				}
 
-				// @ts-ignore
-				return { type: typeOrClass.name.toLowerCase() };
+				return { type: type.name.toLowerCase() };
 			}
 
 			// it's an array => recursively call makeSchema on the first array element

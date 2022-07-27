@@ -13,16 +13,17 @@ export class EntityRegistry {
 	// entityDefinitions = new Set<EntityDefinition[]>();
 	entityDefinitionMap = new Map<TypeValue, EntityDefinition>();
 
-	public getJsonSchema(typeValue: TypeValue): JSONSchema {
+	public getJsonSchema(typeValue: TypeValue): Partial<JSONSchema> {
 		const isPrimitiveType = primitiveTypes.includes(typeValue);
 		if (isPrimitiveType) {
+			const type = typeValue as StringConstructor | NumberConstructor | BooleanConstructor | DateConstructor;
+
 			if (primitiveTypes.includes(typeValue)) {
 				if (typeValue === Date) {
 					return { type: 'string', format: 'date-time' };
 				}
-				// @ts-ignore
-				const type = typeValue.name.toLowerCase();
-				return { type };
+
+				return { type: type.name.toLowerCase() };
 			}
 		}
 

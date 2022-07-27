@@ -4,7 +4,6 @@
  */
 
 // eslint-disable-next-line max-classes-per-file
-
 export class HttpError extends Error {
 	// https://github.com/Microsoft/TypeScript/issues/13965
 	// tslint:disable-next-line variable-name
@@ -32,8 +31,7 @@ export class HttpError extends Error {
 	 * @param className {string} The class name (ie, bad-request)
 	 * @param data {*} response extra, could hold error codes or any relevant information
 	 */
-	// @ts-ignore
-	constructor(message: string, name: string, code: number, className?: string, data: any) {
+	constructor(message: string, name: string, code: number, className?: string, data?: any) {
 		const trueProto = new.target.prototype;
 		super(message);
 		// eslint-disable-next-line no-proto

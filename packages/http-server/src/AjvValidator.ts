@@ -58,11 +58,11 @@ export class AjvValidator<Request = unknown> {
 		await mapSeries(parametersConfig, parameterConfig => {
 			if (parameterConfig.source === 'context') return;
 
-			const createJsonSchema = (jsonSchema: JSONSchema) => {
+			const createJsonSchema = (jsonSchema: Partial<JSONSchema>) => {
 				if (typeof jsonSchema === 'object') {
 					return {
 						...(jsonSchema.title ? { $id: jsonSchema.title } : {}),
-						...mapObject<JSONSchema>(jsonSchema, (p, key) => {
+						...mapObject<Partial<JSONSchema>>(jsonSchema, (p, key) => {
 							if (key === 'properties' && p) {
 								return mapObject(p, propValue => {
 									if (propValue._$ref) {
