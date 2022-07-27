@@ -17,6 +17,12 @@ export type ErrorHandler<TRequest = any, TResponse = any> = (
 ) => any;
 
 export type RequestHandler<TRequest = any, TResponse = any> = (req: TRequest, res: TResponse, next?: Function) => any;
+export type ErrorRequestHandler<TRequest = any, TResponse = any> = (
+	error: Error,
+	req: TRequest,
+	res: TResponse,
+	next?: Function
+) => any;
 
 export interface HttpServerModuleOptions {
 	port?: number | string;
