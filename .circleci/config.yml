@@ -93,7 +93,7 @@ workflows:
           matrix:
             parameters:
               mongo-version: ["4.4", "5"]
-              node-version: ["12", "14", "16"]
+              node-version: ["14", "16"]
       - publish:
           requires:
             - checkout_and_test
