@@ -210,8 +210,8 @@ describe('FastifyHttpServer', () => {
 			expect(fastifyMocks.post.firstCall.args).to.be.deep.equal(['/', cb]);
 			fastifyHttpServer.all('/', cb);
 			expect(fastifyMocks.all.firstCall.args).to.be.deep.equal(['/', cb]);
-			fastifyHttpServer.listen(3000, cb);
-			expect(fastifyMocks.listen.firstCall.args).to.be.deep.equal([3000, cb]);
+			fastifyHttpServer.listen();
+			expect(fastifyMocks.listen.firstCall.args).to.be.deep.equal([{ port: 3000 }]);
 		});
 
 		it('should propagate the calls to the underlying response', async () => {
