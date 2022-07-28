@@ -65,7 +65,6 @@ export class App extends Module {
 		super();
 		this.options = options;
 		this.controllers = options?.controllers ?? [];
-		this.enableShutdownSignals();
 	}
 
 	public getModuleId(): string {
@@ -133,7 +132,6 @@ export class App extends Module {
 					this.logger.error({ moduleId: module.getModuleId(), error: err }, 'Error while destroying module')
 				)
 			);
-			process.exit(0);
 		} catch (err) {
 			this.logger.error({ error: err }, 'Fatal error');
 			throw err;
@@ -166,7 +164,7 @@ export class App extends Module {
 		return reflect(controller);
 	}
 
-	enableShutdownSignals() {
+	public enableShutdownSignals() {
 		const signals = this.options?.shutdownSignals ?? ['SIGTERM', 'SIGINT'];
 		const onSignal = async (signal: Signals) => {
 			this.logger.info(`Received ${signal}, shutting down`);
@@ -175,7 +173,6 @@ export class App extends Module {
 		};
 		signals.forEach(signal => {
 			process.on(signal, onSignal);
-			return onSignal(signal);
 		});
 	}
 }
