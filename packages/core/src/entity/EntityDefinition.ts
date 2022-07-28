@@ -12,7 +12,9 @@ import {
 	reflect,
 	TypeValue
 } from '@davinci/reflector';
+import deepMerge from 'deepmerge';
 import { EntityOptions, EntityPropReflection, JSONSchema } from './types';
+import { isPlainObject, omit } from '../lib/object-utils';
 
 interface EntityDefinitionOptions {
 	name?: string;
@@ -36,7 +38,7 @@ export class EntityDefinition {
 		this.name = options.name ?? this.type?.constructor?.name;
 		this.type = options.type;
 		this.entityDefinitionsMapCache = options.entityDefinitionsMapCache;
-		this.jsonSchema = this.reflect(/* options.jsonSchema */);
+		this.jsonSchema = this.reflect();
 	}
 
 	public getRelatedEntityDefinitionsMap() {
@@ -120,10 +122,16 @@ export class EntityDefinition {
 						const accumulator = acc ?? { properties: {}, required: [] };
 
 						const entityPropDecorator = this.findEntityPropDecorator(prop);
-						accumulator.properties[prop.name] = makeSchema(
+						const extractedJsonSchema = omit(entityPropDecorator?.options ?? {}, ['type', 'required']);
+						accumulator.properties[prop.name] = deepMerge(
+							extractedJsonSchema,
+							makeSchema(entityPropDecorator.options?.type ?? prop.type, prop.name),
+							{ isMergeableObject: isPlainObject }
+						);
+						/* accumulator.properties[prop.name] = makeSchema(
 							entityPropDecorator.options?.type ?? prop.type,
 							prop.name
-						);
+						); */
 						if (entityPropDecorator.options?.required) {
 							accumulator.required.push(prop.name);
 						}

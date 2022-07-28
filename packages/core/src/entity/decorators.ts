@@ -6,7 +6,7 @@
 import { decorate, DecoratorId } from '@davinci/reflector';
 import { EntityOptions, EntityPropOptions } from './types';
 
-export function prop<T = unknown>(options?: EntityPropOptions<T>) {
+export function prop<T = any>(options?: EntityPropOptions<T>) {
 	return decorate(
 		{
 			[DecoratorId]: 'entity.prop',

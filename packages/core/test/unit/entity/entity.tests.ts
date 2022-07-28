@@ -28,10 +28,10 @@ describe('entity decorators', () => {
 		}
 		@entity({ title: 'MyCustomer' })
 		class Customer extends BaseClass {
-			@entity.prop({ required: true })
+			@entity.prop({ required: true, minLength: 2 })
 			firstname: string;
 
-			@entity.prop({ required: true })
+			@entity.prop({ required: true, minLength: 2 })
 			lastname: string;
 
 			@entity.prop()
@@ -62,7 +62,8 @@ describe('entity decorators', () => {
 						{
 							[DecoratorId]: 'entity.prop',
 							options: {
-								required: true
+								required: true,
+								minLength: 2
 							}
 						}
 					],
@@ -76,7 +77,8 @@ describe('entity decorators', () => {
 						{
 							[DecoratorId]: 'entity.prop',
 							options: {
-								required: true
+								required: true,
+								minLength: 2
 							}
 						}
 					],

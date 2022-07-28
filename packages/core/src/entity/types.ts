@@ -8,10 +8,9 @@ import { UncheckedJSONSchemaType } from './jsonSchemaTypes';
 
 export type JSONSchema<T = any> = UncheckedJSONSchemaType<T, true>;
 
-export type EntityPropOptions<T = unknown> = {
-	type?: TypeValue | UncheckedJSONSchemaType<T, true>['type'];
+export type EntityPropOptions<T = unknown> = Partial<JSONSchema<T>> & {
+	type?: TypeValue | JSONSchema<T>['type'];
 	required?: boolean;
-	jsonSchema?: Partial<UncheckedJSONSchemaType<T, true>>;
 };
 
 export interface EntityPropReflection<T = unknown> {

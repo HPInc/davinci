@@ -33,10 +33,10 @@ describe('EntityDefinition', () => {
 
 		@entity()
 		class Customer {
-			@entity.prop()
+			@entity.prop({ minLength: 2 })
 			firstname: string;
 
-			@entity.prop({ required: true })
+			@entity.prop({ required: true, minLength: 2 })
 			lastname: string;
 
 			@entity.prop({ type: [Phone] })
@@ -53,10 +53,12 @@ describe('EntityDefinition', () => {
 			type: 'object',
 			properties: {
 				firstname: {
-					type: 'string'
+					type: 'string',
+					minLength: 2
 				},
 				lastname: {
-					type: 'string'
+					type: 'string',
+					minLength: 2
 				},
 				phones: {
 					type: 'array',
