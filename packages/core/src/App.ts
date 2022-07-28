@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-import pino from 'pino';
+import pino, { Level } from 'pino';
 import { ClassReflection, ClassType, reflect } from '@davinci/reflector';
+import deepmerge from 'deepmerge';
 import { Module } from './Module';
 import { mapSeries } from './lib/async-utils';
 import { coerceArray } from './lib/array-utils';
@@ -50,7 +51,13 @@ type Signals =
 
 export interface AppOptions {
 	controllers?: ClassType[];
-	shutdownSignals?: Signals[];
+	shutdown?: {
+		enabled?: boolean;
+		signals?: Signals[];
+	};
+	logger?: {
+		level?: Level | 'silent';
+	};
 }
 
 export class App extends Module {
@@ -63,12 +70,24 @@ export class App extends Module {
 
 	constructor(options?: AppOptions) {
 		super();
-		this.options = options;
+		const defaultOptions: AppOptions = {
+			shutdown: { enabled: true, signals: ['SIGTERM', 'SIGINT'] },
+			logger: { level: 'info' }
+		};
+		this.options = deepmerge({ ...defaultOptions }, { ...options });
 		this.controllers = options?.controllers ?? [];
+		if (this.options.shutdown?.enabled) {
+			this.enableShutdownSignals();
+		}
+		this.logger.level = this.options.logger?.level;
 	}
 
 	public getModuleId(): string {
 		return 'app';
+	}
+
+	public getOptions() {
+		return this.options;
 	}
 
 	public registerModule(modules: Module[]): this;
@@ -165,7 +184,7 @@ export class App extends Module {
 	}
 
 	public enableShutdownSignals() {
-		const signals = this.options?.shutdownSignals ?? ['SIGTERM', 'SIGINT'];
+		const signals = this.options.shutdown?.signals ?? [];
 		const onSignal = async (signal: Signals) => {
 			this.logger.info(`Received ${signal}, shutting down`);
 			await this.shutdown();
@@ -174,6 +193,8 @@ export class App extends Module {
 		signals.forEach(signal => {
 			process.on(signal, onSignal);
 		});
+
+		return this;
 	}
 }
 
