@@ -24,10 +24,10 @@ class Birth {
 
 @entity()
 export class Customer {
-	@entity.prop()
+	@entity.prop({ minLength: 2 })
 	firstname: string;
 
-	@entity.prop({ required: true })
+	@entity.prop({ required: true, minLength: 2 })
 	lastname: string;
 
 	@entity.prop({ type: [Phone] })
