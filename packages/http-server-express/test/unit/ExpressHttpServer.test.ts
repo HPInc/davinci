@@ -16,7 +16,7 @@ describe('ExpressHttpServer', () => {
 	let app: App;
 
 	beforeEach(() => {
-		app = new App();
+		app = new App({ logger: { level: 'silent' } });
 	});
 
 	afterEach(async () => {
