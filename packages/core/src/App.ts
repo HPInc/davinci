@@ -115,7 +115,7 @@ export class App extends Module {
 			await this.onInit?.(this);
 			return await mapSeries(this.modules, module => module.onInit?.(this));
 		} catch (err) {
-			this.logger.error({ error: err }, 'Fatal error during module init');
+			this.logger.fatal({ error: err }, 'Fatal error during module init');
 			throw err;
 		}
 	}
@@ -133,7 +133,7 @@ export class App extends Module {
 				)
 			);
 		} catch (err) {
-			this.logger.error({ error: err }, 'Fatal error');
+			this.logger.fatal({ error: err }, 'Fatal error');
 			throw err;
 		}
 	}
