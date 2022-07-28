@@ -210,8 +210,8 @@ describe('ExpressHttpServer', () => {
 			expect(expressMocks.use.firstCall.args).to.be.deep.equal(['/', cb]);
 			expressHttpServer.all('/', cb);
 			expect(expressMocks.all.firstCall.args).to.be.deep.equal(['/', cb]);
-			expressHttpServer.listen(3000, cb);
-			expect(expressMocks.listen.firstCall.args).to.be.deep.equal([3000, cb]);
+			expressHttpServer.listen();
+			expect(expressMocks.listen.firstCall.args).to.be.deep.equal([3000]);
 		});
 
 		it('should propagate the calls to the underlying response', async () => {
