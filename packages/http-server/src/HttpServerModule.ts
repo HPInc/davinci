@@ -244,9 +244,7 @@ export abstract class HttpServerModule<
 	// abstract options(handler: RequestHandler<Request, Response>);
 	abstract options(path: unknown, handler: RequestHandler<Request, Response>);
 
-	abstract listen(port: string | number, callback?: () => void);
-
-	abstract listen(port: string | number, hostname: string, callback?: () => void);
+	abstract listen(): unknown | Promise<unknown>;
 
 	abstract initHttpServer(): void;
 
