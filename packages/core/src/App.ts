@@ -3,10 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-import pino, { Level, Logger } from 'pino';
+import pino from 'pino';
 import { ClassReflection, ClassType, reflect } from '@davinci/reflector';
-import deepmerge from 'deepmerge';
-import { Module, ModuleStatus } from './Module';
+import { Module } from './Module';
 import { mapSeries } from './lib/async-utils';
 import { coerceArray } from './lib/array-utils';
 
@@ -51,18 +50,11 @@ type Signals =
 
 export interface AppOptions {
 	controllers?: ClassType[];
-	shutdown?: {
-		enabled?: boolean;
-		signals?: Signals[];
-	};
-	logger?: {
-		name?: string;
-		level?: Level | 'silent';
-	};
+	shutdownSignals?: Signals[];
 }
 
 export class App extends Module {
-	logger: Logger;
+	logger = pino({ name: 'app' });
 	private options?: AppOptions;
 	private modules: Module[] = [];
 	private controllers: ClassType[];
@@ -71,32 +63,19 @@ export class App extends Module {
 
 	constructor(options?: AppOptions) {
 		super();
-		const defaultOptions: AppOptions = {
-			shutdown: { enabled: true, signals: ['SIGTERM', 'SIGINT'] },
-			logger: { name: 'app', level: 'info' }
-		};
-		this.options = deepmerge({ ...defaultOptions }, { ...options });
+		this.options = options;
 		this.controllers = options?.controllers ?? [];
-		if (this.options.shutdown?.enabled) {
-			this.enableShutdownSignals();
-		}
-		this.logger = pino({ name: this.options.logger.name });
-		this.logger.level = this.options.logger?.level;
+		this.enableShutdownSignals();
 	}
 
 	public getModuleId(): string {
 		return 'app';
 	}
 
-	public getOptions() {
-		return this.options;
-	}
-
-	public async registerModule(module: Module): Promise<this>;
-	public async registerModule(modules: Module[]): Promise<this>;
-	public async registerModule(...modules: Module[]): Promise<this>;
-	public async registerModule(...args) {
-		const modules: Module[] = coerceArray(args.length > 1 ? args : args[0]);
+	public registerModule(modules: Module[]): this;
+	public registerModule(module: Module): this;
+	public registerModule(module: Module | Module[]) {
+		const modules: Module[] = coerceArray(module);
 
 		modules.forEach(mod => {
 			const moduleIds = coerceArray(mod.getModuleId());
@@ -108,35 +87,6 @@ export class App extends Module {
 				this.modulesDic[id] = mod;
 			});
 			this.modules.push(mod);
-		});
-
-		this.setStatus('registering');
-
-		await new Promise((resolve, reject) => {
-			process.nextTick(() => {
-				mapSeries(modules, async mod => {
-					mod.setStatus('registering');
-					await mod.onRegister?.(this);
-					mod.setStatus('registered');
-				})
-					.then(() => {
-						const allModulesRegistered = Object.keys(this.modulesDic)
-							.map(key => this.modulesDic[key].getStatus())
-							.every(status => status === 'registered');
-
-						if (allModulesRegistered) {
-							this.setStatus('registered');
-							this.eventBus.emit('registered');
-						}
-
-						resolve(null);
-					})
-					.catch(err => {
-						this.logger.fatal({ error: err }, 'Fatal error during module registration');
-						this.setStatus('error');
-						reject(err);
-					});
-			});
 		});
 
 		return this;
@@ -160,33 +110,19 @@ export class App extends Module {
 	}
 
 	public async init() {
-		if (this.getStatus() === 'registering') {
-			await new Promise(resolve => {
-				this.eventBus.once('registered', () => resolve(null));
-			});
-		}
 		this.logger.debug('App initialization. Executing onInit hooks');
-		this.setStatus('initializing');
 
 		try {
 			await this.onInit?.(this);
-			await mapSeries(this.modules, async module => {
-				module.setStatus('initializing');
-				await module.onInit?.(this);
-				module.setStatus('initialized');
-			});
-
-			this.setStatus('initialized');
+			return await mapSeries(this.modules, module => module.onInit?.(this));
 		} catch (err) {
-			this.logger.fatal({ error: err }, 'Fatal error during module init');
-			this.setStatus('error');
+			this.logger.error({ error: err }, 'Fatal error during module init');
 			throw err;
 		}
 	}
 
 	public async shutdown() {
 		this.logger.debug('App shutdown. Executing onDestroy hooks');
-		this.setStatus('destroying');
 
 		const wrapIntoPromise = async fn => fn();
 
@@ -197,40 +133,15 @@ export class App extends Module {
 					this.logger.error({ moduleId: module.getModuleId(), error: err }, 'Error while destroying module')
 				)
 			);
-			this.setStatus('destroyed');
+			process.exit(0);
 		} catch (err) {
-			this.logger.fatal({ error: err }, 'Fatal error');
+			this.logger.error({ error: err }, 'Fatal error');
 			throw err;
 		}
 	}
 
 	public getModules() {
 		return this.modules;
-	}
-
-	public async getModuleById<M extends Module = Module>(moduleId: string, waitForStatus?: ModuleStatus): Promise<M> {
-		const WEIGHTED_STATUSES = [
-			'unloaded',
-			'registering',
-			'registered',
-			'initializing',
-			'initialized',
-			'destroying',
-			'destroyed',
-			'error'
-		];
-		const module = this.modulesDic[moduleId];
-		if (waitForStatus) {
-			if (WEIGHTED_STATUSES.indexOf(module.getStatus()) >= WEIGHTED_STATUSES.indexOf(waitForStatus)) {
-				return module as M;
-			}
-
-			return new Promise(resolve => {
-				module.eventBus.once(waitForStatus, () => resolve(module as M));
-			});
-		}
-
-		return module as M;
 	}
 
 	public getControllers() {
@@ -255,29 +166,17 @@ export class App extends Module {
 		return reflect(controller);
 	}
 
-	public enableShutdownSignals() {
-		const signals = this.options.shutdown?.signals ?? [];
+	enableShutdownSignals() {
+		const signals = this.options?.shutdownSignals ?? ['SIGTERM', 'SIGINT'];
 		const onSignal = async (signal: Signals) => {
-			if (['destroying', 'destroyed'].includes(this.getStatus())) {
-				this.logger.debug('App is already shutting down. Ignoring signal');
-				return;
-			}
-
 			this.logger.info(`Received ${signal}, shutting down`);
-
-			try {
-				await this.shutdown();
-				process.kill(process.pid, signal);
-				process.exit(0);
-			} catch (err) {
-				process.exit(1);
-			}
+			await this.shutdown();
+			process.kill(process.pid, signal);
 		};
 		signals.forEach(signal => {
 			process.on(signal, onSignal);
+			return onSignal(signal);
 		});
-
-		return this;
 	}
 }
 
