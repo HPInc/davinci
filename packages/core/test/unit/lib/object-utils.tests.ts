@@ -4,8 +4,7 @@
  */
 
 import { expect } from 'chai';
-import { mapObject } from '../../../src';
-import { omit } from 'lodash';
+import { isPlainObject, mapObject, omit } from '../../../src';
 
 describe('object-utils', () => {
 	describe('mapValues', () => {
@@ -46,6 +45,19 @@ describe('object-utils', () => {
 			const result = omit(input, []);
 
 			expect(result).to.be.deep.equal(input);
+		});
+	});
+
+	describe('#isPlainObject', () => {
+		it('should return false if a not plain object is passed', () => {
+			expect(isPlainObject(1)).to.be.false;
+			expect(isPlainObject(null)).to.be.false;
+			expect(isPlainObject('string')).to.be.false;
+			expect(isPlainObject(() => {})).to.be.false;
+		});
+
+		it('should return true if a a plain object is passed', () => {
+			expect(isPlainObject({})).to.be.true;
 		});
 	});
 });
