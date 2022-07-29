@@ -47,7 +47,13 @@ describe('AjvValidator', () => {
 
 		const parametersConfig: ParameterConfiguration<any>[] = [
 			{ name: 'customerId', source: 'path', type: Number, value: { firstname: '4000' } },
-			{ name: 'data', source: 'body', type: Customer, value: { firstname: 'John' } },
+			{
+				name: 'data',
+				source: 'body',
+				type: Customer,
+				options: { in: 'body', required: true },
+				value: { firstname: 'John' }
+			},
 			{ name: 'street', source: 'query', type: String, value: 'My Road' },
 			{
 				name: 'houseNumber',

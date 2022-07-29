@@ -27,18 +27,18 @@ export class HttpError extends Error {
 	 * @constructor
 	 * @param message {string} The error message
 	 * @param name {string} The error name (ie, BadRequest)
-	 * @param code {number} The HTTP status code
+	 * @param statusCode {number} The HTTP status code
 	 * @param className {string} The class name (ie, bad-request)
 	 * @param data {*} response extra, could hold error codes or any relevant information
 	 */
-	constructor(message: string, name: string, code: number, className?: string, data?: any) {
+	constructor(message: string, name: string, statusCode: number, className?: string, data?: any) {
 		const trueProto = new.target.prototype;
 		super(message);
 		// eslint-disable-next-line no-proto
 		this.__proto__ = trueProto;
 
 		this.name = name || 'Error';
-		this.statusCode = code;
+		this.statusCode = statusCode;
 		this.className = className;
 
 		const { errors, ...rest } = data ?? {};
