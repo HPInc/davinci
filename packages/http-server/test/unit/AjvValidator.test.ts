@@ -110,7 +110,7 @@ describe('AjvValidator', () => {
 						required: []
 					}
 				},
-				required: []
+				required: ['body']
 			});
 			expect(customerSchema).to.be.deep.equal({
 				$id: 'Customer',
