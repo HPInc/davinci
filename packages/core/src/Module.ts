@@ -5,13 +5,15 @@
 
 import type { App } from './App';
 
+export type ModuleStatus = 'unloaded' | 'initializing' | 'initialized' | 'destroying' | 'destroyed';
+
 export abstract class Module {
 	/**
 	 * @returns {string | string[]} the identifier (or identifiers) of the module
 	 */
 	abstract getModuleId(): string | string[];
 
-	onInit?(app: App): void | Promise<void>;
+	onInit?(app: App): unknown | Promise<unknown>;
 
-	onDestroy?(app: App): void | Promise<void>;
+	onDestroy?(app: App): unknown | Promise<unknown>;
 }
