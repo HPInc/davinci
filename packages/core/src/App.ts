@@ -6,7 +6,7 @@
 import pino, { Level } from 'pino';
 import { ClassReflection, ClassType, reflect } from '@davinci/reflector';
 import deepmerge from 'deepmerge';
-import { Module } from './Module';
+import { Module, ModuleStatus } from './Module';
 import { mapSeries } from './lib/async-utils';
 import { coerceArray } from './lib/array-utils';
 
@@ -17,13 +17,19 @@ export interface AppOptions {
 	};
 }
 
+interface ModuleState {
+	module: Module;
+	status: ModuleStatus;
+	initPromise?: ReturnType<Module['onInit']>;
+}
+
 export class App extends Module {
 	logger = pino({ name: 'app' });
 	private options?: AppOptions;
 	private modules: Module[] = [];
 	private controllers: ClassType[];
 	private controllersReflectionCache = new Map<ClassType, ClassReflection>();
-	private modulesDic: Record<string, Module> = {};
+	private modulesDic: Record<string, ModuleState> = {};
 
 	constructor(options?: AppOptions) {
 		super();
@@ -50,12 +56,13 @@ export class App extends Module {
 
 		modules.forEach(mod => {
 			const moduleIds = coerceArray(mod.getModuleId());
+			const moduleStatus: ModuleState = { module: mod, status: 'unloaded' };
 			moduleIds.forEach(id => {
 				if (this.modulesDic[id]) {
 					throw new Error(`A module with the same identifier "${id}" has already been registered`);
 				}
 
-				this.modulesDic[id] = mod;
+				this.modulesDic[id] = moduleStatus;
 			});
 			this.modules.push(mod);
 		});
@@ -85,7 +92,14 @@ export class App extends Module {
 
 		try {
 			await this.onInit?.(this);
-			return await mapSeries(this.modules, module => module.onInit?.(this));
+			return await mapSeries(this.modules, async module => {
+				const moduleId = coerceArray(module.getModuleId())[0];
+				const moduleState = this.modulesDic[moduleId];
+				moduleState.status = 'initializing';
+				moduleState.initPromise = module.onInit?.(this);
+				await moduleState.initPromise;
+				moduleState.status = 'initialized';
+			});
 		} catch (err) {
 			this.logger.fatal({ error: err }, 'Fatal error during module init');
 			throw err;
@@ -112,6 +126,15 @@ export class App extends Module {
 
 	public getModules() {
 		return this.modules;
+	}
+
+	public async getModuleById<M extends Module = Module>(moduleId: string, waitInitialization?: boolean): Promise<M> {
+		const moduleState = this.modulesDic[moduleId];
+		if (waitInitialization) {
+			await moduleState.initPromise;
+		}
+
+		return moduleState.module as M;
 	}
 
 	public getControllers() {
