@@ -3,9 +3,12 @@
  * SPDX-License-Identifier: MIT
  */
 
-type Iterable<T> = (item: T, index: number) => void;
+type Iterable<T, ReturnType> = (item: T, index: number) => Promise<ReturnType> | ReturnType;
 
-export async function mapSeries<T = unknown>(data: T[], fn: Iterable<T>) {
+export async function mapSeries<T = unknown, ReturnType = unknown>(
+	data: T[],
+	fn: Iterable<T, ReturnType>
+): Promise<ReturnType[]> {
 	const results = [];
 	for (let index = 0; index < data.length; index++) {
 		const item = data[index];
@@ -16,6 +19,9 @@ export async function mapSeries<T = unknown>(data: T[], fn: Iterable<T>) {
 	return results;
 }
 
-export async function mapParallel<T = unknown>(data: T[], fn: Iterable<T>) {
+export async function mapParallel<T = unknown, ReturnType = unknown>(
+	data: T[],
+	fn: Iterable<T, ReturnType>
+): Promise<ReturnType[]> {
 	return Promise.all(data.map((item, index) => fn(item, index)));
 }

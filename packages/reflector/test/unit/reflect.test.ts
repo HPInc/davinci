@@ -2,8 +2,8 @@
  * © Copyright 2022 HP Development Company, L.P.
  * SPDX-License-Identifier: MIT
  */
-import { reflect, decorate } from '../../src';
-import should from 'should';
+import { decorate, reflect } from '../../src';
+import { expect } from '../support/chai';
 
 describe('reflect', () => {
 	describe('reflect', () => {
@@ -26,14 +26,14 @@ describe('reflect', () => {
 			}
 
 			const reflected = reflect(MyAwesomeClass);
-			should(reflected).match({
+			expect(reflected).to.containSubset({
 				kind: 'Class',
 				name: 'MyAwesomeClass',
 				decorators: [
 					{
 						type: 'cache',
-						duration: 5,
-					},
+						duration: 5
+					}
 				],
 				methods: [
 					{
@@ -45,29 +45,29 @@ describe('reflect', () => {
 								name: 'myParam',
 								decorators: [
 									{
-										type: 'cachedParam',
-									},
+										type: 'cachedParam'
+									}
 								],
 								fields: 'myParam',
 								index: 0,
-								typeClassification: 'Primitive',
-							},
+								typeClassification: 'Primitive'
+							}
 						],
 						decorators: [
 							{
 								type: 'cache',
-								duration: 1,
-							},
-						],
-					},
+								duration: 1
+							}
+						]
+					}
 				],
 				properties: [],
 				ctor: {
 					kind: 'Constructor',
 					name: 'constructor',
-					parameters: [],
+					parameters: []
 				},
-				typeClassification: 'Class',
+				typeClassification: 'Class'
 			});
 		});
 	});

@@ -13,5 +13,6 @@ export {
 	ObjectReflection,
 	ClassReflection,
 	MethodReflection,
+	PropertyReflection,
 	DecoratorId
 } from '@plumier/reflect';

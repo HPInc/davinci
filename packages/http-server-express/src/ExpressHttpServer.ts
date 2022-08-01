@@ -7,12 +7,19 @@ import express, { Express, Request, Response } from 'express';
 import http, { Server as HttpServer } from 'http';
 import https, { Server as HttpsServer } from 'https';
 import type { App } from '@davinci/core';
+import type { OptionsJson, OptionsUrlencoded } from 'body-parser';
 
 type Server = HttpServer | HttpsServer;
 
-type ExpressHttpServerModuleOptions = { app?: Express } & HttpServerModuleOptions;
+type ExpressHttpServerModuleOptions = {
+	app?: Express;
+	middlewares?: {
+		json?: OptionsJson;
+		urlencoded?: OptionsUrlencoded;
+	};
+} & HttpServerModuleOptions;
 
-export class ExpressHttpServer extends HttpServerModule<Request, Response, Server> {
+export class ExpressHttpServer extends HttpServerModule<Request, Response, Server, ExpressHttpServerModuleOptions> {
 	instance: Express;
 	app: App;
 
@@ -24,7 +31,8 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 
 	async onInit(app) {
 		this.app = app;
-		super.createRoutes();
+		this.registerMiddlewares();
+		await super.createRoutes();
 		// this.registerErrorHandlers();
 		this.initHttpServer();
 		return super.getHttpServer().listen(super.moduleOptions?.port ?? 3000);
@@ -32,6 +40,13 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 
 	onDestroy() {
 		return this.close();
+	}
+
+	registerMiddlewares() {
+		const { json, urlencoded } = this.moduleOptions?.middlewares ?? {};
+
+		this.instance.use(express.json({ ...json }));
+		this.instance.use(express.urlencoded({ extended: true, ...urlencoded }));
 	}
 
 	initHttpServer() {
@@ -59,7 +74,7 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 	};
 
 	public get(path: string, handler: RequestHandler<Request, Response>) {
-		this.instance.get(path, handler);
+		return this.instance.get(path, handler);
 	}
 
 	public post(path: string, handler: RequestHandler<Request, Response>) {

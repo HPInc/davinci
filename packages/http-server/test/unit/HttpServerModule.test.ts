@@ -2,18 +2,30 @@
  * © Copyright 2022 HP Development Company, L.P.
  * SPDX-License-Identifier: MIT
  */
-import { App, context, interceptor, InterceptorBag, InterceptorNext } from '@davinci/core';
-import should from 'should';
-import { HttpServerModule, route } from '../../src';
+import {
+	App,
+	context,
+	entity,
+	executeInterceptorsStack,
+	interceptor,
+	InterceptorBag,
+	InterceptorNext
+} from '@davinci/core';
 import * as http from 'http';
 import { reflect } from '@davinci/reflector';
+import { HttpServerModule, ParameterConfiguration, route } from '../../src';
+import { expect } from '../support/chai';
 
 const sinon = require('sinon').createSandbox();
 
 describe('HttpServerModule', () => {
 	let app: App;
 
-	type Request = { headers?: Record<string, string> };
+	type Request = {
+		headers?: Record<string, string>;
+		body?: string | Record<string, unknown>;
+		query?: Record<string, string>;
+	};
 
 	class DummyHttpServer extends HttpServerModule<Request> {
 		onInit(app: App) {
@@ -36,7 +48,23 @@ describe('HttpServerModule', () => {
 		}
 		close() {}
 		getRequestHostname() {}
-		getRequestParameter({ source }) {
+		getRequestParameter({ source, name, request }) {
+			switch (source) {
+				case 'path':
+					return request.params[name];
+
+				case 'header':
+					return request.header(name);
+
+				case 'query':
+					return request.query[name];
+
+				case 'body':
+					return request.body;
+
+				default:
+					return undefined;
+			}
 			return source;
 		}
 		getRequestMethod() {}
@@ -71,15 +99,15 @@ describe('HttpServerModule', () => {
 	it('should be extended by http server modules', async () => {
 		const dummyHttpServer = new DummyHttpServer({ port: 1234 });
 
-		should(dummyHttpServer.getModuleId()).be.equal('http');
-		should(dummyHttpServer.getModuleOptions()).be.deepEqual({ port: 1234 });
+		expect(dummyHttpServer.getModuleId()).to.be.equal('http');
+		expect(dummyHttpServer.getModuleOptions()).to.be.deep.equal({ port: 1234 });
 	});
 
 	it('should be extended by http server modules', async () => {
 		const dummyHttpServer = new DummyHttpServer({ port: 1234 });
 
-		should(dummyHttpServer.getModuleId()).be.equal('http');
-		should(dummyHttpServer.getModuleOptions()).be.deepEqual({ port: 1234 });
+		expect(dummyHttpServer.getModuleId()).to.be.equal('http');
+		expect(dummyHttpServer.getModuleOptions()).to.be.deep.equal({ port: 1234 });
 	});
 
 	it('should be able to set and get the underlying http server instance', async () => {
@@ -87,7 +115,7 @@ describe('HttpServerModule', () => {
 		const httpServer = http.createServer(() => {});
 		dummyHttpServer.setHttpServer(httpServer);
 
-		should(dummyHttpServer.getHttpServer()).be.equal(httpServer);
+		expect(dummyHttpServer.getHttpServer()).to.be.equal(httpServer);
 	});
 
 	describe('#createRoutes', () => {
@@ -110,12 +138,12 @@ describe('HttpServerModule', () => {
 			}
 			const dummyHttpServer = new MyDummyHttpServer();
 			await new App().registerController(CustomerController).registerModule(dummyHttpServer).init();
-			const [[getRoute, postRoute]] = dummyHttpServer.createRoutes();
+			const [[getRoute, postRoute]] = await dummyHttpServer.createRoutes();
 
-			should(getRoute[0]).be.equal('get');
-			should(getRoute[1]).be.equal('/api/customers/all');
-			should(postRoute[0]).be.equal('post');
-			should(postRoute[1]).be.equal('/api/customers/create');
+			expect(getRoute[0]).to.be.equal('get');
+			expect(getRoute[1]).to.be.equal('/api/customers/all');
+			expect(postRoute[0]).to.be.equal('post');
+			expect(postRoute[1]).to.be.equal('/api/customers/create');
 		});
 	});
 
@@ -124,24 +152,24 @@ describe('HttpServerModule', () => {
 			@route.controller({ basePath: '/api/customers' })
 			class CustomerController {
 				@route.get({ path: '/all' })
-				find(@route.body() body, @route.query() query) {
-					return { body, query };
+				find(@route.body() body, @route.query() where: string) {
+					return { body, where };
 				}
 			}
 			const dummyHttpServer = new DummyHttpServer();
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
 				controllerReflection,
 				methodReflection
 			});
-			const reqMock = {};
+			const reqMock: Request = { body: {}, query: { where: '' } };
 			const resMock = {};
 			const result = await requestHandler(reqMock, resMock);
 
-			should(result[1]).be.deepEqual({
-				body: 'body',
-				query: 'query'
+			expect(result[1]).to.be.deep.equal({
+				body: {},
+				where: ''
 			});
 		});
 
@@ -149,23 +177,23 @@ describe('HttpServerModule', () => {
 			@route.controller({ basePath: '/api/customers' })
 			class CustomerController {
 				@route.get({ path: '/all' })
-				find(@route.body() body, @route.query() query) {
-					throw new Error(`Bad request with arguments: ${body}, ${query}`);
+				find(@route.body() body: string, @route.query() where: string) {
+					throw new Error(`Bad request with arguments: ${body}, ${where}`);
 				}
 			}
 			const dummyHttpServer = new DummyHttpServer();
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
 				controllerReflection,
 				methodReflection
 			});
-			const reqMock = {};
+			const reqMock = { body: 'body', query: { where: 'where' } };
 			const resMock = {};
 			const result = await requestHandler(reqMock, resMock);
 
-			should(result[1]).match({
-				message: 'Bad request with arguments: body, query'
+			expect(result[1]).to.containSubset({
+				message: 'Bad request with arguments: body, where'
 			});
 		});
 
@@ -178,34 +206,41 @@ describe('HttpServerModule', () => {
 			class CustomerController {
 				@interceptor(interceptor2)
 				@route.get({ path: '/all' })
-				find(@route.body() body, @route.query() query) {
-					return { body, query };
+				find(@route.body() body, @route.query() where: string) {
+					return { body, where };
 				}
 			}
 			const dummyHttpServer = new DummyHttpServer();
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
 				controllerReflection,
 				methodReflection
 			});
 			const reqMock = {
 				headers: { 'x-my-header': '1' },
 				body: { myBody: true },
-				query: { myQuery: 'query' },
+				query: { where: 'where' },
 				originalUrl: 'http://path/to/url'
 			};
 			const resMock = {};
 			const result = await requestHandler(reqMock, resMock);
 
-			should(result[1]).be.deepEqual({
-				body: 'body',
-				query: 'query'
+			expect(result[1]).to.be.deep.equal({
+				body: {
+					myBody: true
+				},
+				where: 'where'
 			});
-			should(interceptor1.called).be.True();
+			expect(interceptor1.called).to.be.true;
 			const interceptorArgs = {
 				module: 'http-server',
-				handlerArgs: ['body', 'query'],
+				handlerArgs: [
+					{
+						myBody: true
+					},
+					'where'
+				],
 				context: undefined,
 				request: {
 					headers: {
@@ -215,22 +250,23 @@ describe('HttpServerModule', () => {
 						myBody: true
 					},
 					query: {
-						myQuery: 'query'
+						where: 'where'
 					},
 					url: 'http://path/to/url'
-				}
+				},
+				state: {}
 			};
-			should(interceptor1.getCall(0).args[1]).be.deepEqual(interceptorArgs);
-			should(interceptor2.called).be.True();
-			should(interceptor2.getCall(0).args[1]).be.deepEqual(interceptorArgs);
+			expect(interceptor1.getCall(0).args[1]).to.be.deep.equal(interceptorArgs);
+			expect(interceptor2.called).to.be.true;
+			expect(interceptor2.getCall(0).args[1]).to.be.deep.equal(interceptorArgs);
 		});
 
 		it('should be able to process the context parameter', async () => {
 			@route.controller({ basePath: '/api/customers' })
 			class CustomerController {
 				@route.get({ path: '/all' })
-				find(@route.body() body, @route.query() query, @context() ctx) {
-					return { body, query, ctx };
+				find(@route.body() body: object, @route.query() where: string, @context() ctx) {
+					return { body, where, ctx };
 				}
 			}
 
@@ -238,11 +274,15 @@ describe('HttpServerModule', () => {
 			const dummyHttpServer = new DummyHttpServer().setContextFactory(contextFactory);
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
 				controllerReflection,
 				methodReflection
 			});
 			const reqMock = {
+				body: { prop: true },
+				query: {
+					where: 'where'
+				},
 				headers: {
 					'x-userid': '123'
 				}
@@ -250,33 +290,32 @@ describe('HttpServerModule', () => {
 			const resMock = {};
 			const result = await requestHandler(reqMock, resMock);
 
-			should(result[1]).be.match({
-				body: 'body',
-				query: 'query',
+			expect(result[1]).to.containSubset({
+				body: { prop: true },
+				where: 'where',
 				ctx: {
 					userId: '123'
 				}
 			});
 
-			should(contextFactory.getCall(0).args[0]).have.property('reflection');
-			should(contextFactory.getCall(0).args[0].reflection).have.properties([
-				'controllerReflection',
-				'methodReflection'
-			]);
+			expect(contextFactory.getCall(0).args[0]).have.property('reflection');
+			expect(contextFactory.getCall(0).args[0].reflection).haveOwnProperty('controllerReflection');
+			expect(contextFactory.getCall(0).args[0].reflection).haveOwnProperty('methodReflection');
 		});
 
 		it('should inject the context as parameter in the interceptors', async () => {
 			type Context = { userId: string };
 			const handler = sinon.stub().callsFake((next: InterceptorNext<Context>, bag: InterceptorBag<Context>) => {
-				should(bag.context).be.deepEqual({ userId: '123' });
+				expect(bag.context).to.be.deep.equal({ userId: '123' });
 				return next();
 			});
+
 			@interceptor(handler)
 			class CustomerController {
 				@interceptor(handler)
 				@route.get({ path: '/all' })
-				find(@route.body() body, @route.query() query, @context() ctx) {
-					return { body, query, ctx };
+				find(@route.body() body, @route.query() where: string, @context() ctx) {
+					return { body, where, ctx };
 				}
 			}
 
@@ -284,18 +323,22 @@ describe('HttpServerModule', () => {
 			const dummyHttpServer = new DummyHttpServer().setContextFactory(contextFactory);
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
 				controllerReflection,
 				methodReflection
 			});
 			const reqMock = {
+				body: { prop: true },
+				query: {
+					where: 'where'
+				},
 				headers: {
 					'x-userid': '123'
 				}
 			};
 			const resMock = {};
 			await requestHandler(reqMock, resMock);
-			should(handler.callCount).be.equal(2);
+			expect(handler.callCount).to.be.equal(2);
 		});
 
 		it('should log exceptions happening in the contextFactory', async () => {
@@ -313,12 +356,116 @@ describe('HttpServerModule', () => {
 			const errorMock = sinon.stub(dummyHttpServer.logger, 'error');
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
 				controllerReflection,
 				methodReflection
 			});
 			await requestHandler({}, {});
-			should(errorMock.getCall(0).args[1]).be.equal('An error happened during the creation of the context');
+			expect(errorMock.getCall(0).args[1]).to.be.equal('An error happened during the creation of the context');
+		});
+	});
+
+	describe('#createParametersConfigurations', () => {
+		it('should generate the configuration for method parameters', () => {
+			@entity()
+			class Customer {
+				@entity.prop()
+				firstname: string;
+
+				@entity.prop()
+				lastname: string;
+			}
+
+			@route.controller({ basePath: '/customers' })
+			class CustomerController {
+				@route.get({ path: '/:id' })
+				updateById(@route.body() body: Customer, @route.query() query: string, @context() ctx) {
+					return { body, query, ctx };
+				}
+			}
+
+			const dummyHttpServer = new DummyHttpServer();
+			const controllerReflection = reflect(CustomerController);
+			const methodReflection = controllerReflection.methods.find(({ name }) => name === 'updateById');
+
+			const parameterConfigurations = dummyHttpServer.createParametersConfigurations({
+				controllerReflection,
+				methodReflection
+			});
+
+			expect(parameterConfigurations).to.containSubset([
+				{
+					source: 'body',
+					name: 'body',
+					options: {
+						in: 'body'
+					}
+				},
+				{
+					source: 'query',
+					name: 'query',
+					type: String,
+					options: {
+						in: 'query'
+					}
+				},
+				{
+					source: 'context',
+					reflection: {
+						controllerReflection,
+						methodReflection
+					}
+				}
+			]);
+			expect(parameterConfigurations[0]).haveOwnProperty('type').to.be.equal(Customer);
+		});
+	});
+
+	describe('#createValidationInterceptor', () => {
+		it('should create a validation interceptor', async () => {
+			// arrange
+			const dummyHttpServer = new DummyHttpServer();
+			const parametersConfig: ParameterConfiguration<any>[] = [
+				{ name: 'customerId', source: 'path', type: Number, value: { firstname: '4000' } },
+				{ name: 'data', source: 'body', type: Object, value: { firstname: 'John' } },
+				{ name: 'street', source: 'query', type: String, value: 'My Road' },
+				{
+					name: 'houseNumber',
+					source: 'query',
+					type: String,
+					options: { in: 'query', required: true },
+					value: '20'
+				},
+				{ name: 'accountId', source: 'header', type: Number, value: '1000' }
+			];
+			const validatorFunction = sinon.stub();
+			const validationInterceptor = await dummyHttpServer.createValidationInterceptor({
+				validatorFunction,
+				parametersConfig
+			});
+
+			//act
+			await executeInterceptorsStack([validationInterceptor]);
+
+			//assert
+			expect(validatorFunction.called).to.be.true;
+			expect(validatorFunction.getCall(0).args[0]).to.be.deep.equal({
+				params: {
+					customerId: {
+						firstname: '4000'
+					}
+				},
+				body: {
+					firstname: 'John'
+				},
+				querystring: {
+					street: 'My Road',
+					houseNumber: '20'
+				},
+				headers: {
+					accountId: '1000'
+				}
+			});
 		});
 	});
 });

@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: MIT
  */
 
-export * from './HttpServerModule';
-export * as httpErrors from './httpErrors';
 export * from './decorators';
+export * from './EntityRegistry';
+export * from './EntityDefinition';
+
 export * from './types';

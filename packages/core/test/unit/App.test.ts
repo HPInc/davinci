@@ -3,18 +3,18 @@
  * SPDX-License-Identifier: MIT
  */
 
-import should from 'should';
 import sinon from 'sinon';
 import { decorate, decorateParameter, reflect } from '@davinci/reflector';
 import { App, createApp, Module } from '../../src';
+import { expect } from '../support/chai';
 
 describe('App', () => {
 	it('should initialize correctly', () => {
 		class MyController {}
 		const app = createApp({ controllers: [MyController] });
 
-		should(app.getModules()).be.Array();
-		should(app.getControllers()).be.deepEqual([MyController]);
+		expect(app.getModules()).to.be.an('array');
+		expect(app.getControllers()).to.be.deep.equal([MyController]);
 	});
 
 	it('should throw and exception and exit if an error happens during init', async () => {
@@ -29,7 +29,7 @@ describe('App', () => {
 		}
 		const app = createApp().registerModule([new MyModule()]);
 
-		await should(app.init()).be.rejectedWith('Error within MyModule');
+		await expect(app.init()).to.be.rejectedWith('Error within MyModule');
 	});
 
 	it('should register controllers', () => {
@@ -39,8 +39,8 @@ describe('App', () => {
 		app.registerController([MyController, MyController]);
 		app.registerController(MyController, MyController);
 
-		should(app.getModules()).be.Array();
-		should(app.getControllers()).be.deepEqual([
+		expect(app.getModules()).to.be.an('array');
+		expect(app.getControllers()).to.be.deep.equal([
 			MyController,
 			MyController,
 			MyController,
@@ -62,7 +62,9 @@ describe('App', () => {
 
 		const controllersReflection = app.getControllersWithReflection();
 
-		should(controllersReflection).be.deepEqual([{ Controller: MyController, reflection: myControllerReflection }]);
+		expect(controllersReflection).to.be.deep.equal([
+			{ Controller: MyController, reflection: myControllerReflection }
+		]);
 	});
 
 	it('should cache the reflection result', () => {
@@ -79,7 +81,7 @@ describe('App', () => {
 		app.getControllersWithReflection();
 		app.getControllersWithReflection();
 
-		should(getControllerReflectionSpy.callCount).be.equal(1);
+		expect(getControllerReflectionSpy.callCount).to.be.equal(1);
 	});
 
 	it('should execute the onInit hook', async () => {
@@ -92,8 +94,8 @@ describe('App', () => {
 		const app = new MyApp();
 		await app.init();
 
-		should(onInit.called).be.True();
-		should(onInit.getCall(0).args[0]).be.equal(app);
+		expect(onInit.called).to.be.true;
+		expect(onInit.getCall(0).args[0]).to.be.equal(app);
 	});
 
 	it('should execute the the onDestroy hook', async () => {
@@ -107,8 +109,8 @@ describe('App', () => {
 		await app.init();
 		await app.shutdown();
 
-		should(onDestroy.called).be.True();
-		should(onDestroy.getCall(0).args[0]).be.equal(app);
+		expect(onDestroy.called).to.be.true;
+		expect(onDestroy.getCall(0).args[0]).to.be.equal(app);
 	});
 
 	it('should be able to register a module', async () => {
@@ -122,7 +124,7 @@ describe('App', () => {
 		const myModule = new MyModule();
 		app.registerModule(myModule);
 
-		should(app.getModules()[0]).be.equal(myModule);
+		expect(app.getModules()[0]).to.be.equal(myModule);
 	});
 
 	it('should be able to register multiple modules #1', async () => {
@@ -144,7 +146,7 @@ describe('App', () => {
 		const myModule2 = new MyModule2();
 		app.registerModule([myModule1, myModule2]);
 
-		should(app.getModules()).be.deepEqual([myModule1, myModule2]);
+		expect(app.getModules()).to.be.deep.equal([myModule1, myModule2]);
 	});
 
 	it('should error trying to register multiple modules with same identifier', async () => {
@@ -165,9 +167,7 @@ describe('App', () => {
 			app.registerModule([myModule1, myModule2]);
 			throw new Error('failed test');
 		} catch (err) {
-			should(err).match({
-				message: /A module with the same identifier (.+) has already been registered/
-			});
+			expect(err.message).to.match(/A module with the same identifier (.+) has already been registered/);
 		}
 	});
 
@@ -187,7 +187,7 @@ describe('App', () => {
 		app.registerModule(myModule);
 		await app.init();
 
-		should(myModule.app).be.equal(app);
+		expect(myModule.app).to.be.equal(app);
 	});
 
 	it("should execute the the modules' onDestroy hook", async () => {
@@ -207,6 +207,6 @@ describe('App', () => {
 		await app.init();
 		await app.shutdown();
 
-		should(myModule.app).be.equal(app);
+		expect(myModule.app).to.be.equal(app);
 	});
 });
