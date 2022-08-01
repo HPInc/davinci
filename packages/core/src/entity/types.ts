@@ -19,5 +19,5 @@ export interface EntityPropReflection<T = unknown> {
 }
 
 export type EntityOptions = {
-	title?: string;
+	name?: string;
 };

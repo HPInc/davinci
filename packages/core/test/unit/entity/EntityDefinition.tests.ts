@@ -137,4 +137,34 @@ describe('EntityDefinition', () => {
 		// verify cache is being used
 		expect(entityDefinitionsMapCacheGetSpy.called).to.be.equal(true);
 	});
+
+	describe('getName', () => {
+		it('should infer the entity name from the class', () => {
+			@entity()
+			class Customer {
+				@entity.prop({ minLength: 2 })
+				firstname: string;
+
+				@entity.prop({ required: true, minLength: 2 })
+				lastname: string;
+			}
+
+			const entityDefinition = new EntityDefinition({ type: Customer });
+			expect(entityDefinition.getName()).to.be.equal('Customer');
+		});
+
+		it('should return the name explicitly passed in the decorator', () => {
+			@entity({ name: 'MyCustomer' })
+			class Customer {
+				@entity.prop({ minLength: 2 })
+				firstname: string;
+
+				@entity.prop({ required: true, minLength: 2 })
+				lastname: string;
+			}
+
+			const entityDefinition = new EntityDefinition({ type: Customer });
+			expect(entityDefinition.getName()).to.be.equal('MyCustomer');
+		});
+	});
 });

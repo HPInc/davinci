@@ -25,7 +25,7 @@ interface EntityDefinitionOptions {
 }
 
 export class EntityDefinition {
-	private readonly name?: string;
+	private name?: string;
 	private readonly type?: TypeValue;
 	private readonly jsonSchema?: JSONSchema;
 	private relatedEntityDefinitionsMap = new Map<TypeValue, EntityDefinition>();
@@ -35,18 +35,14 @@ export class EntityDefinition {
 		if (!options.type && !options.jsonSchema) {
 			throw new Error('type or jsonSchema must be passed');
 		}
-		this.name = options.name ?? this.type?.constructor?.name;
 		this.type = options.type;
+		this.name = options.name ?? (this.type as ClassType)?.name;
 		this.entityDefinitionsMapCache = options.entityDefinitionsMapCache;
 		this.jsonSchema = this.reflect();
 	}
 
 	public getRelatedEntityDefinitionsMap() {
 		return this.relatedEntityDefinitionsMap;
-	}
-
-	public setRelatedEntityDefinitionsMap(map: Map<TypeValue, EntityDefinition>) {
-		this.relatedEntityDefinitionsMap = map;
 	}
 
 	public getName() {
@@ -90,6 +86,10 @@ export class EntityDefinition {
 				const reflection = reflect(typeOrClass as ClassType);
 				const entityDecorator = this.findEntityDecorator(reflection);
 
+				if (entityDecorator && this.type === typeOrClass) {
+					this.name = entityDecorator.options?.name ?? this.name;
+				}
+
 				if (entityDecorator && this.type !== typeOrClass) {
 					const theClass = <TypeValue>typeOrClass;
 
@@ -128,10 +128,7 @@ export class EntityDefinition {
 							makeSchema(entityPropDecorator.options?.type ?? prop.type, prop.name),
 							{ isMergeableObject: isPlainObject }
 						);
-						/* accumulator.properties[prop.name] = makeSchema(
-							entityPropDecorator.options?.type ?? prop.type,
-							prop.name
-						); */
+
 						if (entityPropDecorator.options?.required) {
 							accumulator.required.push(prop.name);
 						}
@@ -140,7 +137,7 @@ export class EntityDefinition {
 					}, null) ?? {};
 
 				const jsonSchema: JSONSchema = {
-					title: entityDecorator?.options?.title ?? key ?? typeOrClass.name,
+					title: entityDecorator?.options?.name ?? key ?? typeOrClass.name,
 					type: 'object',
 					properties,
 					required

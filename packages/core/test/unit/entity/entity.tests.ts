@@ -26,7 +26,7 @@ describe('entity decorators', () => {
 			@entity.prop()
 			number: number;
 		}
-		@entity({ title: 'MyCustomer' })
+		@entity({ name: 'MyCustomer' })
 		class Customer extends BaseClass {
 			@entity.prop({ required: true, minLength: 2 })
 			firstname: string;
@@ -49,7 +49,7 @@ describe('entity decorators', () => {
 				{
 					[DecoratorId]: 'entity',
 					options: {
-						title: 'MyCustomer'
+						name: 'MyCustomer'
 					}
 				}
 			],
