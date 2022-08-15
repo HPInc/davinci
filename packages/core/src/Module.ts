@@ -5,7 +5,7 @@
 
 import type { App } from './App';
 
-export type ModuleStatus = 'unloaded' | 'initializing' | 'initialized' | 'destroying' | 'destroyed';
+export type ModuleStatus = 'unloaded' | 'initializing' | 'initialized' | 'destroying' | 'destroyed' | 'error';
 
 export abstract class Module {
 	/**

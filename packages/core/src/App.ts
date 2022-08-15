@@ -10,8 +10,51 @@ import { Module, ModuleStatus } from './Module';
 import { mapSeries } from './lib/async-utils';
 import { coerceArray } from './lib/array-utils';
 
+type Signals =
+	| 'SIGABRT'
+	| 'SIGALRM'
+	| 'SIGBUS'
+	| 'SIGCHLD'
+	| 'SIGCONT'
+	| 'SIGFPE'
+	| 'SIGHUP'
+	| 'SIGILL'
+	| 'SIGINT'
+	| 'SIGIO'
+	| 'SIGIOT'
+	| 'SIGKILL'
+	| 'SIGPIPE'
+	| 'SIGPOLL'
+	| 'SIGPROF'
+	| 'SIGPWR'
+	| 'SIGQUIT'
+	| 'SIGSEGV'
+	| 'SIGSTKFLT'
+	| 'SIGSTOP'
+	| 'SIGSYS'
+	| 'SIGTERM'
+	| 'SIGTRAP'
+	| 'SIGTSTP'
+	| 'SIGTTIN'
+	| 'SIGTTOU'
+	| 'SIGUNUSED'
+	| 'SIGURG'
+	| 'SIGUSR1'
+	| 'SIGUSR2'
+	| 'SIGVTALRM'
+	| 'SIGWINCH'
+	| 'SIGXCPU'
+	| 'SIGXFSZ'
+	| 'SIGBREAK'
+	| 'SIGLOST'
+	| 'SIGINFO';
+
 export interface AppOptions {
 	controllers?: ClassType[];
+	shutdown?: {
+		enabled?: boolean;
+		signals?: Signals[];
+	};
 	logger?: {
 		level?: Level | 'silent';
 	};
@@ -30,14 +73,19 @@ export class App extends Module {
 	private controllers: ClassType[];
 	private controllersReflectionCache = new Map<ClassType, ClassReflection>();
 	private modulesDic: Record<string, ModuleState> = {};
+	private status: ModuleStatus = 'unloaded';
 
 	constructor(options?: AppOptions) {
 		super();
 		const defaultOptions: AppOptions = {
+			shutdown: { enabled: true, signals: ['SIGTERM', 'SIGINT'] },
 			logger: { level: 'info' }
 		};
 		this.options = deepmerge({ ...defaultOptions }, { ...options });
 		this.controllers = options?.controllers ?? [];
+		if (this.options.shutdown?.enabled) {
+			this.enableShutdownSignals();
+		}
 		this.logger.level = this.options.logger?.level;
 	}
 
@@ -89,10 +137,11 @@ export class App extends Module {
 
 	public async init() {
 		this.logger.debug('App initialization. Executing onInit hooks');
+		this.status = 'initializing';
 
 		try {
 			await this.onInit?.(this);
-			return await mapSeries(this.modules, async module => {
+			await mapSeries(this.modules, async module => {
 				const moduleId = coerceArray(module.getModuleId())[0];
 				const moduleState = this.modulesDic[moduleId];
 				moduleState.status = 'initializing';
@@ -100,14 +149,18 @@ export class App extends Module {
 				await moduleState.initPromise;
 				moduleState.status = 'initialized';
 			});
+
+			this.status = 'initialized';
 		} catch (err) {
 			this.logger.fatal({ error: err }, 'Fatal error during module init');
+			this.status = 'error';
 			throw err;
 		}
 	}
 
 	public async shutdown() {
 		this.logger.debug('App shutdown. Executing onDestroy hooks');
+		this.status = 'destroying';
 
 		const wrapIntoPromise = async fn => fn();
 
@@ -118,6 +171,7 @@ export class App extends Module {
 					this.logger.error({ moduleId: module.getModuleId(), error: err }, 'Error while destroying module')
 				)
 			);
+			this.status = 'destroyed';
 		} catch (err) {
 			this.logger.fatal({ error: err }, 'Fatal error');
 			throw err;
@@ -157,6 +211,35 @@ export class App extends Module {
 
 	public getControllerReflection(controller: ClassType) {
 		return reflect(controller);
+	}
+
+	public getStatus() {
+		return this.status;
+	}
+
+	public enableShutdownSignals() {
+		const signals = this.options.shutdown?.signals ?? [];
+		const onSignal = async (signal: Signals) => {
+			if (['destroying', 'destroyed'].includes(this.status)) {
+				this.logger.debug('App is already shutting down. Ignoring signal');
+				return;
+			}
+
+			this.logger.info(`Received ${signal}, shutting down`);
+
+			try {
+				await this.shutdown();
+				process.kill(process.pid, signal);
+				process.exit(0);
+			} catch (err) {
+				process.exit(1);
+			}
+		};
+		signals.forEach(signal => {
+			process.on(signal, onSignal);
+		});
+
+		return this;
 	}
 }
 
