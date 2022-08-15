@@ -154,13 +154,7 @@ export class FastifyHttpServer extends HttpServerModule<
 	}
 
 	public close() {
-		return new Promise((resolve, reject) => {
-			return super.getHttpServer()?.close(err => {
-				if (err) return reject(err);
-
-				return resolve(null);
-			});
-		});
+		return this.instance.close();
 	}
 
 	public getRequestHostname(request: FastifyRequest): string {
