@@ -157,13 +157,7 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 	}
 
 	public close() {
-		return new Promise((resolve, reject) => {
-			return super.getHttpServer()?.close(err => {
-				if (err) return reject(err);
-
-				return resolve(null);
-			});
-		});
+		return super.getHttpServer().close();
 	}
 
 	public getRequestHostname(request: Request): string {

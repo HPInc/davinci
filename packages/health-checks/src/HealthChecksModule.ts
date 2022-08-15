@@ -90,7 +90,10 @@ export class HealthChecksModule extends Module {
 			}
 		});
 
-		createTerminus(this.httpServer, { healthChecks: healthCheckTerminusConfiguration });
+		createTerminus(this.httpServer, {
+			healthChecks: healthCheckTerminusConfiguration,
+			useExit0: true
+		});
 
 		return healthCheckTerminusConfiguration;
 	}
