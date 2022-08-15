@@ -9,9 +9,9 @@ import { App, createApp, Module } from '../../src';
 import { expect } from '../support/chai';
 
 describe('App', () => {
-	it('should initialize correctly', () => {
+	it('should instantiate correctly', () => {
 		class MyController {}
-		const app = createApp({ controllers: [MyController] });
+		const app = new App({ controllers: [MyController] });
 
 		expect(app.getModules()).to.be.an('array');
 		expect(app.getControllers()).to.be.deep.equal([MyController]);
@@ -208,5 +208,37 @@ describe('App', () => {
 		await app.shutdown();
 
 		expect(myModule.app).to.be.equal(app);
+	});
+
+	it('should track lifecycle changes via the status property #1', async () => {
+		const app = new App();
+		expect(app.getStatus()).to.be.equal('unloaded');
+
+		const initPromise = app.init();
+		expect(app.getStatus()).to.be.equal('initializing');
+		await initPromise;
+		expect(app.getStatus()).to.be.equal('initialized');
+
+		const shutdownPromise = app.shutdown();
+		expect(app.getStatus()).to.be.equal('destroying');
+		await shutdownPromise;
+		expect(app.getStatus()).to.be.equal('destroyed');
+	});
+
+	it('should track lifecycle changes via the status property #2', async () => {
+		class MyModule implements Module {
+			app: App;
+			getModuleId() {
+				return 'myModule';
+			}
+
+			onInit() {
+				throw new Error('error');
+			}
+		}
+
+		const app = new App().registerModule(new MyModule());
+		await expect(app.init()).to.be.rejected;
+		expect(app.getStatus()).to.be.equal('error');
 	});
 });

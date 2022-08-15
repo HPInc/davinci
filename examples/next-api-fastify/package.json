@@ -13,6 +13,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"@davinci/core": "^1.9.1",
+		"@davinci/health-checks": "^0.0.1",
 		"@davinci/http-server": "^0.0.1",
 		"@davinci/http-server-fastify": "^0.0.1",
 		"fastify": "^4.4.0"
