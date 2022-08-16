@@ -124,7 +124,7 @@ describe('HttpServerModule', () => {
 			class CustomerController {
 				@route.get({ path: '/all' })
 				find() {}
-				@route.post({ path: '/create' })
+				@route.post({ path: '/create/' })
 				create() {}
 			}
 			class MyDummyHttpServer extends DummyHttpServer {
