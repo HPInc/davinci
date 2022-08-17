@@ -15,7 +15,6 @@
 		"@davinci/core": "^1.9.1",
 		"@davinci/http-server": "^0.0.1",
 		"@davinci/http-server-fastify": "^0.0.1",
-		"@davinci/mongoose": "^0.17.9",
 		"fastify": "^4.4.0"
 	},
 	"devDependencies": {
