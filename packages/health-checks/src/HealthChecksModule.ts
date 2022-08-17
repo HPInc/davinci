@@ -14,6 +14,7 @@ import { HealthCheckDecoratorData } from './decorators';
 
 export interface HealthChecksModuleOptions {
 	healthChecks?: { name: string; endpoint: string }[];
+	terminusOptions: Omit<TerminusOptions, 'healthChecks'>;
 }
 
 export class HealthChecksModule extends Module {
@@ -92,7 +93,8 @@ export class HealthChecksModule extends Module {
 
 		createTerminus(this.httpServer, {
 			healthChecks: healthCheckTerminusConfiguration,
-			useExit0: true
+			useExit0: true,
+			...this.moduleOptions?.terminusOptions
 		});
 
 		return healthCheckTerminusConfiguration;
