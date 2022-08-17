@@ -54,7 +54,6 @@ export class FastifyHttpServer extends HttpServerModule<
 		await this.registerPlugins();
 
 		await super.createRoutes();
-		// this.registerErrorHandlers();
 		return this.listen();
 	}
 
@@ -76,16 +75,6 @@ export class FastifyHttpServer extends HttpServerModule<
 	}
 
 	initHttpServer() {
-		/* const isHttpsEnabled = super.moduleOptions?.https;
-		const serverFactory: FastifyServerFactory = handler => {
-			const serverHandler = (req, res) => {
-				handler(req, res);
-			};
-			return isHttpsEnabled
-				? https.createServer(super.moduleOptions.https, serverHandler)
-				: http.createServer(serverHandler);
-		}; */
-
 		this.instance = fastify();
 		super.setHttpServer(this.instance.server);
 	}
