@@ -14,7 +14,7 @@ import { HealthCheckDecoratorData } from './decorators';
 
 export interface HealthChecksModuleOptions {
 	healthChecks?: { name: string; endpoint: string }[];
-	terminusOptions: Omit<TerminusOptions, 'healthChecks'>;
+	terminusOptions?: Omit<TerminusOptions, 'healthChecks'>;
 }
 
 export class HealthChecksModule extends Module {
