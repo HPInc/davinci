@@ -10,51 +10,8 @@ import { Module } from './Module';
 import { mapSeries } from './lib/async-utils';
 import { coerceArray } from './lib/array-utils';
 
-type Signals =
-	| 'SIGABRT'
-	| 'SIGALRM'
-	| 'SIGBUS'
-	| 'SIGCHLD'
-	| 'SIGCONT'
-	| 'SIGFPE'
-	| 'SIGHUP'
-	| 'SIGILL'
-	| 'SIGINT'
-	| 'SIGIO'
-	| 'SIGIOT'
-	| 'SIGKILL'
-	| 'SIGPIPE'
-	| 'SIGPOLL'
-	| 'SIGPROF'
-	| 'SIGPWR'
-	| 'SIGQUIT'
-	| 'SIGSEGV'
-	| 'SIGSTKFLT'
-	| 'SIGSTOP'
-	| 'SIGSYS'
-	| 'SIGTERM'
-	| 'SIGTRAP'
-	| 'SIGTSTP'
-	| 'SIGTTIN'
-	| 'SIGTTOU'
-	| 'SIGUNUSED'
-	| 'SIGURG'
-	| 'SIGUSR1'
-	| 'SIGUSR2'
-	| 'SIGVTALRM'
-	| 'SIGWINCH'
-	| 'SIGXCPU'
-	| 'SIGXFSZ'
-	| 'SIGBREAK'
-	| 'SIGLOST'
-	| 'SIGINFO';
-
 export interface AppOptions {
 	controllers?: ClassType[];
-	shutdown?: {
-		enabled?: boolean;
-		signals?: Signals[];
-	};
 	logger?: {
 		level?: Level | 'silent';
 	};
@@ -71,14 +28,10 @@ export class App extends Module {
 	constructor(options?: AppOptions) {
 		super();
 		const defaultOptions: AppOptions = {
-			shutdown: { enabled: true, signals: ['SIGTERM', 'SIGINT'] },
 			logger: { level: 'info' }
 		};
 		this.options = deepmerge({ ...defaultOptions }, { ...options });
 		this.controllers = options?.controllers ?? [];
-		if (this.options.shutdown?.enabled) {
-			this.enableShutdownSignals();
-		}
 		this.logger.level = this.options.logger?.level;
 	}
 
@@ -181,20 +134,6 @@ export class App extends Module {
 
 	public getControllerReflection(controller: ClassType) {
 		return reflect(controller);
-	}
-
-	public enableShutdownSignals() {
-		const signals = this.options.shutdown?.signals ?? [];
-		const onSignal = async (signal: Signals) => {
-			this.logger.info(`Received ${signal}, shutting down`);
-			await this.shutdown();
-			process.kill(process.pid, signal);
-		};
-		signals.forEach(signal => {
-			process.on(signal, onSignal);
-		});
-
-		return this;
 	}
 }
 
