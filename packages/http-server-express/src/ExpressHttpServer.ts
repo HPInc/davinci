@@ -30,13 +30,16 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 		this.instance = app ?? express();
 	}
 
-	async onInit(app) {
+	async onRegister(app) {
 		this.app = app;
 		this.logger.level = this.app.getOptions()?.logger?.level;
 		this.registerMiddlewares();
 		await super.createRoutes();
 		// this.registerErrorHandlers();
 		this.initHttpServer();
+	}
+
+	async onInit() {
 		return this.listen();
 	}
 

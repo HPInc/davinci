@@ -6,6 +6,7 @@
 import pino, { Level } from 'pino';
 import { ClassReflection, ClassType, reflect } from '@davinci/reflector';
 import deepmerge from 'deepmerge';
+import { EventEmitter } from 'events';
 import { Module, ModuleStatus } from './Module';
 import { mapSeries } from './lib/async-utils';
 import { coerceArray } from './lib/array-utils';
@@ -74,6 +75,7 @@ export class App extends Module {
 	private controllersReflectionCache = new Map<ClassType, ClassReflection>();
 	private modulesDic: Record<string, ModuleState> = {};
 	private status: ModuleStatus = 'unloaded';
+	private eventBus = new EventEmitter();
 
 	constructor(options?: AppOptions) {
 		super();
@@ -97,9 +99,9 @@ export class App extends Module {
 		return this.options;
 	}
 
-	public registerModule(modules: Module[]): this;
-	public registerModule(module: Module): this;
-	public registerModule(module: Module | Module[]) {
+	public async registerModule(modules: Module[]): Promise<this>;
+	public async registerModule(module: Module): Promise<this>;
+	public async registerModule(module: Module | Module[]) {
 		const modules: Module[] = coerceArray(module);
 
 		modules.forEach(mod => {
@@ -113,6 +115,38 @@ export class App extends Module {
 				this.modulesDic[id] = moduleStatus;
 			});
 			this.modules.push(mod);
+		});
+
+		this.status = 'registering';
+
+		await new Promise((resolve, reject) => {
+			process.nextTick(() => {
+				mapSeries(modules, async mod => {
+					const moduleId = coerceArray(mod.getModuleId())[0];
+					const moduleState = this.modulesDic[moduleId];
+					moduleState.status = 'registering';
+					moduleState.initPromise = mod.onRegister?.(this);
+					await moduleState.initPromise;
+					moduleState.status = 'registered';
+				})
+					.then(() => {
+						const allModulesRegistered = Object.keys(this.modulesDic)
+							.map(key => this.modulesDic[key].status)
+							.every(status => status === 'registered');
+
+						if (allModulesRegistered) {
+							this.status = 'registered';
+							this.eventBus.emit('registered');
+						}
+
+						resolve(null);
+					})
+					.catch(err => {
+						this.logger.fatal({ error: err }, 'Fatal error during module registration');
+						this.status = 'error';
+						reject(err);
+					});
+			});
 		});
 
 		return this;
@@ -136,6 +170,11 @@ export class App extends Module {
 	}
 
 	public async init() {
+		if (this.status === 'registering') {
+			await new Promise(resolve => {
+				this.eventBus.once('registered', () => resolve(null));
+			});
+		}
 		this.logger.debug('App initialization. Executing onInit hooks');
 		this.status = 'initializing';
 
