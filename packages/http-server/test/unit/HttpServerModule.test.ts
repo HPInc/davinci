@@ -137,7 +137,9 @@ describe('HttpServerModule', () => {
 				}
 			}
 			const dummyHttpServer = new MyDummyHttpServer();
-			await new App().registerController(CustomerController).registerModule(dummyHttpServer).init();
+			const app = new App();
+			await app.registerController(CustomerController).registerModule(dummyHttpServer);
+			await app.init();
 			const [[getRoute, postRoute]] = await dummyHttpServer.createRoutes();
 
 			expect(getRoute[0]).to.be.equal('get');
