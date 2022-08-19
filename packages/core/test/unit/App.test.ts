@@ -40,6 +40,29 @@ describe('App', () => {
 		await expect(app.init()).to.be.rejectedWith('Error within MyModule');
 	});
 
+	it('should wait for the modules registration to be complete, before initializing', async () => {
+		const completionOrder = [];
+		class MyModule implements Module {
+			getModuleId() {
+				return 'myModule';
+			}
+
+			async onRegister() {
+				await new Promise(resolve => setTimeout(() => resolve(null), 200));
+				completionOrder.push('onRegister');
+			}
+
+			async onInit() {
+				completionOrder.push('onInit');
+			}
+		}
+		const app = createApp();
+		app.registerModule([new MyModule()]);
+		await app.init();
+
+		expect(completionOrder).to.be.deep.equal(['onRegister', 'onInit']);
+	});
+
 	it('should throw and exception and exit if an error happens during a module registration', async () => {
 		class MyModule implements Module {
 			getModuleId() {
