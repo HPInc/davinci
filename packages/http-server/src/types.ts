@@ -63,7 +63,7 @@ export type ParameterConfiguration<Request> =
 			value?: unknown;
 	  };
 
-export type EndpointValidationSchema = JSONSchema<any> & {
+export type EndpointSchema = JSONSchema<any> & {
 	properties: {
 		body?: JSONSchema<any>;
 		params?: JSONSchema<any>;

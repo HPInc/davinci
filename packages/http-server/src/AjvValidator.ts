@@ -9,7 +9,7 @@ import addFormats from 'ajv-formats';
 import { BadRequest } from './httpErrors';
 
 import { Verb } from './decorators';
-import { EndpointValidationSchema, ParameterConfiguration } from './types';
+import { EndpointSchema, ParameterConfiguration } from './types';
 
 export interface AjvValidatorOptions {
 	ajvOptions?: Options;
@@ -48,8 +48,8 @@ export class AjvValidator<Request = unknown> {
 		};
 	}
 
-	async createSchema(parametersConfig: ParameterConfiguration<Request>[]): Promise<EndpointValidationSchema> {
-		const endpointSchema: EndpointValidationSchema = {
+	async createSchema(parametersConfig: ParameterConfiguration<Request>[]): Promise<EndpointSchema> {
+		const endpointSchema: EndpointSchema = {
 			type: 'object',
 			properties: {},
 			required: []
@@ -77,10 +77,29 @@ export class AjvValidator<Request = unknown> {
 
 										if (!this.jsonSchemasMap.has(propValue._$ref)) {
 											this.jsonSchemasMap.set(propValue._$ref, refEntityDefinitionJson);
-											if (refEntityDefinitionJson?.$id) {
-												this.ajv.addSchema(refEntityDefinitionJson);
-												return { $ref: refEntityDefinitionJson.$id };
-											}
+										}
+
+										if (refEntityDefinitionJson?.$id) {
+											this.ajv.addSchema(refEntityDefinitionJson);
+											return { $ref: refEntityDefinitionJson.$id };
+										}
+
+										return refEntityDefinitionJson;
+									}
+
+									if (propValue.type === 'array' && propValue.items?._$ref) {
+										const $ref = propValue.items?._$ref;
+										const refEntityDefinitionJson = createJsonSchema(
+											this.jsonSchemasMap.get($ref) ?? $ref?.getJsonSchema()
+										);
+
+										if (!this.jsonSchemasMap.has($ref)) {
+											this.jsonSchemasMap.set($ref, refEntityDefinitionJson);
+										}
+
+										if (refEntityDefinitionJson?.$id) {
+											this.ajv.addSchema(refEntityDefinitionJson);
+											return { ...propValue, items: { $ref: refEntityDefinitionJson.$id } };
 										}
 
 										return refEntityDefinitionJson;
@@ -107,7 +126,7 @@ export class AjvValidator<Request = unknown> {
 			}
 
 			const sourceToSchemaMap: Partial<
-				Record<ParameterConfiguration<Request>['source'], keyof EndpointValidationSchema['properties']>
+				Record<ParameterConfiguration<Request>['source'], keyof EndpointSchema['properties']>
 			> = {
 				path: 'params',
 				query: 'querystring',

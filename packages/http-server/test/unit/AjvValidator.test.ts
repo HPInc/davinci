@@ -18,6 +18,15 @@ describe('AjvValidator', () => {
 	}
 
 	@entity()
+	class Colors {
+		@entity.prop()
+		name: string;
+
+		@entity.prop()
+		hex: string;
+	}
+
+	@entity()
 	class Birth {
 		@entity.prop()
 		date: Date;
@@ -39,6 +48,9 @@ describe('AjvValidator', () => {
 
 		@entity.prop()
 		birth: Birth;
+
+		@entity.prop({ type: [Colors] })
+		colors: Colors[];
 	}
 
 	const initAjvValidator = () => {
@@ -141,6 +153,12 @@ describe('AjvValidator', () => {
 					},
 					birth: {
 						$ref: 'Birth'
+					},
+					colors: {
+						items: {
+							$ref: 'Colors'
+						},
+						type: 'array'
 					}
 				},
 				required: ['lastname']

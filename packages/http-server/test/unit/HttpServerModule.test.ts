@@ -171,10 +171,15 @@ describe('HttpServerModule', () => {
 			const dummyHttpServer = new DummyHttpServer();
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
-				controllerReflection,
-				methodReflection
-			});
+			const requestHandler = await dummyHttpServer.createRequestHandler(
+				new CustomerController(),
+				'find',
+				dummyHttpServer.createParametersConfigurations({ controllerReflection, methodReflection }),
+				{
+					controllerReflection,
+					methodReflection
+				}
+			);
 			const reqMock: Request = { body: {}, query: { where: '' } };
 			const resMock = {};
 			const result = await requestHandler(reqMock, resMock);
@@ -198,10 +203,15 @@ describe('HttpServerModule', () => {
 			const dummyHttpServer = new DummyHttpServer();
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
-				controllerReflection,
-				methodReflection
-			});
+			const requestHandler = await dummyHttpServer.createRequestHandler(
+				new CustomerController(),
+				'find',
+				dummyHttpServer.createParametersConfigurations({ controllerReflection, methodReflection }),
+				{
+					controllerReflection,
+					methodReflection
+				}
+			);
 			const reqMock = { body: 'body', query: { where: 'where' } };
 			const resMock = {};
 			const result = await requestHandler(reqMock, resMock);
@@ -227,10 +237,15 @@ describe('HttpServerModule', () => {
 			const dummyHttpServer = new DummyHttpServer();
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
-				controllerReflection,
-				methodReflection
-			});
+			const requestHandler = await dummyHttpServer.createRequestHandler(
+				new CustomerController(),
+				'find',
+				dummyHttpServer.createParametersConfigurations({ controllerReflection, methodReflection }),
+				{
+					controllerReflection,
+					methodReflection
+				}
+			);
 			const reqMock = {
 				headers: { 'x-my-header': '1' },
 				body: { myBody: true },
@@ -288,10 +303,15 @@ describe('HttpServerModule', () => {
 			const dummyHttpServer = new DummyHttpServer().setContextFactory(contextFactory);
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
-				controllerReflection,
-				methodReflection
-			});
+			const requestHandler = await dummyHttpServer.createRequestHandler(
+				new CustomerController(),
+				'find',
+				dummyHttpServer.createParametersConfigurations({ controllerReflection, methodReflection }),
+				{
+					controllerReflection,
+					methodReflection
+				}
+			);
 			const reqMock = {
 				body: { prop: true },
 				query: {
@@ -337,10 +357,15 @@ describe('HttpServerModule', () => {
 			const dummyHttpServer = new DummyHttpServer().setContextFactory(contextFactory);
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
-				controllerReflection,
-				methodReflection
-			});
+			const requestHandler = await dummyHttpServer.createRequestHandler(
+				new CustomerController(),
+				'find',
+				dummyHttpServer.createParametersConfigurations({ controllerReflection, methodReflection }),
+				{
+					controllerReflection,
+					methodReflection
+				}
+			);
 			const reqMock = {
 				body: { prop: true },
 				query: {
@@ -370,10 +395,15 @@ describe('HttpServerModule', () => {
 			const errorMock = sinon.stub(dummyHttpServer.logger, 'error');
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
-				controllerReflection,
-				methodReflection
-			});
+			const requestHandler = await dummyHttpServer.createRequestHandler(
+				new CustomerController(),
+				'find',
+				dummyHttpServer.createParametersConfigurations({ controllerReflection, methodReflection }),
+				{
+					controllerReflection,
+					methodReflection
+				}
+			);
 			await requestHandler({}, {});
 			expect(errorMock.getCall(0).args[1]).to.be.equal('An error happened during the creation of the context');
 		});
