@@ -11,7 +11,7 @@ import { expect } from '../support/chai';
 
 // const sinon = createSandbox();
 
-describe.skip('OpenAPIModule', () => {
+describe('OpenAPIModule', () => {
 	describe('onInit', () => {
 		it('should create the correct OpenAPI v3 document', async () => {
 			@entity()
