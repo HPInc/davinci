@@ -135,10 +135,6 @@ describe('HttpServerModule', () => {
 				create() {}
 			}
 			class MyDummyHttpServer extends DummyHttpServer {
-				onRegister(app: App) {
-					this.app = app;
-				}
-
 				get(...args) {
 					return ['get', ...args];
 				}
@@ -148,7 +144,8 @@ describe('HttpServerModule', () => {
 				}
 			}
 			const dummyHttpServer = new MyDummyHttpServer();
-			await new App().registerController(CustomerController).registerModule(dummyHttpServer);
+			const app = new App();
+			await app.registerController(CustomerController).registerModule(dummyHttpServer);
 			await app.init();
 			const [[getRoute, postRoute]] = await dummyHttpServer.createRoutes();
 
