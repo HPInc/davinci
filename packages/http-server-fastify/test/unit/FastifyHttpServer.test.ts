@@ -86,8 +86,12 @@ describe('FastifyHttpServer', () => {
 				body: { isBody: true }
 			};
 			const res = { status: sinon.stub(), send: sinon.stub(), json: sinon.stub() };
+			const parametersConfig = await fastifyHttpServer.createParametersConfigurations({
+				controllerReflection,
+				methodReflection
+			});
 
-			const handler = await fastifyHttpServer.createRequestHandler(controller, 'getAll', {
+			const handler = await fastifyHttpServer.createRequestHandler(controller, 'getAll', parametersConfig, {
 				controllerReflection,
 				methodReflection
 			});
@@ -122,8 +126,12 @@ describe('FastifyHttpServer', () => {
 			const methodReflection = controllerReflection.methods[0];
 			const req = { query: { filter: 'myFilter' } };
 			const res = { status: sinon.stub(), send: sinon.stub(), json: sinon.stub() };
+			const parametersConfig = await fastifyHttpServer.createParametersConfigurations({
+				controllerReflection,
+				methodReflection
+			});
 
-			const handler = await fastifyHttpServer.createRequestHandler(controller, 'getAll', {
+			const handler = await fastifyHttpServer.createRequestHandler(controller, 'getAll', parametersConfig, {
 				controllerReflection,
 				methodReflection
 			});

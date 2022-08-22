@@ -77,10 +77,10 @@ export class AjvValidator<Request = unknown> {
 
 										if (!this.jsonSchemasMap.has(propValue._$ref)) {
 											this.jsonSchemasMap.set(propValue._$ref, refEntityDefinitionJson);
+											this.ajv.addSchema(refEntityDefinitionJson);
 										}
 
 										if (refEntityDefinitionJson?.$id) {
-											this.ajv.addSchema(refEntityDefinitionJson);
 											return { $ref: refEntityDefinitionJson.$id };
 										}
 
@@ -95,10 +95,10 @@ export class AjvValidator<Request = unknown> {
 
 										if (!this.jsonSchemasMap.has($ref)) {
 											this.jsonSchemasMap.set($ref, refEntityDefinitionJson);
+											this.ajv.addSchema(refEntityDefinitionJson);
 										}
 
 										if (refEntityDefinitionJson?.$id) {
-											this.ajv.addSchema(refEntityDefinitionJson);
 											return { ...propValue, items: { $ref: refEntityDefinitionJson.$id } };
 										}
 

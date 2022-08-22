@@ -86,8 +86,12 @@ describe('ExpressHttpServer', () => {
 				body: { isBody: true }
 			};
 			const res = { status: sinon.stub(), send: sinon.stub(), json: sinon.stub() };
+			const parametersConfig = await expressHttpServer.createParametersConfigurations({
+				controllerReflection,
+				methodReflection
+			});
 
-			const handler = await expressHttpServer.createRequestHandler(controller, 'getAll', {
+			const handler = await expressHttpServer.createRequestHandler(controller, 'getAll', parametersConfig, {
 				controllerReflection,
 				methodReflection
 			});
@@ -122,8 +126,12 @@ describe('ExpressHttpServer', () => {
 			const methodReflection = controllerReflection.methods[0];
 			const req = { query: { filter: 'myFilter' } };
 			const res = { status: sinon.stub(), send: sinon.stub(), json: sinon.stub() };
+			const parametersConfig = await expressHttpServer.createParametersConfigurations({
+				controllerReflection,
+				methodReflection
+			});
 
-			const handler = await expressHttpServer.createRequestHandler(controller, 'getAll', {
+			const handler = await expressHttpServer.createRequestHandler(controller, 'getAll', parametersConfig, {
 				controllerReflection,
 				methodReflection
 			});

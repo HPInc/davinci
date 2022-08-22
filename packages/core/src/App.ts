@@ -6,7 +6,6 @@
 import pino, { Level } from 'pino';
 import { ClassReflection, ClassType, reflect } from '@davinci/reflector';
 import deepmerge from 'deepmerge';
-import { EventEmitter } from 'events';
 import { Module, ModuleStatus } from './Module';
 import { mapSeries } from './lib/async-utils';
 import { coerceArray } from './lib/array-utils';
@@ -61,21 +60,13 @@ export interface AppOptions {
 	};
 }
 
-interface ModuleState {
-	module: Module;
-	status: ModuleStatus;
-	initPromise?: ReturnType<Module['onInit']>;
-}
-
 export class App extends Module {
 	logger = pino({ name: 'app' });
 	private options?: AppOptions;
 	private modules: Module[] = [];
 	private controllers: ClassType[];
 	private controllersReflectionCache = new Map<ClassType, ClassReflection>();
-	private modulesDic: Record<string, ModuleState> = {};
-	private status: ModuleStatus = 'unloaded';
-	private eventBus = new EventEmitter();
+	private modulesDic: Record<string, Module> = {};
 
 	constructor(options?: AppOptions) {
 		super();
@@ -99,43 +90,40 @@ export class App extends Module {
 		return this.options;
 	}
 
-	public async registerModule(modules: Module[]): Promise<this>;
 	public async registerModule(module: Module): Promise<this>;
-	public async registerModule(module: Module | Module[]) {
-		const modules: Module[] = coerceArray(module);
+	public async registerModule(modules: Module[]): Promise<this>;
+	public async registerModule(...modules: Module[]): Promise<this>;
+	public async registerModule(...args) {
+		const modules: Module[] = coerceArray(args.length > 1 ? args : args[0]);
 
 		modules.forEach(mod => {
 			const moduleIds = coerceArray(mod.getModuleId());
-			const moduleStatus: ModuleState = { module: mod, status: 'unloaded' };
 			moduleIds.forEach(id => {
 				if (this.modulesDic[id]) {
 					throw new Error(`A module with the same identifier "${id}" has already been registered`);
 				}
 
-				this.modulesDic[id] = moduleStatus;
+				this.modulesDic[id] = mod;
 			});
 			this.modules.push(mod);
 		});
 
-		this.status = 'registering';
+		this.setStatus('registering');
 
 		await new Promise((resolve, reject) => {
 			process.nextTick(() => {
 				mapSeries(modules, async mod => {
-					const moduleId = coerceArray(mod.getModuleId())[0];
-					const moduleState = this.modulesDic[moduleId];
-					moduleState.status = 'registering';
-					moduleState.initPromise = mod.onRegister?.(this);
-					await moduleState.initPromise;
-					moduleState.status = 'registered';
+					mod.setStatus('registering');
+					await mod.onRegister?.(this);
+					mod.setStatus('registered');
 				})
 					.then(() => {
 						const allModulesRegistered = Object.keys(this.modulesDic)
-							.map(key => this.modulesDic[key].status)
+							.map(key => this.modulesDic[key].getStatus())
 							.every(status => status === 'registered');
 
 						if (allModulesRegistered) {
-							this.status = 'registered';
+							this.setStatus('registered');
 							this.eventBus.emit('registered');
 						}
 
@@ -143,7 +131,7 @@ export class App extends Module {
 					})
 					.catch(err => {
 						this.logger.fatal({ error: err }, 'Fatal error during module registration');
-						this.status = 'error';
+						this.setStatus('error');
 						reject(err);
 					});
 			});
@@ -170,36 +158,33 @@ export class App extends Module {
 	}
 
 	public async init() {
-		if (this.status === 'registering') {
+		if (this.getStatus() === 'registering') {
 			await new Promise(resolve => {
 				this.eventBus.once('registered', () => resolve(null));
 			});
 		}
 		this.logger.debug('App initialization. Executing onInit hooks');
-		this.status = 'initializing';
+		this.setStatus('initializing');
 
 		try {
 			await this.onInit?.(this);
 			await mapSeries(this.modules, async module => {
-				const moduleId = coerceArray(module.getModuleId())[0];
-				const moduleState = this.modulesDic[moduleId];
-				moduleState.status = 'initializing';
-				moduleState.initPromise = module.onInit?.(this);
-				await moduleState.initPromise;
-				moduleState.status = 'initialized';
+				module.setStatus('initializing');
+				await module.onInit?.(this);
+				module.setStatus('initialized');
 			});
 
-			this.status = 'initialized';
+			this.setStatus('initialized');
 		} catch (err) {
 			this.logger.fatal({ error: err }, 'Fatal error during module init');
-			this.status = 'error';
+			this.setStatus('error');
 			throw err;
 		}
 	}
 
 	public async shutdown() {
 		this.logger.debug('App shutdown. Executing onDestroy hooks');
-		this.status = 'destroying';
+		this.setStatus('destroying');
 
 		const wrapIntoPromise = async fn => fn();
 
@@ -210,7 +195,7 @@ export class App extends Module {
 					this.logger.error({ moduleId: module.getModuleId(), error: err }, 'Error while destroying module')
 				)
 			);
-			this.status = 'destroyed';
+			this.setStatus('destroyed');
 		} catch (err) {
 			this.logger.fatal({ error: err }, 'Fatal error');
 			throw err;
@@ -221,13 +206,29 @@ export class App extends Module {
 		return this.modules;
 	}
 
-	public async getModuleById<M extends Module = Module>(moduleId: string, waitInitialization?: boolean): Promise<M> {
-		const moduleState = this.modulesDic[moduleId];
-		if (waitInitialization) {
-			await moduleState.initPromise;
+	public async getModuleById<M extends Module = Module>(moduleId: string, waitForStatus?: ModuleStatus): Promise<M> {
+		const statusOrders = [
+			'unloaded',
+			'registering',
+			'registered',
+			'initializing',
+			'initialized',
+			'destroying',
+			'destroyed',
+			'error'
+		];
+		const module = this.modulesDic[moduleId];
+		if (waitForStatus) {
+			if (statusOrders.indexOf(module.getStatus()) >= statusOrders.indexOf(waitForStatus)) {
+				return module as M;
+			}
+
+			return new Promise(resolve => {
+				module.eventBus.once(waitForStatus, () => resolve(module as M));
+			});
 		}
 
-		return moduleState.module as M;
+		return module as M;
 	}
 
 	public getControllers() {
@@ -252,14 +253,10 @@ export class App extends Module {
 		return reflect(controller);
 	}
 
-	public getStatus() {
-		return this.status;
-	}
-
 	public enableShutdownSignals() {
 		const signals = this.options.shutdown?.signals ?? [];
 		const onSignal = async (signal: Signals) => {
-			if (['destroying', 'destroyed'].includes(this.status)) {
+			if (['destroying', 'destroyed'].includes(this.getStatus())) {
 				this.logger.debug('App is already shutting down. Ignoring signal');
 				return;
 			}

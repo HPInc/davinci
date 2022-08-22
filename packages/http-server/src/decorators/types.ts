@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { TypeValue } from '@davinci/reflector';
+import { ClassType, TypeValue } from '@davinci/reflector';
 
 export type Verb = 'get' | 'post' | 'put' | 'patch' | 'head' | 'delete' | 'options';
 
@@ -18,7 +18,7 @@ export interface MethodResponseOutput {
 }
 
 export interface MethodResponses {
-	[key: number]: Function | MethodResponseOutput | ((string) => MethodResponseOutput);
+	[key: number]: MethodResponseOutput | ClassType | (MethodResponseOutput | ClassType[]);
 }
 
 export interface MethodDecoratorOptions {

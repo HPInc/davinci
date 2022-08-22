@@ -12,6 +12,11 @@ import createDeepMerge from '@fastify/deepmerge';
 const deepMerge = createDeepMerge();
 
 export interface OpenAPIModuleOptions {
+	openapiPath?: string;
+	explorer?: {
+		enabled: boolean;
+		path?: string;
+	};
 	document: Omit<OpenAPIV3.Document, 'paths' | 'openapi'>;
 }
 
@@ -23,38 +28,53 @@ type DeepPartial<T> = T extends object
 
 export class OpenAPIModule extends Module {
 	app: App;
+	moduleOptions: OpenAPIModuleOptions;
 	jsonSchemasMap = new Map<string, JSONSchema>();
 	logger = pino({ name: 'openAPI-module' });
+	httpServerModule: HttpServerModule<unknown, unknown, Server>;
 	httpServer: Server;
 	entityRegistry: EntityRegistry;
 	openAPIDoc: DeepPartial<OpenAPIV3.Document>;
 
-	constructor(protected moduleOptions: OpenAPIModuleOptions) {
+	constructor(moduleOptions: OpenAPIModuleOptions) {
 		super();
-		this.openAPIDoc = deepMerge(
+		this.moduleOptions = deepMerge(
 			{
-				openapi: '3.0.0',
-				components: {
-					schemas: {}
+				openapiPath: '/api-doc.json',
+				explorer: {
+					enabled: true,
+					path: '/explorer'
 				},
-				paths: {}
+				document: {
+					openapi: '3.0.0',
+					components: {
+						schemas: {}
+					},
+					paths: {}
+				}
 			},
-			this.moduleOptions.document
+			moduleOptions
 		);
+		this.openAPIDoc = this.moduleOptions.document;
 	}
 
 	getModuleId() {
 		return 'openapi';
 	}
 
-	async onInit(app: App) {
+	async onRegister(app: App) {
 		this.app = app;
-		const httpServerModule = await app.getModuleById<HttpServerModule<unknown, unknown, Server>>('http', true);
-		this.httpServer = httpServerModule?.getHttpServer() ?? http.createServer();
-		this.entityRegistry = httpServerModule.getEntityRegistry();
-		const routes = httpServerModule.getRoutes();
+		this.httpServerModule = await app.getModuleById<HttpServerModule<unknown, unknown, Server>>(
+			'http',
+			'registered'
+		);
+		this.httpServer = this.httpServerModule?.getHttpServer() ?? http.createServer();
+		this.entityRegistry = this.httpServerModule.getEntityRegistry();
+		const routes = this.httpServerModule.getRoutes();
 
 		await mapSeries(routes, route => this.createPathAndSchema(route));
+
+		await this.registerOpenapiRoutes();
 	}
 
 	async createPathAndSchema(route: Route<unknown>): Promise<void> {
@@ -162,6 +182,12 @@ export class OpenAPIModule extends Module {
 				};
 			}
 		});
+	}
+
+	async registerOpenapiRoutes() {
+		this.httpServerModule.get(this.moduleOptions.openapiPath, (_req, res) =>
+			this.httpServerModule.reply(res, this.openAPIDoc)
+		);
 	}
 
 	getOpenAPIDocument() {

@@ -11,9 +11,11 @@ import { CustomerController } from './api/customer';
 const app = createApp();
 const contextFactory = ({ request }) => ({ accountId: request.headers['x-accountid'] });
 
-app.registerController([CustomerController])
-	.registerModule(new ExpressHttpServer().setContextFactory(contextFactory))
-	.registerModule(new HealthChecksModule({ healthChecks: [{ name: 'liveness', endpoint: '/.ah/live' }] }))
-	.init();
+app.registerController([CustomerController]).registerModule(
+	new ExpressHttpServer().setContextFactory(contextFactory),
+	new HealthChecksModule({ healthChecks: [{ name: 'liveness', endpoint: '/.ah/live' }] })
+);
+
+app.init();
 
 export default app;
