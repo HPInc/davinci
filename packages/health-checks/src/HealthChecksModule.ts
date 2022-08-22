@@ -32,7 +32,10 @@ export class HealthChecksModule extends Module {
 
 	async onInit(app: App) {
 		this.app = app;
-		const httpServerModule = await app.getModuleById<HttpServerModule<unknown, unknown, Server>>('http', true);
+		const httpServerModule = await app.getModuleById<HttpServerModule<unknown, unknown, Server>>(
+			'http',
+			'registered'
+		);
 		this.httpServer = httpServerModule?.getHttpServer() ?? http.createServer();
 
 		const findMatchingMethodAndDecoratorReflections = (controllerReflection: ClassReflection) =>

@@ -25,7 +25,7 @@ describe('App', () => {
 	});
 
 	it('should throw and exception and exit if an error happens during init', async () => {
-		class MyModule implements Module {
+		class MyModule extends Module {
 			getModuleId() {
 				return 'myModule';
 			}
@@ -42,7 +42,7 @@ describe('App', () => {
 
 	it('should wait for the modules registration to be complete, before initializing', async () => {
 		const completionOrder = [];
-		class MyModule implements Module {
+		class MyModule extends Module {
 			getModuleId() {
 				return 'myModule';
 			}
@@ -64,7 +64,7 @@ describe('App', () => {
 	});
 
 	it('should throw and exception and exit if an error happens during a module registration', async () => {
-		class MyModule implements Module {
+		class MyModule extends Module {
 			getModuleId() {
 				return 'myModule';
 			}
@@ -79,7 +79,7 @@ describe('App', () => {
 	});
 
 	it('should ignore exceptions on modules happening on destroy', async () => {
-		class MyModule implements Module {
+		class MyModule extends Module {
 			getModuleId() {
 				return 'myModule';
 			}
@@ -196,7 +196,7 @@ describe('App', () => {
 
 	it('should be able to register a module', async () => {
 		const app = createApp();
-		class MyModule implements Module {
+		class MyModule extends Module {
 			app: App;
 			getModuleId() {
 				return 'myModule';
@@ -210,7 +210,7 @@ describe('App', () => {
 
 	it('should be able to register multiple modules #1', async () => {
 		const app = createApp();
-		class MyModule1 implements Module {
+		class MyModule1 extends Module {
 			app: App;
 			getModuleId() {
 				return 'myModule1';
@@ -232,7 +232,7 @@ describe('App', () => {
 
 	it('should error trying to register multiple modules with same identifier', async () => {
 		const app = createApp();
-		class MyModule1 implements Module {
+		class MyModule1 extends Module {
 			app: App;
 			getModuleId() {
 				return ['myModule'];
@@ -254,7 +254,7 @@ describe('App', () => {
 
 	it("should execute the modules' onInit hook", async () => {
 		const app = createApp();
-		class MyModule implements Module {
+		class MyModule extends Module {
 			app: App;
 			getModuleId() {
 				return 'myModule';
@@ -273,7 +273,7 @@ describe('App', () => {
 
 	it("should execute the the modules' onDestroy hook", async () => {
 		const app = createApp();
-		class MyModule implements Module {
+		class MyModule extends Module {
 			app: App;
 			getModuleId() {
 				return 'myModule';
@@ -293,7 +293,7 @@ describe('App', () => {
 
 	it("should execute the modules' onRegister hook", async () => {
 		const app = createApp();
-		class MyModule implements Module {
+		class MyModule extends Module {
 			app: App;
 			getModuleId() {
 				return 'myModule';
@@ -326,7 +326,7 @@ describe('App', () => {
 	});
 
 	it('should track lifecycle changes via the status property #2', async () => {
-		class MyModule implements Module {
+		class MyModule extends Module {
 			app: App;
 			getModuleId() {
 				return 'myModule';
@@ -345,7 +345,7 @@ describe('App', () => {
 	});
 
 	it('should get a module by its id', async () => {
-		class MyModule implements Module {
+		class MyModule extends Module {
 			app: App;
 			getModuleId() {
 				return 'myModule';
@@ -360,7 +360,7 @@ describe('App', () => {
 	});
 
 	it('should get an initialized module by its id', async () => {
-		class MyModule implements Module {
+		class MyModule extends Module {
 			app: App;
 			initialized: boolean;
 			onInit() {
@@ -375,9 +375,57 @@ describe('App', () => {
 		const app = new App();
 		await app.registerModule(new MyModule());
 		app.init();
-		const module = await app.getModuleById<MyModule>('myModule', true);
+		const module = await app.getModuleById<MyModule>('myModule', 'initialized');
 
 		expect(module.initialized).to.be.true;
+	});
+
+	it('should get a module by its id and status', async () => {
+		let initialized;
+		class MyModule1 extends Module {
+			getModuleId() {
+				return 'myModule1';
+			}
+
+			onInit() {
+				return new Promise(resolve => setTimeout(() => resolve(null), 100));
+			}
+		}
+
+		class MyModule2 extends Module {
+			getModuleId() {
+				return 'myModule2';
+			}
+
+			async onInit(app) {
+				const module1 = await app.getModuleById('myModule1', 'initialized');
+				expect(module1).to.be.instanceof(MyModule1);
+				expect(module1.getStatus()).to.be.equal('initialized');
+				initialized = true;
+			}
+		}
+
+		const app = new App();
+		await app.registerModule(new MyModule1(), new MyModule2());
+		await app.init();
+
+		expect(initialized).to.be.true;
+	});
+
+	it('should get a module by its id and a more advanced status in the lifecycle chain', async () => {
+		class MyModule extends Module {
+			getModuleId() {
+				return 'myModule1';
+			}
+		}
+
+		const app = new App();
+		await app.registerModule(new MyModule());
+		await app.init();
+
+		const module1 = await app.getModuleById('myModule1', 'registering');
+		expect(module1).to.be.instanceof(MyModule);
+		expect(module1.getStatus()).to.be.equal('initialized');
 	});
 
 	it('should ignore duplicated shutdown signals', async () => {
