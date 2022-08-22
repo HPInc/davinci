@@ -5,13 +5,23 @@
 
 import type { App } from './App';
 
-export type ModuleStatus = 'unloaded' | 'initializing' | 'initialized' | 'destroying' | 'destroyed' | 'error';
+export type ModuleStatus =
+	| 'unloaded'
+	| 'registering'
+	| 'registered'
+	| 'initializing'
+	| 'initialized'
+	| 'destroying'
+	| 'destroyed'
+	| 'error';
 
 export abstract class Module {
 	/**
 	 * @returns {string | string[]} the identifier (or identifiers) of the module
 	 */
 	abstract getModuleId(): string | string[];
+
+	onRegister?(app: App): unknown | Promise<unknown>;
 
 	onInit?(app: App): unknown | Promise<unknown>;
 
