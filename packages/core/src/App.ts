@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import pino, { Level } from 'pino';
+import pino, { Level, Logger } from 'pino';
 import { ClassReflection, ClassType, reflect } from '@davinci/reflector';
 import deepmerge from 'deepmerge';
 import { Module } from './Module';
@@ -13,12 +13,13 @@ import { coerceArray } from './lib/array-utils';
 export interface AppOptions {
 	controllers?: ClassType[];
 	logger?: {
+		name?: string;
 		level?: Level | 'silent';
 	};
 }
 
 export class App extends Module {
-	logger = pino({ name: 'app' });
+	logger: Logger;
 	private options?: AppOptions;
 	private modules: Module[] = [];
 	private controllers: ClassType[];
@@ -28,10 +29,11 @@ export class App extends Module {
 	constructor(options?: AppOptions) {
 		super();
 		const defaultOptions: AppOptions = {
-			logger: { level: 'info' }
+			logger: { name: 'app', level: 'info' }
 		};
 		this.options = deepmerge({ ...defaultOptions }, { ...options });
 		this.controllers = options?.controllers ?? [];
+		this.logger = pino({ name: this.options.logger.name });
 		this.logger.level = this.options.logger?.level;
 	}
 
