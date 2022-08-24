@@ -5,7 +5,7 @@
 import { HttpServerModule, HttpServerModuleOptions, ParameterSource, RequestHandler } from '@davinci/http-server';
 import express, { Express, Request, Response } from 'express';
 import http, { Server as HttpServer } from 'http';
-import https, { Server as HttpsServer } from 'https';
+import https, { Server as HttpsServer, ServerOptions } from 'https';
 import type { App } from '@davinci/core';
 import type { OptionsJson, OptionsUrlencoded } from 'body-parser';
 
@@ -13,6 +13,7 @@ type Server = HttpServer | HttpsServer;
 
 type ExpressHttpServerModuleOptions = {
 	app?: Express;
+	https?: ServerOptions;
 	middlewares?: {
 		json?: OptionsJson;
 		urlencoded?: OptionsUrlencoded;
@@ -31,15 +32,17 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 
 	async onInit(app) {
 		this.app = app;
+		this.logger.level = this.app.getOptions()?.logger?.level;
 		this.registerMiddlewares();
 		await super.createRoutes();
 		// this.registerErrorHandlers();
 		this.initHttpServer();
-		return super.getHttpServer().listen(super.moduleOptions?.port ?? 3000);
+		return this.listen();
 	}
 
-	onDestroy() {
-		return this.close();
+	async onDestroy() {
+		await this.close();
+		this.logger.info('Server stopped');
 	}
 
 	registerMiddlewares() {
@@ -105,10 +108,10 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 		return this.instance.options(path, handler);
 	}
 
-	public listen(port: string | number, callback?: () => void);
-	public listen(port: string | number, hostname: string, callback?: () => void);
-	public listen(...args: any[]) {
-		return this.instance.listen(...args);
+	listen() {
+		const port = this.moduleOptions?.port || 3000;
+		this.setHttpServer(this.instance.listen(port));
+		this.logger.info(`Server listening on port: ${port}`);
 	}
 
 	getInstance() {

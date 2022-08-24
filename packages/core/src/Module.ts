@@ -11,7 +11,7 @@ export abstract class Module {
 	 */
 	abstract getModuleId(): string | string[];
 
-	onInit?(app: App): void;
+	onInit?(app: App): void | Promise<void>;
 
-	onDestroy?(app: App): void;
+	onDestroy?(app: App): void | Promise<void>;
 }

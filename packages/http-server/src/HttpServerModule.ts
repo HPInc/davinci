@@ -108,7 +108,10 @@ export abstract class HttpServerModule<
 				} = methodDecoratorMetadata;
 
 				const controller = getControllerInstance();
-				const fullPath = pathUtils.join(basePath, path);
+				let fullPath = pathUtils.join(basePath, path);
+				if (fullPath.length > 1 && fullPath[fullPath.length - 1] === '/') {
+					fullPath = fullPath.slice(0, -1);
+				}
 
 				return this[verb](
 					fullPath,
@@ -241,9 +244,7 @@ export abstract class HttpServerModule<
 	// abstract options(handler: RequestHandler<Request, Response>);
 	abstract options(path: unknown, handler: RequestHandler<Request, Response>);
 
-	abstract listen(port: string | number, callback?: () => void);
-
-	abstract listen(port: string | number, hostname: string, callback?: () => void);
+	abstract listen(): unknown | Promise<unknown>;
 
 	abstract initHttpServer(): void;
 

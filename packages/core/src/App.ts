@@ -3,19 +3,24 @@
  * SPDX-License-Identifier: MIT
  */
 
-import pino from 'pino';
+import pino, { Level, Logger } from 'pino';
 import { ClassReflection, ClassType, reflect } from '@davinci/reflector';
+import deepmerge from 'deepmerge';
 import { Module } from './Module';
 import { mapSeries } from './lib/async-utils';
 import { coerceArray } from './lib/array-utils';
 
-const logger = pino({ name: 'app' });
-
 export interface AppOptions {
 	controllers?: ClassType[];
+	logger?: {
+		name?: string;
+		level?: Level | 'silent';
+	};
 }
 
 export class App extends Module {
+	logger: Logger;
+	private options?: AppOptions;
 	private modules: Module[] = [];
 	private controllers: ClassType[];
 	private controllersReflectionCache = new Map<ClassType, ClassReflection>();
@@ -23,11 +28,21 @@ export class App extends Module {
 
 	constructor(options?: AppOptions) {
 		super();
+		const defaultOptions: AppOptions = {
+			logger: { name: 'app', level: 'info' }
+		};
+		this.options = deepmerge({ ...defaultOptions }, { ...options });
 		this.controllers = options?.controllers ?? [];
+		this.logger = pino({ name: this.options.logger.name });
+		this.logger.level = this.options.logger?.level;
 	}
 
 	public getModuleId(): string {
 		return 'app';
+	}
+
+	public getOptions() {
+		return this.options;
 	}
 
 	public registerModule(modules: Module[]): this;
@@ -68,26 +83,31 @@ export class App extends Module {
 	}
 
 	public async init() {
-		logger.debug('App initialization. Executing onInit hooks');
+		this.logger.debug('App initialization. Executing onInit hooks');
 
 		try {
 			await this.onInit?.(this);
 			return await mapSeries(this.modules, module => module.onInit?.(this));
 		} catch (err) {
-			logger.error({ error: err }, 'Fatal error during module init');
+			this.logger.fatal({ error: err }, 'Fatal error during module init');
 			throw err;
 		}
 	}
 
 	public async shutdown() {
-		logger.debug('App shutdown. Executing onDestroy hooks');
+		this.logger.debug('App shutdown. Executing onDestroy hooks');
+
+		const wrapIntoPromise = async fn => fn();
 
 		try {
 			await this.onDestroy?.(this);
-			return await mapSeries(this.modules, module => module.onDestroy?.(this));
+			await mapSeries(this.modules, module =>
+				wrapIntoPromise(() => module.onDestroy?.(this)).catch(err =>
+					this.logger.error({ moduleId: module.getModuleId(), error: err }, 'Error while destroying module')
+				)
+			);
 		} catch (err) {
-			// some logging
-			logger.error({ error: err }, 'Fatal error');
+			this.logger.fatal({ error: err }, 'Fatal error');
 			throw err;
 		}
 	}

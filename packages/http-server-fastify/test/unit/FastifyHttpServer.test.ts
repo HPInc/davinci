@@ -8,11 +8,11 @@ import axios from 'axios';
 import { createSandbox } from 'sinon';
 import { reflect } from '@davinci/reflector';
 import { expect } from '../support/chai';
-import { ExpressHttpServer } from '../../src';
+import { FastifyHttpServer } from '../../src';
 
 const sinon = createSandbox();
 
-describe('ExpressHttpServer', () => {
+describe('FastifyHttpServer', () => {
 	let app: App;
 
 	beforeEach(() => {
@@ -29,8 +29,8 @@ describe('ExpressHttpServer', () => {
 
 	describe('lifecycle', () => {
 		it('should initialize a listening server', async () => {
-			const expressHttpServer = new ExpressHttpServer({ port: 3000 });
-			app.registerModule(expressHttpServer);
+			const fastifyHttpServer = new FastifyHttpServer({ port: 3000 });
+			app.registerModule(fastifyHttpServer);
 
 			await app.init();
 
@@ -43,8 +43,8 @@ describe('ExpressHttpServer', () => {
 		});
 
 		it('should shutdown the listening server', async () => {
-			const expressHttpServer = new ExpressHttpServer({ port: 3000 });
-			app.registerModule(expressHttpServer);
+			const fastifyHttpServer = new FastifyHttpServer({ port: 3000 });
+			app.registerModule(fastifyHttpServer);
 
 			await app.init();
 			await app.shutdown().catch(err => err);
@@ -61,7 +61,7 @@ describe('ExpressHttpServer', () => {
 
 	describe('#createRequestHandler', () => {
 		it('should create a request handler for a controller method that succeed', async () => {
-			const expressHttpServer = new ExpressHttpServer();
+			const fastifyHttpServer = new FastifyHttpServer();
 			class MyController {
 				@route.get({ path: '/all' })
 				getAll(
@@ -74,25 +74,25 @@ describe('ExpressHttpServer', () => {
 				}
 			}
 			const controller = new MyController();
-			const replySpy = sinon.spy(expressHttpServer, 'reply');
+			const replySpy = sinon.spy(fastifyHttpServer, 'reply');
 			const controllerReflection = reflect(MyController);
 			const methodReflection = controllerReflection.methods[0];
 			const req = {
 				params: { path: 'path' },
 				query: { filter: 'myFilter' },
-				header: () => 123,
+				headers: { 'x-accountid': 123 },
 				body: { isBody: true }
 			};
 			const res = { status: sinon.stub(), send: sinon.stub(), json: sinon.stub() };
 
-			const handler = await expressHttpServer.createRequestHandler(controller, 'getAll', {
+			const handler = await fastifyHttpServer.createRequestHandler(controller, 'getAll', {
 				controllerReflection,
 				methodReflection
 			});
 			// @ts-ignore
 			await handler(req, res);
 
-			expect(res.json.args[0][0]).to.be.deep.equal({
+			expect(res.send.args[0][0]).to.be.deep.equal({
 				path: 'path',
 				accountId: 123,
 				body: {
@@ -104,7 +104,7 @@ describe('ExpressHttpServer', () => {
 		});
 
 		it('should create a request handler for a controller method that fails', async () => {
-			const expressHttpServer = new ExpressHttpServer();
+			const fastifyHttpServer = new FastifyHttpServer();
 			class MyController {
 				@route.get({ path: '/all' })
 				getAll(@route.query() filter: string) {
@@ -113,13 +113,13 @@ describe('ExpressHttpServer', () => {
 				}
 			}
 			const controller = new MyController();
-			const replySpy = sinon.spy(expressHttpServer, 'reply');
+			const replySpy = sinon.spy(fastifyHttpServer, 'reply');
 			const controllerReflection = reflect(MyController);
 			const methodReflection = controllerReflection.methods[0];
 			const req = { query: { filter: 'myFilter' } };
 			const res = { status: sinon.stub(), send: sinon.stub(), json: sinon.stub() };
 
-			const handler = await expressHttpServer.createRequestHandler(controller, 'getAll', {
+			const handler = await fastifyHttpServer.createRequestHandler(controller, 'getAll', {
 				controllerReflection,
 				methodReflection
 			});
@@ -127,13 +127,13 @@ describe('ExpressHttpServer', () => {
 			await handler(req, res);
 
 			expect(res.status.args[0][0]).to.be.equal(500);
-			expect(res.json.args[0][0]).to.containSubset({ error: true, message: 'Invalid' });
+			expect(res.send.args[0][0]).to.containSubset({ error: true, message: 'Invalid' });
 			expect(replySpy.called).to.be.true;
 		});
 	});
 
 	describe('#createRoutes', () => {
-		it('should walk the controller reflection and register routes in express', async () => {
+		it('should walk the controller reflection and register routes in fastify', async () => {
 			class MyController {
 				@route.get({ path: '/' })
 				getAll(@route.query() filter: string) {
@@ -160,7 +160,7 @@ describe('ExpressHttpServer', () => {
 					return { id };
 				}
 
-				@route.head({ path: '/' })
+				@route.head({ path: '/head' })
 				head() {
 					return {};
 				}
@@ -171,70 +171,64 @@ describe('ExpressHttpServer', () => {
 				}
 			}
 
-			const expressHttpServer = new ExpressHttpServer();
+			const fastifyHttpServer = new FastifyHttpServer();
 			app.registerController(MyController);
-			app.registerModule(expressHttpServer);
+			app.registerModule(fastifyHttpServer);
 			await app.init();
 
-			const express = expressHttpServer.getInstance();
-
-			expect(express._router.stack[4].route).to.have.property('path').equal('/');
-			expect(express._router.stack[4].route).to.have.property('methods').deep.equal({ get: true });
-			expect(express._router.stack[5].route).to.have.property('path').equal('/:id');
-			expect(express._router.stack[5].route).to.have.property('methods').deep.equal({ patch: true });
-			expect(express._router.stack[6].route).to.have.property('path').equal('/:id');
-			expect(express._router.stack[6].route).to.have.property('methods').deep.equal({ put: true });
-			expect(express._router.stack[7].route).to.have.property('path').equal('/create');
-			expect(express._router.stack[7].route).to.have.property('methods').deep.equal({ post: true });
-			expect(express._router.stack[8].route).to.have.property('path').equal('/:id');
-			expect(express._router.stack[8].route).to.have.property('methods').deep.equal({ delete: true });
-			expect(express._router.stack[9].route).to.have.property('path').equal('/');
-			expect(express._router.stack[9].route).to.have.property('methods').deep.equal({ head: true });
-			expect(express._router.stack[10].route).to.have.property('path').equal('/');
-			expect(express._router.stack[10].route).to.have.property('methods').deep.equal({ options: true });
+			const fastify = fastifyHttpServer.getInstance();
+			expect(fastify.printRoutes()).to.be.equal(
+				'└── / (GET)\n' +
+					'    / (HEAD)\n' +
+					'    / (OPTIONS)\n' +
+					'    ├── head (HEAD)\n' +
+					'    ├── :id (PATCH)\n' +
+					'    │   :id (PUT)\n' +
+					'    │   :id (DELETE)\n' +
+					'    └── create (POST)\n'
+			);
 		});
 	});
 
 	describe('propagation', () => {
-		it('should propagate the calls to the underlying express instance', async () => {
-			const expressHttpServer = new ExpressHttpServer();
-			const express = expressHttpServer.getInstance();
-			const expressMocks = {
-				listen: sinon.stub(express, 'listen'),
-				use: sinon.stub(express, 'use'),
-				all: sinon.stub(express, 'all')
+		it('should propagate the calls to the underlying fastify instance', async () => {
+			const fastifyHttpServer = new FastifyHttpServer();
+			await fastifyHttpServer.initHttpServer();
+			const fastify = fastifyHttpServer.getInstance();
+			const fastifyMocks = {
+				listen: sinon.stub(fastify, 'listen'),
+				post: sinon.stub(fastify, 'post'),
+				all: sinon.stub(fastify, 'all')
 			};
 			const cb = () => {};
 
-			expressHttpServer.use('/', cb);
-			expect(expressMocks.use.firstCall.args).to.be.deep.equal(['/', cb]);
-			expressHttpServer.all('/', cb);
-			expect(expressMocks.all.firstCall.args).to.be.deep.equal(['/', cb]);
-			expressHttpServer.listen();
-			expect(expressMocks.listen.firstCall.args).to.be.deep.equal([3000]);
+			fastifyHttpServer.post('/', cb);
+			expect(fastifyMocks.post.firstCall.args).to.be.deep.equal(['/', cb]);
+			fastifyHttpServer.all('/', cb);
+			expect(fastifyMocks.all.firstCall.args).to.be.deep.equal(['/', cb]);
+			fastifyHttpServer.listen();
+			expect(fastifyMocks.listen.firstCall.args).to.be.deep.equal([{ port: 3000 }]);
 		});
 
 		it('should propagate the calls to the underlying response', async () => {
-			const expressHttpServer = new ExpressHttpServer();
+			const fastifyHttpServer = new FastifyHttpServer();
+			await fastifyHttpServer.initHttpServer();
 			const responseMock = {
 				status: sinon.stub(),
-				render: sinon.stub(),
 				redirect: sinon.stub(),
-				set: sinon.stub()
+				set: sinon.stub(),
+				header: sinon.stub()
 			};
 
 			// @ts-ignore
-			expressHttpServer.status(responseMock, 200);
+			fastifyHttpServer.status(responseMock, 200);
 			expect(responseMock.status.firstCall.args).to.be.deep.equal([200]);
 			// @ts-ignore
-			expressHttpServer.render(responseMock, 'view', {});
-			expect(responseMock.render.firstCall.args).to.be.deep.equal(['view', {}]);
-			// @ts-ignore
-			expressHttpServer.redirect(responseMock, 301, 'http://redirect.url');
+			fastifyHttpServer.redirect(responseMock, 301, 'http://redirect.url');
 			expect(responseMock.redirect.firstCall.args).to.be.deep.equal([301, 'http://redirect.url']);
 			// @ts-ignore
-			expressHttpServer.setHeader(responseMock, 'x-my-header', '123');
-			expect(responseMock.set.firstCall.args).to.be.deep.equal(['x-my-header', '123']);
+			fastifyHttpServer.setHeader(responseMock, 'x-my-header', '123');
+			expect(responseMock.header.firstCall.args).to.be.deep.equal(['x-my-header', '123']);
 		});
 	});
 });

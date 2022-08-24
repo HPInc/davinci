@@ -1,0 +1,35 @@
+{
+	"name": "@davinci/http-server-fastify",
+	"version": "0.0.1",
+	"description": "Framework for rapid and consistent API development",
+	"main": "build-cjs/index.js",
+	"module": "build-esm/index.js",
+	"types": "build-cjs/index.d.ts",
+	"sideEffects": false,
+	"scripts": {
+		"build": "npm run build-cj && npm run build-esm",
+		"build-cj": "../../node_modules/typescript/bin/tsc -p tsconfig.cjs.release.json",
+		"build-esm": "../../node_modules/typescript/bin/tsc -p tsconfig.esm.release.json",
+		"lint": "../../node_modules/eslint/bin/eslint.js --color --c .eslintrc 'src/**/*.ts'",
+		"test": "mocha --exit",
+		"cover": "nyc npm test"
+	},
+	"author": "HP",
+	"license": "MIT",
+	"dependencies": {
+		"@davinci/http-server": "^0.0.1",
+		"@davinci/reflector": "^1.1.1"
+	},
+	"peerDependencies": {
+		"@fastify/cors": "^8.0.0",
+		"fastify": "^4.0.0"
+	},
+	"devDependencies": {
+		"@davinci/core": "^1.9.1",
+		"@fastify/cors": "^8.0.0",
+		"axios": "0.26.1",
+		"fastify": "^4.3.0",
+		"supertest": "6.2.2",
+		"typescript": "^4.6.2"
+	}
+}
