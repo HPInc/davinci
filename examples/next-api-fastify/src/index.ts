@@ -10,8 +10,7 @@ import { CustomerController } from './api/customer';
 const app = createApp();
 const contextFactory = ({ request }) => ({ accountId: request.headers['x-accountid'] });
 
-app.registerController([CustomerController])
-	.registerModule(new FastifyHttpServer().setContextFactory(contextFactory))
-	.init();
+app.registerController([CustomerController]).registerModule(new FastifyHttpServer().setContextFactory(contextFactory));
+app.init();
 
 export default app;
