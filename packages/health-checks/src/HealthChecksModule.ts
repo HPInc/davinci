@@ -10,8 +10,6 @@ import pino from 'pino';
 import { ClassReflection, ClassType, DecoratorId, MethodReflection, reflect } from '@davinci/reflector';
 import { HealthCheckDecoratorData } from './decorators';
 
-// const isPrimitive = typeValue => [Object, Number, String, Date].includes(typeValue);
-
 export interface HealthChecksModuleOptions {
 	healthChecks?: { name: string; endpoint: string }[];
 	terminusOptions?: Omit<TerminusOptions, 'healthChecks'>;
@@ -32,7 +30,10 @@ export class HealthChecksModule extends Module {
 
 	async onInit(app: App) {
 		this.app = app;
-		const httpServerModule = await app.getModuleById<HttpServerModule<unknown, unknown, Server>>('http', true);
+		const httpServerModule = await app.getModuleById<HttpServerModule<unknown, unknown, Server>>(
+			'http',
+			'registered'
+		);
 		this.httpServer = httpServerModule?.getHttpServer() ?? http.createServer();
 
 		const findMatchingMethodAndDecoratorReflections = (controllerReflection: ClassReflection) =>
