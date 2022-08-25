@@ -209,7 +209,7 @@ export class App extends Module {
 	}
 
 	public async getModuleById<M extends Module = Module>(moduleId: string, waitForStatus?: ModuleStatus): Promise<M> {
-		const statusOrders = [
+		const WEIGHTED_STATUSES = [
 			'unloaded',
 			'registering',
 			'registered',
@@ -221,7 +221,7 @@ export class App extends Module {
 		];
 		const module = this.modulesDic[moduleId];
 		if (waitForStatus) {
-			if (statusOrders.indexOf(module.getStatus()) >= statusOrders.indexOf(waitForStatus)) {
+			if (WEIGHTED_STATUSES.indexOf(module.getStatus()) >= WEIGHTED_STATUSES.indexOf(waitForStatus)) {
 				return module as M;
 			}
 
