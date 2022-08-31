@@ -30,13 +30,16 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 		this.instance = app ?? express();
 	}
 
-	async onInit(app) {
+	async onRegister(app) {
 		this.app = app;
 		this.logger.level = this.app.getOptions()?.logger?.level;
 		this.registerMiddlewares();
 		await super.createRoutes();
 		// this.registerErrorHandlers();
 		this.initHttpServer();
+	}
+
+	async onInit() {
 		return this.listen();
 	}
 
@@ -147,13 +150,7 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 	}
 
 	public close() {
-		return new Promise((resolve, reject) => {
-			return super.getHttpServer()?.close(err => {
-				if (err) return reject(err);
-
-				return resolve(null);
-			});
-		});
+		return super.getHttpServer().close();
 	}
 
 	public getRequestHostname(request: Request): string {

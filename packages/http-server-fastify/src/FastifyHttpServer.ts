@@ -46,7 +46,7 @@ export class FastifyHttpServer extends HttpServerModule<
 		super(moduleOptions);
 	}
 
-	async onInit(app) {
+	async onRegister(app: App) {
 		this.app = app;
 		this.logger.level = this.app.getOptions()?.logger?.level;
 		this.initHttpServer();
@@ -54,6 +54,9 @@ export class FastifyHttpServer extends HttpServerModule<
 		await this.registerPlugins();
 
 		await super.createRoutes();
+	}
+
+	async onInit() {
 		return this.listen();
 	}
 
@@ -154,13 +157,7 @@ export class FastifyHttpServer extends HttpServerModule<
 	}
 
 	public close() {
-		return new Promise((resolve, reject) => {
-			return super.getHttpServer()?.close(err => {
-				if (err) return reject(err);
-
-				return resolve(null);
-			});
-		});
+		return this.instance.close();
 	}
 
 	public getRequestHostname(request: FastifyRequest): string {
