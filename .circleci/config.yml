@@ -30,11 +30,11 @@ jobs:
       - run:
           name: build
           command: |
-           npx lerna run build --ignore '@davinci/example*'
+           npx lerna run build --ignore '@davinci/example*' --concurrency 1
       - run:
           name: test
           command: |
-           npx lerna run cover --ignore '@davinci/example*'
+           npx lerna run cover --ignore '@davinci/example*' --concurrency 1
       - when:
           condition:
             and:
