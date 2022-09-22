@@ -10,8 +10,6 @@ import pino from 'pino';
 import { ClassReflection, ClassType, DecoratorId, MethodReflection, reflect } from '@davinci/reflector';
 import { HealthCheckDecoratorData } from './decorators';
 
-// const isPrimitive = typeValue => [Object, Number, String, Date].includes(typeValue);
-
 export interface HealthChecksModuleOptions {
 	healthChecks?: { name: string; endpoint: string }[];
 	terminusOptions?: Omit<TerminusOptions, 'healthChecks'>;
