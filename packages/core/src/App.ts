@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import pino, { Level } from 'pino';
+import pino, { Level, Logger } from 'pino';
 import { ClassReflection, ClassType, reflect } from '@davinci/reflector';
 import deepmerge from 'deepmerge';
 import { Module, ModuleStatus } from './Module';
@@ -56,12 +56,13 @@ export interface AppOptions {
 		signals?: Signals[];
 	};
 	logger?: {
+		name?: string;
 		level?: Level | 'silent';
 	};
 }
 
 export class App extends Module {
-	logger = pino({ name: 'app' });
+	logger: Logger;
 	private options?: AppOptions;
 	private modules: Module[] = [];
 	private controllers: ClassType[];
@@ -72,13 +73,14 @@ export class App extends Module {
 		super();
 		const defaultOptions: AppOptions = {
 			shutdown: { enabled: true, signals: ['SIGTERM', 'SIGINT'] },
-			logger: { level: 'info' }
+			logger: { name: 'app', level: 'info' }
 		};
 		this.options = deepmerge({ ...defaultOptions }, { ...options });
 		this.controllers = options?.controllers ?? [];
 		if (this.options.shutdown?.enabled) {
 			this.enableShutdownSignals();
 		}
+		this.logger = pino({ name: this.options.logger.name });
 		this.logger.level = this.options.logger?.level;
 	}
 
@@ -207,7 +209,7 @@ export class App extends Module {
 	}
 
 	public async getModuleById<M extends Module = Module>(moduleId: string, waitForStatus?: ModuleStatus): Promise<M> {
-		const statusOrders = [
+		const WEIGHTED_STATUSES = [
 			'unloaded',
 			'registering',
 			'registered',
@@ -219,7 +221,7 @@ export class App extends Module {
 		];
 		const module = this.modulesDic[moduleId];
 		if (waitForStatus) {
-			if (statusOrders.indexOf(module.getStatus()) >= statusOrders.indexOf(waitForStatus)) {
+			if (WEIGHTED_STATUSES.indexOf(module.getStatus()) >= WEIGHTED_STATUSES.indexOf(waitForStatus)) {
 				return module as M;
 			}
 

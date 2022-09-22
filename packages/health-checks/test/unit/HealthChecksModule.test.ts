@@ -30,7 +30,8 @@ describe('HealthChecksModule', () => {
 					{ name: 'readiness', endpoint: '/checks/readiness' }
 				]
 			});
-			await app.registerModule(fastifyHttpServer, healthChecksModule);
+			await app.registerModule(fastifyHttpServer);
+			await app.registerModule(healthChecksModule);
 			const onInitSpy = sinon.spy(healthChecksModule, 'onInit');
 
 			await app.init();

@@ -5,5 +5,4 @@
 
 export * from './HealthChecksModule';
 export * from './decorators';
-export * from './types';
 export { HealthCheck, HealthCheckError } from '@godaddy/terminus';
