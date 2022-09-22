@@ -21,6 +21,8 @@ import { Server as HttpServer } from 'http';
 import { Server as HttpsServer } from 'https';
 import type { App } from '@davinci/core';
 import fastifyCors, { FastifyCorsOptions } from '@fastify/cors';
+import fastifyStatic, { FastifyStaticOptions } from '@fastify/static';
+import qs from 'qs';
 
 type Server = HttpServer | HttpsServer;
 
@@ -78,7 +80,9 @@ export class FastifyHttpServer extends HttpServerModule<
 	}
 
 	initHttpServer() {
-		this.instance = fastify();
+		this.instance = fastify({
+			querystringParser: str => qs.parse(str, { parseArrays: true })
+		});
 		super.setHttpServer(this.instance.server);
 	}
 
@@ -120,6 +124,10 @@ export class FastifyHttpServer extends HttpServerModule<
 
 	public options(path: string, handler: RequestHandler<FastifyRequest, FastifyReply>) {
 		return this.instance.options(path, handler);
+	}
+
+	public static(path: string, options?: Omit<FastifyStaticOptions, 'root'>) {
+		return this.instance.register(fastifyStatic, { root: path, ...options });
 	}
 
 	async listen() {

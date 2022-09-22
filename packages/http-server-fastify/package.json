@@ -18,7 +18,9 @@
 	"license": "MIT",
 	"dependencies": {
 		"@davinci/http-server": "^0.0.1",
-		"@davinci/reflector": "^1.1.1"
+		"@davinci/reflector": "^1.1.1",
+		"@fastify/static": "^6.5.0",
+		"qs": "^6.11.0"
 	},
 	"peerDependencies": {
 		"@fastify/cors": "^8.0.0",

@@ -2,7 +2,13 @@
  * © Copyright 2022 HP Development Company, L.P.
  * SPDX-License-Identifier: MIT
  */
-import { HttpServerModule, HttpServerModuleOptions, ParameterSource, RequestHandler } from '@davinci/http-server';
+import {
+	HttpServerModule,
+	HttpServerModuleOptions,
+	ParameterSource,
+	RequestHandler,
+	StaticServeOptions
+} from '@davinci/http-server';
 import express, { Express, Request, Response } from 'express';
 import http, { Server as HttpServer } from 'http';
 import https, { Server as HttpsServer, ServerOptions } from 'https';
@@ -109,6 +115,10 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 
 	public options(path: string, handler: RequestHandler<Request, Response>) {
 		return this.instance.options(path, handler);
+	}
+
+	public static(path: string, options?: StaticServeOptions) {
+		return express.static(path, options);
 	}
 
 	listen() {

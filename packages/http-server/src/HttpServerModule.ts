@@ -22,17 +22,12 @@ import {
 	HttpServerModuleOptions,
 	ParameterConfiguration,
 	ParameterSource,
-	RequestHandler
+	RequestHandler,
+	Route,
+	StaticServeOptions
 } from './types';
-import { ControllerDecoratorMetadata, MethodDecoratorMetadata, ParameterDecoratorMetadata, Verb } from './decorators';
+import { ControllerDecoratorMetadata, MethodDecoratorMetadata, ParameterDecoratorMetadata } from './decorators';
 import { AjvValidator } from './AjvValidator';
-
-export interface Route<Request> {
-	path: string;
-	verb: Verb;
-	parametersConfig: ParameterConfiguration<Request>[];
-	methodDecoratorMetadata: MethodDecoratorMetadata;
-}
 
 export abstract class HttpServerModule<
 	Request = unknown,
@@ -278,6 +273,8 @@ export abstract class HttpServerModule<
 
 	// abstract options(handler: RequestHandler<Request, Response>);
 	abstract options(path: unknown, handler: RequestHandler<Request, Response>);
+
+	abstract static(path: string, options?: StaticServeOptions);
 
 	abstract listen(): unknown | Promise<unknown>;
 

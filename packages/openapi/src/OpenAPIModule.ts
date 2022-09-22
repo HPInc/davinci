@@ -8,16 +8,20 @@ import http, { Server } from 'http';
 import pino from 'pino';
 import { OpenAPIV3 } from 'openapi-types';
 import createDeepMerge from '@fastify/deepmerge';
+import { generateSwaggerUiHtml } from './swaggerUi';
 
 const deepMerge = createDeepMerge();
 
 export interface OpenAPIModuleOptions {
-	openapiPath?: string;
+	document: {
+		enabled?: boolean;
+		path?: string;
+		spec?: Omit<OpenAPIV3.Document, 'paths' | 'openapi'>;
+	};
 	explorer?: {
-		enabled: boolean;
+		enabled?: boolean;
 		path?: string;
 	};
-	document: Omit<OpenAPIV3.Document, 'paths' | 'openapi'>;
 }
 
 type DeepPartial<T> = T extends object
@@ -40,22 +44,25 @@ export class OpenAPIModule extends Module {
 		super();
 		this.moduleOptions = deepMerge(
 			{
-				openapiPath: '/api-doc.json',
+				document: {
+					enabled: true,
+					path: '/api-doc.json',
+					spec: {
+						openapi: '3.0.0',
+						components: {
+							schemas: {}
+						},
+						paths: {}
+					}
+				},
 				explorer: {
 					enabled: true,
 					path: '/explorer'
-				},
-				document: {
-					openapi: '3.0.0',
-					components: {
-						schemas: {}
-					},
-					paths: {}
 				}
 			},
 			moduleOptions
 		);
-		this.openAPIDoc = this.moduleOptions.document;
+		this.openAPIDoc = this.moduleOptions.document?.spec;
 	}
 
 	getModuleId() {
@@ -156,7 +163,8 @@ export class OpenAPIModule extends Module {
 				...(methodDecoratorMetadata.options?.summary && { summary: methodDecoratorMetadata.options?.summary }),
 				...(methodDecoratorMetadata.options?.description && {
 					description: methodDecoratorMetadata.options?.description
-				})
+				}),
+				...this.openAPIDoc.paths[path][verb]
 			};
 
 			if (['path', 'query', 'header'].includes(parameterConfig.source)) {
@@ -165,7 +173,14 @@ export class OpenAPIModule extends Module {
 					name: parameterConfig.name,
 					...(parameterConfig.options?.description && { description: parameterConfig.options?.description }),
 					in: parameterConfig.source,
-					schema: jsonSchema?.$id ? { $ref: `#/components/schemas/${jsonSchema.$id}` } : jsonSchema,
+					schema: jsonSchema?.$id
+						? {
+								type: 'object',
+								properties: {
+									[parameterConfig.name]: { $ref: `#/components/schemas/${jsonSchema.$id}` }
+								}
+						  }
+						: jsonSchema,
 					...(parameterConfig.options?.required && { required: parameterConfig.options?.required })
 				});
 			}
@@ -185,9 +200,24 @@ export class OpenAPIModule extends Module {
 	}
 
 	async registerOpenapiRoutes() {
-		this.httpServerModule.get(this.moduleOptions.openapiPath, (_req, res) =>
-			this.httpServerModule.reply(res, this.openAPIDoc)
-		);
+		const documentEnabled = this.moduleOptions.document?.enabled;
+		const explorerEnabled = this.moduleOptions.explorer?.enabled;
+		if (documentEnabled) {
+			this.httpServerModule.get(this.moduleOptions.document?.path, (_req, res) =>
+				this.httpServerModule.reply(res, this.openAPIDoc)
+			);
+		}
+
+		if (explorerEnabled) {
+			const swaggerUiHtml = generateSwaggerUiHtml({
+				...(documentEnabled ? { path: this.moduleOptions.document.path } : { spec: this.openAPIDoc })
+			});
+
+			this.httpServerModule.get(this.moduleOptions.explorer?.path, (_req, res) => {
+				this.httpServerModule.setHeader(res, 'content-type', 'text/html');
+				this.httpServerModule.reply(res, swaggerUiHtml);
+			});
+		}
 	}
 
 	getOpenAPIDocument() {

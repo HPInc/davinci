@@ -40,6 +40,7 @@ describe('HttpServerModule', () => {
 		all() {}
 		options() {}
 		listen() {}
+		static() {}
 		initHttpServer() {}
 		setInstance() {}
 		getInstance() {}
