@@ -48,7 +48,8 @@ describe('HttpServerModule', () => {
 		}
 		close() {}
 		getRequestHostname() {}
-		getRequestParameter({ source, name, request }) {
+		getRequestParameter(args) {
+			const { source, name, request } = args;
 			switch (source) {
 				case 'path':
 					return request.params[name];
