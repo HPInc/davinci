@@ -56,7 +56,12 @@ export class AjvValidator<Request = unknown> {
 		};
 
 		await mapSeries(parametersConfig, parameterConfig => {
-			if (parameterConfig.source === 'context') return;
+			if (
+				parameterConfig.source === 'context' ||
+				parameterConfig.source === 'request' ||
+				parameterConfig.source === 'response'
+			)
+				return;
 
 			const createJsonSchema = (jsonSchema: Partial<JSONSchema>) => {
 				if (typeof jsonSchema === 'object') {

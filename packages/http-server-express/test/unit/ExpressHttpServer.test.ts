@@ -68,9 +68,11 @@ describe('ExpressHttpServer', () => {
 					@route.path() path: string,
 					@route.query() filter: string,
 					@route.body() body: object,
-					@route.header({ name: 'x-accountid' }) accountId: string
+					@route.header({ name: 'x-accountid' }) accountId: string,
+					@route.response() res,
+					@route.request() req
 				) {
-					return { path, filter, body, accountId };
+					return { path, filter, body, accountId, res, req };
 				}
 			}
 			const controller = new MyController();
@@ -98,7 +100,9 @@ describe('ExpressHttpServer', () => {
 				body: {
 					isBody: true
 				},
-				filter: 'myFilter'
+				filter: 'myFilter',
+				req,
+				res
 			});
 			expect(replySpy.called).to.be.true;
 		});

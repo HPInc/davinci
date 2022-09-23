@@ -161,17 +161,34 @@ export abstract class HttpServerModule<
 							};
 						}
 
+						if (parameterConfig.source === 'request' || parameterConfig.source === 'response') {
+							const value = await httpServerModule.getRequestParameter({
+								source: parameterConfig.source,
+								request,
+								response
+							});
+
+							return {
+								value,
+								source: parameterConfig.source,
+								request,
+								response
+							};
+						}
+
 						const value = await httpServerModule.getRequestParameter({
 							source: parameterConfig.source,
 							name: parameterConfig.name,
-							request
+							request,
+							response
 						});
 
 						return {
 							value,
 							source: parameterConfig.source,
 							name: parameterConfig.name,
-							request
+							request,
+							response
 						};
 					}
 				);
@@ -262,7 +279,12 @@ export abstract class HttpServerModule<
 
 	abstract getRequestUrl(request: Request);
 
-	abstract getRequestParameter(args: { source: ParameterSource; name?: string; request: Request });
+	abstract getRequestParameter(args: {
+		source: ParameterSource;
+		name?: string;
+		request: Request;
+		response: Response;
+	});
 
 	abstract getRequestHeaders(request: Request);
 
@@ -326,12 +348,15 @@ export abstract class HttpServerModule<
 	}) {
 		return methodReflection.parameters.reduce<ParameterConfiguration<Request>[]>((acc, parameterReflection) => {
 			const parameterDecoratorMetadata: ParameterDecoratorMetadata = parameterReflection.decorators.find(
-				d => d[DecoratorId] === 'http-server.parameter' || d[DecoratorId] === 'core.parameter.context'
+				d =>
+					d[DecoratorId] === 'http-server.parameter' ||
+					d[DecoratorId] === 'http-server.parameter.native' ||
+					d[DecoratorId] === 'core.parameter.context'
 			);
-			const parameterType = parameterDecoratorMetadata.options?.type ?? parameterReflection.type;
 
 			if (parameterDecoratorMetadata?.[DecoratorId] === 'http-server.parameter') {
 				const { options } = parameterDecoratorMetadata;
+				const parameterType = parameterDecoratorMetadata.options?.type ?? parameterReflection.type;
 
 				acc.push({
 					source: options.in,
@@ -346,6 +371,12 @@ export abstract class HttpServerModule<
 					source: 'context',
 					options: parameterDecoratorMetadata.options,
 					reflection: { controllerReflection, methodReflection }
+				});
+			}
+
+			if (parameterDecoratorMetadata?.[DecoratorId] === 'http-server.parameter.native') {
+				acc.push({
+					source: parameterDecoratorMetadata.type as 'request' | 'response'
 				});
 			}
 

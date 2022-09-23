@@ -66,3 +66,25 @@ export function controller(options?: ControllerDecoratorOptions): ClassDecorator
 		{ allowMultiple: false }
 	);
 }
+
+export function request() {
+	return decorateParameter(
+		{
+			[DecoratorId]: 'http-server.parameter.native',
+			module: 'http-server',
+			type: 'request'
+		},
+		{ allowMultiple: false, inherit: true }
+	);
+}
+
+export function response() {
+	return decorateParameter(
+		{
+			[DecoratorId]: 'http-server.parameter.native',
+			module: 'http-server',
+			type: 'response'
+		},
+		{ allowMultiple: false, inherit: true }
+	);
+}
