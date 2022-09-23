@@ -177,7 +177,17 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 		return request.query;
 	}
 
-	getRequestParameter({ source, name, request }: { source: ParameterSource; name?: string; request: Request }) {
+	getRequestParameter({
+		source,
+		name,
+		request,
+		response
+	}: {
+		source: ParameterSource;
+		name?: string;
+		request: Request;
+		response: Response;
+	}) {
 		switch (source) {
 			case 'path':
 				return request.params[name];
@@ -190,6 +200,12 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 
 			case 'body':
 				return request.body;
+
+			case 'request':
+				return request;
+
+			case 'response':
+				return response;
 
 			default:
 				return undefined;

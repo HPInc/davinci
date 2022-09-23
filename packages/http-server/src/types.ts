@@ -29,7 +29,7 @@ export interface HttpServerModuleOptions {
 	validatorOptions?: AjvValidatorOptions;
 }
 
-export type ParameterSource = 'path' | 'query' | 'body' | 'header';
+export type ParameterSource = 'path' | 'query' | 'body' | 'header' | 'request' | 'response';
 
 export interface ContextFactoryArguments<Request> {
 	request: Request;
@@ -53,6 +53,14 @@ export type ParameterConfiguration<Request> =
 			request?: Request;
 			value?: unknown;
 			options?: ParameterDecoratorOptions;
+	  }
+	| {
+			source: 'request';
+			value?: unknown;
+	  }
+	| {
+			source: 'response';
+			value?: unknown;
 	  };
 
 export type EndpointValidationSchema = JSONSchema<any> & {

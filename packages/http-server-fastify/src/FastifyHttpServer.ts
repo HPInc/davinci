@@ -187,11 +187,13 @@ export class FastifyHttpServer extends HttpServerModule<
 	getRequestParameter({
 		source,
 		name,
-		request
+		request,
+		response
 	}: {
 		source: ParameterSource;
 		name?: string;
 		request: FastifyRequest;
+		response: FastifyReply;
 	}) {
 		switch (source) {
 			case 'path':
@@ -205,6 +207,12 @@ export class FastifyHttpServer extends HttpServerModule<
 
 			case 'body':
 				return request.body;
+
+			case 'request':
+				return request;
+
+			case 'response':
+				return response;
 
 			default:
 				return undefined;
