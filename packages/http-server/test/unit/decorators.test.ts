@@ -276,11 +276,16 @@ describe('decorators', () => {
 			class CustomerController {
 				get(
 					@route.query({ name: 'a custom name' }) query: string,
-					@route.body({ required: true, description: 'The body' }) body: object
+					@route.body({ required: true, description: 'The body' }) body: object,
+					@route.request() req,
+					@route.response() res
 				) {
-					console.log(query, body);
+					if (body) {
+					}
 					return {
-						query
+						query,
+						req,
+						res
 					};
 				}
 			}
@@ -326,6 +331,32 @@ describe('decorators', () => {
 								],
 								fields: 'body',
 								index: 1,
+								typeClassification: 'Primitive'
+							},
+							{
+								kind: 'Parameter',
+								name: 'req',
+								decorators: [
+									{
+										module: 'http-server',
+										type: 'request'
+									}
+								],
+								fields: 'req',
+								index: 2,
+								typeClassification: 'Primitive'
+							},
+							{
+								kind: 'Parameter',
+								name: 'res',
+								decorators: [
+									{
+										module: 'http-server',
+										type: 'response'
+									}
+								],
+								fields: 'res',
+								index: 3,
 								typeClassification: 'Primitive'
 							}
 						]

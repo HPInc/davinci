@@ -49,7 +49,7 @@ describe('HttpServerModule', () => {
 		close() {}
 		getRequestHostname() {}
 		getRequestParameter(args) {
-			const { source, name, request } = args;
+			const { source, name, request, response } = args;
 			switch (source) {
 				case 'path':
 					return request.params[name];
@@ -62,6 +62,12 @@ describe('HttpServerModule', () => {
 
 				case 'body':
 					return request.body;
+
+				case 'request':
+					return request;
+
+				case 'response':
+					return response;
 
 				default:
 					return undefined;
@@ -158,8 +164,8 @@ describe('HttpServerModule', () => {
 			@route.controller({ basePath: '/api/customers' })
 			class CustomerController {
 				@route.get({ path: '/all' })
-				find(@route.body() body, @route.query() where: string) {
-					return { body, where };
+				find(@route.body() body, @route.query() where: string, @route.request() req, @route.response() res) {
+					return { body, where, req, res };
 				}
 			}
 			const dummyHttpServer = new DummyHttpServer();
@@ -175,7 +181,9 @@ describe('HttpServerModule', () => {
 
 			expect(result[1]).to.be.deep.equal({
 				body: {},
-				where: ''
+				where: '',
+				req: reqMock,
+				res: resMock
 			});
 		});
 
@@ -385,8 +393,14 @@ describe('HttpServerModule', () => {
 			@route.controller({ basePath: '/customers' })
 			class CustomerController {
 				@route.get({ path: '/:id' })
-				updateById(@route.body() body: Customer, @route.query() query: string, @context() ctx) {
-					return { body, query, ctx };
+				updateById(
+					@route.body() body: Customer,
+					@route.query() query: string,
+					@route.request() req,
+					@route.response() res,
+					@context() ctx
+				) {
+					return { body, query, req, res, ctx };
 				}
 			}
 
@@ -414,6 +428,12 @@ describe('HttpServerModule', () => {
 					options: {
 						in: 'query'
 					}
+				},
+				{
+					source: 'request'
+				},
+				{
+					source: 'response'
 				},
 				{
 					source: 'context',
