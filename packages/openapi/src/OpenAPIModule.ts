@@ -33,7 +33,7 @@ type DeepPartial<T> = T extends object
 export class OpenAPIModule extends Module {
 	app: App;
 	moduleOptions: OpenAPIModuleOptions;
-	jsonSchemasMap = new Map<string, JSONSchema>();
+	jsonSchemasMap = new Map<string, Partial<JSONSchema>>();
 	logger = pino({ name: 'openAPI-module' });
 	httpServerModule: HttpServerModule<unknown, unknown, Server>;
 	httpServer: Server;
@@ -86,73 +86,14 @@ export class OpenAPIModule extends Module {
 
 	async createPathAndSchema(route: Route<unknown>): Promise<void> {
 		const { path, verb, parametersConfig, methodDecoratorMetadata } = route;
+
 		await mapSeries(parametersConfig, parameterConfig => {
 			if (parameterConfig.source === 'context') return;
 
-			const createJsonSchema = (jsonSchema: Partial<JSONSchema>) => {
-				if (typeof jsonSchema === 'object') {
-					return {
-						...(jsonSchema.title ? { $id: jsonSchema.title } : {}),
-						...mapObject<Partial<JSONSchema>>(jsonSchema, (p, key) => {
-							if (key === 'properties' && p) {
-								return mapObject(p, propValue => {
-									if (propValue._$ref) {
-										const refEntityDefinitionJson = createJsonSchema(
-											this.jsonSchemasMap.get(propValue._$ref) ?? propValue._$ref?.getJsonSchema()
-										);
-
-										if (!this.jsonSchemasMap.has(propValue._$ref)) {
-											this.jsonSchemasMap.set(propValue._$ref, refEntityDefinitionJson);
-										}
-
-										if (refEntityDefinitionJson?.$id) {
-											this.openAPIDoc.components.schemas[refEntityDefinitionJson.$id] =
-												refEntityDefinitionJson;
-											return { $ref: `#/components/schemas/${refEntityDefinitionJson.$id}` };
-										}
-
-										return refEntityDefinitionJson;
-									}
-
-									if (propValue.type === 'array' && propValue.items?._$ref) {
-										const $ref = propValue.items?._$ref;
-										const refEntityDefinitionJson = createJsonSchema(
-											this.jsonSchemasMap.get($ref) ?? $ref?.getJsonSchema()
-										);
-
-										if (!this.jsonSchemasMap.has($ref)) {
-											this.jsonSchemasMap.set($ref, refEntityDefinitionJson);
-										}
-
-										if (refEntityDefinitionJson?.$id) {
-											this.openAPIDoc.components.schemas[refEntityDefinitionJson.$id] =
-												refEntityDefinitionJson;
-											return {
-												...propValue,
-												items: {
-													$ref: `#/components/schemas/${refEntityDefinitionJson.$id}`
-												}
-											};
-										}
-
-										return refEntityDefinitionJson;
-									}
-
-									return propValue;
-								});
-							}
-
-							return p;
-						})
-					};
-				}
-
-				return jsonSchema;
-			};
-
 			const entityJsonSchema = this.entityRegistry.getJsonSchema(parameterConfig.type);
 
-			const jsonSchema = this.jsonSchemasMap.get(entityJsonSchema.title) ?? createJsonSchema(entityJsonSchema);
+			const jsonSchema =
+				this.jsonSchemasMap.get(entityJsonSchema.title) ?? this.createJsonSchema(entityJsonSchema);
 			if (!this.jsonSchemasMap.has(entityJsonSchema.title) && jsonSchema.$id) {
 				this.jsonSchemasMap.set(jsonSchema.$id, jsonSchema);
 				this.openAPIDoc.components.schemas[jsonSchema.$id] = jsonSchema;
@@ -197,6 +138,67 @@ export class OpenAPIModule extends Module {
 				};
 			}
 		});
+	}
+
+	createJsonSchema(jsonSchema: Partial<JSONSchema>): Partial<JSONSchema> {
+		if (typeof jsonSchema === 'object') {
+			return {
+				...(jsonSchema.title ? { $id: jsonSchema.title } : {}),
+				...mapObject<Partial<JSONSchema>>(jsonSchema, (p, key) => {
+					if (key === 'properties' && p) {
+						return mapObject(p, propValue => {
+							if (propValue._$ref) {
+								const refEntityDefinitionJson = this.createJsonSchema(
+									this.jsonSchemasMap.get(propValue._$ref) ?? propValue._$ref?.getJsonSchema()
+								);
+
+								if (!this.jsonSchemasMap.has(propValue._$ref)) {
+									this.jsonSchemasMap.set(propValue._$ref, refEntityDefinitionJson);
+								}
+
+								if (refEntityDefinitionJson?.$id) {
+									this.openAPIDoc.components.schemas[refEntityDefinitionJson.$id] =
+										refEntityDefinitionJson;
+									return { $ref: `#/components/schemas/${refEntityDefinitionJson.$id}` };
+								}
+
+								return refEntityDefinitionJson;
+							}
+
+							if (propValue.type === 'array' && propValue.items?._$ref) {
+								const $ref = propValue.items?._$ref;
+								const refEntityDefinitionJson = this.createJsonSchema(
+									this.jsonSchemasMap.get($ref) ?? $ref?.getJsonSchema()
+								);
+
+								if (!this.jsonSchemasMap.has($ref)) {
+									this.jsonSchemasMap.set($ref, refEntityDefinitionJson);
+								}
+
+								if (refEntityDefinitionJson?.$id) {
+									this.openAPIDoc.components.schemas[refEntityDefinitionJson.$id] =
+										refEntityDefinitionJson;
+									return {
+										...propValue,
+										items: {
+											$ref: `#/components/schemas/${refEntityDefinitionJson.$id}`
+										}
+									};
+								}
+
+								return refEntityDefinitionJson;
+							}
+
+							return propValue;
+						});
+					}
+
+					return p;
+				})
+			};
+		}
+
+		return jsonSchema;
 	}
 
 	async registerOpenapiRoutes() {
