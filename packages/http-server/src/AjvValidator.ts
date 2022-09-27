@@ -105,8 +105,6 @@ export class AjvValidator<Request = unknown> {
 			}
 		});
 
-		console.log(JSON.stringify(endpointSchema, null, 4));
-		console.log(JSON.stringify(this.ajv.getSchema('#Customer'), null, 4));
 		return endpointSchema;
 	}
 
