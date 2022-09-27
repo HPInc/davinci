@@ -46,8 +46,11 @@ describe('AjvValidator', () => {
 		@entity.prop({ type: [Phone] })
 		phones: Phone[];
 
+		@entity.prop()
+		home: Address;
+
 		@entity.prop({ type: [Address] })
-		addresses: Address[];
+		otherAddresses: Address[];
 
 		@entity.prop()
 		birth: Birth;
@@ -165,7 +168,10 @@ describe('AjvValidator', () => {
 							required: ['phone']
 						}
 					},
-					addresses: {
+					home: {
+						$ref: 'Address'
+					},
+					otherAddresses: {
 						type: 'array',
 						items: {
 							$ref: 'Address'
