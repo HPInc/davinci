@@ -261,7 +261,32 @@ export class OpenAPIModule extends Module {
 		});
 	}
 
-	createJsonSchema(jsonSchema: Partial<JSONSchema>): Partial<JSONSchema> {
+	async registerOpenapiRoutes() {
+		const documentEnabled = this.moduleOptions.document?.enabled;
+		const explorerEnabled = this.moduleOptions.explorer?.enabled;
+		if (documentEnabled) {
+			this.httpServerModule.get(this.moduleOptions.document?.path, (_req, res) =>
+				this.httpServerModule.reply(res, this.openAPIDoc)
+			);
+		}
+
+		if (explorerEnabled) {
+			const swaggerUiHtml = generateSwaggerUiHtml({
+				...(documentEnabled ? { path: this.moduleOptions.document.path } : { spec: this.openAPIDoc })
+			});
+
+			this.httpServerModule.get(this.moduleOptions.explorer?.path, (_req, res) => {
+				this.httpServerModule.setHeader(res, 'content-type', 'text/html');
+				this.httpServerModule.reply(res, swaggerUiHtml);
+			});
+		}
+	}
+
+	getOpenAPIDocument() {
+		return this.openAPIDoc;
+	}
+
+	private createJsonSchema(jsonSchema: Partial<JSONSchema>) {
 		if (typeof jsonSchema === 'object') {
 			return {
 				...(jsonSchema.title ? { $id: jsonSchema.title } : {}),
@@ -301,9 +326,7 @@ export class OpenAPIModule extends Module {
 										refEntityDefinitionJson;
 									return {
 										...propValue,
-										items: {
-											$ref: `#/components/schemas/${refEntityDefinitionJson.$id}`
-										}
+										items: { $ref: `#/components/schemas/${refEntityDefinitionJson.$id}` }
 									};
 								}
 
@@ -314,37 +337,30 @@ export class OpenAPIModule extends Module {
 						});
 					}
 
+					if (key === 'items' && p._$ref) {
+						const $ref = p._$ref;
+						const refEntityDefinitionJson = this.createJsonSchema(
+							this.jsonSchemasMap.get($ref) ?? $ref?.getJsonSchema()
+						);
+
+						if (!this.jsonSchemasMap.has($ref)) {
+							this.jsonSchemasMap.set($ref, refEntityDefinitionJson);
+						}
+
+						if (refEntityDefinitionJson?.$id) {
+							this.openAPIDoc.components.schemas[refEntityDefinitionJson.$id] = refEntityDefinitionJson;
+							return { $ref: `#/components/schemas/${refEntityDefinitionJson.$id}` };
+						}
+
+						return refEntityDefinitionJson;
+					}
+
 					return p;
 				})
 			};
 		}
 
 		return jsonSchema;
-	}
-
-	async registerOpenapiRoutes() {
-		const documentEnabled = this.moduleOptions.document?.enabled;
-		const explorerEnabled = this.moduleOptions.explorer?.enabled;
-		if (documentEnabled) {
-			this.httpServerModule.get(this.moduleOptions.document?.path, (_req, res) =>
-				this.httpServerModule.reply(res, this.openAPIDoc)
-			);
-		}
-
-		if (explorerEnabled) {
-			const swaggerUiHtml = generateSwaggerUiHtml({
-				...(documentEnabled ? { path: this.moduleOptions.document.path } : { spec: this.openAPIDoc })
-			});
-
-			this.httpServerModule.get(this.moduleOptions.explorer?.path, (_req, res) => {
-				this.httpServerModule.setHeader(res, 'content-type', 'text/html');
-				this.httpServerModule.reply(res, swaggerUiHtml);
-			});
-		}
-	}
-
-	getOpenAPIDocument() {
-		return this.openAPIDoc;
 	}
 
 	// DRY function to generate single item or array definition objects

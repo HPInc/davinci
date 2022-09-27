@@ -80,6 +80,11 @@ describe('OpenAPIModule', () => {
 				return data;
 			}
 
+			@route.post({ path: '/multiple', description: 'Create multiple customers' })
+			createMany(@route.body({ type: [Customer], required: true }) data: Customer[]) {
+				return data;
+			}
+
 			@route.patch({ path: '/:id', description: 'Update customer' })
 			patch(
 				@route.path() customerId: string,
@@ -140,6 +145,24 @@ describe('OpenAPIModule', () => {
 									'application/json': {
 										schema: {
 											$ref: '#/components/schemas/MyCustomer'
+										}
+									}
+								}
+							}
+						}
+					},
+					'/api/customers/multiple': {
+						post: {
+							description: 'Create multiple customers',
+							requestBody: {
+								required: true,
+								content: {
+									'application/json': {
+										schema: {
+											type: 'array',
+											items: {
+												$ref: '#/components/schemas/MyCustomer'
+											}
 										}
 									}
 								}
