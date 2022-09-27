@@ -18,6 +18,15 @@ describe('AjvValidator', () => {
 	}
 
 	@entity()
+	class Address {
+		@entity.prop()
+		street: string;
+
+		@entity.prop()
+		number: string;
+	}
+
+	@entity()
 	class Birth {
 		@entity.prop()
 		date: Date;
@@ -36,6 +45,9 @@ describe('AjvValidator', () => {
 
 		@entity.prop({ type: [Phone] })
 		phones: Phone[];
+
+		@entity.prop({ type: [Address] })
+		addresses: Address[];
 
 		@entity.prop()
 		birth: Birth;
@@ -81,6 +93,7 @@ describe('AjvValidator', () => {
 			const schema = await ajvValidator.createSchema(parametersConfig);
 			const { schema: customerSchema } = ajvValidator.getAjvSchema('Customer');
 			const { schema: birthSchema } = ajvValidator.getAjvSchema('Birth');
+			const { schema: addressSchema } = ajvValidator.getAjvSchema('Address');
 
 			expect(schema).to.be.deep.equal({
 				type: 'object',
@@ -152,6 +165,12 @@ describe('AjvValidator', () => {
 							required: ['phone']
 						}
 					},
+					addresses: {
+						type: 'array',
+						items: {
+							$ref: 'Address'
+						}
+					},
 					birth: {
 						$ref: 'Birth'
 					}
@@ -168,6 +187,20 @@ describe('AjvValidator', () => {
 						format: 'date-time'
 					},
 					country: {
+						type: 'string'
+					}
+				},
+				required: []
+			});
+			expect(addressSchema).to.be.deep.equal({
+				$id: 'Address',
+				title: 'Address',
+				type: 'object',
+				properties: {
+					street: {
+						type: 'string'
+					},
+					number: {
 						type: 'string'
 					}
 				},
