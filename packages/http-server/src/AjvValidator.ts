@@ -105,6 +105,8 @@ export class AjvValidator<Request = unknown> {
 			}
 		});
 
+		console.log(JSON.stringify(endpointSchema, null, 4));
+		console.log(JSON.stringify(this.ajv.getSchema('#Customer'), null, 4));
 		return endpointSchema;
 	}
 
@@ -131,6 +133,24 @@ export class AjvValidator<Request = unknown> {
 
 								if (refEntityDefinitionJson?.$id) {
 									return { $ref: refEntityDefinitionJson.$id };
+								}
+
+								return refEntityDefinitionJson;
+							}
+
+							if (propValue.type === 'array' && propValue.items?._$ref) {
+								const $ref = propValue.items?._$ref;
+								const refEntityDefinitionJson = this.createJsonSchema(
+									this.jsonSchemasMap.get($ref) ?? $ref?.getJsonSchema()
+								);
+
+								if (!this.jsonSchemasMap.has($ref)) {
+									this.jsonSchemasMap.set($ref, refEntityDefinitionJson);
+									this.ajv.addSchema(refEntityDefinitionJson);
+								}
+
+								if (refEntityDefinitionJson?.$id) {
+									return { ...propValue, items: { $ref: refEntityDefinitionJson.$id } };
 								}
 
 								return refEntityDefinitionJson;
