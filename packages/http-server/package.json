@@ -27,6 +27,7 @@
 	},
 	"devDependencies": {
 		"ajv": "^8.0.0",
+		"openapi-types": "^12.0.2",
 		"typescript": "^4.6.2"
 	}
 }
