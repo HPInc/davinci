@@ -92,7 +92,12 @@ export class OpenAPIModule extends Module {
 
 		// Parameters handling
 		await mapSeries(parametersConfig, parameterConfig => {
-			if (parameterConfig.source === 'context') return;
+			if (
+				parameterConfig.source === 'context' ||
+				parameterConfig.source === 'request' ||
+				parameterConfig.source === 'response'
+			)
+				return;
 
 			const entityJsonSchema = this.entityRegistry.getJsonSchema(parameterConfig.type);
 
