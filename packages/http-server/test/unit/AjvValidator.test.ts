@@ -62,6 +62,13 @@ describe('AjvValidator', () => {
 				options: { in: 'query', required: true },
 				value: '20'
 			},
+			{
+				name: 'customerArray',
+				source: 'query',
+				type: [Customer],
+				options: { in: 'query', required: true },
+				value: [{ firstname: 'John' }]
+			},
 			{ name: 'accountId', source: 'header', type: Number, value: '1000' }
 		];
 
@@ -87,7 +94,7 @@ describe('AjvValidator', () => {
 						},
 						required: []
 					},
-					body: { type: 'object', $ref: 'Customer' },
+					body: { $ref: 'Customer' },
 					querystring: {
 						type: 'object',
 						properties: {
@@ -96,9 +103,15 @@ describe('AjvValidator', () => {
 							},
 							houseNumber: {
 								type: 'string'
+							},
+							customerArray: {
+								items: {
+									$ref: 'Customer'
+								},
+								type: 'array'
 							}
 						},
-						required: ['houseNumber']
+						required: ['houseNumber', 'customerArray']
 					},
 					headers: {
 						type: 'object',
@@ -178,7 +191,12 @@ describe('AjvValidator', () => {
 				params: { customerId: '4000' },
 				querystring: {
 					street: 'My road',
-					houseNumber: '40'
+					houseNumber: '40',
+					customerArray: [
+						{
+							lastname: 'Bird'
+						}
+					]
 				},
 				headers: {
 					accountId: '1000'
@@ -195,7 +213,12 @@ describe('AjvValidator', () => {
 				},
 				querystring: {
 					street: 'My road',
-					houseNumber: '40'
+					houseNumber: '40',
+					customerArray: [
+						{
+							lastname: 'Bird'
+						}
+					]
 				},
 				headers: {
 					accountId: 1000
@@ -217,7 +240,12 @@ describe('AjvValidator', () => {
 				params: { customerId: 'aaa' },
 				querystring: {
 					street: 'My road',
-					houseNumber: '40'
+					houseNumber: '40',
+					customerArray: [
+						{
+							firstname: 'Bird'
+						}
+					]
 				},
 				headers: {
 					accountId: '1000'
@@ -244,6 +272,15 @@ describe('AjvValidator', () => {
 					},
 					{
 						instancePath: '/body',
+						schemaPath: '#/required',
+						keyword: 'required',
+						params: {
+							missingProperty: 'lastname'
+						},
+						message: "must have required property 'lastname'"
+					},
+					{
+						instancePath: '/querystring/customerArray/0',
 						schemaPath: '#/required',
 						keyword: 'required',
 						params: {
