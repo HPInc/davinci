@@ -113,74 +113,58 @@ export class AjvValidator<Request = unknown> {
 	}
 
 	private createJsonSchema(jsonSchema: Partial<JSONSchema>) {
-		if (typeof jsonSchema === 'object') {
-			return {
-				...(jsonSchema.title ? { $id: jsonSchema.title } : {}),
-				...mapObject<Partial<JSONSchema>>(jsonSchema, (p, key) => {
-					if (key === 'properties' && p) {
-						return mapObject(p, propValue => {
-							if (propValue._$ref) {
-								const refEntityDefinitionJson = this.createJsonSchema(
-									this.jsonSchemasMap.get(propValue._$ref) ?? propValue._$ref?.getJsonSchema()
-								);
+		return {
+			...(jsonSchema.title ? { $id: jsonSchema.title } : {}),
+			...mapObject<Partial<JSONSchema>>(jsonSchema, (p, key) => {
+				if (key === 'properties' && p) {
+					return mapObject(p, propValue => {
+						if (propValue._$ref) {
+							const refEntityDefinitionJson = this.createJsonSchema(
+								this.jsonSchemasMap.get(propValue._$ref) ?? propValue._$ref?.getJsonSchema()
+							);
 
-								if (!this.jsonSchemasMap.has(propValue._$ref)) {
-									this.jsonSchemasMap.set(propValue._$ref, refEntityDefinitionJson);
-									this.ajv.addSchema(refEntityDefinitionJson);
-								}
-
-								if (refEntityDefinitionJson?.$id) {
-									return { $ref: refEntityDefinitionJson.$id };
-								}
-
-								return refEntityDefinitionJson;
+							if (!this.jsonSchemasMap.has(propValue._$ref)) {
+								this.jsonSchemasMap.set(propValue._$ref, refEntityDefinitionJson);
+								this.ajv.addSchema(refEntityDefinitionJson);
 							}
 
-							if (propValue.type === 'array' && propValue.items?._$ref) {
-								const $ref = propValue.items?._$ref;
-								const refEntityDefinitionJson = this.createJsonSchema(
-									this.jsonSchemasMap.get($ref) ?? $ref?.getJsonSchema()
-								);
-
-								if (!this.jsonSchemasMap.has($ref)) {
-									this.jsonSchemasMap.set($ref, refEntityDefinitionJson);
-									this.ajv.addSchema(refEntityDefinitionJson);
-								}
-
-								if (refEntityDefinitionJson?.$id) {
-									return { ...propValue, items: { $ref: refEntityDefinitionJson.$id } };
-								}
-
-								return refEntityDefinitionJson;
-							}
-
-							return propValue;
-						});
-					}
-
-					if (key === 'items' && p._$ref) {
-						const $ref = p._$ref;
-						const refEntityDefinitionJson = this.createJsonSchema(
-							this.jsonSchemasMap.get($ref) ?? $ref?.getJsonSchema()
-						);
-
-						if (!this.jsonSchemasMap.has($ref)) {
-							this.jsonSchemasMap.set($ref, refEntityDefinitionJson);
-							this.ajv.addSchema(refEntityDefinitionJson);
-						}
-
-						if (refEntityDefinitionJson?.$id) {
 							return { $ref: refEntityDefinitionJson.$id };
 						}
 
-						return refEntityDefinitionJson;
+						if (propValue.type === 'array' && propValue.items?._$ref) {
+							const $ref = propValue.items?._$ref;
+							const refEntityDefinitionJson = this.createJsonSchema(
+								this.jsonSchemasMap.get($ref) ?? $ref?.getJsonSchema()
+							);
+
+							if (!this.jsonSchemasMap.has($ref)) {
+								this.jsonSchemasMap.set($ref, refEntityDefinitionJson);
+								this.ajv.addSchema(refEntityDefinitionJson);
+							}
+
+							return { ...propValue, items: { $ref: refEntityDefinitionJson.$id } };
+						}
+
+						return propValue;
+					});
+				}
+
+				if (key === 'items' && p._$ref) {
+					const $ref = p._$ref;
+					const refEntityDefinitionJson = this.createJsonSchema(
+						this.jsonSchemasMap.get($ref) ?? $ref?.getJsonSchema()
+					);
+
+					if (!this.jsonSchemasMap.has($ref)) {
+						this.jsonSchemasMap.set($ref, refEntityDefinitionJson);
+						this.ajv.addSchema(refEntityDefinitionJson);
 					}
 
-					return p;
-				})
-			};
-		}
+					return { $ref: refEntityDefinitionJson.$id };
+				}
 
-		return jsonSchema;
+				return p;
+			})
+		};
 	}
 }
