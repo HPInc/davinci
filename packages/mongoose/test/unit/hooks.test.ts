@@ -16,7 +16,7 @@ describe('mongoose hooks', () => {
 	let afterWriteCallback;
 	let beforeDeleteCallback;
 	let afterDeleteCallback;
-	const context = { accountId: '123123' };
+	const davinciCtx = { accountId: '123123' };
 	const customersData = [{ firstname: 'Mike' }, { firstname: 'John' }];
 
 	beforeEach(async () => {
@@ -69,17 +69,17 @@ describe('mongoose hooks', () => {
 		registerReadHooks({ read: true });
 
 		it('should correctly trigger the hooks', async () => {
-			await CustomerModel.find({}, null, { context }).countDocuments();
+			await CustomerModel.find({}, null, { davinciCtx }).countDocuments();
 			const beforeArgs = beforeReadCallback.getCall(0).args[0];
 			const afterArgs = afterReadCallback.getCall(0).args[0];
 
 			should(beforeReadCallback.callCount).be.equal(1);
-			should(beforeArgs).match({ hookName: 'countDocuments', context });
+			should(beforeArgs).match({ hookName: 'countDocuments', davinciCtx });
 			should(beforeArgs)
 				.have.property('query');
 
 			should(afterReadCallback.callCount).be.equal(1);
-			should(afterArgs).match({ hookName: 'countDocuments', count: 2, context });
+			should(afterArgs).match({ hookName: 'countDocuments', count: 2, davinciCtx });
 			should(afterArgs)
 				.have.property('query');
 		});
@@ -89,17 +89,17 @@ describe('mongoose hooks', () => {
 		registerReadHooks({ read: true });
 
 		it('should correctly trigger the hooks', async () => {
-			await CustomerModel.find({}, null, { context });
+			await CustomerModel.find({}, null, { davinciCtx });
 			const beforeArgs = beforeReadCallback.getCall(0).args[0];
 			const afterArgs = afterReadCallback.getCall(0).args[0];
 
 			should(beforeReadCallback.callCount).be.equal(1);
-			should(beforeArgs).match({ hookName: 'find', context });
+			should(beforeArgs).match({ hookName: 'find', davinciCtx });
 			should(beforeArgs)
 				.have.property('query');
 
 			should(afterReadCallback.callCount).be.equal(1);
-			should(afterArgs).match({ hookName: 'find', context });
+			should(afterArgs).match({ hookName: 'find', davinciCtx });
 			should(afterArgs)
 				.have.property('query');
 			should(afterArgs)
@@ -112,17 +112,17 @@ describe('mongoose hooks', () => {
 		registerReadHooks({ read: true });
 
 		it('should correctly trigger the hooks', async () => {
-			await CustomerModel.findOne({ firstname: 'Mike' }, null, { context });
+			await CustomerModel.findOne({ firstname: 'Mike' }, null, { davinciCtx });
 			const beforeArgs = beforeReadCallback.getCall(0).args[0];
 			const afterArgs = afterReadCallback.getCall(0).args[0];
 
 			should(beforeReadCallback.callCount).be.equal(1);
-			should(beforeArgs).match({ hookName: 'findOne', context });
+			should(beforeArgs).match({ hookName: 'findOne', davinciCtx });
 			should(beforeArgs)
 				.have.property('query')
 
 			should(afterReadCallback.callCount).be.equal(1);
-			should(afterArgs).match({ hookName: 'findOne', context });
+			should(afterArgs).match({ hookName: 'findOne', davinciCtx });
 			should(afterArgs)
 				.have.property('query');
 			should(afterArgs)
@@ -138,7 +138,7 @@ describe('mongoose hooks', () => {
 			await CustomerModel.findOneAndUpdate(
 				{ firstname: 'Mike' },
 				{ firstname: 'Michael' },
-				{ context, new: true }
+				{ davinciCtx, new: true }
 			);
 			const beforeReadArgs = beforeReadCallback.getCall(0).args[0];
 			const afterReadArgs = afterReadCallback.getCall(0).args[0];
@@ -147,12 +147,12 @@ describe('mongoose hooks', () => {
 			const afterWriteArgs = afterWriteCallback.getCall(0).args[0];
 
 			should(beforeReadCallback.callCount).be.equal(1);
-			should(beforeReadArgs).match({ hookName: 'findOneAndUpdate', context });
+			should(beforeReadArgs).match({ hookName: 'findOneAndUpdate', davinciCtx });
 			should(beforeReadArgs)
 				.have.property('query');
 
 			should(afterReadCallback.callCount).be.equal(1);
-			should(afterReadArgs).match({ hookName: 'findOneAndUpdate', context });
+			should(afterReadArgs).match({ hookName: 'findOneAndUpdate', davinciCtx });
 			should(afterReadArgs)
 				.have.property('query');
 			should(afterReadArgs)
@@ -160,12 +160,12 @@ describe('mongoose hooks', () => {
 				.match({ firstname: 'Michael' });
 
 			should(beforeWriteCallback.callCount).be.equal(1);
-			should(beforeWriteArgs).match({ hookName: 'findOneAndUpdate', context });
+			should(beforeWriteArgs).match({ hookName: 'findOneAndUpdate', davinciCtx });
 			should(beforeWriteArgs)
 				.have.property('query');
 
 			should(afterWriteCallback.callCount).be.equal(1);
-			should(afterWriteArgs).match({ hookName: 'findOneAndUpdate', context });
+			should(afterWriteArgs).match({ hookName: 'findOneAndUpdate', davinciCtx });
 			should(afterWriteArgs)
 				.have.property('query');
 			should(afterWriteArgs)
@@ -178,24 +178,24 @@ describe('mongoose hooks', () => {
 		registerReadHooks({ read: true, write: true });
 
 		it('should correctly trigger the hooks', async () => {
-			await CustomerModel.update({ firstname: 'Mike' }, { firstname: 'Michael' }, { context, new: true });
+			await CustomerModel.update({ firstname: 'Mike' }, { firstname: 'Michael' }, { davinciCtx, new: true });
 			const beforeReadArgs = beforeReadCallback.getCall(0).args[0];
 
 			const beforeWriteArgs = beforeWriteCallback.getCall(0).args[0];
 			const afterWriteArgs = afterWriteCallback.getCall(0).args[0];
 
 			should(beforeReadCallback.callCount).be.equal(1);
-			should(beforeReadArgs).match({ hookName: 'update', context });
+			should(beforeReadArgs).match({ hookName: 'update', davinciCtx });
 			should(beforeReadArgs)
 				.have.property('query');
 
 			should(beforeWriteCallback.callCount).be.equal(1);
-			should(beforeWriteArgs).match({ hookName: 'update', context });
+			should(beforeWriteArgs).match({ hookName: 'update', davinciCtx });
 			should(beforeWriteArgs)
 				.have.property('query');
 
 			should(afterWriteCallback.callCount).be.equal(1);
-			should(afterWriteArgs).match({ hookName: 'update', context });
+			should(afterWriteArgs).match({ hookName: 'update', davinciCtx });
 			should(afterWriteArgs)
 				.have.property('query');
 			should(afterWriteArgs).have.property('rawResult');
@@ -206,24 +206,24 @@ describe('mongoose hooks', () => {
 		registerReadHooks({ read: true, write: true });
 
 		it('should correctly trigger the hooks', async () => {
-			await CustomerModel.updateMany({ firstname: 'Mike' }, { firstname: 'Michael' }, { context, new: true });
+			await CustomerModel.updateMany({ firstname: 'Mike' }, { firstname: 'Michael' }, { davinciCtx, new: true });
 			const beforeReadArgs = beforeReadCallback.getCall(0).args[0];
 
 			const beforeWriteArgs = beforeWriteCallback.getCall(0).args[0];
 			const afterWriteArgs = afterWriteCallback.getCall(0).args[0];
 
 			should(beforeReadCallback.callCount).be.equal(1);
-			should(beforeReadArgs).match({ hookName: 'updateMany', context });
+			should(beforeReadArgs).match({ hookName: 'updateMany', davinciCtx });
 			should(beforeReadArgs)
 				.have.property('query');
 
 			should(beforeWriteCallback.callCount).be.equal(1);
-			should(beforeWriteArgs).match({ hookName: 'updateMany', context });
+			should(beforeWriteArgs).match({ hookName: 'updateMany', davinciCtx });
 			should(beforeWriteArgs)
 				.have.property('query');
 
 			should(afterWriteCallback.callCount).be.equal(1);
-			should(afterWriteArgs).match({ hookName: 'updateMany', context });
+			should(afterWriteArgs).match({ hookName: 'updateMany', davinciCtx });
 			should(afterWriteArgs)
 				.have.property('query');
 			should(afterWriteArgs).have.property('rawResult');
@@ -234,24 +234,24 @@ describe('mongoose hooks', () => {
 		registerReadHooks({ read: true, write: true });
 
 		it('should correctly trigger the hooks', async () => {
-			await CustomerModel.updateOne({ firstname: 'Mike' }, { firstname: 'Michael' }, { context, new: true });
+			await CustomerModel.updateOne({ firstname: 'Mike' }, { firstname: 'Michael' }, { davinciCtx, new: true });
 			const beforeReadArgs = beforeReadCallback.getCall(0).args[0];
 
 			const beforeWriteArgs = beforeWriteCallback.getCall(0).args[0];
 			const afterWriteArgs = afterWriteCallback.getCall(0).args[0];
 
 			should(beforeReadCallback.callCount).be.equal(1);
-			should(beforeReadArgs).match({ hookName: 'updateOne', context });
+			should(beforeReadArgs).match({ hookName: 'updateOne', davinciCtx });
 			should(beforeReadArgs)
 				.have.property('query');
 
 			should(beforeWriteCallback.callCount).be.equal(1);
-			should(beforeWriteArgs).match({ hookName: 'updateOne', context });
+			should(beforeWriteArgs).match({ hookName: 'updateOne', davinciCtx });
 			should(beforeWriteArgs)
 				.have.property('query');
 
 			should(afterWriteCallback.callCount).be.equal(1);
-			should(afterWriteArgs).match({ hookName: 'updateOne', context });
+			should(afterWriteArgs).match({ hookName: 'updateOne', davinciCtx });
 			should(afterWriteArgs)
 				.have.property('query');
 			should(afterWriteArgs).have.property('rawResult');
@@ -262,17 +262,17 @@ describe('mongoose hooks', () => {
 		registerReadHooks({ delete: true });
 
 		it('should correctly trigger the hooks', async () => {
-			await CustomerModel.findOneAndDelete({ firstname: 'Mike' }, { context });
+			await CustomerModel.findOneAndDelete({ firstname: 'Mike' }, { davinciCtx });
 			const beforeDeleteArgs = beforeDeleteCallback.getCall(0).args[0];
 			const afterDeleteArgs = afterDeleteCallback.getCall(0).args[0];
 
 			should(beforeDeleteCallback.callCount).be.equal(1);
-			should(beforeDeleteArgs).match({ hookName: 'findOneAndDelete', context });
+			should(beforeDeleteArgs).match({ hookName: 'findOneAndDelete', davinciCtx });
 			should(beforeDeleteArgs)
 				.have.property('query');
 
 			should(afterDeleteCallback.callCount).be.equal(1);
-			should(afterDeleteArgs).match({ hookName: 'findOneAndDelete', context });
+			should(afterDeleteArgs).match({ hookName: 'findOneAndDelete', davinciCtx });
 			should(afterDeleteArgs)
 				.have.property('query');
 			should(afterDeleteArgs)
@@ -286,17 +286,17 @@ describe('mongoose hooks', () => {
 		registerReadHooks({ delete: true });
 
 		it('should correctly trigger the hooks', async () => {
-			await CustomerModel.findOneAndRemove({ firstname: 'Mike' }, { context });
+			await CustomerModel.findOneAndRemove({ firstname: 'Mike' }, { davinciCtx });
 			const beforeDeleteArgs = beforeDeleteCallback.getCall(0).args[0];
 			const afterDeleteArgs = afterDeleteCallback.getCall(0).args[0];
 
 			should(beforeDeleteCallback.callCount).be.equal(1);
-			should(beforeDeleteArgs).match({ hookName: 'findOneAndRemove', context });
+			should(beforeDeleteArgs).match({ hookName: 'findOneAndRemove', davinciCtx });
 			should(beforeDeleteArgs)
 				.have.property('query');
 
 			should(afterDeleteCallback.callCount).be.equal(1);
-			should(afterDeleteArgs).match({ hookName: 'findOneAndRemove', context });
+			should(afterDeleteArgs).match({ hookName: 'findOneAndRemove', davinciCtx });
 			should(afterDeleteArgs)
 				.have.property('query');
 			should(afterDeleteArgs)
@@ -310,17 +310,17 @@ describe('mongoose hooks', () => {
 		registerReadHooks({ delete: true });
 
 		it('should correctly trigger the hooks', async () => {
-			await CustomerModel.deleteOne({ firstname: 'Mike' }).setOptions({ context });
+			await CustomerModel.deleteOne({ firstname: 'Mike' }).setOptions({ davinciCtx });
 			const beforeDeleteArgs = beforeDeleteCallback.getCall(0).args[0];
 			const afterDeleteArgs = afterDeleteCallback.getCall(0).args[0];
 
 			should(beforeDeleteCallback.callCount).be.equal(1);
-			should(beforeDeleteArgs).match({ hookName: 'deleteOne', context });
+			should(beforeDeleteArgs).match({ hookName: 'deleteOne', davinciCtx });
 			should(beforeDeleteArgs)
 				.have.property('query');
 
 			should(afterDeleteCallback.callCount).be.equal(1);
-			should(afterDeleteArgs).match({ hookName: 'deleteOne', context });
+			should(afterDeleteArgs).match({ hookName: 'deleteOne', davinciCtx });
 			should(afterDeleteArgs)
 				.have.property('query');
 			should(afterDeleteArgs).have.property('rawResult');
@@ -332,17 +332,17 @@ describe('mongoose hooks', () => {
 		registerReadHooks({ delete: true });
 
 		it('should correctly trigger the hooks', async () => {
-			await CustomerModel.deleteMany({ firstname: 'Mike' }).setOptions({ context });
+			await CustomerModel.deleteMany({ firstname: 'Mike' }).setOptions({ davinciCtx });
 			const beforeDeleteArgs = beforeDeleteCallback.getCall(0).args[0];
 			const afterDeleteArgs = afterDeleteCallback.getCall(0).args[0];
 
 			should(beforeDeleteCallback.callCount).be.equal(1);
-			should(beforeDeleteArgs).match({ hookName: 'deleteMany', context });
+			should(beforeDeleteArgs).match({ hookName: 'deleteMany', davinciCtx });
 			should(beforeDeleteArgs)
 				.have.property('query');
 
 			should(afterDeleteCallback.callCount).be.equal(1);
-			should(afterDeleteArgs).match({ hookName: 'deleteMany', context });
+			should(afterDeleteArgs).match({ hookName: 'deleteMany', davinciCtx });
 			should(afterDeleteArgs)
 				.have.property('query');
 			should(afterDeleteArgs).have.property('rawResult');
@@ -357,20 +357,20 @@ describe('mongoose hooks', () => {
 			const customer = await CustomerModel.findOne({ firstname: 'Mike' }, null, { skipHooks: true });
 			customer.firstname = 'Michael';
 
-			await customer.save({ context });
+			await customer.save({ davinciCtx });
 
 			const beforeWriteArgs = beforeWriteCallback.getCall(0).args[0];
 			const afterWriteArgs = afterWriteCallback.getCall(0).args[0];
 
 			should(beforeWriteCallback.callCount).be.equal(1);
-			should(beforeWriteArgs).match({ hookName: 'save', context });
+			should(beforeWriteArgs).match({ hookName: 'save', davinciCtx });
 			should(beforeWriteArgs)
 				.have.property('doc')
 				.have.property('firstname')
 				.equal('Michael');
 
 			should(afterWriteCallback.callCount).be.equal(1);
-			should(afterWriteArgs).match({ hookName: 'save', context });
+			should(afterWriteArgs).match({ hookName: 'save', davinciCtx });
 			should(afterWriteArgs)
 				.have.property('result')
 				.have.property('firstname')
@@ -384,7 +384,7 @@ describe('mongoose hooks', () => {
 		it('should correctly trigger the hooks', async () => {
 			const customer = await CustomerModel.findOne({ firstname: 'Mike' }, null, { skipHooks: true });
 
-			await customer.remove({ context });
+			await customer.remove({ davinciCtx });
 
 			const beforeDeleteArgs = beforeDeleteCallback.getCall(0).args[0];
 			const afterDeleteArgs = afterDeleteCallback.getCall(0).args[0];

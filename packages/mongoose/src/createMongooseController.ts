@@ -23,11 +23,11 @@ interface IParsedMongooseFilters {
 export interface IMongooseController {
 	maxLimit: number;
 	defaultQueryParams: { $limit: number; $skip: number };
-	find(query: object, context: object): Promise<any>;
-	findOne(query: object, context: object): Promise<any>;
-	findById(id: string, query: object, context: object): Promise<any>;
-	create(data: any, context: object): Promise<any>;
-	updateById(id: string, data: any, context: object): Promise<any>;
+	find(query: object, davinciCtx: object): Promise<any>;
+	findOne(query: object, davinciCtx: object): Promise<any>;
+	findById(id: string, query: object, davinciCtx: object): Promise<any>;
+	create(data: any, davinciCtx: object): Promise<any>;
+	updateById(id: string, data: any, davinciCtx: object): Promise<any>;
 }
 
 /**
@@ -193,13 +193,13 @@ export const createMongooseController = <T extends Constructor<{}>>(
 		public async find(@route.query() query: QueryParameters, @context() ctx) {
 			if (!this.model) throw new httpErrors.MethodNotAllowed('No model implemented');
 			const { limit, skip, sort, select, populate, where } = this.parseQuery(query, ctx);
-			const mQuery = this.model.find(where, select, { limit, skip, sort, context: ctx });
+			const mQuery = this.model.find(where, select, { limit, skip, sort, davinciCtx: ctx });
 
 			const [data, total] = await bluebird.all([
 				populate ? mQuery.populate(populate) : mQuery,
 				(_.isEmpty(where) && useEstimatedDocumentCount) ?
-					this.model.estimatedDocumentCount().setOptions({ context: ctx })
-					: this.model.countDocuments(where).setOptions({ context: ctx })
+					this.model.estimatedDocumentCount().setOptions({ davinciCtx: ctx })
+					: this.model.countDocuments(where).setOptions({ davinciCtx: ctx })
 			]);
 
 			return {
@@ -213,7 +213,7 @@ export const createMongooseController = <T extends Constructor<{}>>(
 		public async findOne(@route.query() query, @context() ctx) {
 			if (!this.model) throw new httpErrors.MethodNotAllowed('No model implemented');
 			const { sort, select, populate, where } = this.parseQuery(query);
-			const mQuery = this.model.findOne(where, select, { sort, context: ctx });
+			const mQuery = this.model.findOne(where, select, { sort, davinciCtx: ctx });
 			if (populate) {
 				mQuery.populate(populate);
 			}
@@ -240,7 +240,7 @@ export const createMongooseController = <T extends Constructor<{}>>(
 		@route.post({ path: '/', summary: 'Create', responses: { 200: RSchema } })
 		public async create(@route.body() data: RSchema, @context() ctx) {
 			if (!this.model) throw new httpErrors.MethodNotAllowed('No model implemented');
-			const [record] = await this.model.create([data], { context: ctx });
+			const [record] = await this.model.create([data], { davinciCtx: ctx });
 
 			return record;
 		}
@@ -257,7 +257,7 @@ export const createMongooseController = <T extends Constructor<{}>>(
 				new: true,
 				runValidators: true,
 				setDefaultsOnInsert: true,
-				context: ctx
+				davinciCtx: ctx
 			});
 
 			if (!updated) {
@@ -270,7 +270,7 @@ export const createMongooseController = <T extends Constructor<{}>>(
 		@route.del({ path: '/{id}', summary: 'Delete', responses: { 200: RSchema } })
 		public async deleteById(@route.path() id: string, @context() ctx) {
 			if (!this.model) throw new httpErrors.MethodNotAllowed('No model implemented');
-			const removed = await this.model.findOneAndDelete({ _id: id }, { context: ctx });
+			const removed = await this.model.findOneAndDelete({ _id: id }, { davinciCtx: ctx });
 
 			if (!removed) {
 				throw new httpErrors.NotFound();
@@ -354,7 +354,7 @@ export const createMongooseController = <T extends Constructor<{}>>(
 						match: where,
 						populate,
 						select,
-						options: { limit, skip, sort, context: ctx }
+						options: { limit, skip, sort, davinciCtx: ctx }
 					})
 				);
 
