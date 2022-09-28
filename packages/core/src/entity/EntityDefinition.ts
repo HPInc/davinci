@@ -28,7 +28,6 @@ export class EntityDefinition {
 	private name?: string;
 	private readonly type?: TypeValue;
 	private readonly jsonSchema?: JSONSchema;
-	private relatedEntityDefinitionsMap = new Map<TypeValue, EntityDefinition>();
 	private entityDefinitionsMapCache = new Map<TypeValue, EntityDefinition>();
 
 	constructor(options: EntityDefinitionOptions) {
@@ -39,10 +38,6 @@ export class EntityDefinition {
 		this.name = options.name ?? (this.type as ClassType)?.name;
 		this.entityDefinitionsMapCache = options.entityDefinitionsMapCache;
 		this.jsonSchema = this.reflect();
-	}
-
-	public getRelatedEntityDefinitionsMap() {
-		return this.relatedEntityDefinitionsMap;
 	}
 
 	public getName() {
@@ -95,21 +90,17 @@ export class EntityDefinition {
 
 					if (this.entityDefinitionsMapCache?.has(theClass)) {
 						const entityDefinition = this.entityDefinitionsMapCache?.get(theClass);
-						this.relatedEntityDefinitionsMap.set(theClass, entityDefinition);
 
 						return {
-							_$ref: this.relatedEntityDefinitionsMap.get(theClass)
+							_$ref: entityDefinition
 						};
 					}
 
-					// check if the class has been already added to the related entity definitions map
-					if (this.relatedEntityDefinitionsMap.has(theClass)) {
-						return {
-							_$ref: this.relatedEntityDefinitionsMap.get(theClass)
-						};
-					}
-					const entityDefinition = new EntityDefinition({ type: theClass });
-					this.relatedEntityDefinitionsMap.set(theClass, entityDefinition);
+					const entityDefinition = new EntityDefinition({
+						type: theClass,
+						entityDefinitionsMapCache: this.entityDefinitionsMapCache
+					});
+					this.entityDefinitionsMapCache?.set(theClass, entityDefinition);
 
 					return {
 						_$ref: entityDefinition

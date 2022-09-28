@@ -46,14 +46,20 @@ describe('AjvValidator', () => {
 		@entity.prop({ type: [Phone] })
 		phones: Phone[];
 
-		@entity.prop()
-		home: Address;
-
 		@entity.prop({ type: [Address] })
 		otherAddresses: Address[];
 
 		@entity.prop()
+		home: Address;
+
+		@entity.prop()
 		birth: Birth;
+	}
+
+	@entity()
+	class PayingCustomer extends Customer {
+		@entity.prop()
+		creditCard: string;
 	}
 
 	const initAjvValidator = () => {
@@ -84,7 +90,15 @@ describe('AjvValidator', () => {
 				options: { in: 'query', required: true },
 				value: [{ firstname: 'John' }]
 			},
-			{ name: 'accountId', source: 'header', type: Number, value: '1000' }
+			{ name: 'accountId', source: 'header', type: Number, value: '1000' },
+			{
+				name: 'payingCustomerArray',
+				source: 'query',
+				type: [PayingCustomer],
+				options: { in: 'query', required: true },
+				value: [{ firstname: 'John' }]
+			},
+			{ source: 'request', value: {} }
 		];
 
 		return { ajvValidator, parametersConfig };
@@ -97,6 +111,7 @@ describe('AjvValidator', () => {
 			const { schema: customerSchema } = ajvValidator.getAjvSchema('Customer');
 			const { schema: birthSchema } = ajvValidator.getAjvSchema('Birth');
 			const { schema: addressSchema } = ajvValidator.getAjvSchema('Address');
+			const { schema: payingCustomerSchema } = ajvValidator.getAjvSchema('PayingCustomer');
 
 			expect(schema).to.be.deep.equal({
 				type: 'object',
@@ -125,9 +140,15 @@ describe('AjvValidator', () => {
 									$ref: 'Customer'
 								},
 								type: 'array'
+							},
+							payingCustomerArray: {
+								items: {
+									$ref: 'PayingCustomer'
+								},
+								type: 'array'
 							}
 						},
-						required: ['houseNumber', 'customerArray']
+						required: ['houseNumber', 'customerArray', 'payingCustomerArray']
 					},
 					headers: {
 						type: 'object',
@@ -212,6 +233,51 @@ describe('AjvValidator', () => {
 				},
 				required: []
 			});
+			expect(payingCustomerSchema).to.be.deep.equal({
+				$id: 'PayingCustomer',
+				title: 'PayingCustomer',
+				type: 'object',
+				properties: {
+					firstname: {
+						type: 'string'
+					},
+					lastname: {
+						type: 'string'
+					},
+					phones: {
+						type: 'array',
+						items: {
+							title: 'phones',
+							type: 'object',
+							properties: {
+								isDefault: {
+									type: 'boolean'
+								},
+								phone: {
+									type: 'number'
+								}
+							},
+							required: ['phone']
+						}
+					},
+					home: {
+						$ref: 'Address'
+					},
+					otherAddresses: {
+						type: 'array',
+						items: {
+							$ref: 'Address'
+						}
+					},
+					birth: {
+						$ref: 'Birth'
+					},
+					creditCard: {
+						type: 'string'
+					}
+				},
+				required: ['lastname']
+			});
 		});
 	});
 
@@ -235,6 +301,11 @@ describe('AjvValidator', () => {
 						{
 							lastname: 'Bird'
 						}
+					],
+					payingCustomerArray: [
+						{
+							lastname: 'Bird'
+						}
 					]
 				},
 				headers: {
@@ -254,6 +325,11 @@ describe('AjvValidator', () => {
 					street: 'My road',
 					houseNumber: '40',
 					customerArray: [
+						{
+							lastname: 'Bird'
+						}
+					],
+					payingCustomerArray: [
 						{
 							lastname: 'Bird'
 						}
