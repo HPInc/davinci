@@ -15,9 +15,9 @@ export default class BookController {
 	}
 
 	@query([BookSchema], 'books')
-	findBooks(@arg() query: BookFilter, @ctx() context: any, @info() gqlInfo, @selectionSet() gqlSelectionSet) {
+	findBooks(@arg() query: BookFilter, @ctx() davinciCtx: any, @info() gqlInfo, @selectionSet() gqlSelectionSet) {
 		console.log(gqlInfo, gqlSelectionSet);
-		return this.model.find(query, {}, { context });
+		return this.model.find(query, {}, { davinciCtx });
 	}
 
 	@mutation(BookSchema, 'createBook')
@@ -31,7 +31,7 @@ export default class BookController {
 	}
 
 	@fieldResolver<AuthorSchema>(AuthorSchema, 'books', [BookSchema])
-	getAuthorBooks(@parent() author: AuthorSchema, @arg() query: BookFilter, @ctx() context: any) {
-		return this.model.find({ ...query, authorIds: author.id }).setOptions({ context });
+	getAuthorBooks(@parent() author: AuthorSchema, @arg() query: BookFilter, @ctx() davinciCtx: any) {
+		return this.model.find({ ...query, authorIds: author.id }).setOptions({ davinciCtx });
 	}
 }
