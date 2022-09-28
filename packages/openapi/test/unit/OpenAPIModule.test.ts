@@ -630,7 +630,7 @@ describe('OpenAPIModule', () => {
 
 	describe('endpoints', () => {
 		it('should expose an endpoint returning the spec', async () => {
-			await initApp({ document: { path: '/swagger-doc' } });
+			await initApp({ document: { path: '/swagger-doc', spec: { info: { title: '', version: '' } } } });
 
 			const { data } = await axios.get('http://localhost:3000/swagger-doc');
 
@@ -646,7 +646,10 @@ describe('OpenAPIModule', () => {
 		});
 
 		it('should be able to disable the spec endpoint but enable the swagger UI', async () => {
-			await initApp({ document: { enabled: false }, explorer: { path: '/swagger-ui' } });
+			await initApp({
+				document: { spec: { info: { title: '', version: '' } }, enabled: false },
+				explorer: { path: '/swagger-ui' }
+			});
 
 			const { data } = await axios.get('http://localhost:3000/swagger-ui');
 

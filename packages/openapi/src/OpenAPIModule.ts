@@ -17,7 +17,7 @@ export interface OpenAPIModuleOptions {
 	document: {
 		enabled?: boolean;
 		path?: string;
-		spec?: Omit<OpenAPIV3.Document, 'paths' | 'openapi'>;
+		spec: Omit<OpenAPIV3.Document, 'paths' | 'openapi'>;
 	};
 	explorer?: {
 		enabled?: boolean;
