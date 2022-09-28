@@ -9,6 +9,7 @@ import { createSandbox } from 'sinon';
 import { reflect } from '@davinci/reflector';
 import { expect } from '../support/chai';
 import { ExpressHttpServer } from '../../src';
+import express from 'express';
 
 const sinon = createSandbox();
 
@@ -210,18 +211,21 @@ describe('ExpressHttpServer', () => {
 	describe('propagation', () => {
 		it('should propagate the calls to the underlying express instance', async () => {
 			const expressHttpServer = new ExpressHttpServer();
-			const express = expressHttpServer.getInstance();
+			const expressApp = expressHttpServer.getInstance();
 			const expressMocks = {
-				listen: sinon.stub(express, 'listen'),
-				use: sinon.stub(express, 'use'),
-				all: sinon.stub(express, 'all')
+				listen: sinon.stub(expressApp, 'listen'),
+				use: sinon.stub(expressApp, 'use'),
+				all: sinon.stub(expressApp, 'all')
 			};
+			const staticMock = sinon.stub(express, 'static');
 			const cb = () => {};
 
 			expressHttpServer.use('/', cb);
 			expect(expressMocks.use.firstCall.args).to.be.deep.equal(['/', cb]);
 			expressHttpServer.all('/', cb);
 			expect(expressMocks.all.firstCall.args).to.be.deep.equal(['/', cb]);
+			expressHttpServer.static('/', { redirect: true });
+			expect(staticMock.firstCall.args).to.be.deep.equal(['/', { redirect: true }]);
 			expressHttpServer.listen();
 			expect(expressMocks.listen.firstCall.args).to.be.deep.equal([3000]);
 		});

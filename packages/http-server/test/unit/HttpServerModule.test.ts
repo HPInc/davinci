@@ -6,6 +6,8 @@ import {
 	App,
 	context,
 	entity,
+	EntityDefinition,
+	EntityRegistry,
 	executeInterceptorsStack,
 	interceptor,
 	InterceptorBag,
@@ -520,6 +522,96 @@ describe('HttpServerModule', () => {
 					accountId: '1000'
 				}
 			});
+		});
+	});
+
+	describe('#getEntityRegistry', () => {
+		it('should return the populated entity registry', async () => {
+			@entity()
+			class Customer {
+				@entity.prop()
+				firstname: string;
+
+				@entity.prop()
+				lastname: string;
+			}
+
+			@route.controller({ basePath: '/customers' })
+			class CustomerController {
+				@route.get({ path: '/:id' })
+				updateById(
+					@route.body() body: Customer,
+					@route.query() query: string,
+					@route.request() req,
+					@route.response() res,
+					@context() ctx
+				) {
+					return { body, query, req, res, ctx };
+				}
+			}
+
+			const dummyHttpServer = new DummyHttpServer();
+			const app = new App();
+			await app.registerController(CustomerController).registerModule(dummyHttpServer);
+			await app.init();
+			await dummyHttpServer.createRoutes();
+
+			const entityRegistry = dummyHttpServer.getEntityRegistry();
+
+			expect(entityRegistry).to.be.instanceof(EntityRegistry);
+			const [entries] = Array.from(entityRegistry.getEntityDefinitionMap().entries());
+			expect(entries[0]).to.be.equal(Customer);
+			expect(entries[1]).to.be.instanceof(EntityDefinition);
+		});
+	});
+
+	describe('#getRoutes', () => {
+		it('should return the list of registered routes', async () => {
+			@entity()
+			class Customer {
+				@entity.prop()
+				firstname: string;
+
+				@entity.prop()
+				lastname: string;
+			}
+
+			@route.controller({ basePath: '/customers' })
+			class CustomerController {
+				@route.get({ path: '/:id' })
+				updateById(
+					@route.body() body: Customer,
+					@route.query() query: string,
+					@route.request() req,
+					@route.response() res,
+					@context() ctx
+				) {
+					return { body, query, req, res, ctx };
+				}
+			}
+
+			const dummyHttpServer = new DummyHttpServer();
+			const app = new App();
+			await app.registerController(CustomerController).registerModule(dummyHttpServer);
+			await app.init();
+			await dummyHttpServer.createRoutes();
+
+			const routes = dummyHttpServer.getRoutes();
+
+			expect(routes).to.containSubset([
+				{
+					path: '/customers/:id',
+					verb: 'get',
+					methodDecoratorMetadata: {
+						module: 'http-server',
+						type: 'route',
+						verb: 'get',
+						options: {
+							path: '/:id'
+						}
+					}
+				}
+			]);
 		});
 	});
 });

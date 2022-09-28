@@ -118,7 +118,7 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 	}
 
 	public static(path: string, options?: StaticServeOptions) {
-		return express.static(path, options);
+		return this.instance.use(express.static(path, options));
 	}
 
 	listen() {
