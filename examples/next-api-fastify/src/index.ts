@@ -6,16 +6,40 @@
 import { createApp } from '@davinci/core';
 import { FastifyHttpServer } from '@davinci/http-server-fastify';
 import { HealthChecksModule } from '@davinci/health-checks';
+import { OpenAPIModule } from '@davinci/openapi';
 import { CustomerController } from './api/customer';
 
 const app = createApp();
 const contextFactory = ({ request }) => ({ accountId: request.headers['x-accountid'] });
 
-app.registerController([CustomerController]);
-app.registerModule(
+app.registerController(CustomerController).registerModule(
 	new FastifyHttpServer().setContextFactory(contextFactory),
-	new HealthChecksModule({ healthChecks: [{ name: 'liveness', endpoint: '/.ah/live' }] })
+	new HealthChecksModule({ healthChecks: [{ name: 'liveness', endpoint: '/.ah/live' }] }),
+	new OpenAPIModule({
+		document: {
+			spec: {
+				info: { version: '1.0.0', title: 'Customer API', description: 'My nice Customer API' },
+				components: {
+					securitySchemes: {
+						bearerAuth: {
+							type: 'http',
+							scheme: 'bearer',
+							bearerFormat: 'JWT'
+						}
+					}
+				},
+				security: [
+					{
+						bearerAuth: []
+					}
+				]
+			}
+		}
+	})
 );
-app.init();
+
+if (require.main === module) {
+	app.init();
+}
 
 export default app;

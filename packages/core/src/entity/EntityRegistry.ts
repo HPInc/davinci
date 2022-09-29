@@ -37,8 +37,6 @@ export class EntityRegistry {
 		});
 
 		this.entityDefinitionMap.set(typeValue, entityDefinition);
-		const relatedEntitiesMap = entityDefinition.getRelatedEntityDefinitionsMap();
-		relatedEntitiesMap.forEach((value, key) => this.entityDefinitionMap.set(key, value));
 
 		return entityDefinition.getJsonSchema();
 	}

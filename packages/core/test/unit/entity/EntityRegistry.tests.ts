@@ -49,9 +49,9 @@ describe('EntityRegistry', () => {
 			required: ['lastname']
 		});
 		expect(jsonSchema.properties.birth._$ref).to.be.instanceof(EntityDefinition);
-		expect(entries[0][0]).to.be.equal(Customer);
+		expect(entries[0][0]).to.be.equal(Birth);
 		expect(entries[0][1]).to.be.instanceof(EntityDefinition);
-		expect(entries[1][0]).to.be.equal(Birth);
+		expect(entries[1][0]).to.be.equal(Customer);
 		expect(entries[1][1]).to.be.instanceof(EntityDefinition);
 	});
 

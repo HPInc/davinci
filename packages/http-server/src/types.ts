@@ -5,7 +5,7 @@
 
 import { ClassReflection, MethodReflection, TypeValue } from '@davinci/reflector';
 import { JSONSchema } from '@davinci/core';
-import { ParameterDecoratorOptions } from './decorators';
+import { MethodDecoratorMetadata, ParameterDecoratorOptions, Verb } from './decorators';
 import { AjvValidator, AjvValidatorOptions } from './AjvValidator';
 
 export type ErrorHandler<TRequest = any, TResponse = any> = (
@@ -63,7 +63,7 @@ export type ParameterConfiguration<Request> =
 			value?: unknown;
 	  };
 
-export type EndpointValidationSchema = JSONSchema<any> & {
+export type EndpointSchema = JSONSchema<any> & {
 	properties: {
 		body?: JSONSchema<any>;
 		params?: JSONSchema<any>;
@@ -71,3 +71,20 @@ export type EndpointValidationSchema = JSONSchema<any> & {
 		headers?: JSONSchema<any>;
 	};
 };
+
+export interface Route<Request> {
+	path: string;
+	verb: Verb;
+	parametersConfig: ParameterConfiguration<Request>[];
+	methodDecoratorMetadata: MethodDecoratorMetadata;
+}
+
+export interface StaticServeOptions {
+	dotfiles?: 'allow' | 'deny' | 'ignore';
+	etag?: boolean;
+	immutable?: boolean;
+	index?: string[] | string | false;
+	lastModified?: boolean;
+	maxAge?: number | string;
+	redirect?: boolean;
+}

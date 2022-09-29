@@ -22,12 +22,12 @@ import {
 	HttpServerModuleOptions,
 	ParameterConfiguration,
 	ParameterSource,
-	RequestHandler
+	RequestHandler,
+	Route,
+	StaticServeOptions
 } from './types';
 import { ControllerDecoratorMetadata, MethodDecoratorMetadata, ParameterDecoratorMetadata } from './decorators';
 import { AjvValidator } from './AjvValidator';
-
-// const isPrimitive = typeValue => [Object, Number, String, Date].includes(typeValue);
 
 export abstract class HttpServerModule<
 	Request = unknown,
@@ -39,6 +39,7 @@ export abstract class HttpServerModule<
 	contextFactory?: ContextFactory<unknown>;
 	entityRegistry: EntityRegistry = new EntityRegistry();
 	validator: AjvValidator;
+	routes: Route<Request>[] = [];
 	logger = pino({ name: 'http-server' });
 	protected httpServer: Server;
 
@@ -113,9 +114,21 @@ export abstract class HttpServerModule<
 					fullPath = fullPath.slice(0, -1);
 				}
 
+				const parametersConfig = await this.createParametersConfigurations({
+					controllerReflection,
+					methodReflection
+				});
+
+				this.routes.push({
+					path: fullPath,
+					verb,
+					parametersConfig,
+					methodDecoratorMetadata
+				});
+
 				return this[verb](
 					fullPath,
-					await this.createRequestHandler(controller, methodName, {
+					await this.createRequestHandler(controller, methodName, parametersConfig, {
 						methodReflection,
 						controllerReflection
 					})
@@ -127,6 +140,7 @@ export abstract class HttpServerModule<
 	public async createRequestHandler(
 		controller: InstanceType<ClassType>,
 		methodName: string,
+		parametersConfig: ParameterConfiguration<Request>[],
 		reflections: { methodReflection: MethodReflection; controllerReflection: ClassReflection }
 	) {
 		const { methodReflection, controllerReflection } = reflections;
@@ -137,7 +151,6 @@ export abstract class HttpServerModule<
 			...getInterceptorsHandlers(methodReflection)
 		];
 
-		const parametersConfig = await this.createParametersConfigurations({ controllerReflection, methodReflection });
 		const validatorFunction = await this.validator.createValidatorFunction({ parametersConfig });
 
 		// using a named function here for better instrumentation and reporting
@@ -261,6 +274,8 @@ export abstract class HttpServerModule<
 	// abstract options(handler: RequestHandler<Request, Response>);
 	abstract options(path: unknown, handler: RequestHandler<Request, Response>);
 
+	abstract static(path: string, options?: StaticServeOptions);
+
 	abstract listen(): unknown | Promise<unknown>;
 
 	abstract initHttpServer(): void;
@@ -382,6 +397,14 @@ export abstract class HttpServerModule<
 
 			return acc;
 		}, []);
+	}
+
+	getEntityRegistry() {
+		return this.entityRegistry;
+	}
+
+	getRoutes() {
+		return this.routes;
 	}
 
 	private prepareInterceptorBag({

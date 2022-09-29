@@ -6,6 +6,8 @@ import {
 	App,
 	context,
 	entity,
+	EntityDefinition,
+	EntityRegistry,
 	executeInterceptorsStack,
 	interceptor,
 	InterceptorBag,
@@ -40,6 +42,7 @@ describe('HttpServerModule', () => {
 		all() {}
 		options() {}
 		listen() {}
+		static() {}
 		initHttpServer() {}
 		setInstance() {}
 		getInstance() {}
@@ -135,10 +138,6 @@ describe('HttpServerModule', () => {
 				create() {}
 			}
 			class MyDummyHttpServer extends DummyHttpServer {
-				onRegister(app: App) {
-					this.app = app;
-				}
-
 				get(...args) {
 					return ['get', ...args];
 				}
@@ -148,7 +147,8 @@ describe('HttpServerModule', () => {
 				}
 			}
 			const dummyHttpServer = new MyDummyHttpServer();
-			await new App().registerController(CustomerController).registerModule(dummyHttpServer);
+			const app = new App();
+			await app.registerController(CustomerController).registerModule(dummyHttpServer);
 			await app.init();
 			const [[getRoute, postRoute]] = await dummyHttpServer.createRoutes();
 
@@ -171,10 +171,15 @@ describe('HttpServerModule', () => {
 			const dummyHttpServer = new DummyHttpServer();
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
-				controllerReflection,
-				methodReflection
-			});
+			const requestHandler = await dummyHttpServer.createRequestHandler(
+				new CustomerController(),
+				'find',
+				dummyHttpServer.createParametersConfigurations({ controllerReflection, methodReflection }),
+				{
+					controllerReflection,
+					methodReflection
+				}
+			);
 			const reqMock: Request = { body: {}, query: { where: '' } };
 			const resMock = {};
 			const result = await requestHandler(reqMock, resMock);
@@ -198,10 +203,15 @@ describe('HttpServerModule', () => {
 			const dummyHttpServer = new DummyHttpServer();
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
-				controllerReflection,
-				methodReflection
-			});
+			const requestHandler = await dummyHttpServer.createRequestHandler(
+				new CustomerController(),
+				'find',
+				dummyHttpServer.createParametersConfigurations({ controllerReflection, methodReflection }),
+				{
+					controllerReflection,
+					methodReflection
+				}
+			);
 			const reqMock = { body: 'body', query: { where: 'where' } };
 			const resMock = {};
 			const result = await requestHandler(reqMock, resMock);
@@ -227,10 +237,15 @@ describe('HttpServerModule', () => {
 			const dummyHttpServer = new DummyHttpServer();
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
-				controllerReflection,
-				methodReflection
-			});
+			const requestHandler = await dummyHttpServer.createRequestHandler(
+				new CustomerController(),
+				'find',
+				dummyHttpServer.createParametersConfigurations({ controllerReflection, methodReflection }),
+				{
+					controllerReflection,
+					methodReflection
+				}
+			);
 			const reqMock = {
 				headers: { 'x-my-header': '1' },
 				body: { myBody: true },
@@ -288,10 +303,15 @@ describe('HttpServerModule', () => {
 			const dummyHttpServer = new DummyHttpServer().setContextFactory(contextFactory);
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
-				controllerReflection,
-				methodReflection
-			});
+			const requestHandler = await dummyHttpServer.createRequestHandler(
+				new CustomerController(),
+				'find',
+				dummyHttpServer.createParametersConfigurations({ controllerReflection, methodReflection }),
+				{
+					controllerReflection,
+					methodReflection
+				}
+			);
 			const reqMock = {
 				body: { prop: true },
 				query: {
@@ -337,10 +357,15 @@ describe('HttpServerModule', () => {
 			const dummyHttpServer = new DummyHttpServer().setContextFactory(contextFactory);
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
-				controllerReflection,
-				methodReflection
-			});
+			const requestHandler = await dummyHttpServer.createRequestHandler(
+				new CustomerController(),
+				'find',
+				dummyHttpServer.createParametersConfigurations({ controllerReflection, methodReflection }),
+				{
+					controllerReflection,
+					methodReflection
+				}
+			);
 			const reqMock = {
 				body: { prop: true },
 				query: {
@@ -370,10 +395,15 @@ describe('HttpServerModule', () => {
 			const errorMock = sinon.stub(dummyHttpServer.logger, 'error');
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
-				controllerReflection,
-				methodReflection
-			});
+			const requestHandler = await dummyHttpServer.createRequestHandler(
+				new CustomerController(),
+				'find',
+				dummyHttpServer.createParametersConfigurations({ controllerReflection, methodReflection }),
+				{
+					controllerReflection,
+					methodReflection
+				}
+			);
 			await requestHandler({}, {});
 			expect(errorMock.getCall(0).args[1]).to.be.equal('An error happened during the creation of the context');
 		});
@@ -492,6 +522,96 @@ describe('HttpServerModule', () => {
 					accountId: '1000'
 				}
 			});
+		});
+	});
+
+	describe('#getEntityRegistry', () => {
+		it('should return the populated entity registry', async () => {
+			@entity()
+			class Customer {
+				@entity.prop()
+				firstname: string;
+
+				@entity.prop()
+				lastname: string;
+			}
+
+			@route.controller({ basePath: '/customers' })
+			class CustomerController {
+				@route.get({ path: '/:id' })
+				updateById(
+					@route.body() body: Customer,
+					@route.query() query: string,
+					@route.request() req,
+					@route.response() res,
+					@context() ctx
+				) {
+					return { body, query, req, res, ctx };
+				}
+			}
+
+			const dummyHttpServer = new DummyHttpServer();
+			const app = new App();
+			await app.registerController(CustomerController).registerModule(dummyHttpServer);
+			await app.init();
+			await dummyHttpServer.createRoutes();
+
+			const entityRegistry = dummyHttpServer.getEntityRegistry();
+
+			expect(entityRegistry).to.be.instanceof(EntityRegistry);
+			const [entries] = Array.from(entityRegistry.getEntityDefinitionMap().entries());
+			expect(entries[0]).to.be.equal(Customer);
+			expect(entries[1]).to.be.instanceof(EntityDefinition);
+		});
+	});
+
+	describe('#getRoutes', () => {
+		it('should return the list of registered routes', async () => {
+			@entity()
+			class Customer {
+				@entity.prop()
+				firstname: string;
+
+				@entity.prop()
+				lastname: string;
+			}
+
+			@route.controller({ basePath: '/customers' })
+			class CustomerController {
+				@route.get({ path: '/:id' })
+				updateById(
+					@route.body() body: Customer,
+					@route.query() query: string,
+					@route.request() req,
+					@route.response() res,
+					@context() ctx
+				) {
+					return { body, query, req, res, ctx };
+				}
+			}
+
+			const dummyHttpServer = new DummyHttpServer();
+			const app = new App();
+			await app.registerController(CustomerController).registerModule(dummyHttpServer);
+			await app.init();
+			await dummyHttpServer.createRoutes();
+
+			const routes = dummyHttpServer.getRoutes();
+
+			expect(routes).to.containSubset([
+				{
+					path: '/customers/:id',
+					verb: 'get',
+					methodDecoratorMetadata: {
+						module: 'http-server',
+						type: 'route',
+						verb: 'get',
+						options: {
+							path: '/:id'
+						}
+					}
+				}
+			]);
 		});
 	});
 });

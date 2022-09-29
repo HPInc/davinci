@@ -9,6 +9,7 @@ import { createSandbox } from 'sinon';
 import { reflect } from '@davinci/reflector';
 import { expect } from '../support/chai';
 import { FastifyHttpServer } from '../../src';
+import fastifyStatic from '@fastify/static';
 
 const sinon = createSandbox();
 
@@ -86,8 +87,12 @@ describe('FastifyHttpServer', () => {
 				body: { isBody: true }
 			};
 			const res = { status: sinon.stub(), send: sinon.stub(), json: sinon.stub() };
+			const parametersConfig = await fastifyHttpServer.createParametersConfigurations({
+				controllerReflection,
+				methodReflection
+			});
 
-			const handler = await fastifyHttpServer.createRequestHandler(controller, 'getAll', {
+			const handler = await fastifyHttpServer.createRequestHandler(controller, 'getAll', parametersConfig, {
 				controllerReflection,
 				methodReflection
 			});
@@ -122,8 +127,12 @@ describe('FastifyHttpServer', () => {
 			const methodReflection = controllerReflection.methods[0];
 			const req = { query: { filter: 'myFilter' } };
 			const res = { status: sinon.stub(), send: sinon.stub(), json: sinon.stub() };
+			const parametersConfig = await fastifyHttpServer.createParametersConfigurations({
+				controllerReflection,
+				methodReflection
+			});
 
-			const handler = await fastifyHttpServer.createRequestHandler(controller, 'getAll', {
+			const handler = await fastifyHttpServer.createRequestHandler(controller, 'getAll', parametersConfig, {
 				controllerReflection,
 				methodReflection
 			});
@@ -202,7 +211,8 @@ describe('FastifyHttpServer', () => {
 			const fastifyMocks = {
 				listen: sinon.stub(fastify, 'listen'),
 				post: sinon.stub(fastify, 'post'),
-				all: sinon.stub(fastify, 'all')
+				all: sinon.stub(fastify, 'all'),
+				register: sinon.stub(fastify, 'register')
 			};
 			const cb = () => {};
 
@@ -210,6 +220,11 @@ describe('FastifyHttpServer', () => {
 			expect(fastifyMocks.post.firstCall.args).to.be.deep.equal(['/', cb]);
 			fastifyHttpServer.all('/', cb);
 			expect(fastifyMocks.all.firstCall.args).to.be.deep.equal(['/', cb]);
+			fastifyHttpServer.static('/', { redirect: true });
+			expect(fastifyMocks.register.firstCall.args).to.be.deep.equal([
+				fastifyStatic,
+				{ root: '/', redirect: true }
+			]);
 			fastifyHttpServer.listen();
 			expect(fastifyMocks.listen.firstCall.args).to.be.deep.equal([{ port: 3000 }]);
 		});
