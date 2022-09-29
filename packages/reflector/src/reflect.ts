@@ -11,5 +11,8 @@ export {
 	decorateParameter,
 	decorate,
 	ObjectReflection,
-	ClassReflection
+	ClassReflection,
+	MethodReflection,
+	PropertyReflection,
+	DecoratorId
 } from '@plumier/reflect';

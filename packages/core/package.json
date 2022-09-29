@@ -1,0 +1,27 @@
+{
+	"name": "@davinci/core",
+	"version": "1.9.1",
+	"description": "Framework for rapid and consistent API development",
+	"main": "build-cjs/index.js",
+	"module": "build-esm/index.js",
+	"types": "build-cjs/index.d.ts",
+	"sideEffects": false,
+	"scripts": {
+		"build": "npm run build-cj && npm run build-esm",
+		"build-cj": "tsc -p tsconfig.cjs.release.json",
+		"build-esm": "tsc -p tsconfig.esm.release.json",
+		"lint": "../../node_modules/eslint/bin/eslint.js --color --c .eslintrc 'src/**/*.ts'",
+		"test": "mocha --exit",
+		"cover": "nyc npm test"
+	},
+	"author": "HP",
+	"license": "MIT",
+	"dependencies": {
+		"@davinci/reflector": "^1.1.1",
+		"deepmerge": "^4.2.2",
+		"pino": "7.9.1"
+	},
+	"devDependencies": {
+		"typescript": "^4.6.2"
+	}
+}

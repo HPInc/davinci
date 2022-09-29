@@ -23,7 +23,7 @@
 		"esModuleInterop": true,
 		"removeComments": false,
 		"skipLibCheck": false,
-		"lib": ["ES2019"]
+		"lib": ["ES2019", "DOM"]
 	},
 	"include": ["packages/**/*", "examples/**/*"]
 }
