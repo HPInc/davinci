@@ -40,8 +40,6 @@ export class OpenAPIModule extends Module {
 	httpServer: Server;
 	entityRegistry: EntityRegistry;
 	openAPIDoc: DeepPartial<OpenAPIV3.Document>;
-	// DRY function to generate single item or array definition objects
-	private;
 
 	constructor(moduleOptions: OpenAPIModuleOptions) {
 		super();
