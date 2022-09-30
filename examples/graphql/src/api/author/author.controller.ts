@@ -25,14 +25,14 @@ export default class AuthorController {
 		@arg() where: AuthorFilter,
 		@arg() paginate: AuthorPagination,
 		@selectionSet() selection,
-		@context() context: any
+		@context() davinciContext: any
 	) {
 		const q = queryHelpers.toMongodbQuery(where);
 		const { $limit, $skip } = queryHelpers.toMongodbQuery(paginate || {});
 		const projection = queryHelpers.toMongdbProjection(selection || []);
 
 		return this.model
-			.find(q, projection, { context })
+			.find(q, projection, { davinciContext })
 			.limit($limit)
 			.skip($skip);
 	}
@@ -54,7 +54,7 @@ export default class AuthorController {
 	}
 
 	@fieldResolver(BookSchema, 'authors', [AuthorSchema])
-	getBookAuthors(@parent() book: BookSchema, @arg() query: AuthorFilter, @context() context: any) {
-		return this.findAuthors({ ...query, _id: { IN: book.authorIds } }, null, null, context);
+	getBookAuthors(@parent() book: BookSchema, @arg() query: AuthorFilter, @context() davinciContext: any) {
+		return this.findAuthors({ ...query, _id: { IN: book.authorIds } }, null, null, davinciContext);
 	}
 }

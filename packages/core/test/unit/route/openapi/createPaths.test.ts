@@ -8,8 +8,8 @@ describe('createPathsDefinition', () => {
 		class MyClass {
 			constructor() {}
 			@route.get({ path: '/', summary: 'List', description: 'My find method', responses: { '200': {} } })
-			find(@route.query({ name: 'query', schema: { type: 'string' } }) query, context) {
-				return { query, context };
+			find(@route.query({ name: 'query', schema: { type: 'string' } }) query, davinciContext) {
+				return { query, davinciContext };
 			}
 		}
 

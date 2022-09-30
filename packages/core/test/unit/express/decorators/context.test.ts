@@ -5,12 +5,12 @@ import { context } from '../../../../src/express';
 describe('@context()', () => {
 	it('should decorate correctly', () => {
 		class MyClass {
-			myMethod(@context() context) {
-				return context;
+			myMethod(@context() davinciContext) {
+				return davinciContext;
 			}
 
-			myOtherMethod(@context() context) {
-				return context;
+			myOtherMethod(@context() davinciContext) {
+				return davinciContext;
 			}
 		}
 
@@ -35,8 +35,8 @@ describe('@context()', () => {
 
 	it('should ignore a duplicate decorator', () => {
 		class MyClass {
-			myMethod(@context() @context() context) {
-				return context;
+			myMethod(@context() @context() davinciContext) {
+				return davinciContext;
 			}
 		}
 
