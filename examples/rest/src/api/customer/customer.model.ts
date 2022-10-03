@@ -7,26 +7,26 @@ const { generateSchema, beforeRead, beforeWrite, afterDelete } = mgoose;
 
 const schema = generateSchema(CustomerSchema);
 
-beforeRead<Context>(schema, ({ query, context }) => {
+beforeRead<Context>(schema, ({ query, davinciContext }) => {
 	// inject accountId before persisting into DB
-	if (!context) return;
+	if (!davinciContext) return;
 
 	const currentQuery = query.getQuery();
-	query.setQuery({ ...currentQuery, accountId: context.accountId });
+	query.setQuery({ ...currentQuery, accountId: davinciContext.accountId });
 });
 
-beforeWrite<Context, CustomerSchema>(schema, ({ query, doc, context }) => {
+beforeWrite<Context, CustomerSchema>(schema, ({ query, doc, davinciContext }) => {
 	// inject accountId before persisting into DB
-	if (!context) return;
+	if (!davinciContext) return;
 
 	// required check for atomic operations
 	if (doc) {
-		doc.accountId = context.accountId;
+		doc.accountId = davinciContext.accountId;
 	} else {
 		// @ts-ignore
 		query.setUpdate({
 			...query.getUpdate(),
-			accountId: context.accountId
+			accountId: davinciContext.accountId
 		});
 	}
 });

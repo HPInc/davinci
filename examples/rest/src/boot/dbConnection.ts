@@ -2,10 +2,7 @@ import mongoose from 'mongoose';
 
 module.exports = async app => {
 	const mongodbUrl = process.env.MONGODB_URL || 'mongodb://localhost:27017/customer-api';
-	await mongoose.connect(
-		mongodbUrl,
-		{ useNewUrlParser: true }
-	);
+	await mongoose.connect(mongodbUrl);
 
 	/*
 	ready states being:

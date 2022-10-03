@@ -7,17 +7,17 @@ const { generateSchema, beforeRead, beforeWrite, beforeDelete } = mgoose;
 
 const schema = generateSchema(AuthorSchema);
 
-beforeRead<Context>(schema, ({ query, context }) => {
-	if (context) {
+beforeRead<Context>(schema, ({ query, davinciContext }) => {
+	if (davinciContext) {
 		const currentQuery = query.getQuery();
-		query.setQuery({ ...currentQuery, accountId: context.accountId });
+		query.setQuery({ ...currentQuery, accountId: davinciContext.accountId });
 	}
 });
 
-beforeWrite<Context, AuthorSchema>(schema, ({ doc, context }) => {
+beforeWrite<Context, AuthorSchema>(schema, ({ doc, davinciContext }) => {
 	// inject accountId before persisting into DB
-	if (context) {
-		doc.accountId = context.accountId;
+	if (davinciContext) {
+		doc.accountId = davinciContext.accountId;
 	}
 });
 
