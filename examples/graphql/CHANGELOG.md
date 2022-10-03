@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.16](https://github.com/HPInc/davinci/compare/@davinci/example-graphql@1.2.15...@davinci/example-graphql@1.2.16) (2022-10-03)
+
+
+### Bug Fixes
+
+* missing davinciCtx changes in examples ([364bf9d](https://github.com/HPInc/davinci/commit/364bf9d6cb3c32cec8aecd2086fdbd37c6b2d46b))
+
+
+
+
+
 ## [1.2.15](https://github.com/HPInc/davinci/compare/@davinci/example-graphql@1.2.14...@davinci/example-graphql@1.2.15) (2022-06-15)
 
 **Note:** Version bump only for package @davinci/example-graphql

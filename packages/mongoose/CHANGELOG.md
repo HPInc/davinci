@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.18.1](https://github.com/HPInc/davinci/compare/@davinci/mongoose@0.18.0...@davinci/mongoose@0.18.1) (2022-10-03)
+
+
+### Bug Fixes
+
+* rename context to davinciCtx ([a6bb1d6](https://github.com/HPInc/davinci/commit/a6bb1d644508ea5275d5242dd681d902bc7791f4))
+
+
+
+
+
 # [0.18.0](https://github.com/HPInc/davinci/compare/@davinci/mongoose@0.17.13...@davinci/mongoose@0.18.0) (2022-06-15)
 
 

@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/core",
-	"version": "1.10.2",
+	"version": "1.10.3",
 	"description": "Framework for rapid and consistent API development",
 	"main": "build-cjs/index.js",
 	"module": "build-esm/index.js",
