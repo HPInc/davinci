@@ -393,32 +393,4 @@ export class OpenAPIModule extends Module {
 
 		return jsonSchema;
 	}
-
-	// DRY function to generate single item or array definition objects
-	private generateArrayOrSingleDefinition(jsonSchema: Partial<JSONSchema>, isArray): OpenAPIV3.SchemaObject {
-		const singleJsonSchema = (
-			jsonSchema.$id ? { $ref: `#/components/schemas/${jsonSchema.$id}` } : jsonSchema
-		) as OpenAPIV3.SchemaObject;
-
-		if (isArray) {
-			return {
-				type: 'array',
-				items: singleJsonSchema
-			};
-		}
-
-		return singleJsonSchema;
-	}
-
-	private getAndSetJsonSchema(item: ClassType) {
-		const entityJsonSchema = this.entityRegistry.getJsonSchema(item);
-		const jsonSchema = this.jsonSchemasMap.get(entityJsonSchema.title) ?? this.createJsonSchema(entityJsonSchema);
-
-		if (!this.jsonSchemasMap.has(entityJsonSchema.title) && jsonSchema.$id) {
-			this.jsonSchemasMap.set(jsonSchema.$id, jsonSchema);
-			this.openAPIDoc.components.schemas[jsonSchema.$id] = jsonSchema;
-		}
-
-		return jsonSchema;
-	}
 }
