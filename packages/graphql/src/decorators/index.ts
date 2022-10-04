@@ -130,7 +130,7 @@ export function fieldResolver<T = {}>(
 			Reflector.getMetadata('davinci:graphql:field-resolvers', resolverOf.prototype.constructor) || [];
 		const existing = _.find(resolvers, { fieldName }) as IExternalFieldResolverDecoratorMetadata;
 		if (existing) {
-			throw new Error(`'${resolverOf.prototype.constructor.name}.${fieldName}' already resolved by ${existing.prototype.constructor.name}.${existing.methodName}`);
+			throw new Error(`'${resolverOf.prototype.constructor.name}.${String(fieldName)}' already resolved by ${existing.prototype.constructor.name}.${existing.methodName}`);
 		}
 
 		resolvers.unshift({
