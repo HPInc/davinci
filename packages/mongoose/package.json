@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/mongoose",
-	"version": "2.0.0",
+	"version": "0.18.0",
 	"description": "Integration with Mongoose ODM",
 	"author": "HP",
 	"license": "MIT",
@@ -19,14 +19,17 @@
 	"dependencies": {
 		"@davinci/core": "^1.9.1",
 		"@davinci/reflector": "^1.1.1",
-		"deepmerge": "^4.2.2",
-		"pino": "^8.6.1"
+		"bluebird": "^3.7.2",
+		"debug": "^4.1.1",
+		"lodash": "^4.17.19"
 	},
 	"peerDependencies": {
 		"mongoose": "^6.6.2"
 	},
 	"devDependencies": {
 		"mongoose": "^6.6.2",
+		"prettier": "1.19.1",
+		"tslib": "^2.3.0",
 		"typescript": "^4.3.5"
 	}
 }

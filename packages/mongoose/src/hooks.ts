@@ -1,9 +1,9 @@
 /*
- * © Copyright 2022 HP Development Company, L.P.
+ * © Copyright 2020 HP Development Company, L.P.
  * SPDX-License-Identifier: MIT
  */
 
-import { Document, Query, Schema } from 'mongoose';
+import { Document, Schema, Query } from 'mongoose';
 
 type Stage = 'pre' | 'post';
 
@@ -39,31 +39,31 @@ type Hook =
 export interface PreArgs<Context = unknown, ModelSchema = unknown> {
 	query: Query<ModelSchema, ModelSchema & Document>;
 	hookName: Hook;
-	davinciContext: Context;
+	davinciCtx: Context;
 }
 export interface AfterArgs<Context = unknown, ModelSchema = unknown> {
 	query: Query<ModelSchema, ModelSchema & Document>;
 	hookName: Hook;
-	davinciContext: Context;
+	davinciCtx: Context;
 	result: (ModelSchema & Document) | (ModelSchema & Document)[];
 }
 
 export interface AfterRawResultArgs<Context = unknown, ModelSchema = unknown> {
 	query: Query<ModelSchema, ModelSchema & Document>;
 	hookName: Hook;
-	davinciContext: Context;
+	davinciCtx: Context;
 	rawResult: unknown;
 }
 
 export interface DocumentPreArgs<Context = unknown, ModelSchema = unknown> {
 	hookName: Hook;
-	davinciContext: Context;
+	davinciCtx: Context;
 	doc: Document & ModelSchema;
 }
 export interface DocumentPostArgs<Context = unknown, ModelSchema = unknown> {
 	result: Document;
 	hookName: Hook;
-	davinciContext: Context;
+	davinciCtx: Context;
 	doc: Document & ModelSchema;
 }
 
@@ -78,7 +78,7 @@ export interface DocumentPostArgs<Context = unknown, ModelSchema = unknown> {
  * @param thisObj
  * @param result
  * @param rest
- * @param davinciContext
+ * @param davinciCtx
  */
 const createHandlerArgs = <Context = unknown, ResultType = unknown>(
 	stage: Stage,
@@ -90,7 +90,7 @@ const createHandlerArgs = <Context = unknown, ResultType = unknown>(
 		thisObj,
 		result,
 		rest,
-		davinciContext
+		davinciCtx
 	}: {
 		isReadHook: boolean;
 		isWriteHook: boolean;
@@ -98,7 +98,7 @@ const createHandlerArgs = <Context = unknown, ResultType = unknown>(
 		thisObj: Document | Query<ResultType, ResultType & Document>;
 		result?: any;
 		rest?: unknown[];
-		davinciContext?: Context;
+		davinciCtx?: Context;
 	}
 ):
 	| PreArgs<ResultType>
@@ -112,14 +112,14 @@ const createHandlerArgs = <Context = unknown, ResultType = unknown>(
 	const createPreArgs = (): PreArgs<Context, ResultType> => ({
 		query: thisObj as Query<ResultType, ResultType & Document>,
 		hookName,
-		davinciContext
+		davinciCtx
 	});
 
 	// createAfterArgs creates the arguments for `after(Read|Write|Delete)` hooks
 	const createAfterArgs = (): AfterArgs<Context, ResultType> => ({
 		query: thisObj as Query<ResultType, ResultType & Document>,
 		hookName,
-		davinciContext,
+		davinciCtx,
 		result
 	});
 
@@ -127,20 +127,20 @@ const createHandlerArgs = <Context = unknown, ResultType = unknown>(
 	const createAfterRawResultArgs = (): AfterRawResultArgs<Context, ResultType> => ({
 		query: thisObj as Query<ResultType, ResultType & Document>,
 		hookName,
-		davinciContext,
+		davinciCtx,
 		rawResult: result
 	});
 
 	// createDocumentPreArgs creates the arguments for `before(Read|Write|Delete)` hooks triggered by
 	// document middlewares: https://mongoosejs.com/docs/middleware.html
-	const createDocumentPreArgs = (): DocumentPreArgs => ({ hookName, davinciContext, doc: thisObj as Document });
+	const createDocumentPreArgs = (): DocumentPreArgs => ({ hookName, davinciCtx, doc: thisObj as Document });
 
 	// createDocumentPostArgs creates the arguments for `after(Read|Write|Delete)` hooks triggered by
 	// document middlewares: https://mongoosejs.com/docs/middleware.html
 	const createDocumentPostArgs = (): DocumentPostArgs => ({
 		result: thisObj as Document,
 		hookName,
-		davinciContext,
+		davinciCtx,
 		doc: rest[1] as Document
 	});
 
@@ -150,7 +150,7 @@ const createHandlerArgs = <Context = unknown, ResultType = unknown>(
 				read: createPreArgs
 			},
 			post: {
-				read: () => ({ query: thisObj, hookName, davinciContext, count: result })
+				read: () => ({ query: thisObj, hookName, davinciCtx, count: result })
 			}
 		},
 		find: {
@@ -264,52 +264,50 @@ const createHandlerArgs = <Context = unknown, ResultType = unknown>(
  * @param hooksList
  * @param stage
  */
-const createRegisterHooks =
-	(hooksList, stage: Stage) =>
-	<T>(mongooseSchema: T, handler): void => {
-		const isReadHook = hooksList === READ_HOOKS;
-		const isWriteHook = hooksList === WRITE_HOOKS;
-		const isDeleteHook = hooksList === DELETE_HOOKS;
+const createRegisterHooks = (hooksList, stage: Stage) => <T>(mongooseSchema: T, handler): void => {
+	const isReadHook = hooksList === READ_HOOKS;
+	const isWriteHook = hooksList === WRITE_HOOKS;
+	const isDeleteHook = hooksList === DELETE_HOOKS;
 
-		const hasContextInOptions = (hook: Hook): boolean =>
-			isReadHook || isDeleteHook || ['findOneAndUpdate', 'update', 'updateMany', 'updateOne'].includes(hook);
-		const hasContextInSaveOptions = (hook: Hook): boolean =>
-			isWriteHook && !['findOneAndUpdate', 'update', 'updateMany', 'updateOne'].includes(hook);
+	const hasContextInOptions = (hook: Hook): boolean =>
+		isReadHook || isDeleteHook || ['findOneAndUpdate', 'update', 'updateMany', 'updateOne'].includes(hook);
+	const hasContextInSaveOptions = (hook: Hook): boolean =>
+		isWriteHook && !['findOneAndUpdate', 'update', 'updateMany', 'updateOne'].includes(hook);
 
-		hooksList.forEach(hook =>
-			mongooseSchema[stage](hook, async function hookHandlerWrapper(result, ...rest) {
-				let davinciContext;
-				if (hasContextInOptions(hook)) {
-					davinciContext = this.options?.davinciContext;
-					if (this.options?.skipHooks) {
-						return;
-					}
+	hooksList.forEach(hook =>
+		mongooseSchema[stage](hook, async function hookHandlerWrapper(result, ...rest) {
+			let davinciCtx;
+			if (hasContextInOptions(hook)) {
+				davinciCtx = this.options?.davinciCtx;
+				if (this.options?.skipHooks) {
+					return;
 				}
-				if (hasContextInSaveOptions(hook)) {
-					// eslint-disable-next-line no-underscore-dangle
-					davinciContext = this.$__.saveOptions?.davinciContext;
-					// eslint-disable-next-line no-underscore-dangle
-					if (this.$__.saveOptions?.skipHooks) {
-						return;
-					}
+			}
+			if (hasContextInSaveOptions(hook)) {
+				// eslint-disable-next-line no-underscore-dangle
+				davinciCtx = this.$__.saveOptions?.davinciCtx;
+				// eslint-disable-next-line no-underscore-dangle
+				if (this.$__.saveOptions?.skipHooks) {
+					return;
 				}
+			}
 
-				const args = createHandlerArgs<T, T & Document>(stage, hook, {
-					isReadHook,
-					isWriteHook,
-					isDeleteHook,
-					thisObj: this,
-					result,
-					davinciContext,
-					rest
-				});
+			const args = createHandlerArgs<T, T & Document>(stage, hook, {
+				isReadHook,
+				isWriteHook,
+				isDeleteHook,
+				thisObj: this,
+				result,
+				davinciCtx,
+				rest
+			});
 
-				if (args) {
-					await handler(args);
-				}
-			})
-		);
-	};
+			if (args) {
+				await handler(args);
+			}
+		})
+	);
+};
 
 export type Handler<Context = unknown, ModelSchema = unknown> = {
 	beforeRead: (args: PreArgs<Context, ModelSchema>) => unknown | Promise<unknown>;

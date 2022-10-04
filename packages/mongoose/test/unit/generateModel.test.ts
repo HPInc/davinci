@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-import Sinon from 'sinon';
-import { Model, Schema, SchemaTypes } from 'mongoose';
 import { expect } from '../support/chai';
+import Sinon from 'sinon';
+import { Model, SchemaTypes } from 'mongoose';
 import { mgoose } from '../../src';
 
 const sinon = Sinon.createSandbox();
@@ -26,9 +26,9 @@ describe('typed mongoose', () => {
 				isActive: boolean;
 			}
 
-			const schema = mgoose.generateSchema(Customer, {});
+			const { schema } = mgoose.generateSchema(Customer, {});
 
-			expect(schema.obj).to.be.deep.equal({
+			expect(schema).to.be.deep.equal({
 				firstname: {
 					type: String
 				},
@@ -52,9 +52,9 @@ describe('typed mongoose', () => {
 				birth: CustomerBirth;
 			}
 
-			const schema = mgoose.generateSchema(Customer, {});
+			const { schema } = mgoose.generateSchema(Customer, {});
 
-			expect(schema.obj).to.be.deep.equal({
+			expect(schema).be.deep.equal({
 				birth: {
 					type: {
 						place: {
@@ -79,9 +79,9 @@ describe('typed mongoose', () => {
 				tags: string[];
 			}
 
-			const schema = mgoose.generateSchema(Customer, {});
+			const { schema } = mgoose.generateSchema(Customer, {});
 
-			expect(schema.obj).to.be.deep.equal({
+			expect(schema).be.deep.equal({
 				birth: [
 					{
 						type: {
@@ -113,13 +113,13 @@ describe('typed mongoose', () => {
 				otherProp2: string;
 			}
 
-			const schema1 = mgoose.generateSchema(MyClass1, {});
-			const schema2 = mgoose.generateSchema(MyClass2, {});
-			const baseSchema = mgoose.generateSchema(BaseSchema, {});
+			const { schema: schema1 } = mgoose.generateSchema(MyClass1, {});
+			const { schema: schema2 } = mgoose.generateSchema(MyClass2, {});
+			const { schema: baseSchema } = mgoose.generateSchema(BaseSchema, {});
 
-			expect(Object.keys(schema1.obj)).be.deep.equal(['otherProp1', 'createdAt', 'updatedAt']);
-			expect(Object.keys(schema2.obj)).be.deep.equal(['otherProp2', 'createdAt', 'updatedAt']);
-			expect(Object.keys(baseSchema.obj)).be.deep.equal(['createdAt', 'updatedAt']);
+			expect(Object.keys(schema1)).be.deep.equal(['otherProp1', 'createdAt', 'updatedAt']);
+			expect(Object.keys(schema2)).be.deep.equal(['otherProp2', 'createdAt', 'updatedAt']);
+			expect(Object.keys(baseSchema)).be.deep.equal(['createdAt', 'updatedAt']);
 		});
 	});
 
@@ -134,7 +134,7 @@ describe('typed mongoose', () => {
 				myMethod() {}
 			}
 
-			const schema = mgoose.generateSchema(Customer);
+			const { schema } = mgoose.generateSchema(Customer);
 			// expect(schema.statics.myStaticMethod).be.equal(Customer.myStaticMethod);
 			expect(schema.methods.myMethod).be.equal(Customer.prototype.myMethod);
 		});
@@ -151,7 +151,7 @@ describe('typed mongoose', () => {
 				lastname: string;
 			}
 
-			const schema = mgoose.generateSchema(Customer);
+			const { schema } = mgoose.generateSchema(Customer);
 			expect(schema.indexes()).be.deep.equal([
 				[
 					{
@@ -191,7 +191,7 @@ describe('typed mongoose', () => {
 				firstname: string;
 			}
 
-			const schema = mgoose.generateSchema(Customer);
+			const { schema } = mgoose.generateSchema(Customer);
 			// @mgoose.ts-ignore
 			expect(schema.path('firstname').validators).to.containSubset([{ validator: validateFn }]);
 		});
@@ -203,7 +203,7 @@ describe('typed mongoose', () => {
 				firstname: string;
 			}
 
-			const schema = mgoose.generateSchema(Customer);
+			const { schema } = mgoose.generateSchema(Customer);
 			// @mgoose.ts-ignore
 			expect(schema.path('firstname')).be.instanceOf(SchemaTypes.Decimal128);
 			expect(schema.path('firstname')).to.containSubset({
@@ -227,7 +227,7 @@ describe('typed mongoose', () => {
 				items: Item[];
 			}
 
-			const schema = mgoose.generateSchema(Order);
+			const { schema } = mgoose.generateSchema(Order);
 			expect(schema.path('items').schema.virtualpath('categories')).be.ok;
 		});
 
@@ -254,7 +254,7 @@ describe('typed mongoose', () => {
 				items: Item[];
 			}
 
-			const schema = mgoose.generateSchema(Order);
+			const { schema } = mgoose.generateSchema(Order);
 			expect(schema.virtualpath('categories')).be.ok;
 			expect(schema.virtualpath('popularCategories')).be.ok;
 			expect(schema.methods.getTopCategories).be.a('function').and.have.length(1);
@@ -278,7 +278,7 @@ describe('typed mongoose', () => {
 				items: Item[];
 			}
 
-			const schema = mgoose.generateSchema(Order);
+			const { schema } = mgoose.generateSchema(Order);
 			expect(schema.path('items').schema).to.be.undefined;
 		});
 
@@ -298,10 +298,8 @@ describe('typed mongoose', () => {
 				items: Item[];
 			}
 
-			const schema = mgoose.generateSchema(Order);
-			// @ts-ignore
+			const { schema } = mgoose.generateSchema(Order);
 			expect(schema.options.timestamps).be.true;
-			// @ts-ignore
 			expect(schema.path('items').schema.options.timestamps).not.be.true;
 		});
 
@@ -321,26 +319,9 @@ describe('typed mongoose', () => {
 				items: Item[];
 			}
 
-			const schema = mgoose.generateSchema(Order);
-			// @ts-ignore
+			const { schema } = mgoose.generateSchema(Order);
 			expect(schema.options).to.containSubset({ timestamps: true, id: true, _id: true });
-			// @ts-ignore
 			expect(schema.path('items').schema.options).to.containSubset({ timestamps: false, id: false, _id: false });
-		});
-
-		it('should allow omitting the schema decorator for classes passed explicitely to generateSchema', () => {
-			class Customer {
-				@mgoose.prop()
-				firstname: string;
-				@mgoose.prop()
-				age: number;
-				@mgoose.prop()
-				isActive: boolean;
-			}
-
-			const schema = mgoose.generateSchema(Customer, {});
-
-			expect(schema).to.be.instanceOf(Schema);
 		});
 	});
 
