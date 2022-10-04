@@ -14,8 +14,5 @@
 	"license": "MIT",
 	"dependencies": {
 		"@plumier/reflect": "1.0.6"
-	},
-	"devDependencies": {
-		"typescript": "^4.6.3"
 	}
 }
