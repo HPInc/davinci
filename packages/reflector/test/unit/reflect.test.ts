@@ -19,9 +19,6 @@ describe('reflect', () => {
 
 			@cache(5)
 			class MyAwesomeClass {
-				@cache(5)
-				static myStaticMethod() {}
-
 				@cache(1) // use it like usual decorator
 				awesome(@cachedParam() myParam: string) {
 					console.log(myParam);
