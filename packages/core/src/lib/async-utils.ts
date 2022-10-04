@@ -25,3 +25,15 @@ export async function mapParallel<T = unknown, ReturnType = unknown>(
 ): Promise<ReturnType[]> {
 	return Promise.all(data.map((item, index) => fn(item, index)));
 }
+
+export async function nextTick<FN extends (...args) => any>(fn: FN): Promise<ReturnType<FN>> {
+	return new Promise((resolve, reject) => {
+		process.nextTick(async () => {
+			try {
+				resolve(await fn());
+			} catch (err) {
+				reject(err);
+			}
+		});
+	});
+}

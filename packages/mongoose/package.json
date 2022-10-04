@@ -1,0 +1,35 @@
+{
+	"name": "@davinci/mongoose",
+	"version": "0.18.0",
+	"description": "Integration with Mongoose ODM",
+	"author": "HP",
+	"license": "MIT",
+	"main": "build-cjs/index.js",
+	"module": "build-esm/index.js",
+	"types": "build-cjs/index.d.ts",
+	"sideEffects": false,
+	"scripts": {
+		"build": "npm run build-cj && npm run build-esm",
+		"build-cj": "../../node_modules/typescript/bin/tsc -p tsconfig.cjs.release.json",
+		"build-esm": "../../node_modules/typescript/bin/tsc -p tsconfig.esm.release.json",
+		"lint": "../../node_modules/eslint/bin/eslint.js --color --c .eslintrc 'src/**/*.ts'",
+		"test": "mocha --exit",
+		"cover": "nyc npm test"
+	},
+	"dependencies": {
+		"@davinci/core": "^1.9.1",
+		"@davinci/reflector": "^1.1.1",
+		"bluebird": "^3.7.2",
+		"debug": "^4.1.1",
+		"lodash": "^4.17.19"
+	},
+	"peerDependencies": {
+		"mongoose": "^6.6.2"
+	},
+	"devDependencies": {
+		"mongoose": "^6.6.2",
+		"prettier": "1.19.1",
+		"tslib": "^2.3.0",
+		"typescript": "^4.3.5"
+	}
+}

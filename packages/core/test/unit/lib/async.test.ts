@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { mapParallel, mapSeries } from '../../../src';
+import { mapParallel, mapSeries, nextTick } from '../../../src';
 import { expect } from '../../support/chai';
 
 describe('async mappers', () => {
@@ -51,6 +51,26 @@ describe('async mappers', () => {
 			});
 
 			expect(result).to.be.deep.equal(data);
+		});
+	});
+
+	describe('nextTick', () => {
+		it('should execute the function and return a value', async () => {
+			function add(num1: number, num2: number) {
+				return num1 + num2;
+			}
+
+			const result = await nextTick(() => add(1, 2));
+
+			expect(result).to.be.equal(3);
+		});
+
+		it('should fail with a reason', async () => {
+			const promise = nextTick(() => {
+				throw new Error('Something is not right');
+			});
+
+			await expect(promise).to.be.rejectedWith('Something is not right');
 		});
 	});
 });
