@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0](https://github.com/HPInc/davinci/compare/@davinci/example-graphql@1.2.17...@davinci/example-graphql@1.3.0) (2022-10-05)
+
+
+### Features
+
+* **mongoose:** upgraded mongoose dependency from v5 to v6 and renamed context to davinciContext to avoid type collisions with mongoose context ([4c91957](https://github.com/HPInc/davinci/commit/4c919577e9fb17aa216bed24f60e99778ba17d7f))
+
+
+
+
+
 ## [1.2.17](https://github.com/HPInc/davinci/compare/@davinci/example-graphql@1.2.16...@davinci/example-graphql@1.2.17) (2022-10-05)
 
 **Note:** Version bump only for package @davinci/example-graphql

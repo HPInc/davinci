@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.17.0](https://github.com/HPInc/davinci/compare/@davinci/example-rest-custom-ajv@0.16.16...@davinci/example-rest-custom-ajv@0.17.0) (2022-10-05)
+
+
+### Features
+
+* **mongoose:** upgraded mongoose dependency from v5 to v6 and renamed context to davinciContext to avoid type collisions with mongoose context ([4c91957](https://github.com/HPInc/davinci/commit/4c919577e9fb17aa216bed24f60e99778ba17d7f))
+
+
+
+
+
 ## [0.16.16](https://github.com/HPInc/davinci/compare/@davinci/example-rest-custom-ajv@0.16.15...@davinci/example-rest-custom-ajv@0.16.16) (2022-10-05)
 
 **Note:** Version bump only for package @davinci/example-rest-custom-ajv
