@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.19.0](https://github.com/HPInc/davinci/compare/@davinci/mongoose@0.18.1...@davinci/mongoose@0.19.0) (2022-10-05)
+
+
+### Features
+
+* **mongoose:** upgraded mongoose to v6, renamed context ([bafc619](https://github.com/HPInc/davinci/commit/bafc619c7c7e563f065bbc2da4425ea9f4c12fa2))
+
+
+### BREAKING CHANGES
+
+* **mongoose:** upgraded mongoose dependency from v5 to v6 and renamed context to davinciContext to avoid type collisions with mongoose context
+
+
+
+
+
 # [0.18.0](https://github.com/HPInc/davinci/compare/@davinci/mongoose@0.17.13...@davinci/mongoose@0.18.0) (2022-06-15)
 
 
