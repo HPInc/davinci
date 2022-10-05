@@ -181,7 +181,7 @@ export function generateModel<T>(
 	modelName = classSchema.name,
 	collectionName?,
 	options?: SchemaOptions
-) {
-	const schema = generateSchema(classSchema, options);
-	return model(modelName, schema, collectionName) as T & Model<T>;
+): Model<T> {
+	const { schema } = generateSchema(classSchema, options);
+	return model<T>(modelName, schema, collectionName);
 }

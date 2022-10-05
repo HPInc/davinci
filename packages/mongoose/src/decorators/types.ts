@@ -1,10 +1,10 @@
 /*
- * © Copyright 2020 HP Development Company, L.P.
+ * © Copyright 2022 HP Development Company, L.P.
  * SPDX-License-Identifier: MIT
  */
 
 import { SchemaTypeOptions } from 'mongoose';
-import { TypeValueFactory, TypeValue, Maybe } from '@davinci/reflector';
+import { Maybe, TypeValue, TypeValueFactory } from '@davinci/reflector';
 
 export interface IPropDecoratorOptions extends Omit<SchemaTypeOptions<any>, 'type'> {
 	typeFactory?: TypeValueFactory;

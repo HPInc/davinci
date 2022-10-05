@@ -26,7 +26,7 @@ export class MongooseModule extends Module {
 
 	constructor(options: MongooseModuleOptions) {
 		super();
-		this.options = deepmerge({ logger: { name: 'MongooseModule' } }, options);
+		this.options = deepmerge({ logger: { name: 'MongooseModule', level: 'info' } }, options);
 		this.logger = pino({ name: this.options.logger?.name });
 		this.logger.level = this.options.logger?.level;
 	}
@@ -39,9 +39,9 @@ export class MongooseModule extends Module {
 		this.app = app;
 		const { uri, options } = this.options.connection;
 
-		this.logger.info('Initializing module');
+		this.logger.debug('Initializing module');
 		await mongoose.connect(uri, options);
-		this.logger.info('Mongoose connected');
+		this.logger.info('Connection established');
 	}
 
 	getOptions() {

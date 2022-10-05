@@ -5,13 +5,13 @@
 
 import { IndexOptions, SchemaOptions } from 'mongoose';
 import { decorate, DecoratorId } from '@davinci/reflector';
-import { IPropDecoratorOptions, IPropDecoratorOptionsFactory } from './types';
+import { IPropDecoratorOptions } from './types';
 
 /**
  * Decorate a props as mongoose schema property
  * @param options
  */
-export function prop(options?: IPropDecoratorOptions | IPropDecoratorOptionsFactory): PropertyDecorator {
+export function prop(options?: IPropDecoratorOptions): PropertyDecorator {
 	return decorate(
 		{
 			[DecoratorId]: 'mongoose.prop',

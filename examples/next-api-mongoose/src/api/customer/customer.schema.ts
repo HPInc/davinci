@@ -46,9 +46,6 @@ export class Customer {
 	@mgoose.prop()
 	@entity.prop()
 	birth: Birth;
-
-	@mgoose.prop()
-	modifiedCount: number;
 }
 
 export class CustomerPartial extends createPartialEntity<Customer>(Customer) {}
