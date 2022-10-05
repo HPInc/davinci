@@ -1,0 +1,27 @@
+{
+	"name": "@davinci/example-next-api-mongoose",
+	"version": "0.15.9",
+	"private": true,
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"build": "tsc -p ./tsconfig.release.json",
+		"dev": "DEBUG=* ts-node src/index.ts"
+	},
+	"keywords": [],
+	"author": "HP",
+	"license": "MIT",
+	"dependencies": {
+		"@davinci/core": "^1.9.1",
+		"@davinci/http-server": "^0.0.1",
+		"@davinci/http-server-fastify": "^0.0.1",
+		"@davinci/mongoose": "^0.18.0",
+		"@davinci/reflector": "^1.1.1",
+		"fastify": "^4.4.0"
+	},
+	"devDependencies": {
+		"ts-node": "^10.0.0",
+		"tslib": "^2.3.0",
+		"typescript": "^4.3.5"
+	}
+}
