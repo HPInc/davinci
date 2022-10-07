@@ -31,6 +31,6 @@ describe('MongooseModule', () => {
 
 		const readyState = mongoose.connection.readyState;
 		expect(readyState).to.be.equal(0);
-		expect(module.getStatus()).to.be.equal('initialized');
+		expect(module.getStatus()).to.be.equal('destroyed');
 	});
 });
