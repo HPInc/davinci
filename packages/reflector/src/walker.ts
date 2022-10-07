@@ -53,11 +53,6 @@ export function walker<T = unknown>(type: ClassType, iterator: WalkerIterator): 
 		methods
 	}) as WalkerIteratorResult<WalkerIteratorClassMeta>;
 
-	// stop processing
-	if (!classIteratorResult) {
-		return null;
-	}
-
 	// create new class to return
 	const NewClass = reflect.create({}, { name: classIteratorResult.name });
 
