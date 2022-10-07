@@ -20,6 +20,12 @@ describe('entity-walker', () => {
 
 			@entityProp()
 			birthDate: string;
+
+			@entityProp()
+			propToRemoveDecoratorsFrom: number;
+
+			@entityProp()
+			_internalProp: number;
 		}
 
 		// the following example shows how to modify the properties to be optional
@@ -29,18 +35,27 @@ describe('entity-walker', () => {
 			}
 
 			if (meta.iterationType === 'property') {
-				const type = meta.name === 'birthDate' ? Date : meta.type;
-
-				return {
-					...meta,
-					type,
-					decorators: meta.decorators.map(d => {
+				if (meta.name === '_internalProp') {
+					return null; // exclude prop
+				}
+				let decorators;
+				if (meta.name === 'propToRemoveDecoratorsFrom') {
+					decorators = [];
+				} else {
+					decorators = meta.decorators.map(d => {
 						if (d[DecoratorId] === 'prop') {
 							return { ...d, options: { ...d.options, required: false } };
 						}
 
 						return d;
-					})
+					});
+				}
+				const type = meta.name === 'birthDate' ? Date : meta.type;
+
+				return {
+					...meta,
+					type,
+					decorators
 				};
 			}
 
@@ -101,5 +116,6 @@ describe('entity-walker', () => {
 		});
 
 		expect(newClassReflection.properties[2].type).to.be.equal(Date);
+		expect(newClassReflection.properties[4]).to.be.undefined;
 	});
 });
