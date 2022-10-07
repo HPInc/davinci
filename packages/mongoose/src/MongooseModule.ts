@@ -44,6 +44,11 @@ export class MongooseModule extends Module {
 		this.logger.info('Connection established');
 	}
 
+	async onDestroy() {
+		await mongoose.disconnect();
+		this.logger.info('Disconnected');
+	}
+
 	getOptions() {
 		return this.options;
 	}
