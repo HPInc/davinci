@@ -1,1 +1,1 @@
-This example demonstrate the initialisation of a very basic API based on Fastify
+This example demonstrate the initialisation of a very basic API based on Fastify with Mongoose
