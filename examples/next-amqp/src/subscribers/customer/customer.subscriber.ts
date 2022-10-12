@@ -7,6 +7,7 @@ import type { ChannelWrapper } from '@davinci/messaging-amqp';
 import { ChannelParam, Message, Payload, Subscribe } from '@davinci/messaging-amqp';
 import { interceptor } from '@davinci/core';
 import { newrelicInterceptor } from '../../interceptors/newrelic';
+import { Customer } from './customer.schema';
 
 export default class CustomerSubscriber {
 	@Subscribe({
@@ -16,13 +17,7 @@ export default class CustomerSubscriber {
 		queue: 'queue1'
 	})
 	@interceptor(newrelicInterceptor())
-	@interceptor(async (next, bag) => {
-		console.log(bag);
-		const result = await next();
-
-		return result;
-	})
-	subscribeCustomerChange(@Message() msg, @Payload() payload, @ChannelParam() channel: ChannelWrapper) {
+	subscribeCustomerChange(@Message() msg, @Payload() payload: Customer, @ChannelParam() channel: ChannelWrapper) {
 		return { msg, payload, channel };
 	}
 }
