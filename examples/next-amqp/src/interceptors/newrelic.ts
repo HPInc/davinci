@@ -11,7 +11,7 @@ export const newrelicInterceptor = (transactionName?: string): Interceptor<AmqpI
 	return function newrelicInterceptor(next, { context: { subscription } }) {
 		const tName = transactionName ?? subscription.settings?.name;
 
-		return newrelic.startBackgroundTransaction(tName, async () => {
+		newrelic.startBackgroundTransaction(tName, async () => {
 			const transaction = newrelic.getTransaction();
 			try {
 				return await next();

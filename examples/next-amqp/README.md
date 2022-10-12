@@ -1,1 +1,1 @@
-This example demonstrates the initialisation of a very basic RabbitMQ service
+This example demonstrate the initialisation of a very basic API based on Fastify with Mongoose

@@ -4,12 +4,12 @@
  */
 
 import amqplib, { Channel } from 'amqplib';
-import type { ChannelWrapper, SetupFunc } from 'amqp-connection-manager';
+import type { ChannelWrapper } from 'amqp-connection-manager';
 import { CreateChannelOpts } from 'amqp-connection-manager';
-import { ClassReflection, DecoratorId, MethodReflection, TypeValue } from '@davinci/reflector';
-import { SubscribeOptions } from '@davinci/messaging';
+import { ClassReflection, MethodReflection, TypeValue } from '@davinci/reflector';
 
-export interface AmqpSubscribeOptions {
+export interface SubscriptionSettings {
+	name: string;
 	exchange: string;
 	topic?: string;
 	queue: string;
@@ -33,15 +33,9 @@ export interface AmqpSubscribeOptions {
 	queueOptions?: amqplib.Options.AssertQueue;
 }
 
-export interface AmqpSubscriptionSettings extends AmqpSubscribeOptions {
-	name: string;
-}
-
 export interface Subscription {
 	channel?: ChannelWrapper;
-	settings?: AmqpSubscriptionSettings;
-	consumerTag?: string;
-	setup?: SetupFunc;
+	settings?: SubscriptionSettings;
 }
 
 export type ParameterConfiguration =
@@ -56,16 +50,6 @@ export type ParameterConfiguration =
 			reflection: { controllerReflection: ClassReflection; methodReflection: MethodReflection };
 			value?: unknown;
 	  };
-
-/*
- * © Copyright 2022 HP Development Company, L.P.
- * SPDX-License-Identifier: MIT
- */
-
-export type SubscribeDecoratorMetadata = {
-	[DecoratorId]: 'messaging-amqp.subscribe';
-	options: SubscribeOptions;
-};
 
 export interface AmqpInterceptorContext {
 	module: 'messaging-amqp';

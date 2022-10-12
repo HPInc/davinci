@@ -3,87 +3,61 @@
  * SPDX-License-Identifier: MIT
  */
 import { createSandbox } from 'sinon';
-import { App, Interceptor, interceptor, mapSeries, nextTick } from '@davinci/core';
-import { channelParam, message, payload, subscribe } from '@davinci/messaging';
-import { AmqpInterceptorContext, AmqpModule, AmqpModuleOptions, Subscription } from '../../src';
+import { App, Interceptor, interceptor, nextTick } from '@davinci/core';
+import {
+	AmqpInterceptorContext,
+	AmqpModule,
+	ChannelParam,
+	Message,
+	Payload,
+	Subscribe,
+	SubscriptionSettings
+} from '../../src';
 import { expect } from '../support/chai';
 
 const sinon = createSandbox();
 
-const delay = (fn: Function, ms: number) =>
-	new Promise((resolve, reject) =>
-		setTimeout(async () => {
-			try {
-				await fn();
-				resolve(null);
-			} catch (err) {
-				reject(err);
-			}
-		}, ms)
-	);
-
-describe('AmqpModule', () => {
-	let subscriptions: Array<Subscription>;
-	let app: App;
-
-	async function initApp(Controller, moduleSettings?: Partial<AmqpModuleOptions>) {
-		const handlerSpy = 'handler' in Controller.prototype ? sinon.spy(Controller.prototype, 'handler') : null;
-		app = new App({ logger: { level: 'silent' } }).registerController(Controller);
-		const amqpModule = new AmqpModule({
-			connection: 'amqp://127.0.0.1/',
-			logger: { level: 'silent' },
-			...moduleSettings
-		});
-		await app.registerModule(amqpModule);
-		// sinon.stub(amqpModule.getConnection(), 'connect');
-		await app.init();
-		subscriptions = amqpModule.getSubscriptions();
-
-		return { app, amqpModule, handlerSpy };
-	}
-
-	const purgeQueues = () =>
-		mapSeries(subscriptions ?? [], subscription =>
-			subscription.channel.purgeQueue(subscription.settings.queue).catch(() => {})
-		);
-
-	beforeEach(async () => {
-		await purgeQueues();
+const initApp = async (Controller, defaultSubscriptionSettings?: Partial<SubscriptionSettings>) => {
+	const handlerSpy = sinon.spy(Controller.prototype, 'handler');
+	let app = new App({ logger: { level: 'silent' } }).registerController(Controller);
+	const amqpModule = new AmqpModule({
+		connection: 'amqp://127.0.0.1/',
+		logger: { level: 'silent' },
+		defaultSubscriptionSettings
 	});
+	await app.registerModule(amqpModule);
+	// sinon.stub(amqpModule.getConnection(), 'connect');
+	await app.init();
 
 	afterEach(async () => {
-		await purgeQueues();
 		await app?.shutdown();
 		app = null;
+	});
+
+	return { app, amqpModule, handlerSpy };
+};
+
+describe('AmqpModule', () => {
+	afterEach(() => {
 		sinon.restore();
 	});
 
 	describe('initialization', () => {
 		it('should consume and autoAck messages', async () => {
 			class MyController {
-				@subscribe({
-					name: 'mySubscription',
-					amqp: {
-						exchange: 'testExchange',
-						topic: 'testTopic',
-						queue: 'testQueue',
-						queueOptions: { autoDelete: true }
-					}
-				})
-				handler(@message() msg, @payload() body, @channelParam() channel) {
-					return { msg, body, channel };
+				@Subscribe({ name: 'mySubscription', exchange: 'myExchange', topic: 'myTopic', queue: 'myQueue' })
+				handler(@Message() message, @Payload() payload, @ChannelParam() channel) {
+					return { message, payload, channel };
 				}
 			}
 
-			const { amqpModule, handlerSpy } = await initApp(MyController, {
-				defaultSubscriptionSettings: { autoAck: true }
-			});
+			const { amqpModule, handlerSpy } = await initApp(MyController, { autoAck: true });
 
 			const subscription = amqpModule.getSubscriptions()[0];
 
 			// publish a message
 			const messageContent = {};
-			await subscription.channel.publish('testExchange', 'testTopic', messageContent);
+			await subscription.channel.publish('myExchange', 'myTopic', messageContent);
 
 			// assert
 			await expect(nextTick(() => handlerSpy.called)).to.eventually.be.true;
@@ -98,28 +72,19 @@ describe('AmqpModule', () => {
 
 		it('should consume and autoAck messages with no topic specified', async () => {
 			class MyController {
-				@subscribe({
-					name: 'mySubscription',
-					amqp: {
-						exchange: 'testExchange',
-						queue: 'testQueue',
-						queueOptions: { autoDelete: true }
-					}
-				})
-				handler(@message() msg, @payload() body, @channelParam() channel) {
-					return { msg, body, channel };
+				@Subscribe({ name: 'mySubscription', exchange: 'myExchange', queue: 'myQueue' })
+				handler(@Message() message, @Payload() payload, @ChannelParam() channel) {
+					return { message, payload, channel };
 				}
 			}
 
-			const { amqpModule, handlerSpy } = await initApp(MyController, {
-				defaultSubscriptionSettings: { autoAck: true }
-			});
+			const { amqpModule, handlerSpy } = await initApp(MyController, { autoAck: true });
 
 			const subscription = amqpModule.getSubscriptions()[0];
 
 			// publish a message
 			const messageContent = {};
-			await subscription.channel.publish('testExchange', '', messageContent);
+			await subscription.channel.publish('myExchange', '', messageContent);
 
 			await expect(nextTick(() => handlerSpy.called)).to.eventually.be.true;
 			const args = handlerSpy.getCall(0).args;
@@ -133,28 +98,19 @@ describe('AmqpModule', () => {
 
 		it('should consume json messages', async () => {
 			class MyController {
-				@subscribe({
-					name: 'mySubscription',
-					amqp: {
-						exchange: 'testExchange',
-						queue: 'testQueue',
-						queueOptions: { autoDelete: true }
-					}
-				})
-				handler(@message() msg, @payload() body, @channelParam() channel) {
-					return { msg, body, channel };
+				@Subscribe({ name: 'mySubscription', exchange: 'myExchange', queue: 'myQueue' })
+				handler(@Message() message, @Payload() payload, @ChannelParam() channel) {
+					return { message, payload, channel };
 				}
 			}
 
-			const { amqpModule, handlerSpy } = await initApp(MyController, {
-				defaultSubscriptionSettings: { autoAck: true, json: true }
-			});
+			const { amqpModule, handlerSpy } = await initApp(MyController, { autoAck: true, json: true });
 
 			const subscription = amqpModule.getSubscriptions()[0];
 
 			// publish a message
 			const messageContent = { myContent: true };
-			await subscription.channel.publish('testExchange', '', messageContent);
+			await subscription.channel.publish('myExchange', '', messageContent);
 
 			// assert
 			await expect(nextTick(() => handlerSpy.called)).to.eventually.be.true;
@@ -164,28 +120,21 @@ describe('AmqpModule', () => {
 
 		it('should autoNack messages if the handler fails', async () => {
 			class MyController {
-				@subscribe({
-					name: 'mySubscription',
-					amqp: {
-						exchange: 'testExchange',
-						queue: 'testQueue',
-						queueOptions: { autoDelete: true }
-					}
-				})
-				handler(@message() msg, @payload() body, @channelParam() channel) {
+				@Subscribe({ name: 'mySubscription', exchange: 'myExchange', queue: 'myQueue' })
+				handler(@Message() message, @Payload() payload, @ChannelParam() channel) {
 					throw new Error('Nasty error');
-					return { msg, body, channel };
+					return { message, payload, channel };
 				}
 			}
 
-			const { amqpModule } = await initApp(MyController, { defaultSubscriptionSettings: { autoNack: true } });
+			const { amqpModule } = await initApp(MyController, { autoNack: true });
 
 			const subscription = amqpModule.getSubscriptions()[0];
 			const nackSpy = sinon.spy(subscription.channel, 'nack');
 
 			// publish a message
 			const messageContent = { myContent: true };
-			await subscription.channel.publish('testExchange', '', messageContent);
+			await subscription.channel.publish('myExchange', '', messageContent);
 
 			// assert
 			await expect(nextTick(() => nackSpy.called)).to.eventually.be.true;
@@ -194,28 +143,20 @@ describe('AmqpModule', () => {
 		it('should process the interceptors', async () => {
 			const interceptorStub = sinon.stub().callsFake((next => next()) as Interceptor<AmqpInterceptorContext>);
 			class MyController {
-				@subscribe({
-					name: 'mySubscription',
-					amqp: {
-						exchange: 'testExchange',
-						queue: 'testQueue',
-						queueOptions: { autoDelete: true },
-						prefetch: 50
-					}
-				})
+				@Subscribe({ name: 'mySubscription', exchange: 'myExchange', queue: 'myQueue' })
 				@interceptor(interceptorStub)
-				handler(@message() msg, @payload() body, @channelParam() channel) {
-					return { msg, body, channel };
+				handler(@Message() message, @Payload() payload, @ChannelParam() channel) {
+					return { message, payload, channel };
 				}
 			}
 
-			const { amqpModule } = await initApp(MyController, { defaultSubscriptionSettings: { autoAck: true } });
+			const { amqpModule } = await initApp(MyController, { autoAck: true });
 
 			const subscription = amqpModule.getSubscriptions()[0];
 
 			// publish a message
 			const messageContent = { myContent: true };
-			await subscription.channel.publish('testExchange', '', messageContent);
+			await subscription.channel.publish('myExchange', '', messageContent);
 
 			// assert
 			await expect(nextTick(() => interceptorStub.called)).to.eventually.be.true;
@@ -226,210 +167,6 @@ describe('AmqpModule', () => {
 				context: { channel: subscription.channel, subscription },
 				state: {}
 			});
-		});
-
-		it('should reuse a channel, if using the same settings #1', async () => {
-			class MyController {
-				@subscribe({
-					name: 'mySubscription1',
-					amqp: {
-						exchange: 'testExchange',
-						queue: 'testQueue',
-						queueOptions: { autoDelete: true }
-					}
-				})
-				handler1() {}
-
-				@subscribe({
-					name: 'mySubscription2',
-					amqp: {
-						exchange: 'testExchange',
-						queue: 'testQueue',
-						queueOptions: { autoDelete: true }
-					}
-				})
-				handler2() {}
-			}
-
-			const { amqpModule } = await initApp(MyController, { defaultSubscriptionSettings: { autoNack: true } });
-
-			expect(Object.keys(amqpModule.getChannels())).to.have.length(1);
-		});
-
-		it('should reuse a channel, if using the same settings #2', async () => {
-			class MyController {
-				@subscribe({
-					name: 'mySubscription1',
-					amqp: {
-						exchange: 'testExchange',
-						queue: 'testQueue',
-						queueOptions: { autoDelete: true },
-						prefetch: 1,
-						channelOptions: { confirm: true }
-					}
-				})
-				handler1() {}
-
-				@subscribe({
-					name: 'mySubscription2',
-					amqp: {
-						exchange: 'testExchange',
-						queue: 'testQueue',
-						queueOptions: { autoDelete: true },
-						prefetch: 1,
-						channelOptions: { confirm: true }
-					}
-				})
-				handler2() {}
-			}
-
-			const { amqpModule } = await initApp(MyController, { defaultSubscriptionSettings: { autoNack: true } });
-
-			expect(Object.keys(amqpModule.getChannels())).to.have.length(1);
-		});
-
-		it('should not reuse a channel, if different settings are specified #1', async () => {
-			class MyController {
-				@subscribe({
-					name: 'mySubscription1',
-					amqp: {
-						exchange: 'testExchange',
-						queue: 'testQueue',
-						queueOptions: { autoDelete: true },
-						prefetch: 10
-					}
-				})
-				handler1() {}
-
-				@subscribe({
-					name: 'mySubscription2',
-					amqp: {
-						exchange: 'testExchange',
-						queue: 'testQueue',
-						queueOptions: { autoDelete: true },
-						prefetch: 1
-					}
-				})
-				handler2() {}
-			}
-
-			const { amqpModule } = await initApp(MyController, { defaultSubscriptionSettings: { autoNack: true } });
-
-			expect(Object.keys(amqpModule.getChannels())).to.have.length(2);
-		});
-
-		it('should not reuse a channel, if different settings are specified #2', async () => {
-			class MyController {
-				@subscribe({
-					name: 'mySubscription1',
-					amqp: {
-						exchange: 'testExchange',
-						queue: 'testQueue',
-						queueOptions: { autoDelete: true },
-						channelOptions: {
-							name: 'channel1'
-						}
-					}
-				})
-				handler1() {}
-
-				@subscribe({
-					name: 'mySubscription2',
-					amqp: {
-						exchange: 'testExchange',
-						queue: 'testQueue',
-						queueOptions: { autoDelete: true },
-						channelOptions: {
-							name: 'channel2'
-						}
-					}
-				})
-				handler2() {}
-			}
-
-			const { amqpModule } = await initApp(MyController, { defaultSubscriptionSettings: { autoNack: true } });
-
-			expect(Object.keys(amqpModule.getChannels())).to.have.length(2);
-		});
-	});
-
-	describe('shutdown', () => {
-		it('should wait until all in-flight messages are processed', async () => {
-			class MyController {
-				@subscribe({
-					name: 'mySubscription',
-					amqp: {
-						exchange: 'testExchange',
-						topic: 'testTopic',
-						queue: 'testQueue-wait',
-						queueOptions: { autoDelete: true }
-					}
-				})
-				async handler(@message() msg, @payload() body, @channelParam() channel) {
-					await new Promise(resolve => setTimeout(() => resolve(null), 1000));
-					return { msg, body, channel };
-				}
-			}
-
-			const { app, amqpModule, handlerSpy } = await initApp(MyController, {
-				defaultSubscriptionSettings: { autoAck: true },
-				gracefulShutdownStrategy: 'processInFlight'
-			});
-
-			const subscription = amqpModule.getSubscriptions()[0];
-
-			// publish a message
-			await subscription.channel.publish('testExchange', 'testTopic', {});
-			app.shutdown();
-			// these message shouldn't be consumed
-			await delay(
-				() =>
-					Promise.all([
-						subscription.channel.publish('testExchange', 'testTopic', {}),
-						subscription.channel.publish('testExchange', 'testTopic', {})
-					]),
-				500
-			).catch(() => {});
-
-			// assert
-			await expect(nextTick(() => handlerSpy.called)).to.eventually.be.true;
-			expect(handlerSpy.callCount).to.be.equal(1);
-		});
-
-		it('should nack all the in-flight messages', async () => {
-			class MyController {
-				@subscribe({
-					name: 'mySubscription',
-					amqp: {
-						exchange: 'testExchange',
-						topic: 'testTopic',
-						queue: 'testQueue-nack',
-						queueOptions: { autoDelete: true }
-					}
-				})
-				async handler(@message() msg, @payload() body, @channelParam() channel) {
-					await new Promise(resolve => setTimeout(() => resolve(null), 1000));
-					return { msg, body, channel };
-				}
-			}
-
-			const { app, amqpModule, handlerSpy } = await initApp(MyController, {
-				defaultSubscriptionSettings: { autoAck: true },
-				gracefulShutdownStrategy: 'nackInFlight'
-			});
-
-			const subscription = amqpModule.getSubscriptions()[0];
-			const nackSpy = sinon.spy(subscription.channel, 'nack');
-
-			// publish a message
-			await subscription.channel.publish('testExchange', 'testTopic', {});
-			await subscription.channel.publish('testExchange', 'testTopic', {});
-			await app.shutdown();
-
-			// assert
-			await expect(nextTick(() => handlerSpy.called)).to.eventually.be.true;
-			expect(handlerSpy.callCount).to.be.equal(2);
-			expect(nackSpy.callCount).to.be.equal(2);
 		});
 	});
 });

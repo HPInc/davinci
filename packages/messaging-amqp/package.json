@@ -18,10 +18,9 @@
 	},
 	"dependencies": {
 		"@davinci/core": "^1.9.1",
-		"@davinci/messaging": "^1.0.0",
 		"@davinci/reflector": "^1.1.1",
-		"@fastify/deepmerge": "^1.1.0",
 		"amqp-connection-manager": "^4.0.0",
+		"deepmerge": "^4.2.2",
 		"fast-json-stable-stringify": "^2.1.0",
 		"pino": "^8.6.1"
 	},
@@ -29,6 +28,7 @@
 		"amqplib": "^0.10.0"
 	},
 	"devDependencies": {
+		"@oneflow/oneflow-message": "^2.10.1",
 		"@types/amqplib": "^0.8.2",
 		"amqplib": "^0.10.3",
 		"typescript": "^4.3.5"
