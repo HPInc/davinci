@@ -20,53 +20,6 @@ import amqpConnectionManager, { AmqpConnectionManager } from 'amqp-connection-ma
 import { ParameterConfiguration, Subscription, SubscriptionSettings } from './types';
 import { SubscribeDecoratorMetadata } from './decorators/types';
 
-/* import {AmqpChannel, AmqpConsumer} from '@oneflow/oneflow-message';
-
-const consumer = new AmqpConsumer({})
-consumer.subscribe() */
-
-/*
-	AMQP lib
-	1) amqplib.connect (url | {
-			protocol?: string | undefined;
-			hostname?: string | undefined;
-			port?: number | undefined;
-			username?: string | undefined;
-			password?: string | undefined;
-			locale?: string | undefined;
-			frameMax?: number | undefined;
-			heartbeat?: number | undefined;
-			vhost?: string | undefined;
-		}
-
-	2. connection.createChannel()
-	3. channel.assertExchange()
-	4. channel.assertQueue()
-	5. channel.bindQueue(queue, exchange, topic || '#', {});
-	6. channel.consume(queue, messageHandler)
-*/
-
-/*
-	node-amqp-connection-manager
-	1) amqpConnectionManager.connect() // same params as amqplib 1)
-	2) connection.createChannel({
-			name?: string;
-			setup?: SetupFunc;
-			confirm?: boolean;
-			json?: boolean;publishTimeout?: number;
-		})
-	3) continue with amqplib 3)
- */
-
-/* const connection = amqpConnectionManager.connect({});
-
-const channel = connection.createChannel({});
-channel.waitForConnect();
-channel.assertExchange();
-channel.assertQueue();
-channel.bindQueue('', '', '');
-channel.consume('', () => {}, {}); */
-
 export interface AmqpModuleOptions {
 	connection: string | amqplib.Options.Connect;
 	connectionTimeout?: number;
