@@ -8,9 +8,8 @@ import type { OpenAPIV3 } from 'openapi-types';
 
 export type Verb = 'get' | 'post' | 'put' | 'patch' | 'head' | 'delete' | 'options';
 
-export interface MethodValidation {
-	disable?: boolean;
-	partial?: boolean;
+export interface ValidationOptions {
+	disabled?: boolean;
 }
 
 export type MethodResponseItem =
@@ -36,7 +35,6 @@ export interface MethodDecoratorOptions {
 	summary?: string;
 	description?: string;
 	responses?: MethodResponses;
-	validation?: MethodValidation;
 	hidden?: boolean;
 }
 
@@ -53,6 +51,7 @@ export interface ParameterDecoratorBaseOptions {
 	enum?: TypeValue[];
 	description?: string;
 	required?: boolean;
+	validation?: ValidationOptions;
 }
 
 export interface ParameterDecoratorOptions extends ParameterDecoratorBaseOptions {
