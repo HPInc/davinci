@@ -62,7 +62,7 @@ describe('AjvValidator', () => {
 		creditCard: string;
 	}
 
-	const initAjvValidator = () => {
+	const initAjvValidator = (additionalParameterConfigurations?: ParameterConfiguration<any>[]) => {
 		const entityRegistry = new EntityRegistry();
 		const ajvValidator = new AjvValidator({}, entityRegistry);
 
@@ -98,7 +98,8 @@ describe('AjvValidator', () => {
 				options: { in: 'query', required: true },
 				value: [{ firstname: 'John' }]
 			},
-			{ source: 'request', value: {} }
+			{ source: 'request', value: {} },
+			...additionalParameterConfigurations
 		];
 
 		return { ajvValidator, parametersConfig };
@@ -286,7 +287,7 @@ describe('AjvValidator', () => {
 			const { ajvValidator, parametersConfig } = initAjvValidator();
 
 			const validatorFunction = await ajvValidator.createValidatorFunction({
-				parametersConfig: parametersConfig
+				parametersConfig
 			});
 
 			const validData = {
@@ -345,7 +346,7 @@ describe('AjvValidator', () => {
 			const { ajvValidator, parametersConfig } = initAjvValidator();
 
 			const validatorFunction = await ajvValidator.createValidatorFunction({
-				parametersConfig: parametersConfig
+				parametersConfig
 			});
 
 			const invalidData = {
@@ -404,6 +405,54 @@ describe('AjvValidator', () => {
 						message: "must have required property 'lastname'"
 					}
 				]
+			});
+		});
+
+		it('should skip parameter validation, if specified', async () => {
+			const { ajvValidator, parametersConfig } = initAjvValidator([
+				{
+					name: 'shouldNotValidate',
+					source: 'query',
+					type: Number,
+					options: { in: 'query', validation: { disabled: true } }
+				}
+			]);
+
+			const validatorFunction = await ajvValidator.createValidatorFunction({
+				parametersConfig
+			});
+
+			const validData = {
+				body: {
+					lastname: 'Bird'
+				},
+				params: { customerId: '4000' },
+				querystring: {
+					street: 'My road',
+					houseNumber: '40',
+					customerArray: [
+						{
+							lastname: 'Bird'
+						}
+					],
+					payingCustomerArray: [
+						{
+							lastname: 'Bird'
+						}
+					],
+					shouldNotValidate: 'wrong' // should be number
+				},
+				headers: {
+					accountId: '1000'
+				}
+			};
+
+			const promise = validatorFunction(validData);
+			await expect(promise).to.be.fulfilled;
+			expect(validData).to.be.containSubset({
+				querystring: {
+					shouldNotValidate: 'wrong'
+				}
 			});
 		});
 	});
