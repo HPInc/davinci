@@ -99,7 +99,7 @@ describe('AjvValidator', () => {
 				value: [{ firstname: 'John' }]
 			},
 			{ source: 'request', value: {} },
-			...additionalParameterConfigurations
+			...(additionalParameterConfigurations ?? [])
 		];
 
 		return { ajvValidator, parametersConfig };
