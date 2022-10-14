@@ -4,7 +4,7 @@
  */
 
 import amqplib, { Channel } from 'amqplib';
-import type { ChannelWrapper } from 'amqp-connection-manager';
+import type { ChannelWrapper, SetupFunc } from 'amqp-connection-manager';
 import { CreateChannelOpts } from 'amqp-connection-manager';
 import { ClassReflection, MethodReflection, TypeValue } from '@davinci/reflector';
 
@@ -36,6 +36,8 @@ export interface SubscriptionSettings {
 export interface Subscription {
 	channel?: ChannelWrapper;
 	settings?: SubscriptionSettings;
+	consumerTag?: string;
+	setup?: SetupFunc;
 }
 
 export type ParameterConfiguration =
