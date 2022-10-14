@@ -12,7 +12,8 @@ const app = createApp();
 app.registerController(CustomerSubscriber).registerModule(
 	new AmqpModule({
 		connection: 'amqp://app:app@127.0.0.1:5672',
-		defaultSubscriptionSettings: { autoNack: { enabled: true, requeue: true }, json: true }
+		defaultSubscriptionSettings: { autoNack: { enabled: true, requeue: true }, json: true },
+		gracefulShutdownStrategy: 'nackInFlight'
 	})
 );
 
