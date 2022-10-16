@@ -15,12 +15,15 @@ import {
 } from '@davinci/core';
 import { ClassReflection, ClassType, DecoratorId, MethodReflection, PartialDeep } from '@davinci/reflector';
 import { Level, Logger, pino } from 'pino';
-import deepmerge from 'deepmerge';
+import createDeepmerge from '@fastify/deepmerge';
 import amqplib, { Channel } from 'amqplib';
-import amqpConnectionManager, { AmqpConnectionManager } from 'amqp-connection-manager';
+import amqpConnectionManager, { AmqpConnectionManager, ChannelWrapper } from 'amqp-connection-manager';
+import stringify from 'fast-json-stable-stringify';
 import { EventEmitter } from 'events';
 import { ParameterConfiguration, Subscription, SubscriptionSettings } from './types';
 import { SubscribeDecoratorMetadata } from './decorators/types';
+
+const deepmerge = createDeepmerge({ all: true });
 
 export interface AmqpModuleOptions {
 	connection: string | amqplib.Options.Connect;
@@ -40,6 +43,8 @@ export class AmqpModule extends Module {
 	private options: AmqpModuleOptions;
 	private connection: AmqpConnectionManager;
 	private subscriptions: Array<Subscription>;
+	private subscriptionHash: Record<string, Subscription> = {};
+	private channelsHash: Record<string, ChannelWrapper> = {};
 	private bus: EventEmitter;
 	private totalInFlight: number;
 
@@ -142,10 +147,16 @@ export class AmqpModule extends Module {
 		});
 
 		this.subscriptions = this.subscriptions.map(s => {
-			s.settings = deepmerge<SubscriptionSettings, SubscriptionSettings>(
+			if (this.subscriptionHash[s.settings.name]) {
+				throw new Error(`A subscription with the name ${s.settings.name} is already in use`);
+			}
+			this.subscriptionHash[s.settings.name] = s;
+
+			s.settings = deepmerge<(SubscriptionSettings | PartialDeep<SubscriptionSettings>)[]>(
 				{ ...this.options.defaultSubscriptionSettings },
-				deepmerge(s.settings, { exchangeType: 'topic', autoAck: true })
-			);
+				s.settings,
+				{ exchangeType: 'topic', autoAck: true }
+			) as SubscriptionSettings;
 			return s;
 		});
 
@@ -194,14 +205,26 @@ export class AmqpModule extends Module {
 						})
 				]);
 			};
-			subscription.channel = this.connection.createChannel({
-				name: subscription.settings.name,
-				json: subscription.settings.json,
-				setup,
-				...subscription.settings.channelOptions
+			const channelKey = stringify({
+				...subscription.settings?.channelOptions,
+				prefetch: subscription.settings?.prefetch
 			});
 
+			// a channel with the same settings exists, reusing it
+			if (this.channelsHash[channelKey]) {
+				subscription.channel = this.channelsHash[channelKey];
+				await subscription.channel.addSetup(setup);
+			} else {
+				subscription.channel = this.connection.createChannel({
+					name: subscription.settings.name,
+					json: subscription.settings.json,
+					setup,
+					...subscription.settings.channelOptions
+				});
+			}
+			// eslint-disable-next-line require-atomic-updates
 			subscription.setup = setup;
+			this.channelsHash[channelKey] = subscription.channel;
 
 			await subscription.channel.waitForConnect();
 
@@ -344,6 +367,10 @@ export class AmqpModule extends Module {
 
 	getSubscriptions() {
 		return this.subscriptions;
+	}
+
+	getChannelsHash() {
+		return this.channelsHash;
 	}
 
 	private setInFlight(action: 'increase' | 'decrease') {
