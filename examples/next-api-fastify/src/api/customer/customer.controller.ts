@@ -33,6 +33,11 @@ export default class CustomerController {
 		return { success: true, data };
 	}
 
+	@route.get({ path: '/' })
+	getAll(@route.query() query: Customer) {
+		return { query };
+	}
+
 	@healthCheck('liveness')
 	liveness() {
 		return { success: true };

@@ -18,13 +18,24 @@ export default class CustomerController {
 		return next();
 	})
 	@route.get({ path: '/hello', summary: 'That is a hello method' })
-	hello(@route.query({ required: true }) firstname: string, @route.query() age: number, @context() ctx: Context) {
-		return { success: true, firstname, age, ctx };
+	hello(
+		@route.query({ required: true }) firstname: string,
+		@route.query() age: number,
+		@route.query() customer: Customer,
+		@route.header({ name: 'x-accountid' }) accountId: string,
+		@context() ctx: Context
+	) {
+		return { success: true, firstname, age, customer, accountId, ctx };
 	}
 
 	@route.post({ path: '/' })
 	create(@route.body({ required: true }) data: Customer) {
 		return { success: true, data };
+	}
+
+	@route.get({ path: '/' })
+	getAll(@route.query() query: Customer) {
+		return { query };
 	}
 
 	@healthCheck('liveness')
