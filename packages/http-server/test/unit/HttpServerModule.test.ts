@@ -281,7 +281,7 @@ describe('HttpServerModule', () => {
 					query: {
 						where: 'where'
 					},
-					url: 'http://path/to/url'
+					originalUrl: 'http://path/to/url'
 				},
 				state: {}
 			};

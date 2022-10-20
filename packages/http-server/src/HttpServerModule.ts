@@ -421,12 +421,7 @@ export abstract class HttpServerModule<
 			handlerArgs: parameters,
 			context,
 			state: {},
-			request: {
-				headers: this.getRequestHeaders(request),
-				body: this.getRequestBody(request),
-				query: this.getRequestQuerystring(request),
-				url: this.getRequestUrl(request)
-			}
+			request
 		};
 	}
 
