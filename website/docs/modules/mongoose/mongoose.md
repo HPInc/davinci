@@ -1,4 +1,4 @@
-# @davinci/mongoose
+# Mongoose
 
 DaVinci, per se is database agnostic and doesn't have an opinion on how your API persists the data.
 
@@ -11,14 +11,8 @@ More specifically, it provides:
 
 ## Installation
 
-```sh
+```bash
 npm i --save @davinci/mongoose
-```
-
-or
-
-```sh
-yarn add @davinci/mongoose
 ```
 
 ## Define the Schema

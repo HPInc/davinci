@@ -2,13 +2,13 @@
 
 ## Installation
 
-```sh
+```bash
 npm i --save @davinci/graphql
 ```
 
 or
 
-```sh
+```bash
 yarn add @davinci/graphql
 ```
 
