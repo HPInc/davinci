@@ -12,7 +12,7 @@ More specifically, it provides:
 ## Installation
 
 ```bash
-npm i --save @davinci/mongoose
+npm i --save @davinci/mongoose mongoose
 ```
 
 ## Define the Schema
