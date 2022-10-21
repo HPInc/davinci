@@ -1,0 +1,11 @@
+// test-specific eslint
+{
+    "rules": {
+        // we can disable the rule of not requiring dev dependencies
+        "import/no-extraneous-dependencies": [ 2, { "devDependencies": true } ]
+    },
+    "env": {
+        // let's add our mocha globals in to our environment
+        "mocha": true
+    }
+}

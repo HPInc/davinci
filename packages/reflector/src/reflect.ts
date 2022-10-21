@@ -2,6 +2,7 @@
  * © Copyright 2022 HP Development Company, L.P.
  * SPDX-License-Identifier: MIT
  */
+import 'reflect-metadata';
 
 export {
 	reflect,
@@ -14,5 +15,10 @@ export {
 	ClassReflection,
 	MethodReflection,
 	PropertyReflection,
-	DecoratorId
+	DecoratorId,
+	type
 } from '@plumier/reflect';
+
+const ReflectMetadata = Reflect;
+
+export { ReflectMetadata as Reflect };

@@ -311,8 +311,21 @@ describe('App', () => {
 	});
 
 	it('should track lifecycle changes via the status property #1', async () => {
+		class MyModule extends Module {
+			getModuleId() {
+				return 'myModule';
+			}
+		}
 		const app = new App();
+		const module = new MyModule();
+		const emitSpy = sinon.spy(module.eventBus, 'emit');
+
 		expect(app.getStatus()).to.be.equal('unloaded');
+
+		const registerPromise = app.registerModule(module);
+		expect(app.getStatus()).to.be.equal('registering');
+		await registerPromise;
+		expect(app.getStatus()).to.be.equal('registered');
 
 		const initPromise = app.init();
 		expect(app.getStatus()).to.be.equal('initializing');
@@ -323,6 +336,16 @@ describe('App', () => {
 		expect(app.getStatus()).to.be.equal('destroying');
 		await shutdownPromise;
 		expect(app.getStatus()).to.be.equal('destroyed');
+
+		const moduleStatuses = emitSpy.getCalls().flatMap(call => call.args);
+		expect(moduleStatuses).to.be.deep.equal([
+			'registering',
+			'registered',
+			'initializing',
+			'initialized',
+			'destroying',
+			'destroyed'
+		]);
 	});
 
 	it('should track lifecycle changes via the status property #2', async () => {
