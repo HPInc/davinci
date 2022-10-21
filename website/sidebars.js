@@ -44,11 +44,8 @@ const sidebars = {
 						'modules/openapi/openapi'
 					]
 				},
-				{
-					type: 'category',
-					label: 'Database',
-					items: ['modules/mongoose/mongoose']
-				}
+				'modules/mongoose/mongoose',
+				'modules/health-checks/health-checks'
 			]
 		},
 		'interceptors'

@@ -1,3 +1,8 @@
+/*
+ * © Copyright 2022 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
+
 /**
  * CSS files with the .module.css suffix will be treated as CSS modules
  * and scoped locally.
@@ -20,4 +25,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.homeWrapper {
+	display: flex;
+	flex-direction: column;
 }
