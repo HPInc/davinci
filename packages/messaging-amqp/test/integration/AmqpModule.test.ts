@@ -8,10 +8,10 @@ import {
 	AmqpInterceptorContext,
 	AmqpModule,
 	AmqpModuleOptions,
-	ChannelParam,
-	Message,
-	Payload,
-	Subscribe,
+	channelParam,
+	message,
+	payload,
+	subscribe,
 	Subscription
 } from '../../src';
 import { expect } from '../support/chai';
@@ -69,15 +69,15 @@ describe('AmqpModule', () => {
 	describe('initialization', () => {
 		it('should consume and autoAck messages', async () => {
 			class MyController {
-				@Subscribe({
+				@subscribe({
 					name: 'mySubscription',
 					exchange: 'testExchange',
 					topic: 'testTopic',
 					queue: 'testQueue',
 					queueOptions: { autoDelete: true }
 				})
-				handler(@Message() message, @Payload() payload, @ChannelParam() channel) {
-					return { message, payload, channel };
+				handler(@message() msg, @payload() body, @channelParam() channel) {
+					return { msg, body, channel };
 				}
 			}
 
@@ -104,14 +104,14 @@ describe('AmqpModule', () => {
 
 		it('should consume and autoAck messages with no topic specified', async () => {
 			class MyController {
-				@Subscribe({
+				@subscribe({
 					name: 'mySubscription',
 					exchange: 'testExchange',
 					queue: 'testQueue',
 					queueOptions: { autoDelete: true }
 				})
-				handler(@Message() message, @Payload() payload, @ChannelParam() channel) {
-					return { message, payload, channel };
+				handler(@message() msg, @payload() body, @channelParam() channel) {
+					return { msg, body, channel };
 				}
 			}
 
@@ -137,14 +137,14 @@ describe('AmqpModule', () => {
 
 		it('should consume json messages', async () => {
 			class MyController {
-				@Subscribe({
+				@subscribe({
 					name: 'mySubscription',
 					exchange: 'testExchange',
 					queue: 'testQueue',
 					queueOptions: { autoDelete: true }
 				})
-				handler(@Message() message, @Payload() payload, @ChannelParam() channel) {
-					return { message, payload, channel };
+				handler(@message() msg, @payload() body, @channelParam() channel) {
+					return { msg, body, channel };
 				}
 			}
 
@@ -166,15 +166,15 @@ describe('AmqpModule', () => {
 
 		it('should autoNack messages if the handler fails', async () => {
 			class MyController {
-				@Subscribe({
+				@subscribe({
 					name: 'mySubscription',
 					exchange: 'testExchange',
 					queue: 'testQueue',
 					queueOptions: { autoDelete: true }
 				})
-				handler(@Message() message, @Payload() payload, @ChannelParam() channel) {
+				handler(@message() msg, @payload() body, @channelParam() channel) {
 					throw new Error('Nasty error');
-					return { message, payload, channel };
+					return { msg, body, channel };
 				}
 			}
 
@@ -194,7 +194,7 @@ describe('AmqpModule', () => {
 		it('should process the interceptors', async () => {
 			const interceptorStub = sinon.stub().callsFake((next => next()) as Interceptor<AmqpInterceptorContext>);
 			class MyController {
-				@Subscribe({
+				@subscribe({
 					name: 'mySubscription',
 					exchange: 'testExchange',
 					queue: 'testQueue',
@@ -202,8 +202,8 @@ describe('AmqpModule', () => {
 					prefetch: 50
 				})
 				@interceptor(interceptorStub)
-				handler(@Message() message, @Payload() payload, @ChannelParam() channel) {
-					return { message, payload, channel };
+				handler(@message() msg, @payload() body, @channelParam() channel) {
+					return { msg, body, channel };
 				}
 			}
 
@@ -226,9 +226,9 @@ describe('AmqpModule', () => {
 			});
 		});
 
-		it.skip('should reuse a channel, if using the same settings #1', async () => {
+		it('should reuse a channel, if using the same settings #1', async () => {
 			class MyController {
-				@Subscribe({
+				@subscribe({
 					name: 'mySubscription1',
 					exchange: 'testExchange',
 					queue: 'testQueue',
@@ -236,7 +236,7 @@ describe('AmqpModule', () => {
 				})
 				handler1() {}
 
-				@Subscribe({
+				@subscribe({
 					name: 'mySubscription2',
 					exchange: 'testExchange',
 					queue: 'testQueue',
@@ -250,9 +250,9 @@ describe('AmqpModule', () => {
 			expect(Object.keys(amqpModule.getChannelsHash())).to.have.length(1);
 		});
 
-		it.skip('should reuse a channel, if using the same settings #2', async () => {
+		it('should reuse a channel, if using the same settings #2', async () => {
 			class MyController {
-				@Subscribe({
+				@subscribe({
 					name: 'mySubscription1',
 					exchange: 'testExchange',
 					queue: 'testQueue',
@@ -262,7 +262,7 @@ describe('AmqpModule', () => {
 				})
 				handler1() {}
 
-				@Subscribe({
+				@subscribe({
 					name: 'mySubscription2',
 					exchange: 'testExchange',
 					queue: 'testQueue',
@@ -278,9 +278,9 @@ describe('AmqpModule', () => {
 			expect(Object.keys(amqpModule.getChannelsHash())).to.have.length(1);
 		});
 
-		it.skip('should not reuse a channel, if different settings are specified #1', async () => {
+		it('should not reuse a channel, if different settings are specified #1', async () => {
 			class MyController {
-				@Subscribe({
+				@subscribe({
 					name: 'mySubscription1',
 					exchange: 'testExchange',
 					queue: 'testQueue',
@@ -289,7 +289,7 @@ describe('AmqpModule', () => {
 				})
 				handler1() {}
 
-				@Subscribe({
+				@subscribe({
 					name: 'mySubscription2',
 					exchange: 'testExchange',
 					queue: 'testQueue',
@@ -304,9 +304,9 @@ describe('AmqpModule', () => {
 			expect(Object.keys(amqpModule.getChannelsHash())).to.have.length(2);
 		});
 
-		it.skip('should not reuse a channel, if different settings are specified #2', async () => {
+		it('should not reuse a channel, if different settings are specified #2', async () => {
 			class MyController {
-				@Subscribe({
+				@subscribe({
 					name: 'mySubscription1',
 					exchange: 'testExchange',
 					queue: 'testQueue',
@@ -317,7 +317,7 @@ describe('AmqpModule', () => {
 				})
 				handler1() {}
 
-				@Subscribe({
+				@subscribe({
 					name: 'mySubscription2',
 					exchange: 'testExchange',
 					queue: 'testQueue',
@@ -338,16 +338,16 @@ describe('AmqpModule', () => {
 	describe('shutdown', () => {
 		it('should wait until all in-flight messages are processed', async () => {
 			class MyController {
-				@Subscribe({
+				@subscribe({
 					name: 'mySubscription',
 					exchange: 'testExchange',
 					topic: 'testTopic',
 					queue: 'testQueue-wait',
 					queueOptions: { autoDelete: true }
 				})
-				async handler(@Message() message, @Payload() payload, @ChannelParam() channel) {
+				async handler(@message() msg, @payload() body, @channelParam() channel) {
 					await new Promise(resolve => setTimeout(() => resolve(null), 1000));
-					return { message, payload, channel };
+					return { msg, body, channel };
 				}
 			}
 
@@ -378,16 +378,16 @@ describe('AmqpModule', () => {
 
 		it('should nack all the in-flight messages', async () => {
 			class MyController {
-				@Subscribe({
+				@subscribe({
 					name: 'mySubscription',
 					exchange: 'testExchange',
 					topic: 'testTopic',
 					queue: 'testQueue-nack',
 					queueOptions: { autoDelete: true }
 				})
-				async handler(@Message() message, @Payload() payload, @ChannelParam() channel) {
+				async handler(@message() msg, @payload() body, @channelParam() channel) {
 					await new Promise(resolve => setTimeout(() => resolve(null), 1000));
-					return { message, payload, channel };
+					return { msg, body, channel };
 				}
 			}
 
