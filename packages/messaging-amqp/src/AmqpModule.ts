@@ -5,6 +5,7 @@
 
 import {
 	App,
+	di,
 	executeInterceptorsStack,
 	getInterceptorsHandlers,
 	InterceptorBag,
@@ -133,7 +134,7 @@ export class AmqpModule extends Module {
 			const matches = this.findMatchingMethodAndDecoratorReflections(reflection);
 
 			matches.forEach(({ methodReflection, decorator }) => {
-				const controller = new Controller();
+				const controller = di.container.resolve(Controller);
 				const controllerMethodAndReflections = {
 					controller,
 					controllerReflection: reflection,
