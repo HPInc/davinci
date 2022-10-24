@@ -253,7 +253,7 @@ describe('AmqpModule', () => {
 
 			const { amqpModule } = await initApp(MyController, { defaultSubscriptionSettings: { autoNack: true } });
 
-			expect(Object.keys(amqpModule.getChannelsHash())).to.have.length(1);
+			expect(Object.keys(amqpModule.getChannels())).to.have.length(1);
 		});
 
 		it('should reuse a channel, if using the same settings #2', async () => {
@@ -285,7 +285,7 @@ describe('AmqpModule', () => {
 
 			const { amqpModule } = await initApp(MyController, { defaultSubscriptionSettings: { autoNack: true } });
 
-			expect(Object.keys(amqpModule.getChannelsHash())).to.have.length(1);
+			expect(Object.keys(amqpModule.getChannels())).to.have.length(1);
 		});
 
 		it('should not reuse a channel, if different settings are specified #1', async () => {
@@ -315,7 +315,7 @@ describe('AmqpModule', () => {
 
 			const { amqpModule } = await initApp(MyController, { defaultSubscriptionSettings: { autoNack: true } });
 
-			expect(Object.keys(amqpModule.getChannelsHash())).to.have.length(2);
+			expect(Object.keys(amqpModule.getChannels())).to.have.length(2);
 		});
 
 		it('should not reuse a channel, if different settings are specified #2', async () => {
@@ -349,7 +349,7 @@ describe('AmqpModule', () => {
 
 			const { amqpModule } = await initApp(MyController, { defaultSubscriptionSettings: { autoNack: true } });
 
-			expect(Object.keys(amqpModule.getChannelsHash())).to.have.length(2);
+			expect(Object.keys(amqpModule.getChannels())).to.have.length(2);
 		});
 	});
 

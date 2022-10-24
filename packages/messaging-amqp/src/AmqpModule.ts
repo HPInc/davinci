@@ -49,8 +49,8 @@ export class AmqpModule extends Module {
 	private options: AmqpModuleOptions;
 	private connection: AmqpConnectionManager;
 	private subscriptions: Array<Subscription>;
-	private subscriptionHash: Record<string, Subscription> = {};
-	private channelsHash: Record<string, ChannelWrapper> = {};
+	private subscriptionsMap: Map<string, Subscription> = new Map();
+	private channelsMap: Map<string, ChannelWrapper> = new Map();
 	private bus: EventEmitter;
 	private inFlightMessages: Map<Message, InFlightMessage> = new Map();
 
@@ -153,10 +153,10 @@ export class AmqpModule extends Module {
 		});
 
 		this.subscriptions = this.subscriptions.map(s => {
-			if (this.subscriptionHash[s.settings.name]) {
+			if (this.subscriptionsMap.has(s.settings.name)) {
 				throw new Error(`A subscription with the name ${s.settings.name} is already in use`);
 			}
-			this.subscriptionHash[s.settings.name] = s;
+			this.subscriptionsMap.set(s.settings.name, s);
 
 			s.settings = deepmerge<(AmqpSubscriptionSettings | PartialDeep<AmqpSubscriptionSettings>)[]>(
 				{ ...this.options.defaultSubscriptionSettings },
@@ -217,8 +217,8 @@ export class AmqpModule extends Module {
 			});
 
 			// a channel with the same settings exists, reusing it
-			if (this.channelsHash[channelKey]) {
-				subscription.channel = this.channelsHash[channelKey];
+			if (this.channelsMap.has(channelKey)) {
+				subscription.channel = this.channelsMap.get(channelKey);
 				await subscription.channel.addSetup(setup);
 			} else {
 				subscription.channel = this.connection.createChannel({
@@ -230,7 +230,7 @@ export class AmqpModule extends Module {
 			}
 			// eslint-disable-next-line require-atomic-updates
 			subscription.setup = setup;
-			this.channelsHash[channelKey] = subscription.channel;
+			this.channelsMap.set(channelKey, subscription.channel);
 
 			await subscription.channel.waitForConnect();
 
@@ -361,8 +361,8 @@ export class AmqpModule extends Module {
 		return this.subscriptions;
 	}
 
-	getChannelsHash() {
-		return this.channelsHash;
+	getChannels() {
+		return Array.from(this.channelsMap.values());
 	}
 
 	private addInFlightMsg(inFlightMessage: InFlightMessage) {
