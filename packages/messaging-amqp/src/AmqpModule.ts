@@ -131,6 +131,11 @@ export class AmqpModule extends Module {
 				};
 
 				const subscription: Subscription = {
+					// the following ts-ignore is needed to circumvent
+					// an issue affecting nyc and typescript module augmentation.
+					// the tests executed via `nyc npm test` seems to ignore the augmentation defined
+					// in the src/index.ts file
+					// @ts-ignore
 					settings: { name: decorator.options.name, ...decorator.options?.amqp }
 				};
 				this.subscriptions.push(subscription);
