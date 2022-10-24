@@ -64,6 +64,8 @@ export class AjvValidator<Request = unknown> {
 			)
 				return;
 
+			const enabledValidation = !parameterConfig.options?.validation?.disabled;
+
 			const entityJsonSchema = this.entityRegistry.getJsonSchema(parameterConfig.type);
 			const entityDefinition = this.entityRegistry.getEntityDefinitionMap().get(parameterConfig.type);
 
@@ -89,17 +91,20 @@ export class AjvValidator<Request = unknown> {
 					properties: {},
 					required: undefined
 				};
-				endpointSchema.properties[schemaProp].properties[parameterConfig.name] = jsonSchema;
+				endpointSchema.properties[schemaProp].properties[parameterConfig.name] = enabledValidation
+					? jsonSchema
+					: true;
 				endpointSchema.properties[schemaProp].required = endpointSchema.properties[schemaProp].required ?? [];
-				if (parameterConfig.options?.required) {
+				if (enabledValidation && parameterConfig.options?.required) {
 					endpointSchema.properties[schemaProp].required.push(parameterConfig.name);
 				}
 			}
 
 			if (parameterConfig.source === 'body') {
-				endpointSchema.properties.body = jsonSchema?.$id ? { $ref: jsonSchema.$id } : jsonSchema;
+				const jsonSchemaDef = jsonSchema?.$id ? { $ref: jsonSchema.$id } : jsonSchema;
+				endpointSchema.properties.body = enabledValidation ? jsonSchemaDef : true;
 				endpointSchema.required = endpointSchema.required ?? [];
-				if (parameterConfig.options?.required) {
+				if (enabledValidation && parameterConfig.options?.required) {
 					endpointSchema.required.push('body');
 				}
 			}
