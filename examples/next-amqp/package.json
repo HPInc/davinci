@@ -13,6 +13,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"@davinci/core": "^1.9.1",
+		"@davinci/messaging": "^1.0.0",
 		"@davinci/messaging-amqp": "^0.1.0",
 		"@davinci/reflector": "^1.1.1",
 		"amqplib": "^0.10.3",

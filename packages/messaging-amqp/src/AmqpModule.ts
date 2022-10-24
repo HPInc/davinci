@@ -20,16 +20,15 @@ import amqplib, { Channel } from 'amqplib';
 import amqpConnectionManager, { AmqpConnectionManager, ChannelWrapper } from 'amqp-connection-manager';
 import stringify from 'fast-json-stable-stringify';
 import { EventEmitter } from 'events';
-import { ParameterConfiguration, Subscription, SubscriptionSettings } from './types';
-import { SubscribeDecoratorMetadata } from './decorators/types';
+import { AmqpSubscriptionSettings, ParameterConfiguration, SubscribeDecoratorMetadata, Subscription } from './types';
 
 const deepmerge = createDeepmerge({ all: true });
 
 export interface AmqpModuleOptions {
 	connection: string | amqplib.Options.Connect;
 	connectionTimeout?: number;
-	subscriptions?: Array<SubscriptionSettings>;
-	defaultSubscriptionSettings?: PartialDeep<SubscriptionSettings>;
+	subscriptions?: Array<AmqpSubscriptionSettings>;
+	defaultSubscriptionSettings?: PartialDeep<AmqpSubscriptionSettings>;
 	gracefulShutdownStrategy?: 'none' | 'processInFlight' | 'nackInFlight' | null;
 	logger?: {
 		name?: string;
@@ -131,16 +130,10 @@ export class AmqpModule extends Module {
 					methodReflection
 				};
 
-				let subscription: Subscription;
-				if ('subscriptionName' in decorator) {
-					subscription = this.subscriptions.find(s => s.settings?.name === decorator.subscriptionName);
-					if (subscription) {
-						throw new Error('Invalid subscription name');
-					}
-				} else {
-					subscription = { settings: decorator.options };
-					this.subscriptions.push(subscription);
-				}
+				const subscription: Subscription = {
+					settings: { name: decorator.options.name, ...decorator.options?.amqp }
+				};
+				this.subscriptions.push(subscription);
 
 				controllerMethodReflectionsMap.set(subscription, controllerMethodAndReflections);
 			});
@@ -152,11 +145,11 @@ export class AmqpModule extends Module {
 			}
 			this.subscriptionHash[s.settings.name] = s;
 
-			s.settings = deepmerge<(SubscriptionSettings | PartialDeep<SubscriptionSettings>)[]>(
+			s.settings = deepmerge<(AmqpSubscriptionSettings | PartialDeep<AmqpSubscriptionSettings>)[]>(
 				{ ...this.options.defaultSubscriptionSettings },
 				s.settings,
 				{ exchangeType: 'topic', autoAck: true }
-			) as SubscriptionSettings;
+			) as AmqpSubscriptionSettings;
 			return s;
 		});
 
@@ -244,10 +237,10 @@ export class AmqpModule extends Module {
 	}): ParameterConfiguration[] {
 		return methodReflection.parameters.reduce((acc, parameterReflection) => {
 			const parameterDecoratorMetadata = parameterReflection.decorators.find(
-				d => d[DecoratorId] === 'messaging-amqp.parameter'
+				d => d[DecoratorId] === 'messaging.parameter'
 			);
 
-			if (parameterDecoratorMetadata?.[DecoratorId] === 'messaging-amqp.parameter') {
+			if (parameterDecoratorMetadata?.[DecoratorId] === 'messaging.parameter') {
 				const { options } = parameterDecoratorMetadata;
 				const parameterType = parameterReflection.type;
 
@@ -406,7 +399,7 @@ export class AmqpModule extends Module {
 		return controllerReflection.methods.reduce<
 			{ methodReflection: MethodReflection; decorator: SubscribeDecoratorMetadata }[]
 		>((acc, method) => {
-			const decorator = method.decorators.find(d => d[DecoratorId] === 'messaging-amqp.subscribe');
+			const decorator = method.decorators.find(d => d[DecoratorId] === 'messaging.subscribe');
 			if (decorator) {
 				acc.push({ methodReflection: method, decorator });
 			}

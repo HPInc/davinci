@@ -4,16 +4,8 @@
  */
 import { createSandbox } from 'sinon';
 import { App, Interceptor, interceptor, mapSeries, nextTick } from '@davinci/core';
-import {
-	AmqpInterceptorContext,
-	AmqpModule,
-	AmqpModuleOptions,
-	channelParam,
-	message,
-	payload,
-	subscribe,
-	Subscription
-} from '../../src';
+import { channelParam, message, payload, subscribe } from '@davinci/messaging';
+import { AmqpInterceptorContext, AmqpModule, AmqpModuleOptions, Subscription } from '../../src';
 import { expect } from '../support/chai';
 
 const sinon = createSandbox();
@@ -71,10 +63,12 @@ describe('AmqpModule', () => {
 			class MyController {
 				@subscribe({
 					name: 'mySubscription',
-					exchange: 'testExchange',
-					topic: 'testTopic',
-					queue: 'testQueue',
-					queueOptions: { autoDelete: true }
+					amqp: {
+						exchange: 'testExchange',
+						topic: 'testTopic',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true }
+					}
 				})
 				handler(@message() msg, @payload() body, @channelParam() channel) {
 					return { msg, body, channel };
@@ -106,9 +100,11 @@ describe('AmqpModule', () => {
 			class MyController {
 				@subscribe({
 					name: 'mySubscription',
-					exchange: 'testExchange',
-					queue: 'testQueue',
-					queueOptions: { autoDelete: true }
+					amqp: {
+						exchange: 'testExchange',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true }
+					}
 				})
 				handler(@message() msg, @payload() body, @channelParam() channel) {
 					return { msg, body, channel };
@@ -139,9 +135,11 @@ describe('AmqpModule', () => {
 			class MyController {
 				@subscribe({
 					name: 'mySubscription',
-					exchange: 'testExchange',
-					queue: 'testQueue',
-					queueOptions: { autoDelete: true }
+					amqp: {
+						exchange: 'testExchange',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true }
+					}
 				})
 				handler(@message() msg, @payload() body, @channelParam() channel) {
 					return { msg, body, channel };
@@ -168,9 +166,11 @@ describe('AmqpModule', () => {
 			class MyController {
 				@subscribe({
 					name: 'mySubscription',
-					exchange: 'testExchange',
-					queue: 'testQueue',
-					queueOptions: { autoDelete: true }
+					amqp: {
+						exchange: 'testExchange',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true }
+					}
 				})
 				handler(@message() msg, @payload() body, @channelParam() channel) {
 					throw new Error('Nasty error');
@@ -196,10 +196,12 @@ describe('AmqpModule', () => {
 			class MyController {
 				@subscribe({
 					name: 'mySubscription',
-					exchange: 'testExchange',
-					queue: 'testQueue',
-					queueOptions: { autoDelete: true },
-					prefetch: 50
+					amqp: {
+						exchange: 'testExchange',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true },
+						prefetch: 50
+					}
 				})
 				@interceptor(interceptorStub)
 				handler(@message() msg, @payload() body, @channelParam() channel) {
@@ -230,17 +232,21 @@ describe('AmqpModule', () => {
 			class MyController {
 				@subscribe({
 					name: 'mySubscription1',
-					exchange: 'testExchange',
-					queue: 'testQueue',
-					queueOptions: { autoDelete: true }
+					amqp: {
+						exchange: 'testExchange',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true }
+					}
 				})
 				handler1() {}
 
 				@subscribe({
 					name: 'mySubscription2',
-					exchange: 'testExchange',
-					queue: 'testQueue',
-					queueOptions: { autoDelete: true }
+					amqp: {
+						exchange: 'testExchange',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true }
+					}
 				})
 				handler2() {}
 			}
@@ -254,21 +260,25 @@ describe('AmqpModule', () => {
 			class MyController {
 				@subscribe({
 					name: 'mySubscription1',
-					exchange: 'testExchange',
-					queue: 'testQueue',
-					queueOptions: { autoDelete: true },
-					prefetch: 1,
-					channelOptions: { confirm: true }
+					amqp: {
+						exchange: 'testExchange',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true },
+						prefetch: 1,
+						channelOptions: { confirm: true }
+					}
 				})
 				handler1() {}
 
 				@subscribe({
 					name: 'mySubscription2',
-					exchange: 'testExchange',
-					queue: 'testQueue',
-					queueOptions: { autoDelete: true },
-					prefetch: 1,
-					channelOptions: { confirm: true }
+					amqp: {
+						exchange: 'testExchange',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true },
+						prefetch: 1,
+						channelOptions: { confirm: true }
+					}
 				})
 				handler2() {}
 			}
@@ -282,19 +292,23 @@ describe('AmqpModule', () => {
 			class MyController {
 				@subscribe({
 					name: 'mySubscription1',
-					exchange: 'testExchange',
-					queue: 'testQueue',
-					queueOptions: { autoDelete: true },
-					prefetch: 10
+					amqp: {
+						exchange: 'testExchange',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true },
+						prefetch: 10
+					}
 				})
 				handler1() {}
 
 				@subscribe({
 					name: 'mySubscription2',
-					exchange: 'testExchange',
-					queue: 'testQueue',
-					queueOptions: { autoDelete: true },
-					prefetch: 1
+					amqp: {
+						exchange: 'testExchange',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true },
+						prefetch: 1
+					}
 				})
 				handler2() {}
 			}
@@ -308,22 +322,26 @@ describe('AmqpModule', () => {
 			class MyController {
 				@subscribe({
 					name: 'mySubscription1',
-					exchange: 'testExchange',
-					queue: 'testQueue',
-					queueOptions: { autoDelete: true },
-					channelOptions: {
-						name: 'channel1'
+					amqp: {
+						exchange: 'testExchange',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true },
+						channelOptions: {
+							name: 'channel1'
+						}
 					}
 				})
 				handler1() {}
 
 				@subscribe({
 					name: 'mySubscription2',
-					exchange: 'testExchange',
-					queue: 'testQueue',
-					queueOptions: { autoDelete: true },
-					channelOptions: {
-						name: 'channel2'
+					amqp: {
+						exchange: 'testExchange',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true },
+						channelOptions: {
+							name: 'channel2'
+						}
 					}
 				})
 				handler2() {}
@@ -340,10 +358,12 @@ describe('AmqpModule', () => {
 			class MyController {
 				@subscribe({
 					name: 'mySubscription',
-					exchange: 'testExchange',
-					topic: 'testTopic',
-					queue: 'testQueue-wait',
-					queueOptions: { autoDelete: true }
+					amqp: {
+						exchange: 'testExchange',
+						topic: 'testTopic',
+						queue: 'testQueue-wait',
+						queueOptions: { autoDelete: true }
+					}
 				})
 				async handler(@message() msg, @payload() body, @channelParam() channel) {
 					await new Promise(resolve => setTimeout(() => resolve(null), 1000));
@@ -380,10 +400,12 @@ describe('AmqpModule', () => {
 			class MyController {
 				@subscribe({
 					name: 'mySubscription',
-					exchange: 'testExchange',
-					topic: 'testTopic',
-					queue: 'testQueue-nack',
-					queueOptions: { autoDelete: true }
+					amqp: {
+						exchange: 'testExchange',
+						topic: 'testTopic',
+						queue: 'testQueue-nack',
+						queueOptions: { autoDelete: true }
+					}
 				})
 				async handler(@message() msg, @payload() body, @channelParam() channel) {
 					await new Promise(resolve => setTimeout(() => resolve(null), 1000));

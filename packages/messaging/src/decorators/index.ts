@@ -4,13 +4,13 @@
  */
 
 import { decorate, DecoratorId } from '@davinci/reflector';
-import { SubscriptionSettings } from '../types';
+import { SubscribeOptions } from '../types';
 
-export function subscribe(nameOrOptions: string | SubscriptionSettings) {
+export function subscribe(options: SubscribeOptions) {
 	return decorate(
 		{
-			[DecoratorId]: 'messaging-amqp.subscribe',
-			[typeof nameOrOptions === 'string' ? 'subscriptionName' : 'options']: nameOrOptions
+			[DecoratorId]: 'messaging.subscribe',
+			options
 		},
 		['Method'],
 		{ allowMultiple: false, inherit: true }
@@ -20,7 +20,7 @@ export function subscribe(nameOrOptions: string | SubscriptionSettings) {
 export function message() {
 	return decorate(
 		{
-			[DecoratorId]: 'messaging-amqp.parameter',
+			[DecoratorId]: 'messaging.parameter',
 			options: { in: 'message' }
 		},
 		['Parameter'],
@@ -31,7 +31,7 @@ export function message() {
 export function payload() {
 	return decorate(
 		{
-			[DecoratorId]: 'messaging-amqp.parameter',
+			[DecoratorId]: 'messaging.parameter',
 			options: { in: 'payload' }
 		},
 		['Parameter'],
@@ -42,7 +42,7 @@ export function payload() {
 export function channelParam() {
 	return decorate(
 		{
-			[DecoratorId]: 'messaging-amqp.parameter',
+			[DecoratorId]: 'messaging.parameter',
 			options: { in: 'channel' }
 		},
 		['Parameter'],
