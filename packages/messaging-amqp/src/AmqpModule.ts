@@ -10,22 +10,23 @@ import {
 	InterceptorBag,
 	mapParallel,
 	mapSeries,
-	Module,
-	nextTick
+	Module
 } from '@davinci/core';
 import { ClassReflection, ClassType, DecoratorId, MethodReflection, PartialDeep } from '@davinci/reflector';
 import { Level, Logger, pino } from 'pino';
 import createDeepmerge from '@fastify/deepmerge';
-import amqplib, { Channel } from 'amqplib';
-import amqpConnectionManager, { AmqpConnectionManager, ChannelWrapper } from 'amqp-connection-manager';
+import amqplib, { Channel, Message } from 'amqplib';
+import amqpConnectionManager, { AmqpConnectionManager, ChannelWrapper, ConnectionUrl } from 'amqp-connection-manager';
 import stringify from 'fast-json-stable-stringify';
 import { EventEmitter } from 'events';
+import { AmqpConnectionManagerOptions } from 'amqp-connection-manager/dist/esm/AmqpConnectionManager';
 import { AmqpSubscriptionSettings, ParameterConfiguration, SubscribeDecoratorMetadata, Subscription } from './types';
 
 const deepmerge = createDeepmerge({ all: true });
 
 export interface AmqpModuleOptions {
-	connection: string | amqplib.Options.Connect;
+	connection: ConnectionUrl;
+	connectionManagerOptions?: AmqpConnectionManagerOptions;
 	connectionTimeout?: number;
 	subscriptions?: Array<AmqpSubscriptionSettings>;
 	defaultSubscriptionSettings?: PartialDeep<AmqpSubscriptionSettings>;
@@ -34,6 +35,12 @@ export interface AmqpModuleOptions {
 		name?: string;
 		level?: Level | 'silent';
 	};
+}
+
+interface InFlightMessage {
+	message?: Message;
+	processed?: boolean;
+	subscription?: Subscription;
 }
 
 export class AmqpModule extends Module {
@@ -45,7 +52,7 @@ export class AmqpModule extends Module {
 	private subscriptionHash: Record<string, Subscription> = {};
 	private channelsHash: Record<string, ChannelWrapper> = {};
 	private bus: EventEmitter;
-	private totalInFlight: number;
+	private inFlightMessages: Map<Message, InFlightMessage> = new Map();
 
 	constructor(options: AmqpModuleOptions) {
 		super();
@@ -53,7 +60,6 @@ export class AmqpModule extends Module {
 		this.bus = new EventEmitter();
 		this.logger = pino({ name: this.options.logger?.name });
 		this.logger.level = this.options.logger?.level;
-		this.totalInFlight = 0;
 	}
 
 	getModuleId() {
@@ -64,7 +70,7 @@ export class AmqpModule extends Module {
 		this.app = app;
 		const connectionOptions =
 			typeof this.options.connection === 'object' ? this.options.connection : { url: this.options.connection };
-		this.connection = amqpConnectionManager.connect(connectionOptions);
+		this.connection = amqpConnectionManager.connect(connectionOptions, this.options.connectionManagerOptions);
 	}
 
 	async onInit() {
@@ -91,8 +97,10 @@ export class AmqpModule extends Module {
 			this.logger.debug('All the in-flight messages have been processed');
 		} else if (this.options.gracefulShutdownStrategy === 'nackInFlight') {
 			this.logger.debug('Nacking all the in-flight messages');
-			this.bus.emit('nackAll');
-			await nextTick();
+			await mapParallel(Array.from(this.inFlightMessages.values()), inFlightMsg => {
+				inFlightMsg.subscription.channel.nack(inFlightMsg.message, null, true);
+				inFlightMsg.processed = true;
+			});
 		}
 
 		await mapParallel(this.subscriptions ?? [], subscription =>
@@ -291,19 +299,9 @@ export class AmqpModule extends Module {
 
 		return async function davinciAmqpMessageHandler(msg: amqplib.ConsumeMessage) {
 			amqpModule.logger.debug({ message: msg }, 'Message received');
-			amqpModule.setInFlight('increase');
-			let ackedOrNacked = false; // semaphore variable
+			amqpModule.addInFlightMsg({ message: msg, subscription });
 
-			const onNackAll = () => {
-				if (ackedOrNacked) return;
-
-				subscription.channel.nack(msg, null, true);
-				amqpModule.setInFlight('decrease');
-				ackedOrNacked = true;
-			};
-			amqpModule.bus.once('nackAll', onNackAll);
-
-			const parametersConfigWithValues = await mapParallel(parametersConfig, parameterCfg => {
+			const parametersValues = await mapParallel(parametersConfig, parameterCfg => {
 				let value;
 				if (parameterCfg.source === 'message') {
 					value = msg;
@@ -315,12 +313,12 @@ export class AmqpModule extends Module {
 					value = subscription.channel;
 				}
 
-				return { ...parameterCfg, value };
+				return value;
 			});
 
 			const interceptorsBag = amqpModule.prepareInterceptorBag({
 				subscription,
-				parameters: parametersConfigWithValues.map(p => p.value)
+				parameters: parametersValues
 			});
 
 			try {
@@ -329,10 +327,9 @@ export class AmqpModule extends Module {
 					interceptorsBag
 				);
 
-				if (!ackedOrNacked && subscription.settings?.autoAck) {
+				if (!amqpModule.isInFlightMsgProcessed(msg) && subscription.settings?.autoAck) {
 					subscription.channel.ack(msg);
-					amqpModule.setInFlight('decrease');
-					ackedOrNacked = true;
+					amqpModule.deleteInFlightMsg(msg);
 				}
 
 				return result;
@@ -341,16 +338,13 @@ export class AmqpModule extends Module {
 				const { enabled: nackEnabled, requeue } =
 					typeof autoNack === 'boolean' ? { enabled: autoNack, requeue: false } : autoNack ?? {};
 
-				if (!ackedOrNacked && nackEnabled) {
+				if (!amqpModule.isInFlightMsgProcessed(msg) && nackEnabled) {
 					subscription.channel.nack(msg, null, requeue);
-					amqpModule.setInFlight('decrease');
-					ackedOrNacked = true;
+					amqpModule.deleteInFlightMsg(msg);
 					return null;
 				}
 
 				throw err;
-			} finally {
-				amqpModule.bus.removeListener('empty', onNackAll);
 			}
 		};
 	}
@@ -371,18 +365,22 @@ export class AmqpModule extends Module {
 		return this.channelsHash;
 	}
 
-	private setInFlight(action: 'increase' | 'decrease') {
-		if (action === 'increase') {
-			this.totalInFlight += 1;
-			this.bus.emit('addedInFlightMessage', { totalInFlight: this.totalInFlight });
-		} else {
-			this.totalInFlight -= 1;
-			this.bus.emit('removedInFlightMessage', { totalInFlight: this.totalInFlight });
-		}
+	private addInFlightMsg(inFlightMessage: InFlightMessage) {
+		this.inFlightMessages.set(inFlightMessage.message, inFlightMessage);
+		this.bus.emit('addedInFlightMessage', { totalInFlight: this.inFlightMessages.size });
+	}
 
-		if (this.totalInFlight === 0) {
+	private deleteInFlightMsg(msg: Message) {
+		this.inFlightMessages.delete(msg);
+		this.bus.emit('removedInFlightMessage', { totalInFlight: this.inFlightMessages.size });
+
+		if (this.inFlightMessages.size === 0) {
 			this.bus.emit('empty');
 		}
+	}
+
+	private isInFlightMsgProcessed(msg: Message) {
+		return !!this.inFlightMessages.get(msg)?.processed;
 	}
 
 	private prepareInterceptorBag({

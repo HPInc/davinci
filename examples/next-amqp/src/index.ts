@@ -12,6 +12,10 @@ const app = createApp();
 app.registerController(CustomerSubscriber).registerModule(
 	new AmqpModule({
 		connection: 'amqp://app:app@127.0.0.1:5672',
+		connectionManagerOptions: {
+			heartbeatIntervalInSeconds: 1000,
+			reconnectTimeInSeconds: 10000
+		},
 		defaultSubscriptionSettings: { autoNack: { enabled: true, requeue: true }, json: true },
 		gracefulShutdownStrategy: 'nackInFlight'
 	})
