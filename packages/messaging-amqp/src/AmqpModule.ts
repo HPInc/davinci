@@ -147,8 +147,8 @@ export class AmqpModule extends Module {
 
 			s.settings = deepmerge<(AmqpSubscriptionSettings | PartialDeep<AmqpSubscriptionSettings>)[]>(
 				{ ...this.options.defaultSubscriptionSettings },
-				s.settings,
-				{ exchangeType: 'topic', autoAck: true }
+				{ exchangeType: 'topic', autoAck: true },
+				s.settings
 			) as AmqpSubscriptionSettings;
 			return s;
 		});
