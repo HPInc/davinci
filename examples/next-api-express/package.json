@@ -12,11 +12,11 @@
 	"author": "HP",
 	"license": "MIT",
 	"dependencies": {
-		"@davinci/core": "^1.9.1",
-		"@davinci/health-checks": "^0.0.1",
-		"@davinci/http-server": "^0.0.1",
-		"@davinci/http-server-express": "^0.0.1",
-		"@davinci/openapi": "^0.0.1",
+		"@davinci/core": "2.0.0",
+		"@davinci/health-checks": "1.0.0",
+		"@davinci/http-server": "1.0.0",
+		"@davinci/http-server-express": "1.0.0",
+		"@davinci/openapi": "1.0.0",
 		"express": "^4.18.1"
 	},
 	"devDependencies": {
