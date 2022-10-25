@@ -339,10 +339,12 @@ describe('HttpServerModule', () => {
 
 		it('should inject the context as parameter in the interceptors', async () => {
 			type Context = { userId: string };
-			const handler = sinon.stub().callsFake((next: InterceptorNext<Context>, bag: InterceptorBag<Context>) => {
-				expect(bag.context).to.be.deep.equal({ userId: '123' });
-				return next();
-			});
+			const handler = sinon
+				.stub()
+				.callsFake((next: InterceptorNext<{ Context: Context }>, bag: InterceptorBag<{ Context: Context }>) => {
+					expect(bag.context).to.be.deep.equal({ userId: '123' });
+					return next();
+				});
 
 			@interceptor(handler)
 			class CustomerController {

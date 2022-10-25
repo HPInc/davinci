@@ -3,13 +3,14 @@
  * SPDX-License-Identifier: MIT
  */
 
-import amqplib, { Channel } from 'amqplib';
+import amqplib from 'amqplib';
 import type { ChannelWrapper, SetupFunc } from 'amqp-connection-manager';
 import { CreateChannelOpts } from 'amqp-connection-manager';
-import { ClassReflection, MethodReflection, TypeValue } from '@davinci/reflector';
+import { ClassReflection, DecoratorId, MethodReflection, TypeValue } from '@davinci/reflector';
+import { SubscribeOptions } from '@davinci/messaging';
+import { Interceptor, InterceptorBagDetails } from '@davinci/core';
 
-export interface SubscriptionSettings {
-	name: string;
+export interface AmqpSubscribeOptions {
 	exchange: string;
 	topic?: string;
 	queue: string;
@@ -33,9 +34,13 @@ export interface SubscriptionSettings {
 	queueOptions?: amqplib.Options.AssertQueue;
 }
 
+export interface AmqpSubscriptionSettings extends AmqpSubscribeOptions {
+	name: string;
+}
+
 export interface Subscription {
 	channel?: ChannelWrapper;
-	settings?: SubscriptionSettings;
+	settings?: AmqpSubscriptionSettings;
 	consumerTag?: string;
 	setup?: SetupFunc;
 }
@@ -53,12 +58,19 @@ export type ParameterConfiguration =
 			value?: unknown;
 	  };
 
-export interface AmqpInterceptorContext {
-	module: 'messaging-amqp';
-	channel: Channel;
-	subscription: Subscription;
-	state: {};
-	handlerArgs: any[];
-}
+/*
+ * © Copyright 2022 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
+
+export type SubscribeDecoratorMetadata = {
+	[DecoratorId]: 'messaging-amqp.subscribe';
+	options: SubscribeOptions;
+};
+
+export type AmqpInterceptor<IBD extends InterceptorBagDetails = InterceptorBagDetails> = Interceptor<
+	IBD,
+	{ channel: ChannelWrapper; subscription: Subscription }
+>;
 
 export type { ChannelWrapper };

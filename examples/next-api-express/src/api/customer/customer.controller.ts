@@ -13,7 +13,7 @@ import { healthCheck } from '@davinci/health-checks';
 	basePath: '/api/customers'
 })
 export default class CustomerController {
-	@interceptor<Context>((next, { handlerArgs, context, state, module }) => {
+	@interceptor<{ Context: Context }>((next, { handlerArgs, context, state, module }) => {
 		console.log(handlerArgs, context, state, module);
 		return next();
 	})

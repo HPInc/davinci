@@ -3,17 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 import { createSandbox } from 'sinon';
-import { App, Interceptor, interceptor, mapSeries, nextTick } from '@davinci/core';
-import {
-	AmqpInterceptorContext,
-	AmqpModule,
-	AmqpModuleOptions,
-	ChannelParam,
-	Message,
-	Payload,
-	Subscribe,
-	Subscription
-} from '../../src';
+import { App, interceptor, mapSeries, nextTick } from '@davinci/core';
+import { channelParam, message, payload, subscribe } from '@davinci/messaging';
+import { AmqpInterceptor, AmqpModule, AmqpModuleOptions, Subscription } from '../../src';
 import { expect } from '../support/chai';
 
 const sinon = createSandbox();
@@ -69,15 +61,17 @@ describe('AmqpModule', () => {
 	describe('initialization', () => {
 		it('should consume and autoAck messages', async () => {
 			class MyController {
-				@Subscribe({
+				@subscribe({
 					name: 'mySubscription',
-					exchange: 'testExchange',
-					topic: 'testTopic',
-					queue: 'testQueue',
-					queueOptions: { autoDelete: true }
+					amqp: {
+						exchange: 'testExchange',
+						topic: 'testTopic',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true }
+					}
 				})
-				handler(@Message() message, @Payload() payload, @ChannelParam() channel) {
-					return { message, payload, channel };
+				handler(@message() msg, @payload() body, @channelParam() channel) {
+					return { msg, body, channel };
 				}
 			}
 
@@ -104,14 +98,16 @@ describe('AmqpModule', () => {
 
 		it('should consume and autoAck messages with no topic specified', async () => {
 			class MyController {
-				@Subscribe({
+				@subscribe({
 					name: 'mySubscription',
-					exchange: 'testExchange',
-					queue: 'testQueue',
-					queueOptions: { autoDelete: true }
+					amqp: {
+						exchange: 'testExchange',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true }
+					}
 				})
-				handler(@Message() message, @Payload() payload, @ChannelParam() channel) {
-					return { message, payload, channel };
+				handler(@message() msg, @payload() body, @channelParam() channel) {
+					return { msg, body, channel };
 				}
 			}
 
@@ -137,14 +133,16 @@ describe('AmqpModule', () => {
 
 		it('should consume json messages', async () => {
 			class MyController {
-				@Subscribe({
+				@subscribe({
 					name: 'mySubscription',
-					exchange: 'testExchange',
-					queue: 'testQueue',
-					queueOptions: { autoDelete: true }
+					amqp: {
+						exchange: 'testExchange',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true }
+					}
 				})
-				handler(@Message() message, @Payload() payload, @ChannelParam() channel) {
-					return { message, payload, channel };
+				handler(@message() msg, @payload() body, @channelParam() channel) {
+					return { msg, body, channel };
 				}
 			}
 
@@ -166,15 +164,17 @@ describe('AmqpModule', () => {
 
 		it('should autoNack messages if the handler fails', async () => {
 			class MyController {
-				@Subscribe({
+				@subscribe({
 					name: 'mySubscription',
-					exchange: 'testExchange',
-					queue: 'testQueue',
-					queueOptions: { autoDelete: true }
+					amqp: {
+						exchange: 'testExchange',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true }
+					}
 				})
-				handler(@Message() message, @Payload() payload, @ChannelParam() channel) {
+				handler(@message() msg, @payload() body, @channelParam() channel) {
 					throw new Error('Nasty error');
-					return { message, payload, channel };
+					return { msg, body, channel };
 				}
 			}
 
@@ -192,18 +192,20 @@ describe('AmqpModule', () => {
 		});
 
 		it('should process the interceptors', async () => {
-			const interceptorStub = sinon.stub().callsFake((next => next()) as Interceptor<AmqpInterceptorContext>);
+			const interceptorStub = sinon.stub().callsFake((next => next()) as AmqpInterceptor);
 			class MyController {
-				@Subscribe({
+				@subscribe({
 					name: 'mySubscription',
-					exchange: 'testExchange',
-					queue: 'testQueue',
-					queueOptions: { autoDelete: true },
-					prefetch: 50
+					amqp: {
+						exchange: 'testExchange',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true },
+						prefetch: 50
+					}
 				})
 				@interceptor(interceptorStub)
-				handler(@Message() message, @Payload() payload, @ChannelParam() channel) {
-					return { message, payload, channel };
+				handler(@message() msg, @payload() body, @channelParam() channel) {
+					return { msg, body, channel };
 				}
 			}
 
@@ -221,109 +223,30 @@ describe('AmqpModule', () => {
 
 			expect(bag).to.containSubset({
 				module: 'messaging-amqp',
-				context: { channel: subscription.channel, subscription },
+				channel: subscription.channel,
+				subscription,
 				state: {}
 			});
 		});
 
-		it.skip('should reuse a channel, if using the same settings #1', async () => {
+		it('should reuse a channel, if using the same settings #1', async () => {
 			class MyController {
-				@Subscribe({
+				@subscribe({
 					name: 'mySubscription1',
-					exchange: 'testExchange',
-					queue: 'testQueue',
-					queueOptions: { autoDelete: true }
-				})
-				handler1() {}
-
-				@Subscribe({
-					name: 'mySubscription2',
-					exchange: 'testExchange',
-					queue: 'testQueue',
-					queueOptions: { autoDelete: true }
-				})
-				handler2() {}
-			}
-
-			const { amqpModule } = await initApp(MyController, { defaultSubscriptionSettings: { autoNack: true } });
-
-			expect(Object.keys(amqpModule.getChannelsHash())).to.have.length(1);
-		});
-
-		it.skip('should reuse a channel, if using the same settings #2', async () => {
-			class MyController {
-				@Subscribe({
-					name: 'mySubscription1',
-					exchange: 'testExchange',
-					queue: 'testQueue',
-					queueOptions: { autoDelete: true },
-					prefetch: 1,
-					channelOptions: { confirm: true }
-				})
-				handler1() {}
-
-				@Subscribe({
-					name: 'mySubscription2',
-					exchange: 'testExchange',
-					queue: 'testQueue',
-					queueOptions: { autoDelete: true },
-					prefetch: 1,
-					channelOptions: { confirm: true }
-				})
-				handler2() {}
-			}
-
-			const { amqpModule } = await initApp(MyController, { defaultSubscriptionSettings: { autoNack: true } });
-
-			expect(Object.keys(amqpModule.getChannelsHash())).to.have.length(1);
-		});
-
-		it.skip('should not reuse a channel, if different settings are specified #1', async () => {
-			class MyController {
-				@Subscribe({
-					name: 'mySubscription1',
-					exchange: 'testExchange',
-					queue: 'testQueue',
-					queueOptions: { autoDelete: true },
-					prefetch: 10
-				})
-				handler1() {}
-
-				@Subscribe({
-					name: 'mySubscription2',
-					exchange: 'testExchange',
-					queue: 'testQueue',
-					queueOptions: { autoDelete: true },
-					prefetch: 1
-				})
-				handler2() {}
-			}
-
-			const { amqpModule } = await initApp(MyController, { defaultSubscriptionSettings: { autoNack: true } });
-
-			expect(Object.keys(amqpModule.getChannelsHash())).to.have.length(2);
-		});
-
-		it.skip('should not reuse a channel, if different settings are specified #2', async () => {
-			class MyController {
-				@Subscribe({
-					name: 'mySubscription1',
-					exchange: 'testExchange',
-					queue: 'testQueue',
-					queueOptions: { autoDelete: true },
-					channelOptions: {
-						name: 'channel1'
+					amqp: {
+						exchange: 'testExchange',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true }
 					}
 				})
 				handler1() {}
 
-				@Subscribe({
+				@subscribe({
 					name: 'mySubscription2',
-					exchange: 'testExchange',
-					queue: 'testQueue',
-					queueOptions: { autoDelete: true },
-					channelOptions: {
-						name: 'channel2'
+					amqp: {
+						exchange: 'testExchange',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true }
 					}
 				})
 				handler2() {}
@@ -331,23 +254,121 @@ describe('AmqpModule', () => {
 
 			const { amqpModule } = await initApp(MyController, { defaultSubscriptionSettings: { autoNack: true } });
 
-			expect(Object.keys(amqpModule.getChannelsHash())).to.have.length(2);
+			expect(Object.keys(amqpModule.getChannels())).to.have.length(1);
+		});
+
+		it('should reuse a channel, if using the same settings #2', async () => {
+			class MyController {
+				@subscribe({
+					name: 'mySubscription1',
+					amqp: {
+						exchange: 'testExchange',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true },
+						prefetch: 1,
+						channelOptions: { confirm: true }
+					}
+				})
+				handler1() {}
+
+				@subscribe({
+					name: 'mySubscription2',
+					amqp: {
+						exchange: 'testExchange',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true },
+						prefetch: 1,
+						channelOptions: { confirm: true }
+					}
+				})
+				handler2() {}
+			}
+
+			const { amqpModule } = await initApp(MyController, { defaultSubscriptionSettings: { autoNack: true } });
+
+			expect(Object.keys(amqpModule.getChannels())).to.have.length(1);
+		});
+
+		it('should not reuse a channel, if different settings are specified #1', async () => {
+			class MyController {
+				@subscribe({
+					name: 'mySubscription1',
+					amqp: {
+						exchange: 'testExchange',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true },
+						prefetch: 10
+					}
+				})
+				handler1() {}
+
+				@subscribe({
+					name: 'mySubscription2',
+					amqp: {
+						exchange: 'testExchange',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true },
+						prefetch: 1
+					}
+				})
+				handler2() {}
+			}
+
+			const { amqpModule } = await initApp(MyController, { defaultSubscriptionSettings: { autoNack: true } });
+
+			expect(Object.keys(amqpModule.getChannels())).to.have.length(2);
+		});
+
+		it('should not reuse a channel, if different settings are specified #2', async () => {
+			class MyController {
+				@subscribe({
+					name: 'mySubscription1',
+					amqp: {
+						exchange: 'testExchange',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true },
+						channelOptions: {
+							name: 'channel1'
+						}
+					}
+				})
+				handler1() {}
+
+				@subscribe({
+					name: 'mySubscription2',
+					amqp: {
+						exchange: 'testExchange',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true },
+						channelOptions: {
+							name: 'channel2'
+						}
+					}
+				})
+				handler2() {}
+			}
+
+			const { amqpModule } = await initApp(MyController, { defaultSubscriptionSettings: { autoNack: true } });
+
+			expect(Object.keys(amqpModule.getChannels())).to.have.length(2);
 		});
 	});
 
 	describe('shutdown', () => {
 		it('should wait until all in-flight messages are processed', async () => {
 			class MyController {
-				@Subscribe({
+				@subscribe({
 					name: 'mySubscription',
-					exchange: 'testExchange',
-					topic: 'testTopic',
-					queue: 'testQueue-wait',
-					queueOptions: { autoDelete: true }
+					amqp: {
+						exchange: 'testExchange',
+						topic: 'testTopic',
+						queue: 'testQueue-wait',
+						queueOptions: { autoDelete: true }
+					}
 				})
-				async handler(@Message() message, @Payload() payload, @ChannelParam() channel) {
+				async handler(@message() msg, @payload() body, @channelParam() channel) {
 					await new Promise(resolve => setTimeout(() => resolve(null), 1000));
-					return { message, payload, channel };
+					return { msg, body, channel };
 				}
 			}
 
@@ -378,16 +399,18 @@ describe('AmqpModule', () => {
 
 		it('should nack all the in-flight messages', async () => {
 			class MyController {
-				@Subscribe({
+				@subscribe({
 					name: 'mySubscription',
-					exchange: 'testExchange',
-					topic: 'testTopic',
-					queue: 'testQueue-nack',
-					queueOptions: { autoDelete: true }
+					amqp: {
+						exchange: 'testExchange',
+						topic: 'testTopic',
+						queue: 'testQueue-nack',
+						queueOptions: { autoDelete: true }
+					}
 				})
-				async handler(@Message() message, @Payload() payload, @ChannelParam() channel) {
+				async handler(@message() msg, @payload() body, @channelParam() channel) {
 					await new Promise(resolve => setTimeout(() => resolve(null), 1000));
-					return { message, payload, channel };
+					return { msg, body, channel };
 				}
 			}
 
