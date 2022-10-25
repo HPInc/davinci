@@ -15,12 +15,12 @@ import {
 import { ClassReflection, ClassType, DecoratorId, MethodReflection, PartialDeep } from '@davinci/reflector';
 import { Level, Logger, pino } from 'pino';
 import createDeepmerge from '@fastify/deepmerge';
-import amqplib, { Channel, Message } from 'amqplib';
-import amqpConnectionManager, { AmqpConnectionManager, ChannelWrapper, ConnectionUrl } from 'amqp-connection-manager';
-import stringify from 'fast-json-stable-stringify';
+import amqplib, { Message } from 'amqplib';
+import amqpConnectionManager, { AmqpConnectionManager, ConnectionUrl } from 'amqp-connection-manager';
 import { EventEmitter } from 'events';
 import { AmqpConnectionManagerOptions } from 'amqp-connection-manager/dist/esm/AmqpConnectionManager';
 import { AmqpSubscriptionSettings, ParameterConfiguration, SubscribeDecoratorMetadata, Subscription } from './types';
+import { ChannelManager, ChannelManagerOptions } from './ChannelManager';
 
 const deepmerge = createDeepmerge({ all: true });
 
@@ -31,6 +31,7 @@ export interface AmqpModuleOptions {
 	subscriptions?: Array<AmqpSubscriptionSettings>;
 	defaultSubscriptionSettings?: PartialDeep<AmqpSubscriptionSettings>;
 	gracefulShutdownStrategy?: 'none' | 'processInFlight' | 'nackInFlight' | null;
+	channelManagerFactory?: (connection: AmqpConnectionManager, options: ChannelManagerOptions) => ChannelManager;
 	logger?: {
 		name?: string;
 		level?: Level | 'silent';
@@ -50,9 +51,9 @@ export class AmqpModule extends Module {
 	private connection: AmqpConnectionManager;
 	private subscriptions: Array<Subscription>;
 	private subscriptionsMap: Map<string, Subscription> = new Map();
-	private channelsMap: Map<string, ChannelWrapper> = new Map();
 	private bus: EventEmitter;
 	private inFlightMessages: Map<Message, InFlightMessage> = new Map();
+	private channelManager: ChannelManager;
 
 	constructor(options: AmqpModuleOptions) {
 		super();
@@ -71,6 +72,9 @@ export class AmqpModule extends Module {
 		const connectionOptions =
 			typeof this.options.connection === 'object' ? this.options.connection : { url: this.options.connection };
 		this.connection = amqpConnectionManager.connect(connectionOptions, this.options.connectionManagerOptions);
+		this.channelManager =
+			this.options.channelManagerFactory?.(this.connection, { logger: this.options.logger }) ??
+			new ChannelManager(this.connection, { logger: this.options.logger });
 	}
 
 	async onInit() {
@@ -86,9 +90,7 @@ export class AmqpModule extends Module {
 			this.logger.debug('Waiting for the in-flight messages to be processed');
 			// stop consuming new messages
 			await mapParallel(this.subscriptions ?? [], subscription => {
-				return subscription.channel.removeSetup(subscription.setup, async (channel: amqplib.ConfirmChannel) => {
-					return channel.cancel(subscription.consumerTag);
-				});
+				return this.channelManager.unsubscribe(subscription);
 			});
 			// wait until they are processed
 			await new Promise(resolve => {
@@ -98,13 +100,13 @@ export class AmqpModule extends Module {
 		} else if (this.options.gracefulShutdownStrategy === 'nackInFlight') {
 			this.logger.debug('Nacking all the in-flight messages');
 			await mapParallel(Array.from(this.inFlightMessages.values()), inFlightMsg => {
-				inFlightMsg.subscription.channel.nack(inFlightMsg.message, null, true);
+				this.channelManager.nackMessage(inFlightMsg.message, inFlightMsg.subscription, true);
 				inFlightMsg.processed = true;
 			});
 		}
 
 		await mapParallel(this.subscriptions ?? [], subscription =>
-			subscription.channel.close().catch(err => {
+			this.channelManager.closeChannel(subscription).catch(err => {
 				this.logger.info(
 					{ subscriptionName: subscription.settings.name, error: err },
 					'Channel closed with errors'
@@ -175,64 +177,19 @@ export class AmqpModule extends Module {
 				methodReflection
 			});
 
-			const setup = async (channel: Channel) => {
-				await Promise.all([
-					channel.assertExchange(
-						subscription.settings.exchange,
-						subscription.settings.exchangeType,
-						subscription.settings.exchangeOptions
-					),
-					channel.assertQueue(subscription.settings.queue, subscription.settings.queueOptions),
-					subscription.settings.prefetch ? channel.prefetch(subscription.settings.prefetch) : null,
-
-					channel.bindQueue(
-						subscription.settings.queue,
-						subscription.settings.exchange,
-						subscription.settings.topic
-					),
-					channel
-						.consume(
-							subscription.settings.queue,
-							await this.createMessageHandler({
-								controller,
-								methodName: methodReflection.name,
-								parametersConfig,
-								subscription,
-								reflections: {
-									methodReflection,
-									controllerReflection
-								}
-							}),
-							{}
-						)
-						.then(result => {
-							subscription.consumerTag = result.consumerTag;
-							return result;
-						})
-				]);
-			};
-			const channelKey = stringify({
-				...subscription.settings?.channelOptions,
-				prefetch: subscription.settings?.prefetch
-			});
-
-			// a channel with the same settings exists, reusing it
-			if (this.channelsMap.has(channelKey)) {
-				subscription.channel = this.channelsMap.get(channelKey);
-				await subscription.channel.addSetup(setup);
-			} else {
-				subscription.channel = this.connection.createChannel({
-					name: subscription.settings.name,
-					json: subscription.settings.json,
-					setup,
-					...subscription.settings.channelOptions
-				});
-			}
-			// eslint-disable-next-line require-atomic-updates
-			subscription.setup = setup;
-			this.channelsMap.set(channelKey, subscription.channel);
-
-			await subscription.channel.waitForConnect();
+			await this.channelManager.subscribe(
+				subscription,
+				await this.createMessageHandler({
+					controller,
+					methodName: methodReflection.name,
+					parametersConfig,
+					subscription,
+					reflections: {
+						methodReflection,
+						controllerReflection
+					}
+				})
+			);
 
 			this.logger.debug(
 				{ subscription: { name: subscription.settings.name } },
@@ -328,7 +285,7 @@ export class AmqpModule extends Module {
 				);
 
 				if (!amqpModule.isInFlightMsgProcessed(msg) && subscription.settings?.autoAck) {
-					subscription.channel.ack(msg);
+					amqpModule.channelManager.ackMessage(msg, subscription);
 					amqpModule.deleteInFlightMsg(msg);
 				}
 
@@ -339,7 +296,7 @@ export class AmqpModule extends Module {
 					typeof autoNack === 'boolean' ? { enabled: autoNack, requeue: false } : autoNack ?? {};
 
 				if (!amqpModule.isInFlightMsgProcessed(msg) && nackEnabled) {
-					subscription.channel.nack(msg, null, requeue);
+					amqpModule.channelManager.nackMessage(msg, subscription, requeue);
 					amqpModule.deleteInFlightMsg(msg);
 					return null;
 				}
@@ -362,7 +319,7 @@ export class AmqpModule extends Module {
 	}
 
 	getChannels() {
-		return Array.from(this.channelsMap.values());
+		return this.channelManager.getChannels();
 	}
 
 	private addInFlightMsg(inFlightMessage: InFlightMessage) {
