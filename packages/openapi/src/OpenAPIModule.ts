@@ -90,7 +90,7 @@ export class OpenAPIModule extends Module {
 			controllerDecoratorMetadata,
 			controllerReflection
 		} = route;
-		if (methodDecoratorMetadata.options?.openapiHidden) return;
+		if (methodDecoratorMetadata.options?.hidden) return;
 
 		// Parameters handling
 		await mapSeries(parametersConfig, parameterConfig => {
@@ -112,8 +112,8 @@ export class OpenAPIModule extends Module {
 
 			this.openAPIDoc.paths[path] = this.openAPIDoc.paths[path] ?? {};
 			let tags: Array<string>;
-			if (controllerDecoratorMetadata.options?.openapiTags) {
-				tags = controllerDecoratorMetadata.options?.openapiTags;
+			if (controllerDecoratorMetadata.options?.tags) {
+				tags = controllerDecoratorMetadata.options?.tags;
 			} else if (this.moduleOptions.document?.automaticPathTags) {
 				tags = [controllerReflection.name.replace(/Controller/, '')];
 			}
