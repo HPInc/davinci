@@ -10,10 +10,8 @@
 		"test": "lerna run test",
 		"cover": "lerna run cover",
 		"bootstrap": "lerna bootstrap --ignore '@davinci/example*'",
-		"bump": "lerna publish",
-		"docs:dev": "vuepress dev docs",
-		"docs:build": "vuepress build docs --debug",
-		"semantic-release": "lerna version --conventional-commits --create-release github -y && lerna publish from-package -y"
+		"semantic-release": "lerna version --conventional-commits --create-release github -y && lerna publish from-package -y",
+		"publish-next": "lerna publish --dist-tag next"
 	},
 	"devDependencies": {
 		"@types/bluebird": "3.5.25",
