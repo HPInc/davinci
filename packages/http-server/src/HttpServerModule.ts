@@ -123,7 +123,10 @@ export abstract class HttpServerModule<
 					path: fullPath,
 					verb,
 					parametersConfig,
-					methodDecoratorMetadata
+					methodDecoratorMetadata,
+					methodReflection,
+					controllerDecoratorMetadata,
+					controllerReflection
 				});
 
 				return this[verb](
