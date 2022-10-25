@@ -4,7 +4,7 @@
  */
 
 import { ClassReflection, MethodReflection, TypeValue } from '@davinci/reflector';
-import { JSONSchema } from '@davinci/core';
+import { Interceptor, InterceptorBagDetails, JSONSchema } from '@davinci/core';
 import { MethodDecoratorMetadata, ParameterDecoratorOptions, Verb } from './decorators';
 import { AjvValidator, AjvValidatorOptions } from './AjvValidator';
 
@@ -88,3 +88,8 @@ export interface StaticServeOptions {
 	maxAge?: number | string;
 	redirect?: boolean;
 }
+
+export type HttpServerInterceptor<
+	IBD extends InterceptorBagDetails = InterceptorBagDetails,
+	Request = unknown
+> = Interceptor<IBD, { request: Request }>;

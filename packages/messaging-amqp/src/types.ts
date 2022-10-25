@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: MIT
  */
 
-import amqplib, { Channel } from 'amqplib';
+import amqplib from 'amqplib';
 import type { ChannelWrapper, SetupFunc } from 'amqp-connection-manager';
 import { CreateChannelOpts } from 'amqp-connection-manager';
 import { ClassReflection, DecoratorId, MethodReflection, TypeValue } from '@davinci/reflector';
 import { SubscribeOptions } from '@davinci/messaging';
+import { Interceptor, InterceptorBagDetails } from '@davinci/core';
 
 export interface AmqpSubscribeOptions {
 	exchange: string;
@@ -67,12 +68,9 @@ export type SubscribeDecoratorMetadata = {
 	options: SubscribeOptions;
 };
 
-export interface AmqpInterceptorContext {
-	module: 'messaging-amqp';
-	channel: Channel;
-	subscription: Subscription;
-	state: {};
-	handlerArgs: any[];
-}
+export type AmqpInterceptor<IBD extends InterceptorBagDetails = InterceptorBagDetails> = Interceptor<
+	IBD,
+	{ channel: ChannelWrapper; subscription: Subscription }
+>;
 
 export type { ChannelWrapper };
