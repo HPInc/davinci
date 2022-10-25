@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/openapi",
-	"version": "0.0.1",
+	"version": "1.0.0",
 	"description": "Framework for rapid and consistent API development",
 	"main": "build-cjs/index.js",
 	"module": "build-esm/index.js",
@@ -17,20 +17,20 @@
 	"author": "HP",
 	"license": "MIT",
 	"dependencies": {
-		"@davinci/core": "^1.9.1",
-		"@davinci/reflector": "^1.1.1",
+		"@davinci/core": "2.0.0",
+		"@davinci/reflector": "2.0.0",
 		"@fastify/deepmerge": "^1.1.0",
 		"hyperscript": "^2.0.2",
 		"openapi-types": "^12.0.0",
 		"pino": "^7.11.0"
 	},
 	"peerDependencies": {
-		"@davinci/http-server": "^0.0.1"
+		"@davinci/http-server": "1.0.0"
 	},
 	"devDependencies": {
-		"@davinci/http-server": "^0.0.1",
-		"@davinci/http-server-express": "^0.0.1",
-		"@davinci/http-server-fastify": "^0.0.1",
+		"@davinci/http-server": "1.0.0",
+		"@davinci/http-server-express": "1.0.0",
+		"@davinci/http-server-fastify": "1.0.0",
 		"@types/hyperscript": "^0.0.4",
 		"@types/swagger-ui-dist": "^3.30.1",
 		"axios": "^0.27.2",
