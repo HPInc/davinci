@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-next.3](https://github.com/HPInc/davinci/compare/@davinci/messaging-amqp@1.0.0-next.2...@davinci/messaging-amqp@1.0.0-next.3) (2022-10-25)
+
+
+### Features
+
+* **interceptors:** standardized usage, added specific types ([b07022e](https://github.com/HPInc/davinci/commit/b07022e482fe1dbf92b9190d34f065fb8254dde8))
+
+
+
+
+
 # [1.0.0-next.2](https://github.com/HPInc/davinci/compare/@davinci/messaging-amqp@1.0.0-next.1...@davinci/messaging-amqp@1.0.0-next.2) (2022-10-25)
 
 **Note:** Version bump only for package @davinci/messaging-amqp
