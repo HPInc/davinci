@@ -4,3 +4,19 @@
  */
 
 export * from './OpenAPIModule';
+
+declare module '@davinci/http-server' {
+	interface MethodDecoratorOptions {
+		/**
+		 * if set to 'true' hides the endpoint from the
+		 * generated OpenAPI document
+		 *
+		 * @defaultValue false
+		 */
+		openapiHidden?: boolean;
+	}
+
+	interface ControllerDecoratorOptions {
+		openapiTags?: Array<string>;
+	}
+}

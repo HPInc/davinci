@@ -5,7 +5,7 @@
 
 import { ClassReflection, MethodReflection, TypeValue } from '@davinci/reflector';
 import { Interceptor, InterceptorBagDetails, JSONSchema } from '@davinci/core';
-import { MethodDecoratorMetadata, ParameterDecoratorOptions, Verb } from './decorators';
+import { ControllerDecoratorMetadata, MethodDecoratorMetadata, ParameterDecoratorOptions, Verb } from './decorators';
 import { AjvValidator, AjvValidatorOptions } from './AjvValidator';
 
 export type ErrorHandler<TRequest = any, TResponse = any> = (
@@ -77,6 +77,9 @@ export interface Route<Request> {
 	verb: Verb;
 	parametersConfig: ParameterConfiguration<Request>[];
 	methodDecoratorMetadata: MethodDecoratorMetadata;
+	methodReflection: MethodReflection;
+	controllerDecoratorMetadata: ControllerDecoratorMetadata;
+	controllerReflection: ClassReflection;
 }
 
 export interface StaticServeOptions {

@@ -8,7 +8,7 @@ import http, { Server } from 'http';
 import pino from 'pino';
 import { OpenAPIV3 } from 'openapi-types';
 import createDeepMerge from '@fastify/deepmerge';
-import { ClassType } from '@davinci/reflector';
+import { ClassType, PartialDeep } from '@davinci/reflector';
 import { generateSwaggerUiHtml } from './swaggerUi';
 
 const deepMerge = createDeepMerge();
@@ -18,18 +18,13 @@ export interface OpenAPIModuleOptions {
 		enabled?: boolean;
 		path?: string;
 		spec: Omit<OpenAPIV3.Document, 'paths' | 'openapi'>;
+		automaticPathTags?: boolean;
 	};
 	explorer?: {
 		enabled?: boolean;
 		path?: string;
 	};
 }
-
-type DeepPartial<T> = T extends object
-	? {
-			[P in keyof T]?: DeepPartial<T[P]>;
-	  }
-	: T;
 
 export class OpenAPIModule extends Module {
 	app: App;
@@ -39,7 +34,7 @@ export class OpenAPIModule extends Module {
 	httpServerModule: HttpServerModule<unknown, unknown, Server>;
 	httpServer: Server;
 	entityRegistry: EntityRegistry;
-	openAPIDoc: DeepPartial<OpenAPIV3.Document>;
+	openAPIDoc: PartialDeep<OpenAPIV3.Document>;
 
 	constructor(moduleOptions: OpenAPIModuleOptions) {
 		super();
@@ -48,6 +43,7 @@ export class OpenAPIModule extends Module {
 				document: {
 					enabled: true,
 					path: '/api-doc.json',
+					automaticPathTags: true,
 					spec: {
 						openapi: '3.0.0',
 						components: {
@@ -86,7 +82,15 @@ export class OpenAPIModule extends Module {
 	}
 
 	async createPathAndSchema(route: Route<unknown>): Promise<void> {
-		const { path, verb, parametersConfig, methodDecoratorMetadata } = route;
+		const {
+			path,
+			verb,
+			parametersConfig,
+			methodDecoratorMetadata,
+			controllerDecoratorMetadata,
+			controllerReflection
+		} = route;
+		if (methodDecoratorMetadata.options?.openapiHidden) return;
 
 		// Parameters handling
 		await mapSeries(parametersConfig, parameterConfig => {
@@ -107,12 +111,20 @@ export class OpenAPIModule extends Module {
 			}
 
 			this.openAPIDoc.paths[path] = this.openAPIDoc.paths[path] ?? {};
+			let tags: Array<string>;
+			if (controllerDecoratorMetadata.options?.openapiTags) {
+				tags = controllerDecoratorMetadata.options?.openapiTags;
+			} else if (this.moduleOptions.document?.automaticPathTags) {
+				tags = [controllerReflection.name.replace(/Controller/, '')];
+			}
+
 			this.openAPIDoc.paths[path][verb] = {
 				...(methodDecoratorMetadata.options?.summary && { summary: methodDecoratorMetadata.options?.summary }),
 				...(methodDecoratorMetadata.options?.description && {
 					description: methodDecoratorMetadata.options?.description
 				}),
-				...this.openAPIDoc.paths[path][verb]
+				...this.openAPIDoc.paths[path][verb],
+				...(tags ? { tags } : {})
 			};
 
 			if (['path', 'query', 'header'].includes(parameterConfig.source)) {
