@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-next.4](https://github.com/HPInc/davinci/compare/@davinci/http-server@1.0.0-next.3...@davinci/http-server@1.0.0-next.4) (2022-10-25)
+
+
+### Features
+
+* **openapi:** added tags to OpenAPI document ([90de933](https://github.com/HPInc/davinci/commit/90de933318498e5e8e62a17acc39f78180a4ca93))
+
+
+
+
+
 # [1.0.0-next.3](https://github.com/HPInc/davinci/compare/@davinci/http-server@1.0.0-next.2...@davinci/http-server@1.0.0-next.3) (2022-10-25)
 
 
