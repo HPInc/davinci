@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-next.3](https://github.com/HPInc/davinci/compare/@davinci/http-server-fastify@1.0.0-next.2...@davinci/http-server-fastify@1.0.0-next.3) (2022-10-25)
+
+
+### Bug Fixes
+
+* **fastify:** missing dev dependencies ([8364539](https://github.com/HPInc/davinci/commit/836453919cbd147495a43b7cf72f53dc85d4c782))
+* **fastify:** missing dev dependencies [#2](https://github.com/HPInc/davinci/issues/2) ([1bd4871](https://github.com/HPInc/davinci/commit/1bd4871068a0a6ef243a4478152b5928fdfabe18))
+
+
+
+
+
 # [1.0.0-next.2](https://github.com/HPInc/davinci/compare/@davinci/http-server-fastify@1.0.0-next.1...@davinci/http-server-fastify@1.0.0-next.2) (2022-10-25)
 
 **Note:** Version bump only for package @davinci/http-server-fastify
