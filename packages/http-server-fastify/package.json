@@ -31,6 +31,8 @@
 	},
 	"devDependencies": {
 		"@davinci/core": "^2.0.0-next.2",
+		"@fastify/cors": "^8.1.1",
+		"@fastify/static": "^6.5.0",
 		"axios": "0.26.1",
 		"supertest": "6.2.2",
 		"typescript": "^4.6.2"
