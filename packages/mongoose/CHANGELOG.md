@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-next.1](https://github.com/HPInc/davinci/compare/@davinci/mongoose@0.17.9...@davinci/mongoose@2.0.0-next.1) (2022-10-25)
+
+
+### Bug Fixes
+
+* removed unneeded files ([1c0a895](https://github.com/HPInc/davinci/commit/1c0a89593068ad3bd9c96370a1fffdc3835230a1))
+
+
+### Features
+
+* added logging ([746669c](https://github.com/HPInc/davinci/commit/746669cc6d874c91270f6f1d299c371dcc367808))
+* **generateSchema:** reverted to previous signature ([04925e7](https://github.com/HPInc/davinci/commit/04925e7ccb54cb11d939d252cc10dff5db135353))
+* **next:** starting from scratch ([bed4989](https://github.com/HPInc/davinci/commit/bed498970f64146d81aa78d5b0a2cef2d4ece046))
+* **reflector:** implemented walker ([d809667](https://github.com/HPInc/davinci/commit/d809667a757100d09b68c6fc77ae6cd5f9430be3))
+
+
+
+
+
 # [0.18.0](https://github.com/HPInc/davinci/compare/@davinci/mongoose@0.17.13...@davinci/mongoose@0.18.0) (2022-06-15)
 
 
