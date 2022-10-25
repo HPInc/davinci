@@ -1,5 +1,5 @@
 /*
- * © Copyright 2020 HP Development Company, L.P.
+ * © Copyright 2022 HP Development Company, L.P.
  * SPDX-License-Identifier: MIT
  */
 
@@ -19,5 +19,6 @@ export type ReturnTypeFunc = (returns?: void) => ReturnTypeFuncValue;
 export type TypeValueFactory = (type?: void) => TypeValue;
 export type ClassTypeResolver = (of?: void) => ClassType;
 
-
 export type Thunk<T> = (() => T) | T;
+
+export type PartialDeep<T> = T extends Function ? T : T extends object ? { [P in keyof T]?: PartialDeep<T[P]> } : T;

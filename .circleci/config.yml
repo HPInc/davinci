@@ -10,6 +10,7 @@ jobs:
     docker:
       - image: circleci/node:<< parameters.node-version >>
       - image: circleci/mongo:<< parameters.mongo-version >>
+      - image: rabbitmq:3.9-alpine
     steps:
       - checkout
 #      - restore_cache:

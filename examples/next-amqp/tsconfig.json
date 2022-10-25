@@ -2,7 +2,9 @@
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
 		"outDir": "./build",
-		"resolveJsonModule": true
+		"rootDir": ".",
+		"resolveJsonModule": true,
+		"preserveSymlinks": true
 	},
 	"include": ["src/**/*"]
 }
