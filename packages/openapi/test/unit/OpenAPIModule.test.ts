@@ -634,7 +634,7 @@ describe('OpenAPIModule', () => {
 		});
 
 		it('should use the tags passed explicitly in the @route.controller() decorator', async () => {
-			const { openApiModule } = await initApp({}, {}, { openapiTags: ['Customer methods'] });
+			const { openApiModule } = await initApp({}, {}, { tags: ['Customer methods'] });
 			const openAPIDocument = openApiModule.getOpenAPIDocument();
 
 			expect(openAPIDocument).to.containSubset({
@@ -662,7 +662,7 @@ describe('OpenAPIModule', () => {
 		});
 
 		it('should hide a specific route from the OpenAPI document, if specified', async () => {
-			const { openApiModule } = await initApp({}, {}, {}, { openapiHidden: true });
+			const { openApiModule } = await initApp({}, {}, {}, { hidden: true });
 			const openAPIDocument = openApiModule.getOpenAPIDocument();
 
 			expect(openAPIDocument.paths?.['/api/customers']['post']).to.be.ok;

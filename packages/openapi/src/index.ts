@@ -13,10 +13,13 @@ declare module '@davinci/http-server' {
 		 *
 		 * @defaultValue false
 		 */
-		openapiHidden?: boolean;
+		hidden?: boolean;
 	}
 
 	interface ControllerDecoratorOptions {
-		openapiTags?: Array<string>;
+		/**
+		 * Defines the OpenAPI tags for the endpoint
+		 */
+		tags?: Array<string>;
 	}
 }
