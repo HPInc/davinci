@@ -21,7 +21,8 @@ export const generateSchema = <T>(
 		// eslint-disable-next-line no-shadow
 		schemaType: ClassType,
 		// eslint-disable-next-line no-shadow
-		options: SchemaOptions = { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
+		options: SchemaOptions = { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } },
+		forceCreateSchema?: boolean
 	) => {
 		const classReflection = reflect(schemaType);
 		const propsWithMeta: {
@@ -105,7 +106,7 @@ export const generateSchema = <T>(
 		// get schema options
 		const schemaDecoration = classReflection.decorators.find(d => d[DecoratorId] === 'mongoose.schema');
 		const schemaOptions = schemaDecoration?.options;
-		const schema = schemaDecoration && new Schema(definition, options ?? schemaOptions);
+		const schema = (forceCreateSchema || schemaDecoration) && new Schema(definition, options ?? schemaOptions);
 
 		// register methods
 		const methods = classReflection.methods.reduce((acc, methodReflection) => {
@@ -175,7 +176,7 @@ export const generateSchema = <T>(
 		return { schema: schema ?? definition, ...(!schema ? { indexes, populatedVirtuals, virtuals, methods } : {}) };
 	};
 
-	const { schema } = recursivelyGenerateSchema(schemaType, options);
+	const { schema } = recursivelyGenerateSchema(schemaType, options, true);
 
 	return schema;
 };
