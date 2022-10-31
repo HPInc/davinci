@@ -14,3 +14,9 @@ export const mgoose = {
 	...hooks,
 	...decorators
 };
+
+declare module 'mongoose' {
+	interface QueryOptions {
+		davinciContext?: unknown;
+	}
+}
