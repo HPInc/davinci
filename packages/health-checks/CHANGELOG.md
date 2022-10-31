@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-next.10](https://github.com/HPInc/davinci/compare/@davinci/health-checks@1.0.0-next.4...@davinci/health-checks@2.0.0-next.10) (2022-10-31)
+
+**Note:** Version bump only for package @davinci/health-checks
+
+
+
+
+
 # [1.0.0-next.4](https://github.com/HPInc/davinci/compare/@davinci/health-checks@1.0.0-next.3...@davinci/health-checks@1.0.0-next.4) (2022-10-25)
 
 **Note:** Version bump only for package @davinci/health-checks
