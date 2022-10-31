@@ -4,7 +4,7 @@
  */
 
 import Sinon from 'sinon';
-import { Model, SchemaTypes } from 'mongoose';
+import { Model, Schema, SchemaTypes } from 'mongoose';
 import { expect } from '../support/chai';
 import { mgoose } from '../../src';
 
@@ -28,7 +28,7 @@ describe('typed mongoose', () => {
 
 			const schema = mgoose.generateSchema(Customer, {});
 
-			expect(schema).to.be.deep.equal({
+			expect(schema.obj).to.be.deep.equal({
 				firstname: {
 					type: String
 				},
@@ -54,7 +54,7 @@ describe('typed mongoose', () => {
 
 			const schema = mgoose.generateSchema(Customer, {});
 
-			expect(schema).be.deep.equal({
+			expect(schema.obj).to.be.deep.equal({
 				birth: {
 					type: {
 						place: {
@@ -81,7 +81,7 @@ describe('typed mongoose', () => {
 
 			const schema = mgoose.generateSchema(Customer, {});
 
-			expect(schema).be.deep.equal({
+			expect(schema.obj).to.be.deep.equal({
 				birth: [
 					{
 						type: {
@@ -117,9 +117,9 @@ describe('typed mongoose', () => {
 			const schema2 = mgoose.generateSchema(MyClass2, {});
 			const baseSchema = mgoose.generateSchema(BaseSchema, {});
 
-			expect(Object.keys(schema1)).be.deep.equal(['otherProp1', 'createdAt', 'updatedAt']);
-			expect(Object.keys(schema2)).be.deep.equal(['otherProp2', 'createdAt', 'updatedAt']);
-			expect(Object.keys(baseSchema)).be.deep.equal(['createdAt', 'updatedAt']);
+			expect(Object.keys(schema1.obj)).be.deep.equal(['otherProp1', 'createdAt', 'updatedAt']);
+			expect(Object.keys(schema2.obj)).be.deep.equal(['otherProp2', 'createdAt', 'updatedAt']);
+			expect(Object.keys(baseSchema.obj)).be.deep.equal(['createdAt', 'updatedAt']);
 		});
 	});
 
@@ -326,6 +326,21 @@ describe('typed mongoose', () => {
 			expect(schema.options).to.containSubset({ timestamps: true, id: true, _id: true });
 			// @ts-ignore
 			expect(schema.path('items').schema.options).to.containSubset({ timestamps: false, id: false, _id: false });
+		});
+
+		it('should allow omitting the schema decorator for classes passed explicitely to generateSchema', () => {
+			class Customer {
+				@mgoose.prop()
+				firstname: string;
+				@mgoose.prop()
+				age: number;
+				@mgoose.prop()
+				isActive: boolean;
+			}
+
+			const schema = mgoose.generateSchema(Customer, {});
+
+			expect(schema).to.be.instanceOf(Schema);
 		});
 	});
 
