@@ -90,7 +90,7 @@ jobs:
                     git config --global user.email "circleci@hp.com"
                     git config --global user.name "CircleCI"
                     git checkout -f
-                    npm run publish-next
+                    npm run publish-next -- -y
   publish_docs:
     docker:
       - image: cimg/node:16.4
