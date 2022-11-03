@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/example-next-api-fastify",
-	"version": "2.0.0-next.12",
+	"version": "2.0.0-next.13",
 	"private": true,
 	"description": "",
 	"main": "index.js",
@@ -13,7 +13,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"@davinci/core": "^2.0.0-next.11",
-		"@davinci/health-checks": "^2.0.0-next.11",
+		"@davinci/health-checks": "^2.0.0-next.12",
 		"@davinci/http-server": "^2.0.0-next.11",
 		"@davinci/http-server-fastify": "^2.0.0-next.11",
 		"@davinci/openapi": "^2.0.0-next.12",
