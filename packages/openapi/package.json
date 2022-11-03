@@ -28,7 +28,7 @@
 		"pino": "^7.11.0"
 	},
 	"peerDependencies": {
-		"@davinci/http-server": "^1.0.0-next"
+		"@davinci/http-server": "^2.0.0-next.11"
 	},
 	"devDependencies": {
 		"@davinci/http-server": "^2.0.0-next.11",
