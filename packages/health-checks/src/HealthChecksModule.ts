@@ -36,14 +36,12 @@ export class HealthChecksModule extends Module {
 		);
 		this.httpServer = httpServerModule?.getHttpServer() ?? http.createServer();
 
-		const findMatchingMethodAndDecoratorReflections = (controllerReflection: ClassReflection) =>
+		const findMatchingMethodAndDecoratorsReflections = (controllerReflection: ClassReflection) =>
 			controllerReflection.methods.reduce<
-				{ methodReflection: MethodReflection; decorator: HealthCheckDecoratorData }[]
+				{ methodReflection: MethodReflection; decorators: Array<HealthCheckDecoratorData> }[]
 			>((acc, method) => {
-				const decorator = method.decorators.find(d => d[DecoratorId] === 'health-check.method');
-				if (decorator) {
-					acc.push({ methodReflection: method, decorator });
-				}
+				const decorators = method.decorators.filter(d => d[DecoratorId] === 'health-check.method');
+				acc.push({ methodReflection: method, decorators });
 
 				return acc;
 			}, []);
@@ -64,11 +62,13 @@ export class HealthChecksModule extends Module {
 
 		const healthChecksFunctionsDict = classesToInspect.reduce<Record<string, Function[]>>(
 			(acc, { instance, Class, reflection }) => {
-				const matchingMethodAndDecoratorReflections = findMatchingMethodAndDecoratorReflections(reflection);
+				const matchingMethodAndDecoratorReflections = findMatchingMethodAndDecoratorsReflections(reflection);
 				const controllerInstance = instance ?? new Class();
-				matchingMethodAndDecoratorReflections.forEach(({ methodReflection, decorator }) => {
-					acc[decorator.healthCheckName] = acc[decorator.healthCheckName] ?? [];
-					acc[decorator.healthCheckName].push(controllerInstance[methodReflection.name]);
+				matchingMethodAndDecoratorReflections.forEach(({ methodReflection, decorators }) => {
+					decorators.forEach(decorator => {
+						acc[decorator.healthCheckName] = acc[decorator.healthCheckName] ?? [];
+						acc[decorator.healthCheckName].push(() => controllerInstance[methodReflection.name]());
+					});
 				});
 
 				return acc;
