@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { App } from '@davinci/core';
+import { App, mapObject } from '@davinci/core';
 import { FastifyHttpServer } from '@davinci/http-server-fastify';
 import { createSandbox } from 'sinon';
 import { healthCheck, HealthChecksModule } from '../../src';
@@ -40,6 +40,34 @@ describe('HealthChecksModule', () => {
 			const onInitResult = await onInitSpy.getCall(0).returnValue;
 			expect(onInitResult).to.haveOwnProperty('/checks/liveness').to.be.a('function');
 			expect(onInitResult).to.haveOwnProperty('/checks/readiness').to.be.a('function');
+		});
+
+		it('should support multiple decorators for the same method', async () => {
+			class MyController {
+				@healthCheck('readiness')
+				@healthCheck('liveness')
+				check() {}
+			}
+			const checkSpy = sinon.spy(MyController.prototype, 'check');
+			const app = new App({ logger: { level: 'silent' } });
+			app.registerController(MyController);
+			const fastifyHttpServer = new FastifyHttpServer();
+			const healthChecksModule = new HealthChecksModule({
+				healthChecks: [
+					{ name: 'liveness', endpoint: '/checks/liveness' },
+					{ name: 'readiness', endpoint: '/checks/readiness' }
+				]
+			});
+			await app.registerModule(fastifyHttpServer);
+			await app.registerModule(healthChecksModule);
+			const onInitSpy = sinon.spy(healthChecksModule, 'onInit');
+
+			await app.init();
+
+			expect(onInitSpy.called).to.be.true;
+			const onInitResult = await onInitSpy.getCall(0).returnValue;
+			await mapObject(onInitResult, checkFn => typeof checkFn === 'function' && checkFn(null));
+			expect(checkSpy.callCount).to.be.equal(2);
 		});
 
 		it('should fail if trying to register a health check not listed in the configuration', async () => {
