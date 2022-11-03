@@ -13,7 +13,7 @@ const app = createApp();
 const contextFactory = ({ request }) => ({ accountId: request.headers['x-accountid'] });
 
 app.registerController(CustomerController).registerModule(
-	new ExpressHttpServer().setContextFactory(contextFactory),
+	new ExpressHttpServer({ contextFactory }),
 	new HealthChecksModule({ healthChecks: [{ name: 'liveness', endpoint: '/.ah/live' }] }),
 	new OpenAPIModule({
 		document: {

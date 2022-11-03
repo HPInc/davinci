@@ -23,12 +23,6 @@ export type ErrorRequestHandler<TRequest = any, TResponse = any> = (
 	next?: Function
 ) => any;
 
-export interface HttpServerModuleOptions {
-	port?: number | string;
-	validator?: AjvValidator;
-	validatorOptions?: AjvValidatorOptions;
-}
-
 export type ParameterSource = 'path' | 'query' | 'body' | 'header' | 'request' | 'response';
 
 export interface ContextFactoryArguments<Request> {
@@ -37,6 +31,13 @@ export interface ContextFactoryArguments<Request> {
 }
 
 export type ContextFactory<Context, Request = any> = (args: ContextFactoryArguments<Request>) => Context;
+
+export interface HttpServerModuleOptions {
+	port?: number | string;
+	contextFactory?: ContextFactory<unknown>;
+	validator?: AjvValidator;
+	validatorOptions?: AjvValidatorOptions;
+}
 
 export type ParameterConfiguration<Request> =
 	| {

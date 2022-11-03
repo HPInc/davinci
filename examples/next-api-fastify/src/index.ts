@@ -13,7 +13,7 @@ const app = createApp();
 const contextFactory = ({ request }) => ({ accountId: request.headers['x-accountid'] });
 
 app.registerController(CustomerController).registerModule(
-	new FastifyHttpServer().setContextFactory(contextFactory),
+	new FastifyHttpServer({ contextFactory }),
 	new HealthChecksModule({ healthChecks: [{ name: 'liveness', endpoint: '/.ah/live' }] }),
 	new OpenAPIModule({
 		document: {
