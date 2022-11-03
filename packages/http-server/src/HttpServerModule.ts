@@ -46,6 +46,7 @@ export abstract class HttpServerModule<
 	constructor(protected moduleOptions?: ModuleOptions) {
 		super();
 		this.validator = new AjvValidator(moduleOptions?.validatorOptions, this.entityRegistry);
+		this.contextFactory = moduleOptions?.contextFactory;
 	}
 
 	getModuleId() {

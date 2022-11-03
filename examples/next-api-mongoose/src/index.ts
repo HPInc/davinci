@@ -13,9 +13,7 @@ const contextFactory = ({ request }) => ({ accountId: request.headers['x-account
 
 app.registerController(CustomerController).registerModule(
 	new MongooseModule({ connection: { uri: 'mongodb://127.0.0.1:27017/example' } }),
-	new FastifyHttpServer({ validatorOptions: { ajvOptions: { removeAdditional: false } } }).setContextFactory(
-		contextFactory
-	)
+	new FastifyHttpServer({ contextFactory, validatorOptions: { ajvOptions: { removeAdditional: false } } })
 );
 
 if (require.main === module) {
