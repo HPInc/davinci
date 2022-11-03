@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-next.12](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.0.0-next.11...@davinci/mongoose@2.0.0-next.12) (2022-11-03)
+
+
+### Bug Fixes
+
+* **mongoose:** renamed to davinciContext, changed generateSchema behaviour ([#146](https://github.com/HPInc/davinci/issues/146)) ([90f60dd](https://github.com/HPInc/davinci/commit/90f60ddc292d1f2bac8d5bd14082fbcfad1a0bde))
+
+
+
+
+
 # [2.0.0-next.11](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.0.0-next.10...@davinci/mongoose@2.0.0-next.11) (2022-11-03)
 
 **Note:** Version bump only for package @davinci/mongoose
