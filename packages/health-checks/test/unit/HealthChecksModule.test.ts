@@ -12,6 +12,9 @@ import { expect } from '../support/chai';
 const sinon = createSandbox();
 
 describe('HealthChecksModule', () => {
+	let app: App;
+	afterEach(() => app.shutdown());
+
 	describe('onInit', () => {
 		it('should inspect controllers and initialize correctly', async () => {
 			class MyController {
@@ -21,7 +24,7 @@ describe('HealthChecksModule', () => {
 				@healthCheck('liveness')
 				onLivenessCheck() {}
 			}
-			const app = new App({ logger: { level: 'silent' } });
+			app = new App({ logger: { level: 'silent' } });
 			app.registerController(MyController);
 			const fastifyHttpServer = new FastifyHttpServer();
 			const healthChecksModule = new HealthChecksModule({
@@ -49,7 +52,7 @@ describe('HealthChecksModule', () => {
 				check() {}
 			}
 			const checkSpy = sinon.spy(MyController.prototype, 'check');
-			const app = new App({ logger: { level: 'silent' } });
+			app = new App({ logger: { level: 'silent' } });
 			app.registerController(MyController);
 			const fastifyHttpServer = new FastifyHttpServer();
 			const healthChecksModule = new HealthChecksModule({
@@ -75,7 +78,7 @@ describe('HealthChecksModule', () => {
 				@healthCheck('readiness')
 				onReadinessCheck() {}
 			}
-			const app = new App();
+			app = new App();
 			sinon.stub(app, 'getModuleById');
 			app.registerController(MyController);
 			const healthChecksModule = new HealthChecksModule({
