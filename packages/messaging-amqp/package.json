@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/messaging-amqp",
-	"version": "2.0.0-next.10",
+	"version": "2.0.0-next.11",
 	"description": "AMQP module",
 	"author": "HP",
 	"license": "MIT",
@@ -20,9 +20,9 @@
 		"cover": "nyc npm test"
 	},
 	"dependencies": {
-		"@davinci/core": "^2.0.0-next.10",
-		"@davinci/messaging": "^2.0.0-next.10",
-		"@davinci/reflector": "^2.0.0-next.10",
+		"@davinci/core": "^2.0.0-next.11",
+		"@davinci/messaging": "^2.0.0-next.11",
+		"@davinci/reflector": "^2.0.0-next.11",
 		"@fastify/deepmerge": "^1.1.0",
 		"fast-json-stable-stringify": "^2.1.0",
 		"pino": "^8.6.1"
