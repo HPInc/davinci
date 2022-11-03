@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-next.13](https://github.com/HPInc/davinci/compare/@davinci/health-checks@2.0.0-next.12...@davinci/health-checks@2.0.0-next.13) (2022-11-03)
+
+
+### Bug Fixes
+
+* **healthChecks:** a method can be used for multiple checks ([9f4ece0](https://github.com/HPInc/davinci/commit/9f4ece04e7c92d57c65dc0757d7675ff0804c07b))
+* test ([c08d96c](https://github.com/HPInc/davinci/commit/c08d96ca0b5020eed4be8fc87573368361a9a812))
+
+
+
+
+
 # [2.0.0-next.12](https://github.com/HPInc/davinci/compare/@davinci/health-checks@2.0.0-next.11...@davinci/health-checks@2.0.0-next.12) (2022-11-03)
 
 
