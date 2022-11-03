@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-next.11](https://github.com/HPInc/davinci/compare/@davinci/reflector@2.0.0-next.10...@davinci/reflector@2.0.0-next.11) (2022-11-03)
+
+**Note:** Version bump only for package @davinci/reflector
+
+
+
+
+
 ## [1.1.1](https://github.com/HPInc/davinci/compare/@davinci/reflector@1.1.0...@davinci/reflector@1.1.1) (2021-07-06)
 
 **Note:** Version bump only for package @davinci/reflector
@@ -202,4 +210,3 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 * centralised Reflector package ([1b05c32](https://github.com/Oneflow/davinci/commit/1b05c32))
 * Reflector, added method getParameterNames ([868e3a8](https://github.com/Oneflow/davinci/commit/868e3a8))
-
