@@ -16,6 +16,6 @@ export function healthCheck(healthCheckName: string) {
 			[DecoratorId]: 'health-check.method',
 			healthCheckName
 		},
-		{ allowMultiple: false, inherit: true }
+		{ allowMultiple: true, inherit: true }
 	);
 }

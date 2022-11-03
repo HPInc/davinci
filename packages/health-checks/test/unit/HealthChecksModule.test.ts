@@ -21,7 +21,7 @@ describe('HealthChecksModule', () => {
 				@healthCheck('liveness')
 				onLivenessCheck() {}
 			}
-			const app = new App();
+			const app = new App({ logger: { level: 'silent' } });
 			app.registerController(MyController);
 			const fastifyHttpServer = new FastifyHttpServer();
 			const healthChecksModule = new HealthChecksModule({
