@@ -4,7 +4,7 @@
  */
 
 import { expect } from '../support/chai';
-import mongoose from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import Sinon from 'sinon';
 import { mgoose } from '../../src';
 
@@ -14,14 +14,14 @@ const sinon = Sinon.createSandbox();
 
 describe('mongoose hooks', () => {
 	let CustomerSchema;
-	let CustomerModel;
+	let CustomerModel: Model<any>;
 	let beforeReadCallback;
 	let afterReadCallback;
 	let beforeWriteCallback;
 	let afterWriteCallback;
 	let beforeDeleteCallback;
 	let afterDeleteCallback;
-	const davinciCtx = { accountId: '123123' };
+	const context = { accountId: '123123' };
 	const customersData = [{ firstname: 'Mike' }, { firstname: 'John' }];
 
 	beforeEach(async () => {
@@ -74,16 +74,21 @@ describe('mongoose hooks', () => {
 		registerReadHooks({ read: true });
 
 		it('should correctly trigger the hooks', async () => {
-			await CustomerModel.find({}, null, { davinciCtx }).countDocuments();
+			await CustomerModel.find({}, null, { davinciContext: context }).countDocuments();
 			const beforeArgs = beforeReadCallback.getCall(0).args[0];
 			const afterArgs = afterReadCallback.getCall(0).args[0];
 
 			expect(beforeReadCallback.callCount).be.equal(1);
-			expect(beforeArgs).to.containSubset({ hookName: 'countDocuments', davinciCtx });
+			expect(beforeArgs).to.containSubset({ hookName: 'countDocuments', context, davinciContext: context });
 			expect(beforeArgs).have.property('query');
 
 			expect(afterReadCallback.callCount).be.equal(1);
-			expect(afterArgs).to.containSubset({ hookName: 'countDocuments', count: 2, davinciCtx });
+			expect(afterArgs).to.containSubset({
+				hookName: 'countDocuments',
+				count: 2,
+				context,
+				davinciContext: context
+			});
 			expect(afterArgs).have.property('query');
 		});
 	});
@@ -92,16 +97,16 @@ describe('mongoose hooks', () => {
 		registerReadHooks({ read: true });
 
 		it('should correctly trigger the hooks', async () => {
-			await CustomerModel.find({}, null, { davinciCtx });
+			await CustomerModel.find({}, null, { davinciContext: context });
 			const beforeArgs = beforeReadCallback.getCall(0).args[0];
 			const afterArgs = afterReadCallback.getCall(0).args[0];
 
 			expect(beforeReadCallback.callCount).be.equal(1);
-			expect(beforeArgs).to.containSubset({ hookName: 'find', davinciCtx });
+			expect(beforeArgs).to.containSubset({ hookName: 'find', context, davinciContext: context });
 			expect(beforeArgs).have.property('query');
 
 			expect(afterReadCallback.callCount).be.equal(1);
-			expect(afterArgs).to.containSubset({ hookName: 'find', davinciCtx });
+			expect(afterArgs).to.containSubset({ hookName: 'find', context, davinciContext: context });
 			expect(afterArgs).have.property('query');
 			expect(afterArgs).have.property('result').length(2);
 		});
@@ -111,16 +116,16 @@ describe('mongoose hooks', () => {
 		registerReadHooks({ read: true });
 
 		it('should correctly trigger the hooks', async () => {
-			await CustomerModel.findOne({ firstname: 'Mike' }, null, { davinciCtx });
+			await CustomerModel.findOne({ firstname: 'Mike' }, null, { davinciContext: context });
 			const beforeArgs = beforeReadCallback.getCall(0).args[0];
 			const afterArgs = afterReadCallback.getCall(0).args[0];
 
 			expect(beforeReadCallback.callCount).be.equal(1);
-			expect(beforeArgs).to.containSubset({ hookName: 'findOne', davinciCtx });
+			expect(beforeArgs).to.containSubset({ hookName: 'findOne', context, davinciContext: context });
 			expect(beforeArgs).have.property('query');
 
 			expect(afterReadCallback.callCount).be.equal(1);
-			expect(afterArgs).to.containSubset({ hookName: 'findOne', davinciCtx });
+			expect(afterArgs).to.containSubset({ hookName: 'findOne', context, davinciContext: context });
 			expect(afterArgs).have.property('query');
 			expect(afterArgs).have.property('result').to.containSubset({ firstname: 'Mike' });
 		});
@@ -133,7 +138,7 @@ describe('mongoose hooks', () => {
 			await CustomerModel.findOneAndUpdate(
 				{ firstname: 'Mike' },
 				{ firstname: 'Michael' },
-				{ davinciCtx, new: true }
+				{ davinciContext: context, new: true }
 			);
 			const beforeReadArgs = beforeReadCallback.getCall(0).args[0];
 			const afterReadArgs = afterReadCallback.getCall(0).args[0];
@@ -142,20 +147,24 @@ describe('mongoose hooks', () => {
 			const afterWriteArgs = afterWriteCallback.getCall(0).args[0];
 
 			expect(beforeReadCallback.callCount).be.equal(1);
-			expect(beforeReadArgs).to.containSubset({ hookName: 'findOneAndUpdate', davinciCtx });
+			expect(beforeReadArgs).to.containSubset({ hookName: 'findOneAndUpdate', context, davinciContext: context });
 			expect(beforeReadArgs).have.property('query');
 
 			expect(afterReadCallback.callCount).be.equal(1);
-			expect(afterReadArgs).to.containSubset({ hookName: 'findOneAndUpdate', davinciCtx });
+			expect(afterReadArgs).to.containSubset({ hookName: 'findOneAndUpdate', context, davinciContext: context });
 			expect(afterReadArgs).have.property('query');
 			expect(afterReadArgs).have.property('result').to.containSubset({ firstname: 'Michael' });
 
 			expect(beforeWriteCallback.callCount).be.equal(1);
-			expect(beforeWriteArgs).to.containSubset({ hookName: 'findOneAndUpdate', davinciCtx });
+			expect(beforeWriteArgs).to.containSubset({
+				hookName: 'findOneAndUpdate',
+				context,
+				davinciContext: context
+			});
 			expect(beforeWriteArgs).have.property('query');
 
 			expect(afterWriteCallback.callCount).be.equal(1);
-			expect(afterWriteArgs).to.containSubset({ hookName: 'findOneAndUpdate', davinciCtx });
+			expect(afterWriteArgs).to.containSubset({ hookName: 'findOneAndUpdate', context, davinciContext: context });
 			expect(afterWriteArgs).have.property('query');
 			expect(afterWriteArgs).have.property('result').to.containSubset({ firstname: 'Michael' });
 		});
@@ -165,22 +174,26 @@ describe('mongoose hooks', () => {
 		registerReadHooks({ read: true, write: true });
 
 		it('should correctly trigger the hooks', async () => {
-			await CustomerModel.update({ firstname: 'Mike' }, { firstname: 'Michael' }, { davinciCtx, new: true });
+			await CustomerModel.update(
+				{ firstname: 'Mike' },
+				{ firstname: 'Michael' },
+				{ davinciContext: context, new: true }
+			);
 			const beforeReadArgs = beforeReadCallback.getCall(0).args[0];
 
 			const beforeWriteArgs = beforeWriteCallback.getCall(0).args[0];
 			const afterWriteArgs = afterWriteCallback.getCall(0).args[0];
 
 			expect(beforeReadCallback.callCount).be.equal(1);
-			expect(beforeReadArgs).to.containSubset({ hookName: 'update', davinciCtx });
+			expect(beforeReadArgs).to.containSubset({ hookName: 'update', context, davinciContext: context });
 			expect(beforeReadArgs).have.property('query');
 
 			expect(beforeWriteCallback.callCount).be.equal(1);
-			expect(beforeWriteArgs).to.containSubset({ hookName: 'update', davinciCtx });
+			expect(beforeWriteArgs).to.containSubset({ hookName: 'update', context, davinciContext: context });
 			expect(beforeWriteArgs).have.property('query');
 
 			expect(afterWriteCallback.callCount).be.equal(1);
-			expect(afterWriteArgs).to.containSubset({ hookName: 'update', davinciCtx });
+			expect(afterWriteArgs).to.containSubset({ hookName: 'update', context, davinciContext: context });
 			expect(afterWriteArgs).have.property('query');
 			expect(afterWriteArgs).have.property('rawResult');
 		});
@@ -190,22 +203,26 @@ describe('mongoose hooks', () => {
 		registerReadHooks({ read: true, write: true });
 
 		it('should correctly trigger the hooks', async () => {
-			await CustomerModel.updateMany({ firstname: 'Mike' }, { firstname: 'Michael' }, { davinciCtx, new: true });
+			await CustomerModel.updateMany(
+				{ firstname: 'Mike' },
+				{ firstname: 'Michael' },
+				{ davinciContext: context, new: true }
+			);
 			const beforeReadArgs = beforeReadCallback.getCall(0).args[0];
 
 			const beforeWriteArgs = beforeWriteCallback.getCall(0).args[0];
 			const afterWriteArgs = afterWriteCallback.getCall(0).args[0];
 
 			expect(beforeReadCallback.callCount).be.equal(1);
-			expect(beforeReadArgs).to.containSubset({ hookName: 'updateMany', davinciCtx });
+			expect(beforeReadArgs).to.containSubset({ hookName: 'updateMany', context, davinciContext: context });
 			expect(beforeReadArgs).have.property('query');
 
 			expect(beforeWriteCallback.callCount).be.equal(1);
-			expect(beforeWriteArgs).to.containSubset({ hookName: 'updateMany', davinciCtx });
+			expect(beforeWriteArgs).to.containSubset({ hookName: 'updateMany', context, davinciContext: context });
 			expect(beforeWriteArgs).have.property('query');
 
 			expect(afterWriteCallback.callCount).be.equal(1);
-			expect(afterWriteArgs).to.containSubset({ hookName: 'updateMany', davinciCtx });
+			expect(afterWriteArgs).to.containSubset({ hookName: 'updateMany', context, davinciContext: context });
 			expect(afterWriteArgs).have.property('query');
 			expect(afterWriteArgs).have.property('rawResult');
 		});
@@ -215,22 +232,26 @@ describe('mongoose hooks', () => {
 		registerReadHooks({ read: true, write: true });
 
 		it('should correctly trigger the hooks', async () => {
-			await CustomerModel.updateOne({ firstname: 'Mike' }, { firstname: 'Michael' }, { davinciCtx, new: true });
+			await CustomerModel.updateOne(
+				{ firstname: 'Mike' },
+				{ firstname: 'Michael' },
+				{ davinciContext: context, new: true }
+			);
 			const beforeReadArgs = beforeReadCallback.getCall(0).args[0];
 
 			const beforeWriteArgs = beforeWriteCallback.getCall(0).args[0];
 			const afterWriteArgs = afterWriteCallback.getCall(0).args[0];
 
 			expect(beforeReadCallback.callCount).be.equal(1);
-			expect(beforeReadArgs).to.containSubset({ hookName: 'updateOne', davinciCtx });
+			expect(beforeReadArgs).to.containSubset({ hookName: 'updateOne', context, davinciContext: context });
 			expect(beforeReadArgs).have.property('query');
 
 			expect(beforeWriteCallback.callCount).be.equal(1);
-			expect(beforeWriteArgs).to.containSubset({ hookName: 'updateOne', davinciCtx });
+			expect(beforeWriteArgs).to.containSubset({ hookName: 'updateOne', context, davinciContext: context });
 			expect(beforeWriteArgs).have.property('query');
 
 			expect(afterWriteCallback.callCount).be.equal(1);
-			expect(afterWriteArgs).to.containSubset({ hookName: 'updateOne', davinciCtx });
+			expect(afterWriteArgs).to.containSubset({ hookName: 'updateOne', context, davinciContext: context });
 			expect(afterWriteArgs).have.property('query');
 			expect(afterWriteArgs).have.property('rawResult');
 		});
@@ -240,16 +261,24 @@ describe('mongoose hooks', () => {
 		registerReadHooks({ delete: true });
 
 		it('should correctly trigger the hooks', async () => {
-			await CustomerModel.findOneAndDelete({ firstname: 'Mike' }, { davinciCtx });
+			await CustomerModel.findOneAndDelete({ firstname: 'Mike' }, { davinciContext: context });
 			const beforeDeleteArgs = beforeDeleteCallback.getCall(0).args[0];
 			const afterDeleteArgs = afterDeleteCallback.getCall(0).args[0];
 
 			expect(beforeDeleteCallback.callCount).be.equal(1);
-			expect(beforeDeleteArgs).to.containSubset({ hookName: 'findOneAndDelete', davinciCtx });
+			expect(beforeDeleteArgs).to.containSubset({
+				hookName: 'findOneAndDelete',
+				context,
+				davinciContext: context
+			});
 			expect(beforeDeleteArgs).have.property('query');
 
 			expect(afterDeleteCallback.callCount).be.equal(1);
-			expect(afterDeleteArgs).to.containSubset({ hookName: 'findOneAndDelete', davinciCtx });
+			expect(afterDeleteArgs).to.containSubset({
+				hookName: 'findOneAndDelete',
+				context,
+				davinciContext: context
+			});
 			expect(afterDeleteArgs).have.property('query');
 			expect(afterDeleteArgs).have.property('result').to.containSubset({ firstname: 'Mike' });
 			expect(await CustomerModel.findOne({ firstname: 'Mike' })).be.null;
@@ -260,16 +289,24 @@ describe('mongoose hooks', () => {
 		registerReadHooks({ delete: true });
 
 		it('should correctly trigger the hooks', async () => {
-			await CustomerModel.findOneAndRemove({ firstname: 'Mike' }, { davinciCtx });
+			await CustomerModel.findOneAndRemove({ firstname: 'Mike' }, { davinciContext: context });
 			const beforeDeleteArgs = beforeDeleteCallback.getCall(0).args[0];
 			const afterDeleteArgs = afterDeleteCallback.getCall(0).args[0];
 
 			expect(beforeDeleteCallback.callCount).be.equal(1);
-			expect(beforeDeleteArgs).to.containSubset({ hookName: 'findOneAndRemove', davinciCtx });
+			expect(beforeDeleteArgs).to.containSubset({
+				hookName: 'findOneAndRemove',
+				context,
+				davinciContext: context
+			});
 			expect(beforeDeleteArgs).have.property('query');
 
 			expect(afterDeleteCallback.callCount).be.equal(1);
-			expect(afterDeleteArgs).to.containSubset({ hookName: 'findOneAndRemove', davinciCtx });
+			expect(afterDeleteArgs).to.containSubset({
+				hookName: 'findOneAndRemove',
+				context,
+				davinciContext: context
+			});
 			expect(afterDeleteArgs).have.property('query');
 			expect(afterDeleteArgs).have.property('result').to.containSubset({ firstname: 'Mike' });
 			expect(await CustomerModel.findOne({ firstname: 'Mike' })).be.null;
@@ -280,16 +317,16 @@ describe('mongoose hooks', () => {
 		registerReadHooks({ delete: true });
 
 		it('should correctly trigger the hooks', async () => {
-			await CustomerModel.deleteOne({ firstname: 'Mike' }).setOptions({ davinciCtx });
+			await CustomerModel.deleteOne({ firstname: 'Mike' }).setOptions({ davinciContext: context });
 			const beforeDeleteArgs = beforeDeleteCallback.getCall(0).args[0];
 			const afterDeleteArgs = afterDeleteCallback.getCall(0).args[0];
 
 			expect(beforeDeleteCallback.callCount).be.equal(1);
-			expect(beforeDeleteArgs).to.containSubset({ hookName: 'deleteOne', davinciCtx });
+			expect(beforeDeleteArgs).to.containSubset({ hookName: 'deleteOne', context, davinciContext: context });
 			expect(beforeDeleteArgs).have.property('query');
 
 			expect(afterDeleteCallback.callCount).be.equal(1);
-			expect(afterDeleteArgs).to.containSubset({ hookName: 'deleteOne', davinciCtx });
+			expect(afterDeleteArgs).to.containSubset({ hookName: 'deleteOne', context, davinciContext: context });
 			expect(afterDeleteArgs).have.property('query');
 			expect(afterDeleteArgs).have.property('rawResult');
 			expect(await CustomerModel.findOne({ firstname: 'Mike' })).be.null;
@@ -300,16 +337,16 @@ describe('mongoose hooks', () => {
 		registerReadHooks({ delete: true });
 
 		it('should correctly trigger the hooks', async () => {
-			await CustomerModel.deleteMany({ firstname: 'Mike' }).setOptions({ davinciCtx });
+			await CustomerModel.deleteMany({ firstname: 'Mike' }).setOptions({ davinciContext: context });
 			const beforeDeleteArgs = beforeDeleteCallback.getCall(0).args[0];
 			const afterDeleteArgs = afterDeleteCallback.getCall(0).args[0];
 
 			expect(beforeDeleteCallback.callCount).be.equal(1);
-			expect(beforeDeleteArgs).to.containSubset({ hookName: 'deleteMany', davinciCtx });
+			expect(beforeDeleteArgs).to.containSubset({ hookName: 'deleteMany', context, davinciContext: context });
 			expect(beforeDeleteArgs).have.property('query');
 
 			expect(afterDeleteCallback.callCount).be.equal(1);
-			expect(afterDeleteArgs).to.containSubset({ hookName: 'deleteMany', davinciCtx });
+			expect(afterDeleteArgs).to.containSubset({ hookName: 'deleteMany', context, davinciContext: context });
 			expect(afterDeleteArgs).have.property('query');
 			expect(afterDeleteArgs).have.property('rawResult');
 			expect(await CustomerModel.findOne({ firstname: 'Mike' })).be.null;
@@ -323,17 +360,17 @@ describe('mongoose hooks', () => {
 			const customer = await CustomerModel.findOne({ firstname: 'Mike' }, null, { skipHooks: true });
 			customer.firstname = 'Michael';
 
-			await customer.save({ davinciCtx });
+			await customer.save({ davinciContext: context });
 
 			const beforeWriteArgs = beforeWriteCallback.getCall(0).args[0];
 			const afterWriteArgs = afterWriteCallback.getCall(0).args[0];
 
 			expect(beforeWriteCallback.callCount).be.equal(1);
-			expect(beforeWriteArgs).to.containSubset({ hookName: 'save', davinciCtx });
+			expect(beforeWriteArgs).to.containSubset({ hookName: 'save', context, davinciContext: context });
 			expect(beforeWriteArgs).have.property('doc').have.property('firstname').equal('Michael');
 
 			expect(afterWriteCallback.callCount).be.equal(1);
-			expect(afterWriteArgs).to.containSubset({ hookName: 'save', davinciCtx });
+			expect(afterWriteArgs).to.containSubset({ hookName: 'save', context, davinciContext: context });
 			expect(afterWriteArgs).have.property('result').have.property('firstname').equal('Michael');
 		});
 	});
@@ -344,7 +381,7 @@ describe('mongoose hooks', () => {
 		it('should correctly trigger the hooks', async () => {
 			const customer = await CustomerModel.findOne({ firstname: 'Mike' }, null, { skipHooks: true });
 
-			await customer.remove({ davinciCtx });
+			await customer.remove();
 
 			const beforeDeleteArgs = beforeDeleteCallback.getCall(0).args[0];
 			const afterDeleteArgs = afterDeleteCallback.getCall(0).args[0];
