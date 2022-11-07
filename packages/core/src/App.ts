@@ -192,11 +192,15 @@ export class App extends Module {
 
 		try {
 			await this.onDestroy?.(this);
-			await mapSeries(this.modules, module =>
-				wrapIntoPromise(() => module.onDestroy?.(this)).catch(err =>
-					this.logger.error({ moduleId: module.getModuleId(), error: err }, 'Error while destroying module')
-				)
-			);
+			await mapSeries(this.modules, async module => {
+				try {
+					module.setStatus('destroying');
+					await wrapIntoPromise(() => module.onDestroy?.(this));
+					module.setStatus('destroyed');
+				} catch (err) {
+					this.logger.error({ moduleId: module.getModuleId(), error: err }, 'Error while destroying module');
+				}
+			});
 			this.setStatus('destroyed');
 		} catch (err) {
 			this.logger.fatal({ error: err }, 'Fatal error');

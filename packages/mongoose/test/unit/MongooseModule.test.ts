@@ -20,4 +20,17 @@ describe('MongooseModule', () => {
 		expect(readyState).to.be.equal(1);
 		expect(module.getStatus()).to.be.equal('initialized');
 	});
+
+	it('should correctly disconnect', async () => {
+		const module = new MongooseModule({ connection: { uri: 'mongodb://127.0.0.1/test' } });
+		const app = new App();
+		app.registerModule(module);
+
+		await app.init();
+		await app.shutdown();
+
+		const readyState = mongoose.connection.readyState;
+		expect(readyState).to.be.equal(0);
+		expect(module.getStatus()).to.be.equal('destroyed');
+	});
 });
