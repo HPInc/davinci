@@ -39,31 +39,52 @@ type Hook =
 export interface PreArgs<Context = unknown, ModelSchema = unknown> {
 	query: Query<ModelSchema, ModelSchema & Document>;
 	hookName: Hook;
+	context: Context;
+	/**
+	 * @deprecated Use the new {context} property instead.
+	 */
 	davinciContext: Context;
 }
+
 export interface AfterArgs<Context = unknown, ModelSchema = unknown> {
 	query: Query<ModelSchema, ModelSchema & Document>;
 	hookName: Hook;
+	/**
+	 * @deprecated Use the new {context} property instead.
+	 */
 	davinciContext: Context;
+	context: Context;
 	result: (ModelSchema & Document) | (ModelSchema & Document)[];
 }
 
 export interface AfterRawResultArgs<Context = unknown, ModelSchema = unknown> {
 	query: Query<ModelSchema, ModelSchema & Document>;
 	hookName: Hook;
+	/**
+	 * @deprecated Use the new {context} property instead.
+	 */
 	davinciContext: Context;
+	context: Context;
 	rawResult: unknown;
 }
 
 export interface DocumentPreArgs<Context = unknown, ModelSchema = unknown> {
 	hookName: Hook;
+	/**
+	 * @deprecated Use the new {context} property instead.
+	 */
 	davinciContext: Context;
+	context: Context;
 	doc: Document & ModelSchema;
 }
 export interface DocumentPostArgs<Context = unknown, ModelSchema = unknown> {
 	result: Document;
 	hookName: Hook;
+	/**
+	 * @deprecated Use the new {context} property instead.
+	 */
 	davinciContext: Context;
+	context: Context;
 	doc: Document & ModelSchema;
 }
 
@@ -78,7 +99,7 @@ export interface DocumentPostArgs<Context = unknown, ModelSchema = unknown> {
  * @param thisObj
  * @param result
  * @param rest
- * @param davinciContext
+ * @param context
  */
 const createHandlerArgs = <Context = unknown, ResultType = unknown>(
 	stage: Stage,
@@ -90,7 +111,7 @@ const createHandlerArgs = <Context = unknown, ResultType = unknown>(
 		thisObj,
 		result,
 		rest,
-		davinciContext
+		context
 	}: {
 		isReadHook: boolean;
 		isWriteHook: boolean;
@@ -98,7 +119,7 @@ const createHandlerArgs = <Context = unknown, ResultType = unknown>(
 		thisObj: Document | Query<ResultType, ResultType & Document>;
 		result?: any;
 		rest?: unknown[];
-		davinciContext?: Context;
+		context?: Context;
 	}
 ):
 	| PreArgs<ResultType>
@@ -112,14 +133,16 @@ const createHandlerArgs = <Context = unknown, ResultType = unknown>(
 	const createPreArgs = (): PreArgs<Context, ResultType> => ({
 		query: thisObj as Query<ResultType, ResultType & Document>,
 		hookName,
-		davinciContext
+		context,
+		davinciContext: context
 	});
 
 	// createAfterArgs creates the arguments for `after(Read|Write|Delete)` hooks
 	const createAfterArgs = (): AfterArgs<Context, ResultType> => ({
 		query: thisObj as Query<ResultType, ResultType & Document>,
 		hookName,
-		davinciContext,
+		context,
+		davinciContext: context,
 		result
 	});
 
@@ -127,20 +150,27 @@ const createHandlerArgs = <Context = unknown, ResultType = unknown>(
 	const createAfterRawResultArgs = (): AfterRawResultArgs<Context, ResultType> => ({
 		query: thisObj as Query<ResultType, ResultType & Document>,
 		hookName,
-		davinciContext,
+		context,
+		davinciContext: context,
 		rawResult: result
 	});
 
 	// createDocumentPreArgs creates the arguments for `before(Read|Write|Delete)` hooks triggered by
 	// document middlewares: https://mongoosejs.com/docs/middleware.html
-	const createDocumentPreArgs = (): DocumentPreArgs => ({ hookName, davinciContext, doc: thisObj as Document });
+	const createDocumentPreArgs = (): DocumentPreArgs => ({
+		hookName,
+		context,
+		davinciContext: context,
+		doc: thisObj as Document
+	});
 
 	// createDocumentPostArgs creates the arguments for `after(Read|Write|Delete)` hooks triggered by
 	// document middlewares: https://mongoosejs.com/docs/middleware.html
 	const createDocumentPostArgs = (): DocumentPostArgs => ({
 		result: thisObj as Document,
 		hookName,
-		davinciContext,
+		context,
+		davinciContext: context,
 		doc: rest[1] as Document
 	});
 
@@ -150,7 +180,7 @@ const createHandlerArgs = <Context = unknown, ResultType = unknown>(
 				read: createPreArgs
 			},
 			post: {
-				read: () => ({ query: thisObj, hookName, davinciContext, count: result })
+				read: () => ({ query: thisObj, hookName, context, davinciContext: context, count: result })
 			}
 		},
 		find: {
@@ -278,16 +308,16 @@ const createRegisterHooks =
 
 		hooksList.forEach(hook =>
 			mongooseSchema[stage](hook, async function hookHandlerWrapper(result, ...rest) {
-				let davinciContext;
+				let context;
 				if (hasContextInOptions(hook)) {
-					davinciContext = this.options?.davinciContext;
+					context = this.options?.davinciContext;
 					if (this.options?.skipHooks) {
 						return;
 					}
 				}
 				if (hasContextInSaveOptions(hook)) {
 					// eslint-disable-next-line no-underscore-dangle
-					davinciContext = this.$__.saveOptions?.davinciContext;
+					context = this.$__.saveOptions?.davinciContext;
 					// eslint-disable-next-line no-underscore-dangle
 					if (this.$__.saveOptions?.skipHooks) {
 						return;
@@ -300,7 +330,7 @@ const createRegisterHooks =
 					isDeleteHook,
 					thisObj: this,
 					result,
-					davinciContext,
+					context,
 					rest
 				});
 

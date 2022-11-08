@@ -4,7 +4,7 @@
  */
 
 import { App, entity } from '@davinci/core';
-import { MethodResponses, route } from '@davinci/http-server';
+import { ControllerDecoratorOptions, MethodDecoratorOptions, MethodResponses, route } from '@davinci/http-server';
 import { FastifyHttpServer } from '@davinci/http-server-fastify';
 import deepMerge from 'deepmerge';
 import axios from 'axios';
@@ -41,7 +41,9 @@ describe('OpenAPIModule', () => {
 
 	const initApp = async (
 		openapiModuleOptions?: Partial<OpenAPIModuleOptions>,
-		postMethodResponses?: MethodResponses
+		postMethodResponses?: MethodResponses,
+		controllerDecoratorOptions?: Partial<ControllerDecoratorOptions>,
+		findMethodDecoratorOptions?: Partial<MethodDecoratorOptions>
 	) => {
 		const openapiModuleOpts = deepMerge(
 			{
@@ -68,9 +70,9 @@ describe('OpenAPIModule', () => {
 			openapiModuleOptions ?? {}
 		);
 
-		@route.controller({ basePath: '/api/customers' })
+		@route.controller({ basePath: '/api/customers', ...controllerDecoratorOptions })
 		class CustomerController {
-			@route.get({ path: '/', description: 'Find all customers' })
+			@route.get({ path: '/', description: 'Find all customers', ...findMethodDecoratorOptions })
 			find(@route.query() query: CustomerSearch, @route.query() onlyEnabled: boolean) {
 				return { query, onlyEnabled };
 			}
@@ -135,7 +137,8 @@ describe('OpenAPIModule', () => {
 										type: 'boolean'
 									}
 								}
-							]
+							],
+							tags: ['Customer']
 						},
 						post: {
 							description: 'Create customer',
@@ -148,7 +151,8 @@ describe('OpenAPIModule', () => {
 										}
 									}
 								}
-							}
+							},
+							tags: ['Customer']
 						}
 					},
 					'/api/customers/multiple': {
@@ -166,7 +170,8 @@ describe('OpenAPIModule', () => {
 										}
 									}
 								}
-							}
+							},
+							tags: ['Customer']
 						}
 					},
 					'/api/customers/:id': {
@@ -188,7 +193,8 @@ describe('OpenAPIModule', () => {
 									},
 									required: true
 								}
-							]
+							],
+							tags: ['Customer']
 						}
 					}
 				},
@@ -625,6 +631,42 @@ describe('OpenAPIModule', () => {
 					}
 				}
 			});
+		});
+
+		it('should use the tags passed explicitly in the @route.controller() decorator', async () => {
+			const { openApiModule } = await initApp({}, {}, { tags: ['Customer methods'] });
+			const openAPIDocument = openApiModule.getOpenAPIDocument();
+
+			expect(openAPIDocument).to.containSubset({
+				paths: {
+					'/api/customers': {
+						get: {
+							tags: ['Customer methods']
+						},
+						post: {
+							tags: ['Customer methods']
+						}
+					},
+					'/api/customers/multiple': {
+						post: {
+							tags: ['Customer methods']
+						}
+					},
+					'/api/customers/:id': {
+						patch: {
+							tags: ['Customer methods']
+						}
+					}
+				}
+			});
+		});
+
+		it('should hide a specific route from the OpenAPI document, if specified', async () => {
+			const { openApiModule } = await initApp({}, {}, {}, { hidden: true });
+			const openAPIDocument = openApiModule.getOpenAPIDocument();
+
+			expect(openAPIDocument.paths?.['/api/customers']['post']).to.be.ok;
+			expect(openAPIDocument.paths?.['/api/customers']['get']).to.be.undefined;
 		});
 	});
 

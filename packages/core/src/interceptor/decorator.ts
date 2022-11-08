@@ -4,9 +4,9 @@
  */
 
 import { decorate, DecoratorId } from '@davinci/reflector';
-import { Interceptor } from './types';
+import { Interceptor, InterceptorBagDetails } from './types';
 
-export function interceptor<Context = unknown, State = unknown>(handler: Interceptor<Context, State>) {
+export function interceptor<IBD extends InterceptorBagDetails = InterceptorBagDetails>(handler: Interceptor<IBD>) {
 	return decorate(
 		{
 			[DecoratorId]: 'interceptor',

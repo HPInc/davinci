@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 import { createSandbox } from 'sinon';
-import { App, Interceptor, interceptor, mapSeries, nextTick } from '@davinci/core';
+import { App, interceptor, mapSeries, nextTick } from '@davinci/core';
 import { channelParam, message, payload, subscribe } from '@davinci/messaging';
-import { AmqpInterceptorContext, AmqpModule, AmqpModuleOptions, Subscription } from '../../src';
+import { AmqpInterceptor, AmqpModule, AmqpModuleOptions, Subscription } from '../../src';
 import { expect } from '../support/chai';
 
 const sinon = createSandbox();
@@ -192,7 +192,7 @@ describe('AmqpModule', () => {
 		});
 
 		it('should process the interceptors', async () => {
-			const interceptorStub = sinon.stub().callsFake((next => next()) as Interceptor<AmqpInterceptorContext>);
+			const interceptorStub = sinon.stub().callsFake((next => next()) as AmqpInterceptor);
 			class MyController {
 				@subscribe({
 					name: 'mySubscription',
@@ -223,7 +223,8 @@ describe('AmqpModule', () => {
 
 			expect(bag).to.containSubset({
 				module: 'messaging-amqp',
-				context: { channel: subscription.channel, subscription },
+				channel: subscription.channel,
+				subscription,
 				state: {}
 			});
 		});

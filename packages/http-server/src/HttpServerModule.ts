@@ -46,6 +46,7 @@ export abstract class HttpServerModule<
 	constructor(protected moduleOptions?: ModuleOptions) {
 		super();
 		this.validator = new AjvValidator(moduleOptions?.validatorOptions, this.entityRegistry);
+		this.contextFactory = moduleOptions?.contextFactory;
 	}
 
 	getModuleId() {
@@ -123,7 +124,10 @@ export abstract class HttpServerModule<
 					path: fullPath,
 					verb,
 					parametersConfig,
-					methodDecoratorMetadata
+					methodDecoratorMetadata,
+					methodReflection,
+					controllerDecoratorMetadata,
+					controllerReflection
 				});
 
 				return this[verb](
@@ -421,12 +425,7 @@ export abstract class HttpServerModule<
 			handlerArgs: parameters,
 			context,
 			state: {},
-			request: {
-				headers: this.getRequestHeaders(request),
-				body: this.getRequestBody(request),
-				query: this.getRequestQuerystring(request),
-				url: this.getRequestUrl(request)
-			}
+			request
 		};
 	}
 

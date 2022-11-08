@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/mongoose",
-	"version": "2.0.0",
+	"version": "2.0.0-next.12",
 	"description": "Integration with Mongoose ODM",
 	"author": "HP",
 	"license": "MIT",
@@ -8,6 +8,9 @@
 	"module": "build-esm/index.js",
 	"types": "build-cjs/index.d.ts",
 	"sideEffects": false,
+	"publishConfig": {
+		"access": "public"
+	},
 	"scripts": {
 		"build": "npm run build-cj && npm run build-esm",
 		"build-cj": "../../node_modules/typescript/bin/tsc -p tsconfig.cjs.release.json",
@@ -17,8 +20,8 @@
 		"cover": "nyc npm test"
 	},
 	"dependencies": {
-		"@davinci/core": "^1.9.1",
-		"@davinci/reflector": "^1.1.1",
+		"@davinci/core": "^2.0.0-next.11",
+		"@davinci/reflector": "^2.0.0-next.11",
 		"deepmerge": "^4.2.2",
 		"pino": "^8.6.1"
 	},
@@ -28,5 +31,6 @@
 	"devDependencies": {
 		"mongoose": "^6.6.2",
 		"typescript": "^4.3.5"
-	}
+	},
+	"gitHead": "451fc8dbdbf23b7f019391dcfce5f85c24cd40f4"
 }

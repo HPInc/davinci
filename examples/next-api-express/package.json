@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/example-next-api-express",
-	"version": "0.15.9",
+	"version": "2.0.0-next.14",
 	"private": true,
 	"description": "",
 	"main": "index.js",
@@ -12,11 +12,11 @@
 	"author": "HP",
 	"license": "MIT",
 	"dependencies": {
-		"@davinci/core": "^1.9.1",
-		"@davinci/health-checks": "^0.0.1",
-		"@davinci/http-server": "^0.0.1",
-		"@davinci/http-server-express": "^0.0.1",
-		"@davinci/openapi": "^0.0.1",
+		"@davinci/core": "^2.0.0-next.11",
+		"@davinci/health-checks": "^2.0.0-next.13",
+		"@davinci/http-server": "^2.0.0-next.11",
+		"@davinci/http-server-express": "^2.0.0-next.11",
+		"@davinci/openapi": "^2.0.0-next.12",
 		"express": "^4.18.1"
 	},
 	"devDependencies": {

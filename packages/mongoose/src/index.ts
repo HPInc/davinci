@@ -18,5 +18,16 @@ export const mgoose = {
 declare module 'mongoose' {
 	interface QueryOptions {
 		davinciContext?: unknown;
+		skipHooks?: boolean;
+	}
+
+	interface InsertManyOptions {
+		davinciContext?: unknown;
+		skipHooks?: boolean;
+	}
+
+	interface SaveOptions {
+		davinciContext?: unknown;
+		skipHooks?: boolean;
 	}
 }

@@ -13,18 +13,29 @@ import { healthCheck } from '@davinci/health-checks';
 	basePath: '/api/customers'
 })
 export default class CustomerController {
-	@interceptor<Context>((next, { handlerArgs, context, state, module }) => {
+	@interceptor<{ Context: Context }>((next, { handlerArgs, context, state, module }) => {
 		console.log(handlerArgs, context, state, module);
 		return next();
 	})
 	@route.get({ path: '/hello', summary: 'That is a hello method' })
-	hello(@route.query({ required: true }) firstname: string, @route.query() age: number, @context() ctx: Context) {
-		return { success: true, firstname, age, ctx };
+	hello(
+		@route.query({ required: true }) firstname: string,
+		@route.query() age: number,
+		@route.query() customer: Customer,
+		@route.header({ name: 'x-accountid' }) accountId: string,
+		@context() ctx: Context
+	) {
+		return { success: true, firstname, age, customer, accountId, ctx };
 	}
 
 	@route.post({ path: '/' })
 	create(@route.body({ required: true }) data: Customer) {
 		return { success: true, data };
+	}
+
+	@route.get({ path: '/' })
+	getAll(@route.query() query: Customer) {
+		return { query };
 	}
 
 	@healthCheck('liveness')

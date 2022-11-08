@@ -16,7 +16,7 @@ import { ClassReflection, ClassType, DecoratorId, MethodReflection, PartialDeep 
 import { Level, Logger, pino } from 'pino';
 import createDeepmerge from '@fastify/deepmerge';
 import amqplib, { Message } from 'amqplib';
-import amqpConnectionManager, { AmqpConnectionManager, ConnectionUrl } from 'amqp-connection-manager';
+import amqpConnectionManager, { AmqpConnectionManager, ChannelWrapper, ConnectionUrl } from 'amqp-connection-manager';
 import { EventEmitter } from 'events';
 import { AmqpConnectionManagerOptions } from 'amqp-connection-manager/dist/esm/AmqpConnectionManager';
 import { AmqpSubscriptionSettings, ParameterConfiguration, SubscribeDecoratorMetadata, Subscription } from './types';
@@ -346,11 +346,12 @@ export class AmqpModule extends Module {
 	}: {
 		subscription: Subscription;
 		parameters: any[];
-	}): InterceptorBag {
+	}): InterceptorBag<{}, { channel: ChannelWrapper; subscription: Subscription }> {
 		return {
 			module: 'messaging-amqp',
 			handlerArgs: parameters,
-			context: { channel: subscription.channel, subscription },
+			channel: subscription.channel,
+			subscription,
 			state: {}
 		};
 	}

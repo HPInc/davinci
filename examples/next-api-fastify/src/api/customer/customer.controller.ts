@@ -13,7 +13,7 @@ import { healthCheck } from '@davinci/health-checks';
 	basePath: '/api/customers'
 })
 export default class CustomerController {
-	@interceptor<Context>((next, { handlerArgs, context, state, module }) => {
+	@interceptor<{ Context: Context }>((next, { handlerArgs, context, state, module }) => {
 		console.log(handlerArgs, context, state, module);
 		return next();
 	})
@@ -31,6 +31,11 @@ export default class CustomerController {
 	@route.post({ path: '/' })
 	create(@route.body({ required: true }) data: Customer) {
 		return { success: true, data };
+	}
+
+	@route.get({ path: '/' })
+	getAll(@route.query() query: Customer) {
+		return { query };
 	}
 
 	@healthCheck('liveness')

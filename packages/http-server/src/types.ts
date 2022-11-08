@@ -4,8 +4,8 @@
  */
 
 import { ClassReflection, MethodReflection, TypeValue } from '@davinci/reflector';
-import { JSONSchema } from '@davinci/core';
-import { MethodDecoratorMetadata, ParameterDecoratorOptions, Verb } from './decorators';
+import { Interceptor, InterceptorBagDetails, JSONSchema } from '@davinci/core';
+import { ControllerDecoratorMetadata, MethodDecoratorMetadata, ParameterDecoratorOptions, Verb } from './decorators';
 import { AjvValidator, AjvValidatorOptions } from './AjvValidator';
 
 export type ErrorHandler<TRequest = any, TResponse = any> = (
@@ -23,12 +23,6 @@ export type ErrorRequestHandler<TRequest = any, TResponse = any> = (
 	next?: Function
 ) => any;
 
-export interface HttpServerModuleOptions {
-	port?: number | string;
-	validator?: AjvValidator;
-	validatorOptions?: AjvValidatorOptions;
-}
-
 export type ParameterSource = 'path' | 'query' | 'body' | 'header' | 'request' | 'response';
 
 export interface ContextFactoryArguments<Request> {
@@ -37,6 +31,13 @@ export interface ContextFactoryArguments<Request> {
 }
 
 export type ContextFactory<Context, Request = any> = (args: ContextFactoryArguments<Request>) => Context;
+
+export interface HttpServerModuleOptions {
+	port?: number | string;
+	contextFactory?: ContextFactory<unknown>;
+	validator?: AjvValidator;
+	validatorOptions?: AjvValidatorOptions;
+}
 
 export type ParameterConfiguration<Request> =
 	| {
@@ -77,6 +78,9 @@ export interface Route<Request> {
 	verb: Verb;
 	parametersConfig: ParameterConfiguration<Request>[];
 	methodDecoratorMetadata: MethodDecoratorMetadata;
+	methodReflection: MethodReflection;
+	controllerDecoratorMetadata: ControllerDecoratorMetadata;
+	controllerReflection: ClassReflection;
 }
 
 export interface StaticServeOptions {
@@ -88,3 +92,8 @@ export interface StaticServeOptions {
 	maxAge?: number | string;
 	redirect?: boolean;
 }
+
+export type HttpServerInterceptor<
+	IBD extends InterceptorBagDetails = InterceptorBagDetails,
+	Request = unknown
+> = Interceptor<IBD, { request: Request }>;

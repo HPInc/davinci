@@ -4,11 +4,10 @@
  */
 
 import newrelic from 'newrelic';
-import { Interceptor } from '@davinci/core';
-import { AmqpInterceptorContext } from '@davinci/messaging-amqp';
+import { AmqpInterceptor } from '@davinci/messaging-amqp';
 
-export const newrelicInterceptor = (transactionName?: string): Interceptor<AmqpInterceptorContext> => {
-	return function newrelicInterceptor(next, { context: { subscription } }) {
+export const newrelicInterceptor = (transactionName?: string): AmqpInterceptor => {
+	return function newrelicInterceptor(next, { subscription }) {
 		const tName = transactionName ?? subscription.settings?.name;
 
 		return newrelic.startBackgroundTransaction(tName, async () => {
