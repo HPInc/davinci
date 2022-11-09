@@ -183,10 +183,13 @@ export class AjvValidator<Request = unknown> {
 	}
 
 	private addSchemaToAjvInstances(schema: Partial<JSONSchema>) {
+		const completedAjvInstances = new Set();
+
 		sources.forEach(source => {
 			const ajv = this.ajvInstances[source];
-			if (!ajv.getSchema(schema.$id)) {
+			if (!completedAjvInstances.has(ajv) && !ajv.getSchema(schema.$id)) {
 				ajv.addSchema(schema);
+				completedAjvInstances.add(ajv);
 			}
 		});
 	}

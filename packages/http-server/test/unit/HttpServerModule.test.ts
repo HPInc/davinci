@@ -5,6 +5,7 @@
 import {
 	App,
 	context,
+	di,
 	entity,
 	EntityDefinition,
 	EntityRegistry,
@@ -104,6 +105,7 @@ describe('HttpServerModule', () => {
 	afterEach(async () => {
 		await app.shutdown().catch(() => {});
 		sinon.restore();
+		di.container.clearInstances();
 	});
 
 	it('should be extended by http server modules', async () => {
