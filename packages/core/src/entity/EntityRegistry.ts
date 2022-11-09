@@ -6,9 +6,11 @@
 import { TypeValue } from '@davinci/reflector';
 import { EntityDefinition } from './EntityDefinition';
 import { JSONSchema } from './types';
+import { di } from '../di';
 
 const primitiveTypes = [String, Number, Boolean, Date] as unknown[];
 
+@di.singleton()
 export class EntityRegistry {
 	// entityDefinitions = new Set<EntityDefinition[]>();
 	entityDefinitionMap = new Map<TypeValue, EntityDefinition>();

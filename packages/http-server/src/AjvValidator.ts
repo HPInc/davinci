@@ -3,48 +3,81 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { EntityRegistry, JSONSchema, mapObject, mapSeries } from '@davinci/core';
-import Ajv, { Options } from 'ajv';
+import { di, EntityRegistry, JSONSchema, mapObject, mapSeries } from '@davinci/core';
+import Ajv, { DefinedError, Options } from 'ajv';
 import addFormats from 'ajv-formats';
 import { TypeValue } from '@davinci/reflector';
+import { EndpointSchema, ParameterConfiguration, Route, ValidationFactory, ValidationFunction } from './types';
 import { BadRequest } from './httpErrors';
 
-import { Verb } from './decorators';
-import { EndpointSchema, ParameterConfiguration } from './types';
+const defaultAjvOptions: Options = {
+	removeAdditional: 'all',
+	coerceTypes: 'array',
+	allErrors: true,
+	useDefaults: true
+};
+
+const sources = ['path', 'header', 'query', 'body'] as const;
+type Source = typeof sources[number];
+type AjvInstancesMap = Record<Source, Ajv>;
+
+type AjvPlugin = Function;
+type AjvPluginOptions = unknown;
 
 export interface AjvValidatorOptions {
 	ajvOptions?: Options;
-	plugins?: [];
+	plugins?: Array<[AjvPlugin, AjvPluginOptions?]>;
+	instances?: Ajv | Partial<AjvInstancesMap>;
 }
 
+@di.autoInjectable()
 export class AjvValidator<Request = unknown> {
-	ajv: Ajv;
-	jsonSchemasMap = new Map<TypeValue, JSONSchema>();
+	private ajvInstances?: Partial<AjvInstancesMap>;
+	private jsonSchemasMap = new Map<TypeValue, JSONSchema>();
 
-	constructor(options: AjvValidatorOptions, private entityRegistry: EntityRegistry) {
-		this.ajv = new Ajv({
-			removeAdditional: 'all',
-			coerceTypes: 'array',
-			allErrors: true,
-			useDefaults: true,
-			...options?.ajvOptions
-		});
-		addFormats(this.ajv);
+	private sourceToSchemaMap: Partial<
+		Record<ParameterConfiguration<Request>['source'], keyof EndpointSchema['properties']>
+	> = {
+		path: 'params',
+		query: 'querystring',
+		header: 'headers',
+		body: 'body'
+	};
+
+	constructor(private options: AjvValidatorOptions, private entityRegistry?: EntityRegistry) {
+		this.initializeInstances();
 	}
 
-	public async createValidatorFunction({
-		parametersConfig
-	}: {
-		verb?: Verb;
-		path?: string;
-		parametersConfig: ParameterConfiguration<Request>[];
-	}): Promise<(data: unknown) => Promise<void>> {
+	public async createValidatorFunction(route: Route<Request>): Promise<ValidationFunction> {
+		const { parametersConfig } = route;
 		const endpointSchema = await this.createSchema(parametersConfig);
-		const validate = this.ajv.compile(endpointSchema);
+
+		const validateFns = sources.reduce((acc, source) => {
+			const schema = endpointSchema.properties[this.sourceToSchemaMap[source]];
+			if (schema) {
+				const validateFn = this.ajvInstances[source].compile(schema);
+				acc.push({
+					source,
+					validateFn
+				});
+			}
+
+			return acc;
+		}, []);
 
 		return async (data: unknown) => {
-			if (!validate(data)) {
-				throw new BadRequest('Validation error', { errors: validate.errors });
+			const errors = [];
+			validateFns.forEach(({ source, validateFn }) => {
+				const dataPath = data?.[this.sourceToSchemaMap[source]];
+				if (!validateFn(dataPath)) {
+					errors.push(...validateFn.errors.map(error => this.formatAjvError(source, error)));
+				}
+			});
+
+			if (errors.length) {
+				throw new BadRequest('Validation error', {
+					errors
+				});
 			}
 		};
 	}
@@ -72,19 +105,11 @@ export class AjvValidator<Request = unknown> {
 			const jsonSchema = this.jsonSchemasMap.get(parameterConfig.type) ?? this.createJsonSchema(entityJsonSchema);
 			if (!this.jsonSchemasMap.has(entityDefinition) && jsonSchema.$id) {
 				this.jsonSchemasMap.set(entityDefinition, jsonSchema);
-				this.ajv.addSchema(jsonSchema);
+				this.addSchemaToAjvInstances(jsonSchema);
 			}
 
-			const sourceToSchemaMap: Partial<
-				Record<ParameterConfiguration<Request>['source'], keyof EndpointSchema['properties']>
-			> = {
-				path: 'params',
-				query: 'querystring',
-				header: 'headers'
-			};
-
 			if (['path', 'query', 'header'].includes(parameterConfig.source)) {
-				const schemaProp = sourceToSchemaMap[parameterConfig.source];
+				const schemaProp = this.sourceToSchemaMap[parameterConfig.source];
 
 				endpointSchema.properties[schemaProp] = endpointSchema.properties[schemaProp] ?? {
 					type: 'object',
@@ -113,8 +138,60 @@ export class AjvValidator<Request = unknown> {
 		return endpointSchema;
 	}
 
-	public getAjvSchema(key: string) {
-		return this.ajv.getSchema(key);
+	public getAjvInstances() {
+		return this.ajvInstances;
+	}
+
+	public getOptions() {
+		return this.options;
+	}
+
+	private formatAjvError(source: Source, error: DefinedError) {
+		const rootPath = this.sourceToSchemaMap[source];
+		error.instancePath = error.instancePath.replace(/(^\/)|(^$)/, `/${rootPath}$1`);
+		error.schemaPath = error.schemaPath.replace(/^#\/properties\//, `#/${rootPath}/properties/`);
+
+		return error;
+	}
+
+	private initializeInstances() {
+		const ajvInstances = this.options?.instances;
+
+		if (ajvInstances instanceof Ajv || ajvInstances?.constructor?.name === 'Ajv') {
+			const ajv = ajvInstances as Ajv;
+			this.ajvInstances = {
+				body: ajv,
+				query: ajv,
+				path: ajv,
+				header: ajv
+			};
+		} else if (typeof ajvInstances === 'object' || !ajvInstances) {
+			const ajv = new Ajv({
+				...defaultAjvOptions,
+				...this.options?.ajvOptions
+			});
+			addFormats(ajv);
+
+			this.ajvInstances = sources.reduce(
+				(acc: AjvInstancesMap, source) => ({
+					...acc,
+					[source]: acc?.[source] ?? ajv
+				}),
+				ajvInstances
+			);
+		}
+	}
+
+	private addSchemaToAjvInstances(schema: Partial<JSONSchema>) {
+		const completedAjvInstances = new Set();
+
+		sources.forEach(source => {
+			const ajv = this.ajvInstances[source];
+			if (!completedAjvInstances.has(ajv) && !ajv.getSchema(schema.$id)) {
+				ajv.addSchema(schema);
+				completedAjvInstances.add(ajv);
+			}
+		});
 	}
 
 	private createJsonSchema(jsonSchema: Partial<JSONSchema>) {
@@ -130,7 +207,7 @@ export class AjvValidator<Request = unknown> {
 
 							if (!this.jsonSchemasMap.has(propValue._$ref)) {
 								this.jsonSchemasMap.set(propValue._$ref, refEntityDefinitionJson);
-								this.ajv.addSchema(refEntityDefinitionJson);
+								this.addSchemaToAjvInstances(refEntityDefinitionJson);
 							}
 
 							return { $ref: refEntityDefinitionJson.$id };
@@ -144,7 +221,7 @@ export class AjvValidator<Request = unknown> {
 
 							if (!this.jsonSchemasMap.has($ref)) {
 								this.jsonSchemasMap.set($ref, refEntityDefinitionJson);
-								this.ajv.addSchema(refEntityDefinitionJson);
+								this.addSchemaToAjvInstances(refEntityDefinitionJson);
 							}
 
 							return { ...propValue, items: { $ref: refEntityDefinitionJson.$id } };
@@ -162,7 +239,7 @@ export class AjvValidator<Request = unknown> {
 
 					if (!this.jsonSchemasMap.has($ref)) {
 						this.jsonSchemasMap.set($ref, refEntityDefinitionJson);
-						this.ajv.addSchema(refEntityDefinitionJson);
+						this.addSchemaToAjvInstances(refEntityDefinitionJson);
 					}
 
 					return { $ref: refEntityDefinitionJson.$id };
@@ -173,3 +250,9 @@ export class AjvValidator<Request = unknown> {
 		};
 	}
 }
+
+export const createAjvValidator = (options?: AjvValidatorOptions): ValidationFactory => {
+	const ajvValidator = new AjvValidator(options);
+
+	return route => ajvValidator.createValidatorFunction(route);
+};

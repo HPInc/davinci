@@ -6,7 +6,6 @@
 import { ClassReflection, MethodReflection, TypeValue } from '@davinci/reflector';
 import { Interceptor, InterceptorBagDetails, JSONSchema } from '@davinci/core';
 import { ControllerDecoratorMetadata, MethodDecoratorMetadata, ParameterDecoratorOptions, Verb } from './decorators';
-import { AjvValidator, AjvValidatorOptions } from './AjvValidator';
 
 export type ErrorHandler<TRequest = any, TResponse = any> = (
 	error: any,
@@ -24,20 +23,6 @@ export type ErrorRequestHandler<TRequest = any, TResponse = any> = (
 ) => any;
 
 export type ParameterSource = 'path' | 'query' | 'body' | 'header' | 'request' | 'response';
-
-export interface ContextFactoryArguments<Request> {
-	request: Request;
-	reflection: { controllerReflection: ClassReflection; methodReflection: MethodReflection };
-}
-
-export type ContextFactory<Context, Request = any> = (args: ContextFactoryArguments<Request>) => Context;
-
-export interface HttpServerModuleOptions {
-	port?: number | string;
-	contextFactory?: ContextFactory<unknown>;
-	validator?: AjvValidator;
-	validatorOptions?: AjvValidatorOptions;
-}
 
 export type ParameterConfiguration<Request> =
 	| {
@@ -64,6 +49,33 @@ export type ParameterConfiguration<Request> =
 			value?: unknown;
 	  };
 
+export interface Route<Request> {
+	path: string;
+	verb: Verb;
+	parametersConfig: ParameterConfiguration<Request>[];
+	methodDecoratorMetadata?: MethodDecoratorMetadata;
+	methodReflection: MethodReflection;
+	controllerDecoratorMetadata?: ControllerDecoratorMetadata;
+	controllerReflection: ClassReflection;
+}
+
+export interface ContextFactoryArguments<Request> {
+	request: Request;
+	reflection: { controllerReflection: ClassReflection; methodReflection: MethodReflection };
+}
+
+export type ContextFactory<Context, Request = any> = (args: ContextFactoryArguments<Request>) => Context;
+
+export type ValidationFunction = (data: unknown) => typeof data;
+
+export type ValidationFactory = (route: Route<any>) => ValidationFunction | Promise<ValidationFunction>;
+
+export interface HttpServerModuleOptions {
+	port?: number | string;
+	contextFactory?: ContextFactory<unknown>;
+	validationFactory?: ValidationFactory;
+}
+
 export type EndpointSchema = JSONSchema<any> & {
 	properties: {
 		body?: JSONSchema<any>;
@@ -72,16 +84,6 @@ export type EndpointSchema = JSONSchema<any> & {
 		headers?: JSONSchema<any>;
 	};
 };
-
-export interface Route<Request> {
-	path: string;
-	verb: Verb;
-	parametersConfig: ParameterConfiguration<Request>[];
-	methodDecoratorMetadata: MethodDecoratorMetadata;
-	methodReflection: MethodReflection;
-	controllerDecoratorMetadata: ControllerDecoratorMetadata;
-	controllerReflection: ClassReflection;
-}
 
 export interface StaticServeOptions {
 	dotfiles?: 'allow' | 'deny' | 'ignore';

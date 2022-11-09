@@ -5,6 +5,7 @@
 import {
 	App,
 	context,
+	di,
 	entity,
 	EntityDefinition,
 	EntityRegistry,
@@ -104,6 +105,7 @@ describe('HttpServerModule', () => {
 	afterEach(async () => {
 		await app.shutdown().catch(() => {});
 		sinon.restore();
+		di.container.clearInstances();
 	});
 
 	it('should be extended by http server modules', async () => {
@@ -171,15 +173,16 @@ describe('HttpServerModule', () => {
 			const dummyHttpServer = new DummyHttpServer();
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = await dummyHttpServer.createRequestHandler(
-				new CustomerController(),
-				'find',
-				dummyHttpServer.createParametersConfigurations({ controllerReflection, methodReflection }),
-				{
+			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+				path: '/all',
+				verb: 'get',
+				controllerReflection,
+				methodReflection,
+				parametersConfig: dummyHttpServer.createParametersConfigurations({
 					controllerReflection,
 					methodReflection
-				}
-			);
+				})
+			});
 			const reqMock: Request = { body: {}, query: { where: '' } };
 			const resMock = {};
 			const result = await requestHandler(reqMock, resMock);
@@ -203,15 +206,16 @@ describe('HttpServerModule', () => {
 			const dummyHttpServer = new DummyHttpServer();
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = await dummyHttpServer.createRequestHandler(
-				new CustomerController(),
-				'find',
-				dummyHttpServer.createParametersConfigurations({ controllerReflection, methodReflection }),
-				{
+			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+				path: '/all',
+				verb: 'get',
+				controllerReflection,
+				methodReflection,
+				parametersConfig: dummyHttpServer.createParametersConfigurations({
 					controllerReflection,
 					methodReflection
-				}
-			);
+				})
+			});
 			const reqMock = { body: 'body', query: { where: 'where' } };
 			const resMock = {};
 			const result = await requestHandler(reqMock, resMock);
@@ -237,15 +241,16 @@ describe('HttpServerModule', () => {
 			const dummyHttpServer = new DummyHttpServer();
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = await dummyHttpServer.createRequestHandler(
-				new CustomerController(),
-				'find',
-				dummyHttpServer.createParametersConfigurations({ controllerReflection, methodReflection }),
-				{
+			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+				path: '/all',
+				verb: 'get',
+				controllerReflection,
+				methodReflection,
+				parametersConfig: dummyHttpServer.createParametersConfigurations({
 					controllerReflection,
 					methodReflection
-				}
-			);
+				})
+			});
 			const reqMock = {
 				headers: { 'x-my-header': '1' },
 				body: { myBody: true },
@@ -303,15 +308,16 @@ describe('HttpServerModule', () => {
 			const dummyHttpServer = new DummyHttpServer().setContextFactory(contextFactory);
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = await dummyHttpServer.createRequestHandler(
-				new CustomerController(),
-				'find',
-				dummyHttpServer.createParametersConfigurations({ controllerReflection, methodReflection }),
-				{
+			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+				path: '/all',
+				verb: 'get',
+				controllerReflection,
+				methodReflection,
+				parametersConfig: dummyHttpServer.createParametersConfigurations({
 					controllerReflection,
 					methodReflection
-				}
-			);
+				})
+			});
 			const reqMock = {
 				body: { prop: true },
 				query: {
@@ -359,15 +365,16 @@ describe('HttpServerModule', () => {
 			const dummyHttpServer = new DummyHttpServer().setContextFactory(contextFactory);
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = await dummyHttpServer.createRequestHandler(
-				new CustomerController(),
-				'find',
-				dummyHttpServer.createParametersConfigurations({ controllerReflection, methodReflection }),
-				{
+			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+				path: '/all',
+				verb: 'get',
+				controllerReflection,
+				methodReflection,
+				parametersConfig: dummyHttpServer.createParametersConfigurations({
 					controllerReflection,
 					methodReflection
-				}
-			);
+				})
+			});
 			const reqMock = {
 				body: { prop: true },
 				query: {
@@ -397,15 +404,16 @@ describe('HttpServerModule', () => {
 			const errorMock = sinon.stub(dummyHttpServer.logger, 'error');
 			const controllerReflection = reflect(CustomerController);
 			const methodReflection = controllerReflection.methods[0];
-			const requestHandler = await dummyHttpServer.createRequestHandler(
-				new CustomerController(),
-				'find',
-				dummyHttpServer.createParametersConfigurations({ controllerReflection, methodReflection }),
-				{
+			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+				path: '/all',
+				verb: 'get',
+				controllerReflection,
+				methodReflection,
+				parametersConfig: dummyHttpServer.createParametersConfigurations({
 					controllerReflection,
 					methodReflection
-				}
-			);
+				})
+			});
 			await requestHandler({}, {});
 			expect(errorMock.getCall(0).args[1]).to.be.equal('An error happened during the creation of the context');
 		});
@@ -562,8 +570,8 @@ describe('HttpServerModule', () => {
 
 			expect(entityRegistry).to.be.instanceof(EntityRegistry);
 			const [entries] = Array.from(entityRegistry.getEntityDefinitionMap().entries());
-			expect(entries[0]).to.be.equal(Customer);
-			expect(entries[1]).to.be.instanceof(EntityDefinition);
+			expect(entries?.[0]).to.be.equal(Customer);
+			expect(entries?.[1]).to.be.instanceof(EntityDefinition);
 		});
 	});
 

@@ -25,10 +25,12 @@ import {
 	ParameterSource,
 	RequestHandler,
 	Route,
-	StaticServeOptions
+	StaticServeOptions,
+	ValidationFactory,
+	ValidationFunction
 } from './types';
 import { ControllerDecoratorMetadata, MethodDecoratorMetadata, ParameterDecoratorMetadata } from './decorators';
-import { AjvValidator } from './AjvValidator';
+import { createAjvValidator } from './AjvValidator';
 
 export abstract class HttpServerModule<
 	Request = unknown,
@@ -37,17 +39,17 @@ export abstract class HttpServerModule<
 	ModuleOptions extends HttpServerModuleOptions = HttpServerModuleOptions
 > extends Module {
 	app: App;
+	validationFactory?: ValidationFactory;
 	contextFactory?: ContextFactory<unknown>;
-	entityRegistry: EntityRegistry = new EntityRegistry();
-	validator: AjvValidator;
+	entityRegistry = di.container.resolve(EntityRegistry);
 	routes: Route<Request>[] = [];
 	logger = pino({ name: 'http-server' });
 	protected httpServer: Server;
 
 	constructor(protected moduleOptions?: ModuleOptions) {
 		super();
-		this.validator = new AjvValidator(moduleOptions?.validatorOptions, this.entityRegistry);
 		this.contextFactory = moduleOptions?.contextFactory;
+		this.validationFactory = moduleOptions?.validationFactory ?? createAjvValidator();
 	}
 
 	getModuleId() {
@@ -121,7 +123,7 @@ export abstract class HttpServerModule<
 					methodReflection
 				});
 
-				this.routes.push({
+				const route: Route<Request> = {
 					path: fullPath,
 					verb,
 					parametersConfig,
@@ -129,26 +131,17 @@ export abstract class HttpServerModule<
 					methodReflection,
 					controllerDecoratorMetadata,
 					controllerReflection
-				});
+				};
 
-				return this[verb](
-					fullPath,
-					await this.createRequestHandler(controller, methodName, parametersConfig, {
-						methodReflection,
-						controllerReflection
-					})
-				);
+				this.routes.push(route);
+
+				return this[verb](fullPath, await this.createRequestHandler(controller, methodName, route));
 			});
 		});
 	}
 
-	public async createRequestHandler(
-		controller: InstanceType<ClassType>,
-		methodName: string,
-		parametersConfig: ParameterConfiguration<Request>[],
-		reflections: { methodReflection: MethodReflection; controllerReflection: ClassReflection }
-	) {
-		const { methodReflection, controllerReflection } = reflections;
+	public async createRequestHandler(controller: InstanceType<ClassType>, methodName: string, route: Route<Request>) {
+		const { methodReflection, controllerReflection, parametersConfig } = route;
 		// eslint-disable-next-line @typescript-eslint/no-this-alias
 		const httpServerModule = this;
 		const interceptors = [
@@ -156,7 +149,7 @@ export abstract class HttpServerModule<
 			...getInterceptorsHandlers(methodReflection)
 		];
 
-		const validatorFunction = await this.validator.createValidatorFunction({ parametersConfig });
+		const validatorFunction: ValidationFunction | null = await this.validationFactory?.(route);
 
 		// using a named function here for better instrumentation and reporting
 		return async function davinciHttpRequestHandler(request: Request, response: Response) {
@@ -353,7 +346,7 @@ export abstract class HttpServerModule<
 				return acc;
 			}, {} as any);
 
-			await validatorFunction(data);
+			await validatorFunction?.(data);
 
 			return next();
 		};

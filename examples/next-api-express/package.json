@@ -12,11 +12,13 @@
 	"author": "HP",
 	"license": "MIT",
 	"dependencies": {
-		"@davinci/core": "^2.0.0-next.13",
-		"@davinci/health-checks": "^2.0.0-next.15",
-		"@davinci/http-server": "^2.0.0-next.13",
-		"@davinci/http-server-express": "^2.0.0-next.13",
-		"@davinci/openapi": "^2.0.0-next.14",
+		"@davinci/core": "^2.0.0-next.12",
+		"@davinci/health-checks": "^2.0.0-next.14",
+		"@davinci/http-server": "^2.0.0-next.12",
+		"@davinci/http-server-express": "^2.0.0-next.12",
+		"@davinci/openapi": "^2.0.0-next.13",
+		"ajv": "^8.11.0",
+		"ajv-formats": "^2.1.1",
 		"express": "^4.18.1"
 	},
 	"devDependencies": {

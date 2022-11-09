@@ -6,4 +6,5 @@
 export * from './HttpServerModule';
 export * as httpErrors from './httpErrors';
 export * from './decorators';
+export * from './AjvValidator';
 export * from './types';

@@ -4,9 +4,15 @@
  */
 
 import { entity, EntityRegistry } from '@davinci/core';
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
+import { createSandbox } from 'sinon';
 import { expect } from '../support/chai';
-import { AjvValidator } from '../../src/AjvValidator';
-import { ParameterConfiguration } from '../../src';
+import { AjvValidator, AjvValidatorOptions, createAjvValidator, ParameterConfiguration, Route } from '../../src';
+
+const toPromise = async (fn: Function) => fn();
+
+const sinon = createSandbox();
 
 describe('AjvValidator', () => {
 	class Phone {
@@ -62,12 +68,15 @@ describe('AjvValidator', () => {
 		creditCard: string;
 	}
 
-	const initAjvValidator = (additionalParameterConfigurations?: ParameterConfiguration<any>[]) => {
+	const initAjvValidator = (
+		additionalParameterConfigurations?: ParameterConfiguration<any>[],
+		options: Partial<AjvValidatorOptions> = {}
+	) => {
 		const entityRegistry = new EntityRegistry();
-		const ajvValidator = new AjvValidator({}, entityRegistry);
+		const ajvValidator = new AjvValidator(options, entityRegistry);
 
 		const parametersConfig: ParameterConfiguration<any>[] = [
-			{ name: 'customerId', source: 'path', type: Number, value: { firstname: '4000' } },
+			{ name: 'customerId', source: 'path', type: Number },
 			{
 				name: 'data',
 				source: 'body',
@@ -105,14 +114,19 @@ describe('AjvValidator', () => {
 		return { ajvValidator, parametersConfig };
 	};
 
+	afterEach(() => {
+		sinon.restore();
+	});
+
 	describe('#createSchema', () => {
 		it('should create the schema for an endpoint', async () => {
 			const { ajvValidator, parametersConfig } = initAjvValidator();
 			const schema = await ajvValidator.createSchema(parametersConfig);
-			const { schema: customerSchema } = ajvValidator.getAjvSchema('Customer');
-			const { schema: birthSchema } = ajvValidator.getAjvSchema('Birth');
-			const { schema: addressSchema } = ajvValidator.getAjvSchema('Address');
-			const { schema: payingCustomerSchema } = ajvValidator.getAjvSchema('PayingCustomer');
+			const ajvInstance = ajvValidator.getAjvInstances().body;
+			const { schema: customerSchema } = ajvInstance.getSchema('Customer');
+			const { schema: birthSchema } = ajvInstance.getSchema('Birth');
+			const { schema: addressSchema } = ajvInstance.getSchema('Address');
+			const { schema: payingCustomerSchema } = ajvInstance.getSchema('PayingCustomer');
 
 			expect(schema).to.be.deep.equal({
 				type: 'object',
@@ -287,7 +301,11 @@ describe('AjvValidator', () => {
 			const { ajvValidator, parametersConfig } = initAjvValidator();
 
 			const validatorFunction = await ajvValidator.createValidatorFunction({
-				parametersConfig
+				parametersConfig,
+				path: '/',
+				verb: 'get',
+				methodReflection: {} as any,
+				controllerReflection: {} as any
 			});
 
 			const validData = {
@@ -346,14 +364,18 @@ describe('AjvValidator', () => {
 			const { ajvValidator, parametersConfig } = initAjvValidator();
 
 			const validatorFunction = await ajvValidator.createValidatorFunction({
-				parametersConfig
+				parametersConfig,
+				path: '/',
+				verb: 'get',
+				methodReflection: {} as any,
+				controllerReflection: {} as any
 			});
 
 			const invalidData = {
+				params: { customerId: 'aaa' },
 				body: {
 					firstname: 'Larry'
 				},
-				params: { customerId: 'aaa' },
 				querystring: {
 					street: 'My road',
 					houseNumber: '40',
@@ -368,7 +390,7 @@ describe('AjvValidator', () => {
 				}
 			};
 
-			const promise = validatorFunction(invalidData);
+			const promise = toPromise(() => validatorFunction(invalidData));
 			const error = await promise.catch(err => err);
 			await expect(promise).to.be.rejected;
 			expect(error).to.containSubset({
@@ -379,29 +401,30 @@ describe('AjvValidator', () => {
 				errors: [
 					{
 						instancePath: '/params/customerId',
-						schemaPath: '#/properties/params/properties/customerId/type',
+						schemaPath: '#/params/properties/customerId/type',
 						keyword: 'type',
-						params: {
-							type: 'number'
-						},
+						params: { type: 'number' },
 						message: 'must be number'
 					},
 					{
-						instancePath: '/body',
+						instancePath: '/querystring',
 						schemaPath: '#/required',
 						keyword: 'required',
-						params: {
-							missingProperty: 'lastname'
-						},
-						message: "must have required property 'lastname'"
+						params: { missingProperty: 'payingCustomerArray' },
+						message: "must have required property 'payingCustomerArray'"
 					},
 					{
 						instancePath: '/querystring/customerArray/0',
 						schemaPath: '#/required',
 						keyword: 'required',
-						params: {
-							missingProperty: 'lastname'
-						},
+						params: { missingProperty: 'lastname' },
+						message: "must have required property 'lastname'"
+					},
+					{
+						instancePath: '/body',
+						schemaPath: '#/required',
+						keyword: 'required',
+						params: { missingProperty: 'lastname' },
 						message: "must have required property 'lastname'"
 					}
 				]
@@ -419,7 +442,11 @@ describe('AjvValidator', () => {
 			]);
 
 			const validatorFunction = await ajvValidator.createValidatorFunction({
-				parametersConfig
+				parametersConfig,
+				path: '/',
+				verb: 'get',
+				methodReflection: {} as any,
+				controllerReflection: {} as any
 			});
 
 			const validData = {
@@ -453,6 +480,208 @@ describe('AjvValidator', () => {
 				querystring: {
 					shouldNotValidate: 'wrong'
 				}
+			});
+		});
+
+		it('should validates using the Ajv instance passed as parameters', async () => {
+			const ajv = new Ajv({ coerceTypes: false, allErrors: true });
+			addFormats(ajv);
+
+			const compileSpy = sinon.spy(ajv, 'compile');
+
+			const { ajvValidator, parametersConfig } = initAjvValidator([], {
+				instances: ajv
+			});
+
+			const validatorFunction = await ajvValidator.createValidatorFunction({
+				parametersConfig,
+				path: '/',
+				verb: 'get',
+				methodReflection: {} as any,
+				controllerReflection: {} as any
+			});
+
+			const invalidData = {
+				params: { customerId: '4000' },
+				body: {
+					firstname: 'Larry'
+				},
+				querystring: {
+					additionalProp: true,
+					street: 'My road',
+					houseNumber: '40',
+					customerArray: [
+						{
+							lastname: 'Bird'
+						}
+					],
+					payingCustomerArray: [
+						{
+							lastname: 'Bird'
+						}
+					]
+				},
+				headers: {
+					additionalHeader: true,
+					accountId: 1000
+				}
+			};
+
+			const promise = toPromise(() => validatorFunction(invalidData));
+			const error = await promise.catch(err => err);
+
+			expect(compileSpy.callCount).to.be.equal(4);
+			// additionalProps allowed
+			expect(invalidData.querystring.additionalProp).to.be.ok;
+			expect(invalidData.headers.additionalHeader).to.be.ok;
+
+			// type coercion disabled in body
+			expect(error).to.containSubset({
+				errors: [
+					{
+						instancePath: '/params/customerId',
+						schemaPath: '#/params/properties/customerId/type',
+						keyword: 'type',
+						params: { type: 'number' },
+						message: 'must be number'
+					},
+					{
+						instancePath: '/body',
+						schemaPath: '#/required',
+						keyword: 'required',
+						params: { missingProperty: 'lastname' },
+						message: "must have required property 'lastname'"
+					}
+				]
+			});
+		});
+
+		it('should validates using the different Ajv instances passed as parameters', async () => {
+			const pathAjvInstance = new Ajv({ coerceTypes: true });
+			addFormats(pathAjvInstance);
+			const headerAjvInstance = new Ajv({ removeAdditional: 'all' });
+			addFormats(headerAjvInstance);
+			const queryAjvInstance = new Ajv({ removeAdditional: false, coerceTypes: true });
+			addFormats(queryAjvInstance);
+			const bodyAjvInstance = new Ajv({ removeAdditional: false, coerceTypes: false });
+			addFormats(bodyAjvInstance);
+
+			const { ajvValidator, parametersConfig } = initAjvValidator([], {
+				instances: {
+					path: pathAjvInstance,
+					header: headerAjvInstance,
+					query: queryAjvInstance,
+					body: bodyAjvInstance
+				}
+			});
+
+			const validatorFunction = await ajvValidator.createValidatorFunction({
+				parametersConfig,
+				path: '/',
+				verb: 'get',
+				methodReflection: {} as any,
+				controllerReflection: {} as any
+			});
+
+			const invalidData1 = {
+				params: { customerId: '4000' },
+				body: {
+					lastname: 'Bird',
+					home: {
+						number: 40
+					}
+				},
+				querystring: {
+					additionalProp: true,
+					street: 'My road',
+					houseNumber: '40',
+					customerArray: [
+						{
+							lastname: 'Bird'
+						}
+					],
+					payingCustomerArray: [
+						{
+							lastname: 'Bird'
+						}
+					]
+				},
+				headers: {
+					additionalHeader: true,
+					accountId: 1000
+				}
+			};
+
+			const promise1 = toPromise(() => validatorFunction(invalidData1));
+			const error1 = await promise1.catch(err => err);
+
+			// additionalProps allowed in querystrying
+			expect(invalidData1.querystring.additionalProp).to.be.ok;
+
+			// type coercion enabled in params
+			expect(invalidData1.params.customerId).to.be.a('number');
+
+			// additionalProps removed in headers
+			expect(invalidData1.headers.additionalHeader).to.be.undefined;
+
+			// type coercion disabled in body
+			expect(error1).to.containSubset({
+				errors: [
+					{
+						instancePath: '/body/home/number',
+						schemaPath: 'Address/properties/number/type',
+						keyword: 'type',
+						params: {
+							type: 'string'
+						},
+						message: 'must be string'
+					}
+				]
+			});
+		});
+	});
+
+	describe('#createAjvValidator', () => {
+		it('should create a validator that uses AjvValidator', async () => {
+			const options: AjvValidatorOptions = {
+				ajvOptions: { removeAdditional: 'all' }
+			};
+			const ajvValidatorFactory = createAjvValidator(options);
+			const route = {
+				path: '/',
+				verb: 'get',
+				parametersConfig: [
+					{ source: 'path', type: Number, name: 'customerId' },
+					{ source: 'body', type: Customer, name: 'customerData' }
+				]
+			} as Route<any>;
+			const data = {
+				params: {
+					customerId: '180123'
+				},
+				body: {}
+			};
+
+			const validator = await ajvValidatorFactory(route);
+			const error = await toPromise(() => validator(data)).catch(err => err);
+
+			expect(validator).to.be.a('function');
+			expect(data.params.customerId).to.be.equal(180123);
+			expect(error).to.containSubset({
+				name: 'BadRequest',
+				message: 'Validation error',
+				statusCode: 400,
+				errors: [
+					{
+						instancePath: '/body',
+						schemaPath: '#/required',
+						keyword: 'required',
+						params: {
+							missingProperty: 'lastname'
+						},
+						message: "must have required property 'lastname'"
+					}
+				]
 			});
 		});
 	});
