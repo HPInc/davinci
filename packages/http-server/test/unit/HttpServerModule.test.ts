@@ -6,6 +6,8 @@ import {
 	App,
 	context,
 	entity,
+	EntityDefinition,
+	EntityRegistry,
 	executeInterceptorsStack,
 	interceptor,
 	InterceptorBag,
@@ -531,8 +533,6 @@ describe('HttpServerModule', () => {
 		});
 	});
 
-	/*
-	TODO: re-implement
 	describe('#getEntityRegistry', () => {
 		it('should return the populated entity registry', async () => {
 			@entity()
@@ -571,7 +571,7 @@ describe('HttpServerModule', () => {
 			expect(entries?.[0]).to.be.equal(Customer);
 			expect(entries?.[1]).to.be.instanceof(EntityDefinition);
 		});
-	});*/
+	});
 
 	describe('#getRoutes', () => {
 		it('should return the list of registered routes', async () => {

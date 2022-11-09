@@ -157,7 +157,7 @@ export class AjvValidator<Request = unknown> {
 	private initializeInstances() {
 		const ajvInstances = this.options?.instances;
 
-		if (ajvInstances instanceof Ajv || ajvInstances.constructor.name === 'Ajv') {
+		if (ajvInstances instanceof Ajv || ajvInstances?.constructor?.name === 'Ajv') {
 			const ajv = ajvInstances as Ajv;
 			this.ajvInstances = {
 				body: ajv,

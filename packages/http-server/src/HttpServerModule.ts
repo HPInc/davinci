@@ -41,7 +41,7 @@ export abstract class HttpServerModule<
 	app: App;
 	validatorFactory?: ValidationFactory;
 	contextFactory?: ContextFactory<unknown>;
-	entityRegistry: EntityRegistry = new EntityRegistry();
+	entityRegistry = di.container.resolve(EntityRegistry);
 	routes: Route<Request>[] = [];
 	logger = pino({ name: 'http-server' });
 	protected httpServer: Server;
