@@ -25,9 +25,12 @@ import {
 	ParameterSource,
 	RequestHandler,
 	Route,
-	StaticServeOptions
+	StaticServeOptions,
+	ValidationFactory,
+	ValidationFunction
 } from './types';
 import { ControllerDecoratorMetadata, MethodDecoratorMetadata, ParameterDecoratorMetadata } from './decorators';
+import { createAjvValidator } from './AjvValidator';
 
 export abstract class HttpServerModule<
 	Request = unknown,
@@ -36,6 +39,7 @@ export abstract class HttpServerModule<
 	ModuleOptions extends HttpServerModuleOptions = HttpServerModuleOptions
 > extends Module {
 	app: App;
+	validatorFactory?: ValidationFactory;
 	contextFactory?: ContextFactory<unknown>;
 	entityRegistry: EntityRegistry = new EntityRegistry();
 	routes: Route<Request>[] = [];
@@ -45,6 +49,7 @@ export abstract class HttpServerModule<
 	constructor(protected moduleOptions?: ModuleOptions) {
 		super();
 		this.contextFactory = moduleOptions?.contextFactory;
+		this.validatorFactory = moduleOptions?.validatorFactory ?? createAjvValidator();
 	}
 
 	getModuleId() {
@@ -144,7 +149,7 @@ export abstract class HttpServerModule<
 			...getInterceptorsHandlers(methodReflection)
 		];
 
-		const validatorFunction = await this.moduleOptions?.validatorFactory(route);
+		const validatorFunction: ValidationFunction | null = await this.validatorFactory?.(route);
 
 		// using a named function here for better instrumentation and reporting
 		return async function davinciHttpRequestHandler(request: Request, response: Response) {

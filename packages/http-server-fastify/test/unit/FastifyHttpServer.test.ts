@@ -92,7 +92,10 @@ describe('FastifyHttpServer', () => {
 				methodReflection
 			});
 
-			const handler = await fastifyHttpServer.createRequestHandler(controller, 'getAll', parametersConfig, {
+			const handler = await fastifyHttpServer.createRequestHandler(controller, 'getAll', {
+				path: '/all',
+				verb: 'get',
+				parametersConfig,
 				controllerReflection,
 				methodReflection
 			});
@@ -132,7 +135,10 @@ describe('FastifyHttpServer', () => {
 				methodReflection
 			});
 
-			const handler = await fastifyHttpServer.createRequestHandler(controller, 'getAll', parametersConfig, {
+			const handler = await fastifyHttpServer.createRequestHandler(controller, 'getAll', {
+				path: '/all',
+				verb: 'get',
+				parametersConfig,
 				controllerReflection,
 				methodReflection
 			});

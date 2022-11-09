@@ -17,6 +17,8 @@
 		"@davinci/http-server": "^2.0.0-next.12",
 		"@davinci/http-server-fastify": "^2.0.0-next.12",
 		"@davinci/openapi": "^2.0.0-next.13",
+		"ajv": "^8.11.0",
+		"ajv-formats": "^2.1.1",
 		"fastify": "^4.4.0"
 	},
 	"devDependencies": {

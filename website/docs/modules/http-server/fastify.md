@@ -3,8 +3,9 @@
 Fastify is a fast and low overhead web framework, for Node.js
 
 How to install it:
+
 ```bash
-npm i --save @davinci/http-server-fastify @davinci/http-server fastify @fastify/cors @fastify/static qs
+npm i --save @davinci/http-server-fastify @davinci/http-server ajv ajv-formats fastify @fastify/cors @fastify/static qs
 ```
 
 After that, register the FastifyHttpServer module within the App

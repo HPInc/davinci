@@ -92,7 +92,10 @@ describe('ExpressHttpServer', () => {
 				methodReflection
 			});
 
-			const handler = await expressHttpServer.createRequestHandler(controller, 'getAll', parametersConfig, {
+			const handler = await expressHttpServer.createRequestHandler(controller, 'getAll', {
+				path: '/all',
+				verb: 'get',
+				parametersConfig,
 				controllerReflection,
 				methodReflection
 			});
@@ -132,7 +135,10 @@ describe('ExpressHttpServer', () => {
 				methodReflection
 			});
 
-			const handler = await expressHttpServer.createRequestHandler(controller, 'getAll', parametersConfig, {
+			const handler = await expressHttpServer.createRequestHandler(controller, 'getAll', {
+				path: '/all',
+				verb: 'get',
+				parametersConfig,
 				controllerReflection,
 				methodReflection
 			});

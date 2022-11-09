@@ -68,7 +68,7 @@ export type ContextFactory<Context, Request = any> = (args: ContextFactoryArgume
 
 export type ValidationFunction = (data: unknown) => typeof data;
 
-export type ValidationFactory = (route: Route<any>) => ValidationFunction;
+export type ValidationFactory = (route: Route<any>) => ValidationFunction | Promise<ValidationFunction>;
 
 export interface HttpServerModuleOptions {
 	port?: number | string;

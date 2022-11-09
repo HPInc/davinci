@@ -3,8 +3,9 @@
 Express is the most popular web framework for Node.js
 
 How to install it:
+
 ```bash
-npm i --save @davinci/http-server-express @davinci/http-server express
+npm i --save @davinci/http-server-express @davinci/http-server ajv ajv-formats express
 ```
 
 After that, register the ExpressHttpServer module within the App
