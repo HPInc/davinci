@@ -11,3 +11,5 @@ export * from './context';
 export * from './lib/async-utils';
 export * from './lib/array-utils';
 export * from './lib/object-utils';
+
+export * as di from 'tsyringe';

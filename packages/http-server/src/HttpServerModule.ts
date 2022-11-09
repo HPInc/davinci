@@ -4,6 +4,7 @@
  */
 import {
 	App,
+	di,
 	EntityRegistry,
 	executeInterceptorsStack,
 	getInterceptorsHandlers,
@@ -91,7 +92,7 @@ export abstract class HttpServerModule<
 			const getControllerInstance = () => {
 				if (ctrlInstance) return ctrlInstance;
 
-				ctrlInstance = new Controller();
+				ctrlInstance = di.container.resolve(Controller);
 
 				return ctrlInstance;
 			};
