@@ -157,12 +157,13 @@ export class AjvValidator<Request = unknown> {
 	private initializeInstances() {
 		const ajvInstances = this.options?.instances;
 
-		if (ajvInstances instanceof Ajv) {
+		if (ajvInstances instanceof Ajv || ajvInstances.constructor.name === 'Ajv') {
+			const ajv = ajvInstances as Ajv;
 			this.ajvInstances = {
-				body: ajvInstances,
-				query: ajvInstances,
-				path: ajvInstances,
-				header: ajvInstances
+				body: ajv,
+				query: ajv,
+				path: ajv,
+				header: ajv
 			};
 		} else if (typeof ajvInstances === 'object' || !ajvInstances) {
 			const ajv = new Ajv({
