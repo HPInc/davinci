@@ -73,11 +73,7 @@ export type ValidationFactory = (route: Route<any>) => ValidationFunction | Prom
 export interface HttpServerModuleOptions {
 	port?: number | string;
 	contextFactory?: ContextFactory<unknown>;
-	validatorFactory?: ValidationFactory;
-	/* ajv?: {
-		options?: AjvOptions;
-		plugins?: [];
-	}; */
+	validationFactory?: ValidationFactory;
 }
 
 export type EndpointSchema = JSONSchema<any> & {

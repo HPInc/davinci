@@ -39,7 +39,7 @@ export abstract class HttpServerModule<
 	ModuleOptions extends HttpServerModuleOptions = HttpServerModuleOptions
 > extends Module {
 	app: App;
-	validatorFactory?: ValidationFactory;
+	validationFactory?: ValidationFactory;
 	contextFactory?: ContextFactory<unknown>;
 	entityRegistry = di.container.resolve(EntityRegistry);
 	routes: Route<Request>[] = [];
@@ -49,7 +49,7 @@ export abstract class HttpServerModule<
 	constructor(protected moduleOptions?: ModuleOptions) {
 		super();
 		this.contextFactory = moduleOptions?.contextFactory;
-		this.validatorFactory = moduleOptions?.validatorFactory ?? createAjvValidator();
+		this.validationFactory = moduleOptions?.validationFactory ?? createAjvValidator();
 	}
 
 	getModuleId() {
@@ -149,7 +149,7 @@ export abstract class HttpServerModule<
 			...getInterceptorsHandlers(methodReflection)
 		];
 
-		const validatorFunction: ValidationFunction | null = await this.validatorFactory?.(route);
+		const validatorFunction: ValidationFunction | null = await this.validationFactory?.(route);
 
 		// using a named function here for better instrumentation and reporting
 		return async function davinciHttpRequestHandler(request: Request, response: Response) {
