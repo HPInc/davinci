@@ -8,6 +8,7 @@ import { ControllerDecoratorOptions, MethodDecoratorOptions, MethodResponses, ro
 import { FastifyHttpServer } from '@davinci/http-server-fastify';
 import deepMerge from 'deepmerge';
 import axios from 'axios';
+import { PartialDeep } from '@davinci/reflector';
 import { OpenAPIModule, OpenAPIModuleOptions } from '../../src';
 import { expect } from '../support/chai';
 
@@ -42,7 +43,7 @@ describe('OpenAPIModule', () => {
 	const initApp = async (
 		openapiModuleOptions?: Partial<OpenAPIModuleOptions>,
 		postMethodResponses?: MethodResponses,
-		controllerDecoratorOptions?: Partial<ControllerDecoratorOptions>,
+		controllerDecoratorOptions?: PartialDeep<ControllerDecoratorOptions>,
 		findMethodDecoratorOptions?: Partial<MethodDecoratorOptions>
 	) => {
 		const openapiModuleOpts = deepMerge(
@@ -119,6 +120,8 @@ describe('OpenAPIModule', () => {
 					'/api/customers': {
 						get: {
 							description: 'Find all customers',
+							tags: ['Customer'],
+							operationId: 'customerFind',
 							parameters: [
 								{
 									name: 'query',
@@ -126,22 +129,25 @@ describe('OpenAPIModule', () => {
 									schema: {
 										type: 'object',
 										properties: {
-											query: { $ref: '#/components/schemas/CustomerSearch' }
+											query: {
+												$ref: '#/components/schemas/CustomerSearch'
+											}
 										}
 									}
 								},
 								{
-									in: 'query',
 									name: 'onlyEnabled',
+									in: 'query',
 									schema: {
 										type: 'boolean'
 									}
 								}
-							],
-							tags: ['Customer']
+							]
 						},
 						post: {
 							description: 'Create customer',
+							tags: ['Customer'],
+							operationId: 'customerCreate',
 							requestBody: {
 								required: true,
 								content: {
@@ -151,13 +157,14 @@ describe('OpenAPIModule', () => {
 										}
 									}
 								}
-							},
-							tags: ['Customer']
+							}
 						}
 					},
 					'/api/customers/multiple': {
 						post: {
 							description: 'Create multiple customers',
+							tags: ['Customer'],
+							operationId: 'customerCreateMany',
 							requestBody: {
 								required: true,
 								content: {
@@ -170,17 +177,18 @@ describe('OpenAPIModule', () => {
 										}
 									}
 								}
-							},
-							tags: ['Customer']
+							}
 						}
 					},
 					'/api/customers/:id': {
 						patch: {
 							description: 'Update customer',
+							tags: ['Customer'],
+							operationId: 'customerPatch',
 							parameters: [
 								{
-									in: 'path',
 									name: 'customerId',
+									in: 'path',
 									schema: {
 										type: 'string'
 									}
@@ -193,8 +201,7 @@ describe('OpenAPIModule', () => {
 									},
 									required: true
 								}
-							],
-							tags: ['Customer']
+							]
 						}
 					}
 				},
@@ -627,6 +634,48 @@ describe('OpenAPIModule', () => {
 									format: 'date-time'
 								}
 							}
+						}
+					}
+				}
+			});
+		});
+
+		it('should use the operationId passed explicitly in the @route.method() decorator', async () => {
+			const { openApiModule } = await initApp({}, {}, {}, { operationId: 'findCustomers' });
+			const openAPIDocument = openApiModule.getOpenAPIDocument();
+
+			expect(openAPIDocument).to.containSubset({
+				paths: {
+					'/api/customers': {
+						get: {
+							operationId: 'findCustomers'
+						}
+					}
+				}
+			});
+		});
+
+		it('should generate the operationId using a custom formatter', async () => {
+			const { openApiModule } = await initApp({
+				document: {
+					spec: {},
+					operationIdFormatter({ controllerName, methodName }) {
+						const methodN = methodName.charAt(0).toLowerCase() + methodName.slice(1);
+						const controllerN = (controllerName.charAt(0).toUpperCase() + controllerName.slice(1)).replace(
+							/Controller/,
+							''
+						);
+						return `${methodN}${controllerN}`;
+					}
+				}
+			});
+			const openAPIDocument = openApiModule.getOpenAPIDocument();
+
+			expect(openAPIDocument).to.containSubset({
+				paths: {
+					'/api/customers': {
+						get: {
+							operationId: 'findCustomer'
 						}
 					}
 				}

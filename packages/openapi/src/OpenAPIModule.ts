@@ -17,7 +17,9 @@ export interface OpenAPIModuleOptions {
 	document: {
 		enabled?: boolean;
 		path?: string;
-		spec: Omit<OpenAPIV3.Document, 'paths' | 'openapi'>;
+		spec: Partial<OpenAPIV3.Document>;
+		automaticOperationIds?: boolean;
+		operationIdFormatter?: (route: Route<any> & { controllerName: string; methodName: string }) => string;
 		automaticPathTags?: boolean;
 	};
 	explorer?: {
@@ -43,6 +45,13 @@ export class OpenAPIModule extends Module {
 				document: {
 					enabled: true,
 					path: '/api-doc.json',
+					automaticOperationIds: true,
+					operationIdFormatter({ controllerName, methodName }) {
+						const resourceName = controllerName.replace(/Controller/, '');
+						const controllerN = resourceName.charAt(0).toLowerCase() + resourceName.slice(1);
+						const methodN = methodName.charAt(0).toUpperCase() + methodName.slice(1);
+						return `${controllerN}${methodN}`;
+					},
 					automaticPathTags: true,
 					spec: {
 						openapi: '3.0.0',
@@ -86,6 +95,7 @@ export class OpenAPIModule extends Module {
 			path,
 			verb,
 			parametersConfig,
+			methodReflection,
 			methodDecoratorMetadata,
 			controllerDecoratorMetadata,
 			controllerReflection
@@ -111,11 +121,26 @@ export class OpenAPIModule extends Module {
 			}
 
 			this.openAPIDoc.paths[path] = this.openAPIDoc.paths[path] ?? {};
+
+			const resourceName = controllerReflection.name.replace(/Controller/, '');
+			// tags handling
 			let tags: Array<string>;
 			if (controllerDecoratorMetadata.options?.tags) {
 				tags = controllerDecoratorMetadata.options?.tags;
 			} else if (this.moduleOptions.document?.automaticPathTags) {
-				tags = [controllerReflection.name.replace(/Controller/, '')];
+				tags = [resourceName];
+			}
+
+			// operationId handling
+			let operationId: string;
+			if (methodDecoratorMetadata.options?.operationId) {
+				operationId = methodDecoratorMetadata.options?.operationId;
+			} else if (this.moduleOptions?.document?.automaticOperationIds) {
+				operationId = this.moduleOptions?.document?.operationIdFormatter?.({
+					...route,
+					controllerName: controllerReflection.name,
+					methodName: methodReflection.name
+				});
 			}
 
 			this.openAPIDoc.paths[path][verb] = {
@@ -124,7 +149,8 @@ export class OpenAPIModule extends Module {
 					description: methodDecoratorMetadata.options?.description
 				}),
 				...this.openAPIDoc.paths[path][verb],
-				...(tags ? { tags } : {})
+				...(tags ? { tags } : {}),
+				...(operationId ? { operationId } : {})
 			};
 
 			if (['path', 'query', 'header'].includes(parameterConfig.source)) {
