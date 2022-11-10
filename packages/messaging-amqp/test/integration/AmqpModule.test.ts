@@ -355,7 +355,7 @@ describe('AmqpModule', () => {
 		});
 	});
 
-	describe.skip('ChannelManager', () => {
+	describe('ChannelManager', () => {
 		it('should inject the channelManager within the controller and publish a message', async () => {
 			@di.injectable()
 			class MyController {
