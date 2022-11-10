@@ -8,6 +8,13 @@ export * from './OpenAPIModule';
 declare module '@davinci/http-server' {
 	interface MethodDecoratorOptions {
 		/**
+		 * specify an operationId explicitly.
+		 * Otherwise, the operationId will be inferred by
+		 * controller + method names
+		 *
+		 */
+		operationId?: string;
+		/**
 		 * if set to 'true' hides the endpoint from the
 		 * generated OpenAPI document
 		 *
