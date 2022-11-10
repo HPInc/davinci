@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-next.16](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.0.0-next.15...@davinci/openapi@2.0.0-next.16) (2022-11-10)
+
+
+### Features
+
+* **OpenAPI:** added logic for generating or providing operationId ([#149](https://github.com/HPInc/davinci/issues/149)) ([d2b18b8](https://github.com/HPInc/davinci/commit/d2b18b8a03d23265a618974ea300a14da3ec499f))
+
+
+
+
+
 # [2.0.0-next.15](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.0.0-next.14...@davinci/openapi@2.0.0-next.15) (2022-11-09)
 
 **Note:** Version bump only for package @davinci/openapi
