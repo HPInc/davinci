@@ -143,26 +143,9 @@ describe('App', () => {
 
 		const controllersReflection = app.getControllersWithReflection();
 
-		expect(controllersReflection).to.be.deep.equal([
-			{ Controller: MyController, reflection: myControllerReflection }
-		]);
-	});
-
-	it('should cache the reflection result', () => {
-		@decorate({ isMyClass: true })
-		class MyController {
-			@decorate({ isMyMethod: true })
-			myMethod(@decorateParameter({ isMyParam: true }) param: string) {
-				return param;
-			}
-		}
-		const app = createApp({ controllers: [MyController] });
-
-		const getControllerReflectionSpy = sinon.spy(app, 'getControllerReflection');
-		app.getControllersWithReflection();
-		app.getControllersWithReflection();
-
-		expect(getControllerReflectionSpy.callCount).to.be.equal(1);
+		expect(controllersReflection[0].Controller).to.be.deep.equal(MyController);
+		expect(controllersReflection[0].reflection).to.be.deep.equal(myControllerReflection);
+		expect(controllersReflection[0].controllerInstance).to.be.instanceof(MyController);
 	});
 
 	it('should execute the onInit hook', async () => {

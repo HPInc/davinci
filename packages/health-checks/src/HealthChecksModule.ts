@@ -2,7 +2,7 @@
  * © Copyright 2022 HP Development Company, L.P.
  * SPDX-License-Identifier: MIT
  */
-import { App, di, mapParallel, Module } from '@davinci/core';
+import { App, mapParallel, Module } from '@davinci/core';
 import type { HttpServerModule } from '@davinci/http-server';
 import http, { Server } from 'http';
 import { createTerminus, TerminusOptions } from '@godaddy/terminus';
@@ -47,9 +47,11 @@ export class HealthChecksModule extends Module {
 			}, []);
 
 		const classesToInspect = [
-			...this.app
-				.getControllersWithReflection()
-				.map(({ Controller, reflection }) => ({ instance: null, Class: Controller, reflection })),
+			...this.app.getControllersWithReflection().map(({ Controller, controllerInstance, reflection }) => ({
+				instance: controllerInstance,
+				Class: Controller,
+				reflection
+			})),
 			...this.app
 				.getModules()
 				.filter(m => m.getModuleId() !== this.getModuleId())
@@ -61,13 +63,12 @@ export class HealthChecksModule extends Module {
 		];
 
 		const healthChecksFunctionsDict = classesToInspect.reduce<Record<string, Function[]>>(
-			(acc, { instance, Class, reflection }) => {
+			(acc, { instance, reflection }) => {
 				const matchingMethodAndDecoratorReflections = findMatchingMethodAndDecoratorsReflections(reflection);
-				const controllerInstance = instance ?? di.container.resolve(Class);
 				matchingMethodAndDecoratorReflections.forEach(({ methodReflection, decorators }) => {
 					decorators.forEach(decorator => {
 						acc[decorator.healthCheckName] = acc[decorator.healthCheckName] ?? [];
-						acc[decorator.healthCheckName].push(() => controllerInstance[methodReflection.name]());
+						acc[decorator.healthCheckName].push(() => instance[methodReflection.name]());
 					});
 				});
 

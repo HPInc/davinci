@@ -6,6 +6,7 @@
 import { AmqpSubscribeOptions } from './types';
 
 export * from './AmqpModule';
+export * from './ChannelManager';
 export * from './types';
 
 declare module '@davinci/messaging' {

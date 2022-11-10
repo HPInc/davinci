@@ -83,21 +83,12 @@ export abstract class HttpServerModule<
 					reflection.methods.some(m => m.decorators.some(d => d.module === 'http-server'))
 			);
 
-		return mapSeries(controllersReflection, ({ Controller, reflection: controllerReflection }) => {
+		return mapSeries(controllersReflection, ({ controllerInstance, reflection: controllerReflection }) => {
 			const controllerDecoratorMetadata: ControllerDecoratorMetadata = controllerReflection.decorators.find(
 				d => d.module === 'http-server' && d.type === 'controller'
 			);
 			const basePath =
 				controllerDecoratorMetadata?.options?.basePath ?? controllerDecoratorMetadata?.options?.basepath ?? '/';
-
-			let ctrlInstance: typeof Controller;
-			const getControllerInstance = () => {
-				if (ctrlInstance) return ctrlInstance;
-
-				ctrlInstance = di.container.resolve(Controller);
-
-				return ctrlInstance;
-			};
 
 			return mapSeries(controllerReflection.methods, async methodReflection => {
 				const methodDecoratorMetadata: MethodDecoratorMetadata = methodReflection.decorators.find(
@@ -112,7 +103,6 @@ export abstract class HttpServerModule<
 					options: { path }
 				} = methodDecoratorMetadata;
 
-				const controller = getControllerInstance();
 				let fullPath = pathUtils.join(basePath, path);
 				if (fullPath.length > 1 && fullPath[fullPath.length - 1] === '/') {
 					fullPath = fullPath.slice(0, -1);
@@ -135,7 +125,7 @@ export abstract class HttpServerModule<
 
 				this.routes.push(route);
 
-				return this[verb](fullPath, await this.createRequestHandler(controller, methodName, route));
+				return this[verb](fullPath, await this.createRequestHandler(controllerInstance, methodName, route));
 			});
 		});
 	}

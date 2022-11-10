@@ -4,11 +4,12 @@
  */
 
 import pino, { Level, Logger } from 'pino';
-import { ClassReflection, ClassType, reflect } from '@davinci/reflector';
+import { ClassType, reflect } from '@davinci/reflector';
 import deepmerge from 'deepmerge';
 import { Module, ModuleStatus } from './Module';
 import { mapSeries } from './lib/async-utils';
 import { coerceArray } from './lib/array-utils';
+import { di } from './di';
 
 type Signals =
 	| 'SIGABRT'
@@ -66,7 +67,6 @@ export class App extends Module {
 	private options?: AppOptions;
 	private modules: Module[] = [];
 	private controllers: ClassType[];
-	private controllersReflectionCache = new Map<ClassType, ClassReflection>();
 	private modulesDic: Record<string, Module> = {};
 
 	constructor(options?: AppOptions) {
@@ -244,13 +244,10 @@ export class App extends Module {
 	public getControllersWithReflection() {
 		return (
 			this.controllers?.map(Controller => {
-				const cached = this.controllersReflectionCache.get(Controller);
-				if (cached) return { Controller, reflection: cached };
-
 				const controllerReflection = this.getControllerReflection(Controller);
-				this.controllersReflectionCache.set(Controller, controllerReflection);
+				const controllerInstance = di.container.resolve(Controller);
 
-				return { Controller, reflection: controllerReflection };
+				return { Controller, controllerInstance, reflection: controllerReflection };
 			}) ?? []
 		);
 	}
