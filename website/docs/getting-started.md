@@ -5,36 +5,31 @@
 DaVinci can be installed with either `npm` or `yarn`.
 
 ```bash
-npm i --save @davinci/core
+npm i --save @davinci/http-server-fastify @davinci/http-server ajv ajv-formats fastify @fastify/cors @fastify/static qs
 ```
-
-or
-
-```bash
-yarn add @davinci/core
-```
-
 
 <br/>
 
-## Start shaping the API
-Implement API endpoints and handlers declaratively, using classes and decorators.
+## Install HTTP Server module
+
+In this example, we are going to implement a basic HTTP Server, defining with API endpoints and handlers declaratively, using classes and decorators.
 
 ### Create a controller
 
 ```typescript
 // file: ./CustomerController.ts
-import { context, route } from '@davinci/core';
+import { context } from '@davinci/core';
+import { route } from '@davinci/http-server';
 
 @route.controller({ basepath: '/api/customers' })
 export class CustomerController {
-	@route.get({ path: '/hello', summary: 'That is a hello method' })
+	@route.get({ path: '/hello', summary: 'This is a hello method' })
 	hello(@route.query() firstname: string, @context() context) {
 		console.log(firstname, context);
 		return firstname;
 	}
 
-	@route.post({ path: '/create', summary: 'That is a create method' })
+	@route.post({ path: '/create', summary: 'This is a create method' })
 	create(@route.body() data: object) {
 		console.log(data);
 		return { success: true };
@@ -46,35 +41,19 @@ export class CustomerController {
 
 ```typescript
 // file: ./index.ts
-import express, { Express } from 'express';
-import { createApp, createRouter, DaVinciExpress } from '@davinci/core';
-import { CustomerController } from './CustomerController';
-import packageJson = require('../package.json');
+import { createApp } from '@davinci/core';
+import { FastifyHttpServer } from '@davinci/http-server-fastify';
+import { CustomerController } from './customer.controller.ts';
 
-const options = {
-	version: packageJson.version,
-	openapi: {
-		docs: {
-			path: '/api-doc.json'
-		},
-		ui: {
-			path: '/explorer'
-		}
-	}
-};
+const app = createApp();
 
-const expressApp: Express = express();
-
-createApp(expressApp, options, app => {
-	app.use(createRouter({ Controller: CustomerController }));	
-});
+app.registerController(CustomerController).registerModule(new FastifyHttpServer());
 
 if (require.main === module) {
-	// this module was run directly from the command line, so we can start the server
-	(expressApp as DaVinciExpress).start();
+	app.init();
 }
 
-export default expressApp;
+export default app;
 ```
 
 <br/>
@@ -88,5 +67,3 @@ ts-node ./index.ts
 ```
 
 The app is now serving requests at [http://localhost:3000](http://localhost:3000)
-
-Additionally, a swagger UI is served at [http://localhost:3000/explorer](http://localhost:3000/explorer)
