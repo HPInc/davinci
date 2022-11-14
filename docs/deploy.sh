@@ -23,7 +23,7 @@ git add ./build -f
 git stash
 git checkout gh-pages
 git pull
-git stash pop
+git stash pop || true
 git checkout --ours -- .
 
 # remove everything except the build folder
