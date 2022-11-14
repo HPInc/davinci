@@ -20,8 +20,10 @@ npm run build
 
 # git checkout -f ./package-lock.json
 git add ./build -f
+git stash
 git checkout gh-pages
 git pull
+git stash pop
 
 # remove everything except the build folder
 ls | grep -v ^build | xargs rm -r
