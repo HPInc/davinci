@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-next.19](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.0.0-next.18...@davinci/openapi@2.0.0-next.19) (2022-11-14)
+
+
+### Bug Fixes
+
+* **OpenAPI:** safe controllerDecoratorMetadata access ([eb2b32d](https://github.com/HPInc/davinci/commit/eb2b32d2da213b3571cc896b1550340b46159f80))
+
+
+
+
+
 # [2.0.0-next.18](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.0.0-next.17...@davinci/openapi@2.0.0-next.18) (2022-11-14)
 
 
