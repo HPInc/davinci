@@ -107,8 +107,8 @@ export class OpenAPIModule extends Module {
 		const resourceName = controllerReflection.name.replace(/Controller/, '');
 		// tags handling
 		let tags: Array<string>;
-		if (controllerDecoratorMetadata.options?.tags) {
-			tags = controllerDecoratorMetadata.options?.tags;
+		if (controllerDecoratorMetadata?.options?.tags) {
+			tags = controllerDecoratorMetadata?.options?.tags;
 		} else if (this.moduleOptions.document?.automaticPathTags) {
 			tags = [resourceName];
 		}
