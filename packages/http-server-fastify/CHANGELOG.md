@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-next.15](https://github.com/HPInc/davinci/compare/@davinci/http-server-fastify@2.0.0-next.14...@davinci/http-server-fastify@2.0.0-next.15) (2022-11-14)
+
+
+### Bug Fixes
+
+* **fastify:** allow passing existing fastify instance ([0c20638](https://github.com/HPInc/davinci/commit/0c20638193617b628bf74d32cdc0a107368780a8))
+
+
+
+
+
 # [2.0.0-next.14](https://github.com/HPInc/davinci/compare/@davinci/http-server-fastify@2.0.0-next.13...@davinci/http-server-fastify@2.0.0-next.14) (2022-11-09)
 
 **Note:** Version bump only for package @davinci/http-server-fastify

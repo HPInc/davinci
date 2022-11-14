@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/health-checks",
-	"version": "2.0.0-next.16",
+	"version": "2.0.0-next.17",
 	"description": "Framework for rapid and consistent API development",
 	"main": "build-cjs/index.js",
 	"module": "build-esm/index.js",
@@ -29,7 +29,7 @@
 		"@godaddy/terminus": "^4.11.1"
 	},
 	"devDependencies": {
-		"@davinci/http-server-fastify": "^2.0.0-next.14",
+		"@davinci/http-server-fastify": "^2.0.0-next.15",
 		"@godaddy/terminus": "^4.11.2",
 		"typescript": "^4.6.2"
 	},
