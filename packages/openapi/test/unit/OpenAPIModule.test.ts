@@ -732,6 +732,8 @@ describe('OpenAPIModule', () => {
 
 			const openAPIDocument = openApiModule.getOpenAPIDocument();
 			expect(openAPIDocument.paths?.['/api/orders']['get']).to.be.ok;
+
+			await app.shutdown();
 		});
 	});
 
