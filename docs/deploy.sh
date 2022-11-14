@@ -24,7 +24,7 @@ git stash
 git checkout gh-pages
 git pull
 git stash pop || true
-git checkout --ours -- .
+git checkout --theirs -- .
 
 # remove everything except the build folder
 ls | grep -v ^build | xargs rm -r
