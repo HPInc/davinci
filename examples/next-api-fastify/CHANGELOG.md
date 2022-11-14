@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-next.20](https://github.com/HPInc/davinci/compare/@davinci/example-next-api-fastify@2.0.0-next.19...@davinci/example-next-api-fastify@2.0.0-next.20) (2022-11-14)
+
+**Note:** Version bump only for package @davinci/example-next-api-fastify
+
+
+
+
+
 # [2.0.0-next.19](https://github.com/HPInc/davinci/compare/@davinci/example-next-api-fastify@2.0.0-next.18...@davinci/example-next-api-fastify@2.0.0-next.19) (2022-11-14)
 
 **Note:** Version bump only for package @davinci/example-next-api-fastify

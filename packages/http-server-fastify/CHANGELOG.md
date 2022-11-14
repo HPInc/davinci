@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-next.16](https://github.com/HPInc/davinci/compare/@davinci/http-server-fastify@2.0.0-next.15...@davinci/http-server-fastify@2.0.0-next.16) (2022-11-14)
+
+
+### Bug Fixes
+
+* **OpenAPI:** routes with no parameters are now correctly registered ([#152](https://github.com/HPInc/davinci/issues/152)) ([a214efc](https://github.com/HPInc/davinci/commit/a214efc48caa4448dcc0125e6dffbd882638a476))
+
+
+
+
+
 # [2.0.0-next.15](https://github.com/HPInc/davinci/compare/@davinci/http-server-fastify@2.0.0-next.14...@davinci/http-server-fastify@2.0.0-next.15) (2022-11-14)
 
 
