@@ -717,6 +717,24 @@ describe('OpenAPIModule', () => {
 			expect(openAPIDocument.paths?.['/api/customers']['post']).to.be.ok;
 			expect(openAPIDocument.paths?.['/api/customers']['get']).to.be.undefined;
 		});
+
+		it('should generate the paths definition, for methods with no parameters', async () => {
+			@route.controller({ basePath: '/api/orders' })
+			class OrderController {
+				@route.get({ path: '/' })
+				findAll() {}
+			}
+
+			const openApiModule = new OpenAPIModule({ document: { spec: {} } });
+			const app = new App({ logger: { level: 'error' } });
+			await app.registerController(OrderController).registerModule(new FastifyHttpServer(), openApiModule);
+			await app.init();
+
+			const openAPIDocument = openApiModule.getOpenAPIDocument();
+			expect(openAPIDocument.paths?.['/api/orders']['get']).to.be.ok;
+
+			await app.shutdown();
+		});
 	});
 
 	describe('endpoints', () => {

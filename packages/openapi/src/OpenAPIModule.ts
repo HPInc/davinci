@@ -102,6 +102,39 @@ export class OpenAPIModule extends Module {
 		} = route;
 		if (methodDecoratorMetadata.options?.hidden) return;
 
+		this.openAPIDoc.paths[path] = this.openAPIDoc.paths[path] ?? {};
+
+		const resourceName = controllerReflection.name.replace(/Controller/, '');
+		// tags handling
+		let tags: Array<string>;
+		if (controllerDecoratorMetadata.options?.tags) {
+			tags = controllerDecoratorMetadata.options?.tags;
+		} else if (this.moduleOptions.document?.automaticPathTags) {
+			tags = [resourceName];
+		}
+
+		// operationId handling
+		let operationId: string;
+		if (methodDecoratorMetadata.options?.operationId) {
+			operationId = methodDecoratorMetadata.options?.operationId;
+		} else if (this.moduleOptions?.document?.automaticOperationIds) {
+			operationId = this.moduleOptions?.document?.operationIdFormatter?.({
+				...route,
+				controllerName: controllerReflection.name,
+				methodName: methodReflection.name
+			});
+		}
+
+		this.openAPIDoc.paths[path][verb] = {
+			...(methodDecoratorMetadata.options?.summary && { summary: methodDecoratorMetadata.options?.summary }),
+			...(methodDecoratorMetadata.options?.description && {
+				description: methodDecoratorMetadata.options?.description
+			}),
+			...this.openAPIDoc.paths[path][verb],
+			...(tags ? { tags } : {}),
+			...(operationId ? { operationId } : {})
+		};
+
 		// Parameters handling
 		await mapSeries(parametersConfig, parameterConfig => {
 			if (
@@ -119,39 +152,6 @@ export class OpenAPIModule extends Module {
 				this.jsonSchemasMap.set(jsonSchema.$id, jsonSchema);
 				this.openAPIDoc.components.schemas[jsonSchema.$id] = jsonSchema;
 			}
-
-			this.openAPIDoc.paths[path] = this.openAPIDoc.paths[path] ?? {};
-
-			const resourceName = controllerReflection.name.replace(/Controller/, '');
-			// tags handling
-			let tags: Array<string>;
-			if (controllerDecoratorMetadata.options?.tags) {
-				tags = controllerDecoratorMetadata.options?.tags;
-			} else if (this.moduleOptions.document?.automaticPathTags) {
-				tags = [resourceName];
-			}
-
-			// operationId handling
-			let operationId: string;
-			if (methodDecoratorMetadata.options?.operationId) {
-				operationId = methodDecoratorMetadata.options?.operationId;
-			} else if (this.moduleOptions?.document?.automaticOperationIds) {
-				operationId = this.moduleOptions?.document?.operationIdFormatter?.({
-					...route,
-					controllerName: controllerReflection.name,
-					methodName: methodReflection.name
-				});
-			}
-
-			this.openAPIDoc.paths[path][verb] = {
-				...(methodDecoratorMetadata.options?.summary && { summary: methodDecoratorMetadata.options?.summary }),
-				...(methodDecoratorMetadata.options?.description && {
-					description: methodDecoratorMetadata.options?.description
-				}),
-				...this.openAPIDoc.paths[path][verb],
-				...(tags ? { tags } : {}),
-				...(operationId ? { operationId } : {})
-			};
 
 			if (['path', 'query', 'header'].includes(parameterConfig.source)) {
 				this.openAPIDoc.paths[path][verb].parameters = this.openAPIDoc.paths[path][verb].parameters ?? [];
