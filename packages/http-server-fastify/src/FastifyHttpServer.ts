@@ -26,7 +26,7 @@ import qs from 'qs';
 
 type Server = HttpServer | HttpsServer;
 
-type FastifyHttpServerModuleOptions = {
+export type FastifyHttpServerModuleOptions = {
 	app?: FastifyInstance;
 	middlewares?: {
 		cors?: FastifyCorsOptions;
