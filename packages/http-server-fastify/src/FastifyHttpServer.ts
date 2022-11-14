@@ -46,6 +46,7 @@ export class FastifyHttpServer extends HttpServerModule<
 	constructor(options?: FastifyHttpServerModuleOptions) {
 		const { app, ...moduleOptions } = options ?? {};
 		super(moduleOptions);
+		this.instance = app;
 	}
 
 	async onRegister(app: App) {
@@ -80,9 +81,11 @@ export class FastifyHttpServer extends HttpServerModule<
 	}
 
 	initHttpServer() {
-		this.instance = fastify({
-			querystringParser: str => qs.parse(str, { parseArrays: true })
-		});
+		this.instance =
+			this.instance ??
+			fastify({
+				querystringParser: str => qs.parse(str, { parseArrays: true })
+			});
 		super.setHttpServer(this.instance.server);
 	}
 
