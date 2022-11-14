@@ -4,13 +4,13 @@
 
 DaVinci can be installed with either `npm` or `yarn`.
 
-```bash
+```sh
 npm i --save @davinci/core
 ```
 
 or
 
-```bash
+```sh
 yarn add @davinci/core
 ```
 
