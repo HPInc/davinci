@@ -55,7 +55,7 @@ jobs:
                   - "~"
   publish:
     docker:
-      - image: cimg/node:16.4
+      - image: cimg/node:16
     steps:
       - restore_cache:
           key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
@@ -74,7 +74,7 @@ jobs:
             npm run semantic-release
   publish-next:
       docker:
-          - image: cimg/node:16.4
+          - image: cimg/node:16
       steps:
           - restore_cache:
                 key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
@@ -93,7 +93,7 @@ jobs:
                     npm run publish-next -- -y
   publish_docs:
     docker:
-      - image: cimg/node:16.4
+      - image: cimg/node:16
     steps:
       - restore_cache:
           key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
