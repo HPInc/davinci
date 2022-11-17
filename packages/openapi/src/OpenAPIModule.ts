@@ -306,9 +306,10 @@ export class OpenAPIModule extends Module {
 		const documentEnabled = this.moduleOptions.document?.enabled;
 		const explorerEnabled = this.moduleOptions.explorer?.enabled;
 		if (documentEnabled) {
-			this.httpServerModule.get(this.moduleOptions.document?.path, (_req, res) =>
-				this.httpServerModule.reply(res, this.openAPIDoc)
-			);
+			this.httpServerModule.get(this.moduleOptions.document?.path, (_req, res) => {
+				this.httpServerModule.setHeader(res, 'content-type', 'application/json');
+				this.httpServerModule.reply(res, this.openAPIDoc);
+			});
 		}
 
 		if (explorerEnabled) {

@@ -13,6 +13,14 @@ import {
 	type as typeDecorator
 } from './index';
 
+function renameClass(theClass: ClassType, newName: string) {
+	const nameDescriptors = Object.getOwnPropertyDescriptor(theClass, 'name');
+	Object.defineProperty(theClass, 'name', {
+		...nameDescriptors,
+		value: newName
+	});
+}
+
 interface WalkerIteratorClassMeta {
 	iterationType: 'class';
 	name: string;
@@ -34,7 +42,10 @@ export type WalkerIteratorResult<T = WalkerIteratorMeta> = T & {
 	recursive?: boolean;
 };
 
-export type WalkerIterator = (meta: WalkerIteratorMeta) => Partial<WalkerIteratorResult> | null | undefined;
+export type WalkerIterator = (
+	meta: WalkerIteratorMeta,
+	utils: { renameClass: typeof renameClass }
+) => Partial<WalkerIteratorResult> | null | undefined;
 
 /**
  * Utility function to walk, inspect and change a class reflection
@@ -45,13 +56,16 @@ export function walker<T = unknown>(type: ClassType, iterator: WalkerIterator): 
 	const reflection = reflect(type);
 	const { name, decorators, properties, methods } = reflection;
 
-	const classIteratorResult = iterator({
-		iterationType: 'class',
-		name,
-		decorators,
-		properties,
-		methods
-	}) as WalkerIteratorResult<WalkerIteratorClassMeta>;
+	const classIteratorResult = iterator(
+		{
+			iterationType: 'class',
+			name,
+			decorators,
+			properties,
+			methods
+		},
+		{ renameClass }
+	) as WalkerIteratorResult<WalkerIteratorClassMeta>;
 
 	// create new class to return
 	const NewClass = reflect.create({}, { name: classIteratorResult.name });
@@ -65,12 +79,15 @@ export function walker<T = unknown>(type: ClassType, iterator: WalkerIterator): 
 	classIteratorResult?.properties
 		?.map(property => ({
 			property,
-			iteratorResult: iterator({
-				iterationType: 'property',
-				name: property.name,
-				type: property.type,
-				decorators: property.decorators
-			}) as WalkerIteratorResult<WalkerIteratorPropMeta>
+			iteratorResult: iterator(
+				{
+					iterationType: 'property',
+					name: property.name,
+					type: property.type,
+					decorators: property.decorators
+				},
+				{ renameClass }
+			) as WalkerIteratorResult<WalkerIteratorPropMeta>
 		}))
 		.filter(({ iteratorResult }) => !!iteratorResult)
 		.forEach(({ property, iteratorResult }) => {
