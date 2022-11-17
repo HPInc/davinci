@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-next.13](https://github.com/HPInc/davinci/compare/@davinci/reflector@2.0.0-next.12...@davinci/reflector@2.0.0-next.13) (2022-11-17)
+
+
+### Bug Fixes
+
+* OpenAPI doc content-type + walker utils parameter ([45176f2](https://github.com/HPInc/davinci/commit/45176f24d02ac2092d29eb22226b04e8c3818aa5))
+
+
+
+
+
 # [2.0.0-next.12](https://github.com/HPInc/davinci/compare/@davinci/reflector@1.1.1...@davinci/reflector@2.0.0-next.12) (2022-11-08)
 
 

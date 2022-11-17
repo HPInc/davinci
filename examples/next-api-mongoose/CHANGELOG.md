@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-next.18](https://github.com/HPInc/davinci/compare/@davinci/example-next-api-mongoose@2.0.0-next.17...@davinci/example-next-api-mongoose@2.0.0-next.18) (2022-11-17)
+
+
+### Bug Fixes
+
+* OpenAPI doc content-type + walker utils parameter ([45176f2](https://github.com/HPInc/davinci/commit/45176f24d02ac2092d29eb22226b04e8c3818aa5))
+
+
+
+
+
 # [2.0.0-next.17](https://github.com/HPInc/davinci/compare/@davinci/example-next-api-mongoose@2.0.0-next.16...@davinci/example-next-api-mongoose@2.0.0-next.17) (2022-11-14)
 
 **Note:** Version bump only for package @davinci/example-next-api-mongoose
