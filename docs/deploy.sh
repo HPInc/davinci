@@ -18,19 +18,4 @@ cd docs
 npm ci
 npm run build
 
-git checkout -f ../package-lock.json
-git add ./build -f
-git stash
-git checkout gh-pages
-git pull
-git stash pop || true
-git checkout --theirs -- .
-
-# remove everything except the build folder
-ls | grep -v ^build | xargs rm -r
-cp -rf ./build/* ./
-
-# commit & push the changes
-git add .
-git commit --allow-empty -am "Update Docs [skip ci]"
-git push
+npx gh-pages --message "Update Docs [skip ci]" --dist ./build
