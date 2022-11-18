@@ -11,7 +11,7 @@ import { expect } from '../support/chai';
 describe('MongooseModule', () => {
 	it('should correctly initialize and connect', async () => {
 		const module = new MongooseModule({ connection: { uri: 'mongodb://127.0.0.1/test' } });
-		const app = new App();
+		const app = new App({ logger: { level: 'silent' } });
 		app.registerModule(module);
 
 		await app.init();
@@ -23,7 +23,7 @@ describe('MongooseModule', () => {
 
 	it('should correctly disconnect', async () => {
 		const module = new MongooseModule({ connection: { uri: 'mongodb://127.0.0.1/test' } });
-		const app = new App();
+		const app = new App({ logger: { level: 'silent' } });
 		app.registerModule(module);
 
 		await app.init();

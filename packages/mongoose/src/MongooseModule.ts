@@ -26,13 +26,22 @@ export class MongooseModule extends Module {
 
 	constructor(options: MongooseModuleOptions) {
 		super();
-		this.options = deepmerge({ logger: { name: 'MongooseModule', level: 'info' } }, options);
+		this.options = deepmerge({ logger: { name: 'MongooseModule' } }, options);
 		this.logger = pino({ name: this.options.logger?.name });
-		this.logger.level = this.options.logger?.level;
+		if (this.options.logger?.level) {
+			this.logger.level = this.options.logger?.level;
+		}
 	}
 
 	getModuleId() {
 		return ['db', 'mongoose'];
+	}
+
+	onRegister(app: App) {
+		const level = this.options.logger?.level ?? app.getOptions().logger?.level;
+		if (level) {
+			this.logger.level = level;
+		}
 	}
 
 	async onInit(app: App) {

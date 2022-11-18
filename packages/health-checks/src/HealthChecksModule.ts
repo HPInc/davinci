@@ -6,26 +6,38 @@ import { App, di, mapParallel, Module } from '@davinci/core';
 import type { HttpServerModule } from '@davinci/http-server';
 import http, { Server } from 'http';
 import { createTerminus, TerminusOptions } from '@godaddy/terminus';
-import pino from 'pino';
+import pino, { Level, Logger } from 'pino';
 import { ClassReflection, ClassType, DecoratorId, MethodReflection, reflect } from '@davinci/reflector';
 import { HealthCheckDecoratorData } from './decorators';
 
 export interface HealthChecksModuleOptions {
 	healthChecks?: { name: string; endpoint: string }[];
 	terminusOptions?: Omit<TerminusOptions, 'healthChecks'>;
+	logger?: {
+		name?: string;
+		level?: Level | 'silent';
+	};
 }
 
 export class HealthChecksModule extends Module {
 	app: App;
-	logger = pino({ name: 'health-checks' });
+	logger: Logger;
 	httpServer: Server;
 
 	constructor(protected moduleOptions?: HealthChecksModuleOptions) {
 		super();
+		this.logger = pino({ name: this.moduleOptions.logger?.name ?? 'health-checks' });
 	}
 
 	getModuleId() {
 		return 'health-checks';
+	}
+
+	onRegister(app: App) {
+		const level = this.moduleOptions.logger?.level ?? app.getOptions().logger?.level;
+		if (level) {
+			this.logger.level = level;
+		}
 	}
 
 	async onInit(app: App) {

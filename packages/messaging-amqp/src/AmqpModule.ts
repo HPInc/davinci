@@ -61,7 +61,9 @@ export class AmqpModule extends Module {
 		this.options = deepmerge({ connectionTimeout: 5000, logger: { name: 'AmqpModule', level: 'info' } }, options);
 		this.bus = new EventEmitter();
 		this.logger = pino({ name: this.options.logger?.name });
-		this.logger.level = this.options.logger?.level;
+		if (this.options.logger?.level) {
+			this.logger.level = this.options.logger?.level;
+		}
 	}
 
 	getModuleId() {
@@ -70,6 +72,12 @@ export class AmqpModule extends Module {
 
 	onRegister(app: App) {
 		this.app = app;
+
+		const level = this.options.logger?.level ?? app.getOptions().logger?.level;
+		if (level) {
+			this.logger.level = level;
+		}
+
 		const connectionOptions =
 			typeof this.options.connection === 'object' ? this.options.connection : { url: this.options.connection };
 		this.connection = amqpConnectionManager.connect(connectionOptions, this.options.connectionManagerOptions);

@@ -27,7 +27,7 @@ export interface ExpressHttpServerModuleOptions extends HttpServerModuleOptions 
 }
 
 export class ExpressHttpServer extends HttpServerModule<{
-	Request: Request,
+	Request: Request;
 	Response: Response;
 	Server: Server;
 	ModuleOptions: ExpressHttpServerModuleOptions;
@@ -39,11 +39,17 @@ export class ExpressHttpServer extends HttpServerModule<{
 		const { app, ...moduleOptions } = options ?? {};
 		super(moduleOptions);
 		this.instance = app ?? express();
+		if (this.moduleOptions.logger?.level) {
+			this.logger.level = this.moduleOptions.logger?.level;
+		}
 	}
 
 	async onRegister(app) {
 		this.app = app;
-		this.logger.level = this.app.getOptions()?.logger?.level;
+		const level = this.moduleOptions.logger?.level ?? app.getOptions().logger?.level;
+		if (level) {
+			this.logger.level = level;
+		}
 		this.registerMiddlewares();
 		await super.createRoutes();
 		// this.registerErrorHandlers();

@@ -47,11 +47,17 @@ export class FastifyHttpServer extends HttpServerModule<{
 		const { app, ...moduleOptions } = options ?? {};
 		super(moduleOptions);
 		this.instance = app;
+		if (this.moduleOptions.logger?.level) {
+			this.logger.level = this.moduleOptions.logger?.level;
+		}
 	}
 
 	async onRegister(app: App) {
 		this.app = app;
-		this.logger.level = this.app.getOptions()?.logger?.level;
+		const level = this.moduleOptions.logger?.level ?? app.getOptions().logger?.level;
+		if (level) {
+			this.logger.level = level;
+		}
 		this.initHttpServer();
 		await this.registerMiddlewares();
 		await this.registerPlugins();

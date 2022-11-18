@@ -5,6 +5,7 @@
 
 import { ClassReflection, MethodReflection, TypeValue } from '@davinci/reflector';
 import { Interceptor, InterceptorBagDetails, JSONSchema } from '@davinci/core';
+import { Level } from 'pino';
 import { ControllerDecoratorMetadata, MethodDecoratorMetadata, ParameterDecoratorOptions, Verb } from './decorators';
 
 export type RequestHandler<TRequest = any, TResponse = any> = (req: TRequest, res: TResponse, next?: Function) => any;
@@ -76,6 +77,10 @@ export interface HttpServerModuleOptions {
 		exposeStack?: boolean;
 	};
 	globalInterceptors?: Array<HttpServerInterceptor>;
+	logger?: {
+		name?: string;
+		level?: Level | 'silent';
+	};
 }
 
 export type EndpointSchema = JSONSchema<any> & {
