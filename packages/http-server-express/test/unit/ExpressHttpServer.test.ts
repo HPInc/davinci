@@ -216,7 +216,7 @@ describe('ExpressHttpServer', () => {
 
 	describe('propagation', () => {
 		it('should propagate the calls to the underlying express instance', async () => {
-			const expressHttpServer = new ExpressHttpServer();
+			const expressHttpServer = new ExpressHttpServer({ logger: { level: 'silent' } });
 			const expressApp = expressHttpServer.getInstance();
 			const expressMocks = {
 				listen: sinon.stub(expressApp, 'listen'),

@@ -5,7 +5,7 @@
 import { App, EntityRegistry, JSONSchema, mapObject, mapSeries, Module } from '@davinci/core';
 import type { HttpServerModule, Route } from '@davinci/http-server';
 import http, { Server } from 'http';
-import pino from 'pino';
+import pino, { Level } from 'pino';
 import { OpenAPIV3 } from 'openapi-types';
 import createDeepMerge from '@fastify/deepmerge';
 import { ClassType, PartialDeep } from '@davinci/reflector';
@@ -26,6 +26,10 @@ export interface OpenAPIModuleOptions {
 		enabled?: boolean;
 		path?: string;
 	};
+	logger?: {
+		name?: string;
+		level?: Level | 'silent';
+	};
 }
 
 export class OpenAPIModule extends Module {
@@ -33,7 +37,7 @@ export class OpenAPIModule extends Module {
 	moduleOptions: OpenAPIModuleOptions;
 	jsonSchemasMap = new Map<string, Partial<JSONSchema>>();
 	logger = pino({ name: 'openAPI-module' });
-	httpServerModule: HttpServerModule<unknown, unknown, Server>;
+	httpServerModule: HttpServerModule<{ Server: Server }>;
 	httpServer: Server;
 	entityRegistry: EntityRegistry;
 	openAPIDoc: PartialDeep<OpenAPIV3.Document>;
@@ -69,6 +73,10 @@ export class OpenAPIModule extends Module {
 			moduleOptions
 		);
 		this.openAPIDoc = this.moduleOptions.document?.spec;
+
+		if (this.moduleOptions.logger?.level) {
+			this.logger.level = this.moduleOptions.logger?.level;
+		}
 	}
 
 	getModuleId() {
@@ -77,10 +85,13 @@ export class OpenAPIModule extends Module {
 
 	async onRegister(app: App) {
 		this.app = app;
-		this.httpServerModule = await app.getModuleById<HttpServerModule<unknown, unknown, Server>>(
-			'http',
-			'registered'
-		);
+
+		const level = this.moduleOptions.logger?.level ?? app.getOptions().logger?.level;
+		if (level) {
+			this.logger.level = level;
+		}
+
+		this.httpServerModule = await app.getModuleById<HttpServerModule<{ Server: Server }>>('http', 'registered');
 		this.httpServer = this.httpServerModule?.getHttpServer() ?? http.createServer();
 		this.entityRegistry = this.httpServerModule.getEntityRegistry();
 		const routes = this.httpServerModule.getRoutes();
@@ -305,8 +316,10 @@ export class OpenAPIModule extends Module {
 	async registerOpenapiRoutes() {
 		const documentEnabled = this.moduleOptions.document?.enabled;
 		const explorerEnabled = this.moduleOptions.explorer?.enabled;
+
 		if (documentEnabled) {
-			this.httpServerModule.get(this.moduleOptions.document?.path, (_req, res) => {
+			const path = this.moduleOptions.document?.path;
+			this.httpServerModule.get(path, (_req, res) => {
 				this.httpServerModule.setHeader(res, 'content-type', 'application/json');
 				this.httpServerModule.reply(res, this.openAPIDoc);
 			});
@@ -317,7 +330,8 @@ export class OpenAPIModule extends Module {
 				...(documentEnabled ? { path: this.moduleOptions.document.path } : { spec: this.openAPIDoc })
 			});
 
-			this.httpServerModule.get(this.moduleOptions.explorer?.path, (_req, res) => {
+			const path = this.moduleOptions.explorer?.path;
+			this.httpServerModule.get(path, (_req, res) => {
 				this.httpServerModule.setHeader(res, 'content-type', 'text/html');
 				this.httpServerModule.reply(res, swaggerUiHtml);
 			});

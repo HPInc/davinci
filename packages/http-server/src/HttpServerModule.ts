@@ -20,6 +20,7 @@ import { ClassReflection, ClassType, DecoratorId, MethodReflection } from '@davi
 import {
 	ContextFactory,
 	ContextFactoryArguments,
+	HttpServerInterceptor,
 	HttpServerModuleOptions,
 	ParameterConfiguration,
 	ParameterSource,
@@ -32,24 +33,30 @@ import {
 import { ControllerDecoratorMetadata, MethodDecoratorMetadata, ParameterDecoratorMetadata } from './decorators';
 import { createAjvValidator } from './AjvValidator';
 
+interface HttpServerModuleGenerics<ModuleOptions> {
+	Request?: unknown;
+	Response?: unknown;
+	Server?: unknown;
+	ModuleOptions?: ModuleOptions;
+}
+
 export abstract class HttpServerModule<
-	Request = unknown,
-	Response = unknown,
-	Server = unknown,
-	ModuleOptions extends HttpServerModuleOptions = HttpServerModuleOptions
+	SMG extends HttpServerModuleGenerics<HttpServerModuleOptions> = {}
 > extends Module {
 	app: App;
 	validationFactory?: ValidationFactory;
 	contextFactory?: ContextFactory<unknown>;
+	globalInterceptors: Array<HttpServerInterceptor> = [];
 	entityRegistry = di.container.resolve(EntityRegistry);
-	routes: Route<Request>[] = [];
+	routes: Route<SMG['Request']>[] = [];
 	logger = pino({ name: 'http-server' });
-	protected httpServer: Server;
+	protected httpServer: SMG['Server'];
 
-	constructor(protected moduleOptions?: ModuleOptions) {
+	constructor(protected moduleOptions?: SMG['ModuleOptions']) {
 		super();
 		this.contextFactory = moduleOptions?.contextFactory;
 		this.validationFactory = moduleOptions?.validationFactory ?? createAjvValidator();
+		this.globalInterceptors = moduleOptions?.globalInterceptors ?? [];
 	}
 
 	getModuleId() {
@@ -60,15 +67,19 @@ export abstract class HttpServerModule<
 		return this.moduleOptions;
 	}
 
-	public getHttpServer(): Server {
-		return this.httpServer as Server;
+	public getHttpServer(): SMG['Server'] {
+		return this.httpServer as SMG['Server'];
 	}
 
-	public setHttpServer(httpServer: Server) {
+	public setHttpServer(httpServer: SMG['Server']) {
 		this.httpServer = httpServer;
 	}
 
-	public setContextFactory<Context>(contextFactory: ContextFactory<Context, Request>): this {
+	public setGlobalInterceptors(interceptors: Array<HttpServerInterceptor>) {
+		this.globalInterceptors = interceptors;
+	}
+
+	public setContextFactory<Context>(contextFactory: ContextFactory<Context, SMG['Request']>): this {
 		this.contextFactory = contextFactory;
 
 		return this;
@@ -123,7 +134,7 @@ export abstract class HttpServerModule<
 					methodReflection
 				});
 
-				const route: Route<Request> = {
+				const route: Route<SMG['Request']> = {
 					path: fullPath,
 					verb,
 					parametersConfig,
@@ -140,11 +151,16 @@ export abstract class HttpServerModule<
 		});
 	}
 
-	public async createRequestHandler(controller: InstanceType<ClassType>, methodName: string, route: Route<Request>) {
+	public async createRequestHandler(
+		controller: InstanceType<ClassType>,
+		methodName: string,
+		route: Route<SMG['Request']>
+	) {
 		const { methodReflection, controllerReflection, parametersConfig } = route;
 		// eslint-disable-next-line @typescript-eslint/no-this-alias
 		const httpServerModule = this;
 		const interceptors = [
+			...this.globalInterceptors,
 			...getInterceptorsHandlers(controllerReflection),
 			...getInterceptorsHandlers(methodReflection)
 		];
@@ -152,10 +168,10 @@ export abstract class HttpServerModule<
 		const validatorFunction: ValidationFunction | null = await this.validationFactory?.(route);
 
 		// using a named function here for better instrumentation and reporting
-		return async function davinciHttpRequestHandler(request: Request, response: Response) {
+		return async function davinciHttpRequestHandler(request: SMG['Request'], response: SMG['Response']) {
 			try {
 				// enrich the parameter configurations with the values
-				const parametersConfigWithValues: ParameterConfiguration<Request>[] = await mapParallel(
+				const parametersConfigWithValues: ParameterConfiguration<SMG['Request']>[] = await mapParallel(
 					parametersConfig,
 					async parameterConfig => {
 						if (parameterConfig.source === 'context') {
@@ -247,30 +263,30 @@ export abstract class HttpServerModule<
 	}
 
 	// abstract get(handler: Function);
-	abstract get(path: unknown, handler: RequestHandler<Request, Response>);
+	abstract get(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>);
 
-	// abstract post(handler: RequestHandler<Request, Response>);
-	abstract post(path: unknown, handler: RequestHandler<Request, Response>);
+	// abstract post(handler: RequestHandler<SMG['Request]>, SMG['Response]);
+	abstract post(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>);
 
-	// abstract head(handler: RequestHandler<Request, Response>);
-	abstract head(path: unknown, handler: RequestHandler<Request, Response>);
+	// abstract head(handler: RequestHandler<SMG['Request]>, SMG['Response]);
+	abstract head(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>);
 
-	// abstract delete(handler: RequestHandler<Request, Response>);
-	abstract delete(path: unknown, handler: RequestHandler<Request, Response>);
+	// abstract delete(handler: RequestHandler<SMG['Request]>, SMG['Response]);
+	abstract delete(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>);
 
 	// public createNotFoundHandler() {}
 
-	// abstract put(handler: RequestHandler<Request, Response>);
-	abstract put(path: unknown, handler: RequestHandler<Request, Response>);
+	// abstract put(handler: RequestHandler<SMG['Request]>, SMG['Response]);
+	abstract put(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>);
 
-	// abstract patch(handler: RequestHandler<Request, Response>);
-	abstract patch(path: unknown, handler: RequestHandler<Request, Response>);
+	// abstract patch(handler: RequestHandler<SMG['Request]>, SMG['Response]);
+	abstract patch(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>);
 
-	// abstract all(handler: RequestHandler<Request, Response>);
-	abstract all(path: unknown, handler: RequestHandler<Request, Response>);
+	// abstract all(handler: RequestHandler<SMG['Request]>, SMG['Response]);
+	abstract all(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>);
 
-	// abstract options(handler: RequestHandler<Request, Response>);
-	abstract options(path: unknown, handler: RequestHandler<Request, Response>);
+	// abstract options(handler: RequestHandler<SMG['Request]>, SMG['Response]);
+	abstract options(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>);
 
 	abstract static(path: string, options?: StaticServeOptions);
 
@@ -286,24 +302,24 @@ export abstract class HttpServerModule<
 
 	abstract close();
 
-	abstract getRequestHostname(request: Request);
+	abstract getRequestHostname(request: SMG['Request']);
 
-	abstract getRequestMethod(request: Request);
+	abstract getRequestMethod(request: SMG['Request']);
 
-	abstract getRequestUrl(request: Request);
+	abstract getRequestUrl(request: SMG['Request']);
 
 	abstract getRequestParameter(args: {
 		source: ParameterSource;
 		name?: string;
-		request: Request;
-		response: Response;
+		request: SMG['Request'];
+		response: SMG['Response'];
 	});
 
-	abstract getRequestHeaders(request: Request);
+	abstract getRequestHeaders(request: SMG['Request']);
 
-	abstract getRequestBody(request: Request);
+	abstract getRequestBody(request: SMG['Request']);
 
-	abstract getRequestQuerystring(request: Request);
+	abstract getRequestQuerystring(request: SMG['Request']);
 
 	abstract status(response, statusCode: number);
 
@@ -320,7 +336,7 @@ export abstract class HttpServerModule<
 		parametersConfig
 	}: {
 		validatorFunction;
-		parametersConfig: ParameterConfiguration<Request>[];
+		parametersConfig: ParameterConfiguration<SMG['Request']>[];
 	}): Promise<Interceptor> {
 		return async function validationInterceptor(next: InterceptorNext) {
 			const data = parametersConfig.reduce((acc, parameterConfig) => {
@@ -359,42 +375,45 @@ export abstract class HttpServerModule<
 		methodReflection: MethodReflection;
 		controllerReflection: ClassReflection;
 	}) {
-		return methodReflection.parameters.reduce<ParameterConfiguration<Request>[]>((acc, parameterReflection) => {
-			const parameterDecoratorMetadata: ParameterDecoratorMetadata = parameterReflection.decorators.find(
-				d =>
-					d[DecoratorId] === 'http-server.parameter' ||
-					d[DecoratorId] === 'http-server.parameter.native' ||
-					d[DecoratorId] === 'core.parameter.context'
-			);
+		return methodReflection.parameters.reduce<ParameterConfiguration<SMG['Request']>[]>(
+			(acc, parameterReflection) => {
+				const parameterDecoratorMetadata: ParameterDecoratorMetadata = parameterReflection.decorators.find(
+					d =>
+						d[DecoratorId] === 'http-server.parameter' ||
+						d[DecoratorId] === 'http-server.parameter.native' ||
+						d[DecoratorId] === 'core.parameter.context'
+				);
 
-			if (parameterDecoratorMetadata?.[DecoratorId] === 'http-server.parameter') {
-				const { options } = parameterDecoratorMetadata;
-				const parameterType = parameterDecoratorMetadata.options?.type ?? parameterReflection.type;
+				if (parameterDecoratorMetadata?.[DecoratorId] === 'http-server.parameter') {
+					const { options } = parameterDecoratorMetadata;
+					const parameterType = parameterDecoratorMetadata.options?.type ?? parameterReflection.type;
 
-				acc.push({
-					source: options.in,
-					name: options.name ?? parameterReflection.name,
-					options,
-					type: parameterType
-				});
-			}
+					acc.push({
+						source: options.in,
+						name: options.name ?? parameterReflection.name,
+						options,
+						type: parameterType
+					});
+				}
 
-			if (parameterDecoratorMetadata?.[DecoratorId] === 'core.parameter.context') {
-				acc.push({
-					source: 'context',
-					options: parameterDecoratorMetadata.options,
-					reflection: { controllerReflection, methodReflection }
-				});
-			}
+				if (parameterDecoratorMetadata?.[DecoratorId] === 'core.parameter.context') {
+					acc.push({
+						source: 'context',
+						options: parameterDecoratorMetadata.options,
+						reflection: { controllerReflection, methodReflection }
+					});
+				}
 
-			if (parameterDecoratorMetadata?.[DecoratorId] === 'http-server.parameter.native') {
-				acc.push({
-					source: parameterDecoratorMetadata.type as 'request' | 'response'
-				});
-			}
+				if (parameterDecoratorMetadata?.[DecoratorId] === 'http-server.parameter.native') {
+					acc.push({
+						source: parameterDecoratorMetadata.type as 'request' | 'response'
+					});
+				}
 
-			return acc;
-		}, []);
+				return acc;
+			},
+			[]
+		);
 	}
 
 	getEntityRegistry() {
@@ -410,7 +429,7 @@ export abstract class HttpServerModule<
 		parameters,
 		context
 	}: {
-		request: Request;
+		request: SMG['Request'];
 		parameters: any[];
 		context: any;
 	}) {
@@ -426,7 +445,7 @@ export abstract class HttpServerModule<
 	private async createContext({
 		request,
 		reflection: { controllerReflection, methodReflection }
-	}: ContextFactoryArguments<Request>) {
+	}: ContextFactoryArguments<SMG['Request']>) {
 		try {
 			return await this.contextFactory?.({
 				request,

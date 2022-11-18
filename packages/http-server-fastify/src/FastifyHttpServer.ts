@@ -26,20 +26,20 @@ import qs from 'qs';
 
 type Server = HttpServer | HttpsServer;
 
-export type FastifyHttpServerModuleOptions = {
+export interface FastifyHttpServerModuleOptions extends HttpServerModuleOptions {
 	app?: FastifyInstance;
 	middlewares?: {
 		cors?: FastifyCorsOptions;
 	};
 	plugins?: [FastifyPluginCallback, FastifyPluginOptions?][];
-} & HttpServerModuleOptions;
+}
 
-export class FastifyHttpServer extends HttpServerModule<
-	FastifyRequest,
-	FastifyReply,
-	Server,
-	FastifyHttpServerModuleOptions
-> {
+export class FastifyHttpServer extends HttpServerModule<{
+	Request: FastifyRequest;
+	Response: FastifyReply;
+	Server: Server;
+	ModuleOptions: FastifyHttpServerModuleOptions;
+}> {
 	instance: FastifyInstance;
 	app: App;
 
@@ -47,11 +47,17 @@ export class FastifyHttpServer extends HttpServerModule<
 		const { app, ...moduleOptions } = options ?? {};
 		super(moduleOptions);
 		this.instance = app;
+		if (this.moduleOptions.logger?.level) {
+			this.logger.level = this.moduleOptions.logger?.level;
+		}
 	}
 
 	async onRegister(app: App) {
 		this.app = app;
-		this.logger.level = this.app.getOptions()?.logger?.level;
+		const level = this.moduleOptions.logger?.level ?? app.getOptions().logger?.level;
+		if (level) {
+			this.logger.level = level;
+		}
 		this.initHttpServer();
 		await this.registerMiddlewares();
 		await this.registerPlugins();

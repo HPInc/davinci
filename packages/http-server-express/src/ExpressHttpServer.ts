@@ -17,16 +17,21 @@ import type { OptionsJson, OptionsUrlencoded } from 'body-parser';
 
 type Server = HttpServer | HttpsServer;
 
-type ExpressHttpServerModuleOptions = {
+export interface ExpressHttpServerModuleOptions extends HttpServerModuleOptions {
 	app?: Express;
 	https?: ServerOptions;
 	middlewares?: {
 		json?: OptionsJson;
 		urlencoded?: OptionsUrlencoded;
 	};
-} & HttpServerModuleOptions;
+}
 
-export class ExpressHttpServer extends HttpServerModule<Request, Response, Server, ExpressHttpServerModuleOptions> {
+export class ExpressHttpServer extends HttpServerModule<{
+	Request: Request;
+	Response: Response;
+	Server: Server;
+	ModuleOptions: ExpressHttpServerModuleOptions;
+}> {
 	instance: Express;
 	app: App;
 
@@ -34,11 +39,17 @@ export class ExpressHttpServer extends HttpServerModule<Request, Response, Serve
 		const { app, ...moduleOptions } = options ?? {};
 		super(moduleOptions);
 		this.instance = app ?? express();
+		if (this.moduleOptions.logger?.level) {
+			this.logger.level = this.moduleOptions.logger?.level;
+		}
 	}
 
 	async onRegister(app) {
 		this.app = app;
-		this.logger.level = this.app.getOptions()?.logger?.level;
+		const level = this.moduleOptions.logger?.level ?? app.getOptions().logger?.level;
+		if (level) {
+			this.logger.level = level;
+		}
 		this.registerMiddlewares();
 		await super.createRoutes();
 		// this.registerErrorHandlers();

@@ -211,7 +211,7 @@ describe('FastifyHttpServer', () => {
 
 	describe('propagation', () => {
 		it('should propagate the calls to the underlying fastify instance', async () => {
-			const fastifyHttpServer = new FastifyHttpServer();
+			const fastifyHttpServer = new FastifyHttpServer({ logger: { level: 'silent' } });
 			await fastifyHttpServer.initHttpServer();
 			const fastify = fastifyHttpServer.getInstance();
 			const fastifyMocks = {

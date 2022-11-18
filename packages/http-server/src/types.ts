@@ -5,14 +5,8 @@
 
 import { ClassReflection, MethodReflection, TypeValue } from '@davinci/reflector';
 import { Interceptor, InterceptorBagDetails, JSONSchema } from '@davinci/core';
+import { Level } from 'pino';
 import { ControllerDecoratorMetadata, MethodDecoratorMetadata, ParameterDecoratorOptions, Verb } from './decorators';
-
-export type ErrorHandler<TRequest = any, TResponse = any> = (
-	error: any,
-	req: TRequest,
-	res: TResponse,
-	next?: Function
-) => any;
 
 export type RequestHandler<TRequest = any, TResponse = any> = (req: TRequest, res: TResponse, next?: Function) => any;
 export type ErrorRequestHandler<TRequest = any, TResponse = any> = (
@@ -70,10 +64,23 @@ export type ValidationFunction = (data: unknown) => typeof data;
 
 export type ValidationFactory = (route: Route<any>) => ValidationFunction | Promise<ValidationFunction>;
 
+export type HttpServerInterceptor<
+	IBD extends InterceptorBagDetails = InterceptorBagDetails,
+	Request = unknown
+> = Interceptor<IBD, { request: Request }>;
+
 export interface HttpServerModuleOptions {
 	port?: number | string;
 	contextFactory?: ContextFactory<unknown>;
 	validationFactory?: ValidationFactory;
+	errorsHandling?: {
+		exposeStack?: boolean;
+	};
+	globalInterceptors?: Array<HttpServerInterceptor>;
+	logger?: {
+		name?: string;
+		level?: Level | 'silent';
+	};
 }
 
 export type EndpointSchema = JSONSchema<any> & {
@@ -94,8 +101,3 @@ export interface StaticServeOptions {
 	maxAge?: number | string;
 	redirect?: boolean;
 }
-
-export type HttpServerInterceptor<
-	IBD extends InterceptorBagDetails = InterceptorBagDetails,
-	Request = unknown
-> = Interceptor<IBD, { request: Request }>;
