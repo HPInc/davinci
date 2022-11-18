@@ -33,7 +33,7 @@ export class OpenAPIModule extends Module {
 	moduleOptions: OpenAPIModuleOptions;
 	jsonSchemasMap = new Map<string, Partial<JSONSchema>>();
 	logger = pino({ name: 'openAPI-module' });
-	httpServerModule: HttpServerModule<unknown, unknown, Server>;
+	httpServerModule: HttpServerModule<{ Server: Server }>;
 	httpServer: Server;
 	entityRegistry: EntityRegistry;
 	openAPIDoc: PartialDeep<OpenAPIV3.Document>;
@@ -77,10 +77,7 @@ export class OpenAPIModule extends Module {
 
 	async onRegister(app: App) {
 		this.app = app;
-		this.httpServerModule = await app.getModuleById<HttpServerModule<unknown, unknown, Server>>(
-			'http',
-			'registered'
-		);
+		this.httpServerModule = await app.getModuleById<HttpServerModule<{ Server: Server }>>('http', 'registered');
 		this.httpServer = this.httpServerModule?.getHttpServer() ?? http.createServer();
 		this.entityRegistry = this.httpServerModule.getEntityRegistry();
 		const routes = this.httpServerModule.getRoutes();

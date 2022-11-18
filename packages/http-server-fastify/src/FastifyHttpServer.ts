@@ -26,20 +26,20 @@ import qs from 'qs';
 
 type Server = HttpServer | HttpsServer;
 
-export type FastifyHttpServerModuleOptions = {
+export interface FastifyHttpServerModuleOptions extends HttpServerModuleOptions {
 	app?: FastifyInstance;
 	middlewares?: {
 		cors?: FastifyCorsOptions;
 	};
 	plugins?: [FastifyPluginCallback, FastifyPluginOptions?][];
-} & HttpServerModuleOptions;
+}
 
-export class FastifyHttpServer extends HttpServerModule<
-	FastifyRequest,
-	FastifyReply,
-	Server,
-	FastifyHttpServerModuleOptions
-> {
+export class FastifyHttpServer extends HttpServerModule<{
+	Request: FastifyRequest;
+	Response: FastifyReply;
+	Server: Server;
+	ModuleOptions: FastifyHttpServerModuleOptions;
+}> {
 	instance: FastifyInstance;
 	app: App;
 

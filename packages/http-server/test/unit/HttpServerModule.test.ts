@@ -30,7 +30,7 @@ describe('HttpServerModule', () => {
 		query?: Record<string, string>;
 	};
 
-	class DummyHttpServer extends HttpServerModule<Request> {
+	class DummyHttpServer extends HttpServerModule<{ Request: Request }> {
 		onInit(app: App) {
 			this.app = app;
 		}
@@ -293,6 +293,85 @@ describe('HttpServerModule', () => {
 			expect(interceptor1.getCall(0).args[1]).to.be.deep.equal(interceptorArgs);
 			expect(interceptor2.called).to.be.true;
 			expect(interceptor2.getCall(0).args[1]).to.be.deep.equal(interceptorArgs);
+		});
+
+		it('should be able to pass global interceptors', async () => {
+			const interceptorsOrder = [];
+			const globalInterceptor = sinon.stub().callsFake(next => {
+				interceptorsOrder.push('globalInterceptor');
+				next();
+			});
+			const interceptor1 = sinon.stub().callsFake(next => {
+				interceptorsOrder.push('controllerInterceptor');
+				next();
+			});
+			const interceptor2 = sinon.stub().callsFake(next => {
+				interceptorsOrder.push('methodInterceptor');
+				next();
+			});
+
+			@interceptor(interceptor1)
+			@route.controller({ basePath: '/api/customers' })
+			class CustomerController {
+				@interceptor(interceptor2)
+				@route.get({ path: '/all' })
+				find(@route.body() body, @route.query() where: string) {
+					return { body, where };
+				}
+			}
+			const dummyHttpServer = new DummyHttpServer();
+			dummyHttpServer.setGlobalInterceptors([globalInterceptor]);
+			const controllerReflection = reflect(CustomerController);
+			const methodReflection = controllerReflection.methods[0];
+			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+				path: '/all',
+				verb: 'get',
+				controllerReflection,
+				methodReflection,
+				parametersConfig: dummyHttpServer.createParametersConfigurations({
+					controllerReflection,
+					methodReflection
+				})
+			});
+			const reqMock = {
+				headers: { 'x-my-header': '1' },
+				body: { myBody: true },
+				query: { where: 'where' },
+				originalUrl: 'http://path/to/url'
+			};
+			const resMock = {};
+			await requestHandler(reqMock, resMock);
+
+			expect(globalInterceptor.called).to.be.true;
+			expect(interceptorsOrder).to.be.deep.equal([
+				'globalInterceptor',
+				'controllerInterceptor',
+				'methodInterceptor'
+			]);
+			const interceptorArgs = {
+				module: 'http-server',
+				handlerArgs: [
+					{
+						myBody: true
+					},
+					'where'
+				],
+				context: undefined,
+				request: {
+					headers: {
+						'x-my-header': '1'
+					},
+					body: {
+						myBody: true
+					},
+					query: {
+						where: 'where'
+					},
+					originalUrl: 'http://path/to/url'
+				},
+				state: {}
+			};
+			expect(globalInterceptor.getCall(0).args[1]).to.be.deep.equal(interceptorArgs);
 		});
 
 		it('should be able to process the context parameter', async () => {
