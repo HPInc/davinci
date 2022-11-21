@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-next.22](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.0.0-next.21...@davinci/openapi@2.0.0-next.22) (2022-11-21)
+
+
+### Features
+
+* **openapi:** added ability to specify default responses ([#154](https://github.com/HPInc/davinci/issues/154)) ([65bd201](https://github.com/HPInc/davinci/commit/65bd201f881df853c33124fc1a24aed370eb0ca9))
+
+
+
+
+
 # [2.0.0-next.21](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.0.0-next.20...@davinci/openapi@2.0.0-next.21) (2022-11-18)
 
 **Note:** Version bump only for package @davinci/openapi

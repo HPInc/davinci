@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/openapi",
-	"version": "2.0.0-next.21",
+	"version": "2.0.0-next.22",
 	"description": "Framework for rapid and consistent API development",
 	"main": "build-cjs/index.js",
 	"module": "build-esm/index.js",
@@ -31,9 +31,9 @@
 		"@davinci/http-server": "^2.0.0-next.11"
 	},
 	"devDependencies": {
-		"@davinci/http-server": "^2.0.0-next.16",
-		"@davinci/http-server-express": "^2.0.0-next.16",
-		"@davinci/http-server-fastify": "^2.0.0-next.18",
+		"@davinci/http-server": "^2.0.0-next.17",
+		"@davinci/http-server-express": "^2.0.0-next.17",
+		"@davinci/http-server-fastify": "^2.0.0-next.19",
 		"@types/hyperscript": "^0.0.4",
 		"@types/swagger-ui-dist": "^3.30.1",
 		"axios": "^0.27.2",

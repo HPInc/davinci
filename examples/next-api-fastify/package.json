@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/example-next-api-fastify",
-	"version": "2.0.0-next.23",
+	"version": "2.0.0-next.24",
 	"private": true,
 	"description": "",
 	"main": "index.js",
@@ -13,10 +13,10 @@
 	"license": "MIT",
 	"dependencies": {
 		"@davinci/core": "^2.0.0-next.15",
-		"@davinci/health-checks": "^2.0.0-next.20",
-		"@davinci/http-server": "^2.0.0-next.16",
-		"@davinci/http-server-fastify": "^2.0.0-next.18",
-		"@davinci/openapi": "^2.0.0-next.21",
+		"@davinci/health-checks": "^2.0.0-next.21",
+		"@davinci/http-server": "^2.0.0-next.17",
+		"@davinci/http-server-fastify": "^2.0.0-next.19",
+		"@davinci/openapi": "^2.0.0-next.22",
 		"ajv": "^8.11.0",
 		"ajv-formats": "^2.1.1",
 		"fastify": "^4.4.0"
