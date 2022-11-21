@@ -3,7 +3,10 @@
  * SPDX-License-Identifier: MIT
  */
 
+import { MethodResponses } from './types';
+
 export * from './OpenAPIModule';
+export * from './types';
 
 declare module '@davinci/http-server' {
 	interface MethodDecoratorOptions {
@@ -14,6 +17,12 @@ declare module '@davinci/http-server' {
 		 *
 		 */
 		operationId?: string;
+
+		/**
+		 * allows specifying the shape of the responses
+		 */
+		responses?: MethodResponses;
+
 		/**
 		 * if set to 'true' hides the endpoint from the
 		 * generated OpenAPI document
