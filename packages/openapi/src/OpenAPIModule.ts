@@ -10,6 +10,7 @@ import { OpenAPIV3 } from 'openapi-types';
 import createDeepMerge from '@fastify/deepmerge';
 import { ClassType, PartialDeep } from '@davinci/reflector';
 import { generateSwaggerUiHtml } from './swaggerUi';
+import { MethodResponses } from './types';
 
 const deepMerge = createDeepMerge();
 
@@ -25,6 +26,10 @@ export interface OpenAPIModuleOptions {
 	explorer?: {
 		enabled?: boolean;
 		path?: string;
+	};
+	defaults?: {
+		responseContentType?: string;
+		responses?: MethodResponses | ((route: Route<unknown>) => MethodResponses);
 	};
 	logger?: {
 		name?: string;
@@ -196,7 +201,15 @@ export class OpenAPIModule extends Module {
 		});
 
 		// Responses handling
-		await mapObject(methodDecoratorMetadata.options?.responses ?? {}, async (response, statusCode) => {
+		const defaultResponses =
+			typeof this.moduleOptions?.defaults?.responses === 'function'
+				? this.moduleOptions?.defaults?.responses(route)
+				: this.moduleOptions?.defaults?.responses;
+
+		const responses = { ...defaultResponses, ...methodDecoratorMetadata.options?.responses };
+		const defaultResponseContentType = this.moduleOptions?.defaults?.responseContentType ?? 'application/json';
+
+		mapObject(responses, (response, statusCode) => {
 			let formattedResponse: OpenAPIV3.ResponseObject;
 
 			// Case: ClassType passed at status code level
@@ -209,7 +222,7 @@ export class OpenAPIModule extends Module {
 				formattedResponse = {
 					description,
 					content: {
-						'application/json': {
+						[defaultResponseContentType]: {
 							schema: this.generateArrayOrSingleDefinition(jsonSchema, Array.isArray(response))
 						}
 					}
@@ -227,13 +240,13 @@ export class OpenAPIModule extends Module {
 					description,
 					...response,
 					content: {
-						'application/json': {
+						[defaultResponseContentType]: {
 							schema: this.generateArrayOrSingleDefinition(jsonSchema, Array.isArray(response.content))
 						}
 					}
 				};
 			} else if (typeof response.content === 'object') {
-				await mapObject(
+				mapObject(
 					response.content,
 					(mediaTypeObject: OpenAPIV3.MediaTypeObject | ClassType | Array<ClassType>, contentType) => {
 						// Case: ClassType passed at response content type level

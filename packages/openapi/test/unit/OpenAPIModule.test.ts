@@ -4,12 +4,12 @@
  */
 
 import { App, entity } from '@davinci/core';
-import { ControllerDecoratorOptions, MethodDecoratorOptions, MethodResponses, route } from '@davinci/http-server';
+import { ControllerDecoratorOptions, MethodDecoratorOptions, route } from '@davinci/http-server';
 import { FastifyHttpServer } from '@davinci/http-server-fastify';
 import deepMerge from 'deepmerge';
 import axios from 'axios';
 import { PartialDeep } from '@davinci/reflector';
-import { OpenAPIModule, OpenAPIModuleOptions } from '../../src';
+import { MethodResponses, OpenAPIModule, OpenAPIModuleOptions } from '../../src';
 import { expect } from '../support/chai';
 
 describe('OpenAPIModule', () => {
@@ -633,6 +633,234 @@ describe('OpenAPIModule', () => {
 									type: 'string',
 									format: 'date-time'
 								}
+							}
+						}
+					}
+				}
+			});
+		});
+
+		it('should use the default responses definitions', async () => {
+			const { openApiModule } = await initApp(
+				{
+					defaults: {
+						responses: {
+							400: Number,
+							500: {
+								description: 'Server error',
+								content: { 'application/json': { schema: { type: 'string' } } }
+							}
+						}
+					}
+				},
+				{}
+			);
+			const openAPIDocument = openApiModule.getOpenAPIDocument();
+
+			expect(openAPIDocument.paths['/api/customers'].post.responses).to.be.deep.equal({
+				'400': {
+					description: '',
+					content: {
+						'application/json': {
+							schema: {
+								type: 'number'
+							}
+						}
+					}
+				},
+				'500': {
+					description: 'Server error',
+					content: {
+						'application/json': {
+							schema: {
+								type: 'string'
+							}
+						}
+					}
+				}
+			});
+		});
+
+		it('should use the default responses factory', async () => {
+			@entity()
+			class GenericError {
+				@entity.prop()
+				error: true;
+
+				@entity.prop()
+				message: string;
+			}
+
+			class Error {
+				@entity.prop()
+				field: string;
+
+				@entity.prop()
+				reason: string;
+			}
+			@entity()
+			class ValidationError extends GenericError {
+				@entity.prop({ type: [Error] })
+				errors: Array<Error>;
+			}
+
+			const { openApiModule } = await initApp(
+				{
+					defaults: {
+						responses: route => {
+							if (route.methodDecoratorMetadata.verb === 'get') {
+								return { default: GenericError };
+							}
+
+							if (route.methodDecoratorMetadata.verb === 'post') {
+								return { default: ValidationError };
+							}
+
+							return null;
+						}
+					}
+				},
+				{}
+			);
+			const openAPIDocument = openApiModule.getOpenAPIDocument();
+
+			expect(openAPIDocument).to.containSubset({
+				paths: {
+					'/api/customers': {
+						get: {
+							responses: {
+								default: {
+									description: 'GenericError',
+									content: {
+										'application/json': {
+											schema: {
+												$ref: '#/components/schemas/GenericError'
+											}
+										}
+									}
+								}
+							}
+						},
+						post: {
+							responses: {
+								default: {
+									description: 'ValidationError',
+									content: {
+										'application/json': {
+											schema: {
+												$ref: '#/components/schemas/ValidationError'
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					'/api/customers/multiple': {
+						post: {
+							responses: {
+								default: {
+									description: 'ValidationError',
+									content: {
+										'application/json': {
+											schema: {
+												$ref: '#/components/schemas/ValidationError'
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				components: {
+					schemas: {
+						GenericError: {
+							$id: 'GenericError',
+							title: 'GenericError',
+							type: 'object',
+							properties: {
+								error: {
+									type: 'boolean'
+								},
+								message: {
+									type: 'string'
+								}
+							},
+							required: []
+						},
+						ValidationError: {
+							$id: 'ValidationError',
+							title: 'ValidationError',
+							type: 'object',
+							properties: {
+								errors: {
+									type: 'array',
+									items: {
+										title: 'errors',
+										type: 'object',
+										properties: {
+											field: {
+												type: 'string'
+											},
+											reason: {
+												type: 'string'
+											}
+										},
+										required: []
+									}
+								},
+								error: {
+									type: 'boolean'
+								},
+								message: {
+									type: 'string'
+								}
+							},
+							required: []
+						}
+					}
+				}
+			});
+		});
+
+		it('should use the default response content type', async () => {
+			const { openApiModule } = await initApp(
+				{ defaults: { responseContentType: 'text/xml' } },
+				{ 200: Customer, 201: [Customer], 202: { description: '', content: { 'application/json': Customer } } }
+			);
+			const openAPIDocument = openApiModule.getOpenAPIDocument();
+
+			expect(openAPIDocument.paths['/api/customers'].post.responses).to.be.deep.equal({
+				'200': {
+					description: 'MyCustomer',
+					content: {
+						'text/xml': {
+							schema: {
+								$ref: '#/components/schemas/MyCustomer'
+							}
+						}
+					}
+				},
+				'201': {
+					description: 'MyCustomer',
+					content: {
+						'text/xml': {
+							schema: {
+								type: 'array',
+								items: {
+									$ref: '#/components/schemas/MyCustomer'
+								}
+							}
+						}
+					}
+				},
+				'202': {
+					description: '',
+					content: {
+						'application/json': {
+							schema: {
+								$ref: '#/components/schemas/MyCustomer'
 							}
 						}
 					}
