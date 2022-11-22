@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-next.22](https://github.com/HPInc/davinci/compare/@davinci/health-checks@2.0.0-next.21...@davinci/health-checks@2.0.0-next.22) (2022-11-22)
+
+
+### Features
+
+* **Amqp:** provide ability to inject ChannelManager in controllers ([#150](https://github.com/HPInc/davinci/issues/150)) ([e3d09fd](https://github.com/HPInc/davinci/commit/e3d09fd52291aa73efcaaaa29f7fcf8113ef8289))
+
+
+
+
+
 # [2.0.0-next.21](https://github.com/HPInc/davinci/compare/@davinci/health-checks@2.0.0-next.20...@davinci/health-checks@2.0.0-next.21) (2022-11-21)
 
 **Note:** Version bump only for package @davinci/health-checks
