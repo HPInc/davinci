@@ -31,6 +31,7 @@ export interface AmqpModuleOptions {
 	connectionTimeout?: number;
 	subscriptions?: Array<AmqpSubscriptionSettings>;
 	defaultSubscriptionSettings?: PartialDeep<AmqpSubscriptionSettings>;
+	defaultChannelSettings?: AmqpSubscriptionSettings;
 	gracefulShutdownStrategy?: 'none' | 'processInFlight' | 'nackInFlight' | null;
 	channelManagerFactory?: (connection: AmqpConnectionManager, options: ChannelManagerOptions) => ChannelManager;
 	logger?: {
@@ -58,7 +59,14 @@ export class AmqpModule extends Module {
 
 	constructor(options: AmqpModuleOptions) {
 		super();
-		this.options = deepmerge({ connectionTimeout: 5000, logger: { name: 'AmqpModule', level: 'info' } }, options);
+		this.options = deepmerge(
+			<AmqpModuleOptions>{
+				connectionTimeout: 5000,
+				defaultChannelSettings: { exchangeType: 'topic' },
+				logger: { name: 'AmqpModule', level: 'info' }
+			},
+			options
+		);
 		this.bus = new EventEmitter();
 		this.logger = pino({ name: this.options.logger?.name });
 		if (this.options.logger?.level) {
@@ -83,7 +91,10 @@ export class AmqpModule extends Module {
 		this.connection = amqpConnectionManager.connect(connectionOptions, this.options.connectionManagerOptions);
 		this.channelManager =
 			this.options.channelManagerFactory?.(this.connection, { logger: this.options.logger }) ??
-			new ChannelManager(this.connection, { logger: this.options.logger });
+			di.container.resolve(ChannelManager).setConnection(this.connection).setOptions({
+				defaultChannelSettings: this.options.defaultChannelSettings,
+				logger: this.options.logger
+			});
 	}
 
 	async onInit() {
@@ -138,13 +149,12 @@ export class AmqpModule extends Module {
 			}
 		>();
 
-		this.app.getControllersWithReflection().forEach(({ Controller, reflection }) => {
+		this.app.getControllersWithReflection().forEach(({ controllerInstance, reflection }) => {
 			const matches = this.findMatchingMethodAndDecoratorReflections(reflection);
 
 			matches.forEach(({ methodReflection, decorator }) => {
-				const controller = di.container.resolve(Controller);
 				const controllerMethodAndReflections = {
-					controller,
+					controller: controllerInstance,
 					controllerReflection: reflection,
 					methodReflection
 				};

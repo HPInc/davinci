@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 import { createSandbox } from 'sinon';
-import { App, interceptor, mapSeries, nextTick } from '@davinci/core';
+import { App, di, interceptor, mapSeries, nextTick } from '@davinci/core';
 import { channelParam, message, payload, subscribe } from '@davinci/messaging';
-import { AmqpInterceptor, AmqpModule, AmqpModuleOptions, Subscription } from '../../src';
+import { AmqpInterceptor, AmqpModule, AmqpModuleOptions, ChannelManager, Subscription } from '../../src';
 import { expect } from '../support/chai';
 
 const sinon = createSandbox();
@@ -56,6 +56,7 @@ describe('AmqpModule', () => {
 		await app?.shutdown();
 		app = null;
 		sinon.restore();
+		di.container.clearInstances();
 	});
 
 	describe('initialization', () => {
@@ -354,6 +355,96 @@ describe('AmqpModule', () => {
 		});
 	});
 
+	describe('ChannelManager', () => {
+		it('should inject the channelManager within the controller and publish a message', async () => {
+			@di.injectable()
+			class MyController {
+				constructor(private channelManager?: ChannelManager) {}
+
+				@subscribe({
+					name: 'mySubscription1',
+					amqp: {
+						exchange: 'testExchange1',
+						topic: 'testTopic',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true }
+					}
+				})
+				async handler1() {
+					await this.channelManager.publish('testExchange2', {}, 'testTopic');
+					return { success: true };
+				}
+
+				@subscribe({
+					name: 'mySubscription2',
+					amqp: {
+						exchange: 'testExchange2',
+						topic: 'testTopic',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true }
+					}
+				})
+				handler2() {
+					return { success: true };
+				}
+			}
+
+			const handler1Spy = sinon.spy(MyController.prototype, 'handler1');
+			const handler2Spy = sinon.spy(MyController.prototype, 'handler2');
+
+			const { amqpModule } = await initApp(MyController, {
+				defaultSubscriptionSettings: { autoAck: true }
+			});
+
+			const subscription = amqpModule.getSubscriptions()[0];
+
+			// publish a message
+			const messageContent = {};
+			await subscription.channel.publish('testExchange1', 'testTopic', messageContent);
+			await delay(() => {}, 100);
+
+			// assert
+			expect(handler1Spy.called).to.be.true;
+			expect(handler2Spy.called).to.be.true;
+		});
+
+		it('should be able to publish messages', async () => {
+			@di.injectable()
+			class MyController {
+				constructor(private channelManager?: ChannelManager) {}
+
+				@subscribe({
+					name: 'mySubscription',
+					amqp: {
+						exchange: 'testExchange',
+						topic: 'testTopic',
+						queue: 'testQueue',
+						queueOptions: { autoDelete: true }
+					}
+				})
+				handler() {
+					return { channelManager: this.channelManager };
+				}
+			}
+
+			const { amqpModule, handlerSpy } = await initApp(MyController, {
+				defaultSubscriptionSettings: { autoAck: true }
+			});
+
+			const subscription = amqpModule.getSubscriptions()[0];
+
+			// publish a message
+			const messageContent = {};
+			await subscription.channel.publish('testExchange', 'testTopic', messageContent);
+			await nextTick(() => handlerSpy.called);
+
+			// assert
+			const returnValue = handlerSpy.getCall(0).returnValue;
+
+			expect(returnValue.channelManager).to.be.instanceof(ChannelManager);
+		});
+	});
+
 	describe('shutdown', () => {
 		it('should wait until all in-flight messages are processed', async () => {
 			class MyController {
@@ -367,7 +458,7 @@ describe('AmqpModule', () => {
 					}
 				})
 				async handler(@message() msg, @payload() body, @channelParam() channel) {
-					await new Promise(resolve => setTimeout(() => resolve(null), 1000));
+					await delay(() => {}, 1000);
 					return { msg, body, channel };
 				}
 			}
@@ -409,7 +500,7 @@ describe('AmqpModule', () => {
 					}
 				})
 				async handler(@message() msg, @payload() body, @channelParam() channel) {
-					await new Promise(resolve => setTimeout(() => resolve(null), 1000));
+					await delay(() => {}, 500);
 					return { msg, body, channel };
 				}
 			}
