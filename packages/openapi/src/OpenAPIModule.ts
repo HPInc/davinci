@@ -3,14 +3,13 @@
  * SPDX-License-Identifier: MIT
  */
 import { App, EntityRegistry, JSONSchema, mapObject, mapSeries, Module } from '@davinci/core';
-import type { HttpServerModule, Route } from '@davinci/http-server';
+import type { HttpServerModule, MethodResponses, Route } from '@davinci/http-server';
 import http, { Server } from 'http';
 import pino, { Level } from 'pino';
 import { OpenAPIV3 } from 'openapi-types';
 import createDeepMerge from '@fastify/deepmerge';
 import { ClassType, PartialDeep } from '@davinci/reflector';
 import { generateSwaggerUiHtml } from './swaggerUi';
-import { MethodResponses } from './types';
 
 const deepMerge = createDeepMerge();
 

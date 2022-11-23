@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { TypeValue } from '@davinci/reflector';
+import { ClassType, TypeValue } from '@davinci/reflector';
+import type { OpenAPIV3 } from 'openapi-types';
 
 export type Verb = 'get' | 'post' | 'put' | 'patch' | 'head' | 'delete' | 'options';
 
@@ -11,10 +12,29 @@ export interface ValidationOptions {
 	disabled?: boolean;
 }
 
+export type MethodResponseItem =
+	| OpenAPIV3.ResponseObject
+	| (Omit<OpenAPIV3.ResponseObject, 'content'> & { content: ClassType | Array<ClassType> })
+	| (Omit<OpenAPIV3.ResponseObject, 'content'> & {
+			content: { [media: string]: ClassType | Array<ClassType> };
+	  })
+	| (Omit<OpenAPIV3.ResponseObject, 'content'> & {
+			content: {
+				[media: string]: Omit<OpenAPIV3.MediaTypeObject, 'schema'> & { schema?: ClassType | Array<ClassType> };
+			};
+	  })
+	| ClassType
+	| Array<ClassType>;
+
+export interface MethodResponses {
+	[key: number | string]: MethodResponseItem | Array<MethodResponseItem>;
+}
+
 export interface MethodDecoratorOptions {
 	path: string;
 	summary?: string;
 	description?: string;
+	responses?: MethodResponses;
 }
 
 export interface MethodDecoratorMetadata {
