@@ -68,7 +68,7 @@ export type ValidationFactory = (route: Route<any>) => ValidationFunction | Prom
 export type HttpServerInterceptor<
 	IBD extends InterceptorBagDetails = InterceptorBagDetails,
 	Request = unknown
-> = Interceptor<IBD, { request: Request }>;
+> = Interceptor<IBD, { request?: Request }>;
 
 export interface HttpServerModuleOptions {
 	port?: number | string;
