@@ -28,7 +28,7 @@ export default class CustomerController {
 		return { success: true, firstname, age, customer, accountId, ctx };
 	}
 
-	@route.post({ path: '/' })
+	@route.post({ path: '/', responses: { 201: Customer } })
 	create(@route.body({ required: true }) data: Customer) {
 		return { success: true, data };
 	}

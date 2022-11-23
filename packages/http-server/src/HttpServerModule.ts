@@ -124,6 +124,16 @@ export abstract class HttpServerModule<
 					methodReflection
 				});
 
+				const responseStatusCodes = Object.keys(methodDecoratorMetadata.options?.responses ?? {})
+					.reduce((acc, statusCodeString) => {
+						const statusCode = Number(statusCodeString);
+						if (!Number.isNaN(statusCode)) {
+							acc.push(statusCode);
+						}
+						return acc;
+					}, [])
+					.sort();
+
 				const route: Route<SMG['Request']> = {
 					path: fullPath,
 					verb,
@@ -131,7 +141,8 @@ export abstract class HttpServerModule<
 					methodDecoratorMetadata,
 					methodReflection,
 					controllerDecoratorMetadata,
-					controllerReflection
+					controllerReflection,
+					responseStatusCodes
 				};
 
 				this.routes.push(route);
@@ -240,6 +251,10 @@ export abstract class HttpServerModule<
 					interceptorsBag
 				);
 
+				const statusCode = httpServerModule.getResponseStatusCode(route);
+
+				httpServerModule.status(response, statusCode);
+
 				return httpServerModule.reply(response, result);
 			} catch (err) {
 				// default error handler, can be overridden by a dedicated interceptor
@@ -250,6 +265,10 @@ export abstract class HttpServerModule<
 				);
 			}
 		};
+	}
+
+	getResponseStatusCode(route: Route<SMG['Request']>) {
+		return route.responseStatusCodes?.find(s => s >= 100 && s <= 399) ?? 200;
 	}
 
 	// abstract get(handler: Function);

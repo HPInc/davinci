@@ -51,6 +51,7 @@ export interface Route<Request> {
 	methodReflection: MethodReflection;
 	controllerDecoratorMetadata?: ControllerDecoratorMetadata;
 	controllerReflection: ClassReflection;
+	responseStatusCodes?: Array<number>;
 }
 
 export interface ContextFactoryArguments<Request> {

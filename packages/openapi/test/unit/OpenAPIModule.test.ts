@@ -4,12 +4,12 @@
  */
 
 import { App, entity } from '@davinci/core';
-import { ControllerDecoratorOptions, MethodDecoratorOptions, route } from '@davinci/http-server';
+import { ControllerDecoratorOptions, MethodDecoratorOptions, MethodResponses, route } from '@davinci/http-server';
 import { FastifyHttpServer } from '@davinci/http-server-fastify';
 import deepMerge from 'deepmerge';
 import axios from 'axios';
 import { PartialDeep } from '@davinci/reflector';
-import { MethodResponses, OpenAPIModule, OpenAPIModuleOptions } from '../../src';
+import { OpenAPIModule, OpenAPIModuleOptions } from '../../src';
 import { expect } from '../support/chai';
 
 describe('OpenAPIModule', () => {

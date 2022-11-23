@@ -134,9 +134,12 @@ describe('HttpServerModule', () => {
 		it('should introspect the controller and register the routes', async () => {
 			@route.controller({ basePath: '/api/customers' })
 			class CustomerController {
-				@route.get({ path: '/all' })
+				@route.get({
+					path: '/all',
+					responses: { 400: { description: '' }, 200: { description: '' }, default: { description: '' } }
+				})
 				find() {}
-				@route.post({ path: '/create/' })
+				@route.post({ path: '/create/', responses: { 201: { description: '' } } })
 				create() {}
 			}
 			class MyDummyHttpServer extends DummyHttpServer {
@@ -152,12 +155,60 @@ describe('HttpServerModule', () => {
 			const app = new App();
 			await app.registerController(CustomerController).registerModule(dummyHttpServer);
 			await app.init();
-			const [[getRoute, postRoute]] = await dummyHttpServer.createRoutes();
 
+			const [[getRoute, postRoute]] = await dummyHttpServer.createRoutes();
 			expect(getRoute[0]).to.be.equal('get');
 			expect(getRoute[1]).to.be.equal('/api/customers/all');
 			expect(postRoute[0]).to.be.equal('post');
 			expect(postRoute[1]).to.be.equal('/api/customers/create');
+
+			const routesDefinition = dummyHttpServer.getRoutes();
+			expect(routesDefinition).to.containSubset([
+				{
+					path: '/api/customers/all',
+					verb: 'get',
+					parametersConfig: [],
+					methodDecoratorMetadata: {
+						module: 'http-server',
+						type: 'route',
+						verb: 'get',
+						options: {
+							path: '/all',
+							responses: {
+								'200': {
+									description: ''
+								},
+								'400': {
+									description: ''
+								},
+								default: {
+									description: ''
+								}
+							}
+						}
+					},
+					responseStatusCodes: [200, 400]
+				},
+				{
+					path: '/api/customers/create',
+					verb: 'post',
+					parametersConfig: [],
+					methodDecoratorMetadata: {
+						module: 'http-server',
+						type: 'route',
+						verb: 'post',
+						options: {
+							path: '/create/',
+							responses: {
+								'201': {
+									description: ''
+								}
+							}
+						}
+					},
+					responseStatusCodes: [201]
+				}
+			]);
 		});
 	});
 
