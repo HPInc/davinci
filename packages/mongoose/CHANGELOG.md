@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-next.19](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.0.0-next.18...@davinci/mongoose@2.0.0-next.19) (2022-11-23)
+
+
+### Bug Fixes
+
+* **mongoose:** set typeKey schema option to '$type' ([#155](https://github.com/HPInc/davinci/issues/155)) ([4c416a3](https://github.com/HPInc/davinci/commit/4c416a34da5e89071c2ac88024ff244d33c708f2))
+
+
+
+
+
 # [2.0.0-next.18](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.0.0-next.17...@davinci/mongoose@2.0.0-next.18) (2022-11-22)
 
 **Note:** Version bump only for package @davinci/mongoose

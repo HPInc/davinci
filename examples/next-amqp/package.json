@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/example-next-amqp",
-	"version": "2.0.0-next.17",
+	"version": "2.0.0-next.18",
 	"private": true,
 	"description": "",
 	"main": "index.js",
@@ -12,9 +12,9 @@
 	"author": "HP",
 	"license": "MIT",
 	"dependencies": {
-		"@davinci/core": "^2.0.0-next.16",
+		"@davinci/core": "^2.0.0-next.17",
 		"@davinci/messaging": "^2.0.0-next.13",
-		"@davinci/messaging-amqp": "^2.0.0-next.17",
+		"@davinci/messaging-amqp": "^2.0.0-next.18",
 		"@davinci/reflector": "^2.0.0-next.13",
 		"amqp-connection-manager": "^4.1.9",
 		"amqplib": "^0.10.3",
