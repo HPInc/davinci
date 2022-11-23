@@ -5,6 +5,7 @@
 
 import { model, Model, Schema, SchemaOptions } from 'mongoose';
 import { ClassType, DecoratorId, PropertyReflection, reflect, TypeValue } from '@davinci/reflector';
+import { omit } from '@davinci/core';
 import { IPropDecoratorOptions, IPropDecoratorOptionsFactory } from './decorators/types';
 
 /**
@@ -93,8 +94,8 @@ export const generateSchema = <T>(
 			}
 
 			const prop = {
-				...options,
-				type
+				...omit(options, ['type']),
+				$type: type
 			};
 
 			return {
@@ -106,7 +107,9 @@ export const generateSchema = <T>(
 		// get schema options
 		const schemaDecoration = classReflection.decorators.find(d => d[DecoratorId] === 'mongoose.schema');
 		const schemaOptions = schemaDecoration?.options;
-		const schema = (forceCreateSchema || schemaDecoration) && new Schema(definition, options ?? schemaOptions);
+		const schema =
+			(forceCreateSchema || schemaDecoration) &&
+			new Schema(definition, { ...(options ?? schemaOptions), typeKey: '$type' });
 
 		// register methods
 		const methods = classReflection.methods.reduce((acc, methodReflection) => {
