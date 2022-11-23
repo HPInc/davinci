@@ -238,6 +238,7 @@ export abstract class HttpServerModule<
 
 				const interceptorsBag = httpServerModule.prepareInterceptorBag({
 					request,
+					response,
 					parameters: parametersConfigWithValues.map(p => p.value),
 					context: contextValue
 				});
@@ -435,10 +436,12 @@ export abstract class HttpServerModule<
 
 	private prepareInterceptorBag({
 		request,
+		response,
 		parameters,
 		context
 	}: {
 		request: SMG['Request'];
+		response: SMG['Response'];
 		parameters: any[];
 		context: any;
 	}) {
@@ -447,7 +450,8 @@ export abstract class HttpServerModule<
 			handlerArgs: parameters,
 			context,
 			state: {},
-			request
+			request,
+			response
 		};
 	}
 

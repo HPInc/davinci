@@ -339,6 +339,7 @@ describe('HttpServerModule', () => {
 					},
 					originalUrl: 'http://path/to/url'
 				},
+				response: {},
 				state: {}
 			};
 			expect(interceptor1.getCall(0).args[1]).to.be.deep.equal(interceptorArgs);
@@ -420,6 +421,7 @@ describe('HttpServerModule', () => {
 					},
 					originalUrl: 'http://path/to/url'
 				},
+				response: {},
 				state: {}
 			};
 			expect(globalInterceptor.getCall(0).args[1]).to.be.deep.equal(interceptorArgs);
