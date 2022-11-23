@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-next.26](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.0.0-next.25...@davinci/openapi@2.0.0-next.26) (2022-11-23)
+
+**Note:** Version bump only for package @davinci/openapi
+
+
+
+
+
 # [2.0.0-next.25](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.0.0-next.24...@davinci/openapi@2.0.0-next.25) (2022-11-23)
 
 
