@@ -16,6 +16,7 @@ export function mapObject(obj: object, iteratee: (value, key: string) => unknown
 export function omit<T extends object>(obj: T, keys: (keyof T)[]): Partial<T>;
 export function omit(obj: object, keys: string[]) {
 	if (!keys.length) return obj;
+	if (typeof obj !== 'object' || obj === null) return obj;
 
 	return Object.keys(obj).reduce((acc, key) => {
 		if (keys.indexOf(key) === -1) {

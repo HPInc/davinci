@@ -46,6 +46,11 @@ describe('object-utils', () => {
 
 			expect(result).to.be.deep.equal(input);
 		});
+
+		it('should handle null or undefined', () => {
+			expect(omit(null, [])).to.be.equal(null);
+			expect(omit(undefined, [])).to.be.equal(undefined);
+		});
 	});
 
 	describe('#isPlainObject', () => {
