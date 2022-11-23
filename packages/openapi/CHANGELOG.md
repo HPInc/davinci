@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-next.25](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.0.0-next.24...@davinci/openapi@2.0.0-next.25) (2022-11-23)
+
+
+### Bug Fixes
+
+* **httpServer:** implemented missing response status functionality ([#156](https://github.com/HPInc/davinci/issues/156)) ([04dd187](https://github.com/HPInc/davinci/commit/04dd1878f787bf4fc3cbbd272f5f4c7ccbc66190))
+
+
+
+
+
 # [2.0.0-next.24](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.0.0-next.23...@davinci/openapi@2.0.0-next.24) (2022-11-23)
 
 **Note:** Version bump only for package @davinci/openapi

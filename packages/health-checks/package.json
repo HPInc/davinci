@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/health-checks",
-	"version": "2.0.0-next.23",
+	"version": "2.0.0-next.24",
 	"description": "Framework for rapid and consistent API development",
 	"main": "build-cjs/index.js",
 	"module": "build-esm/index.js",
@@ -21,7 +21,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"@davinci/core": "^2.0.0-next.17",
-		"@davinci/http-server": "^2.0.0-next.19",
+		"@davinci/http-server": "^2.0.0-next.20",
 		"@davinci/reflector": "^2.0.0-next.13",
 		"pino": "^7.11.0"
 	},
@@ -29,7 +29,7 @@
 		"@godaddy/terminus": "^4.11.1"
 	},
 	"devDependencies": {
-		"@davinci/http-server-fastify": "^2.0.0-next.21",
+		"@davinci/http-server-fastify": "^2.0.0-next.22",
 		"@godaddy/terminus": "^4.11.2",
 		"typescript": "^4.6.2"
 	},

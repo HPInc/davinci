@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-next.27](https://github.com/HPInc/davinci/compare/@davinci/example-next-api-fastify@2.0.0-next.26...@davinci/example-next-api-fastify@2.0.0-next.27) (2022-11-23)
+
+
+### Bug Fixes
+
+* **httpServer:** implemented missing response status functionality ([#156](https://github.com/HPInc/davinci/issues/156)) ([04dd187](https://github.com/HPInc/davinci/commit/04dd1878f787bf4fc3cbbd272f5f4c7ccbc66190))
+
+
+
+
+
 # [2.0.0-next.26](https://github.com/HPInc/davinci/compare/@davinci/example-next-api-fastify@2.0.0-next.25...@davinci/example-next-api-fastify@2.0.0-next.26) (2022-11-23)
 
 **Note:** Version bump only for package @davinci/example-next-api-fastify
