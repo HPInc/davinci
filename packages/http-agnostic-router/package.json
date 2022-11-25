@@ -1,0 +1,39 @@
+{
+	"name": "@davinci/http-agnostic-router",
+	"version": "2.0.0-next.1",
+	"description": "Framework for rapid and consistent API development",
+	"main": "build-cjs/index.js",
+	"module": "build-esm/index.js",
+	"types": "build-cjs/index.d.ts",
+	"sideEffects": false,
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"build": "npm run build-cj && npm run build-esm",
+		"build-cj": "../../node_modules/typescript/bin/tsc -p tsconfig.cjs.release.json",
+		"build-esm": "../../node_modules/typescript/bin/tsc -p tsconfig.esm.release.json",
+		"lint": "../../node_modules/eslint/bin/eslint.js --color --c .eslintrc 'src/**/*.ts'",
+		"test": "mocha --exit",
+		"cover": "nyc npm test"
+	},
+	"author": "HP",
+	"license": "MIT",
+	"dependencies": {
+		"@davinci/http-server": "^2.0.0-next.20",
+		"@davinci/reflector": "^2.0.0-next.13",
+		"itty-router-extras": "^0.4.2"
+	},
+	"peerDependencies": {
+		"express": "^4.0.0",
+		"itty-router": "^2.6.6"
+	},
+	"devDependencies": {
+		"@davinci/core": "^2.0.0-next.17",
+		"@types/itty-router-extras": "^0.4.0",
+		"axios": "0.26.1",
+		"itty-router": "^2.6.6",
+		"supertest": "6.2.2",
+		"typescript": "^4.6.2"
+	}
+}

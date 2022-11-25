@@ -26,9 +26,7 @@ export type MethodResponseItem =
 	| ClassType
 	| Array<ClassType>;
 
-export interface MethodResponses {
-	[key: number | string]: MethodResponseItem | Array<MethodResponseItem>;
-}
+export type MethodResponses = Record<number | string, MethodResponseItem | Array<MethodResponseItem>>;
 
 export interface MethodDecoratorOptions {
 	path: string;
