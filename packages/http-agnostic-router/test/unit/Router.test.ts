@@ -48,15 +48,14 @@ describe('Router', () => {
 				body: { address: 'My street' }
 			});
 
-			router[method]('*', identity);
+			router[method]('*', () => ({ statusCode: 404 }));
 			await expect(
 				router.handle({
 					url: '/not/existing/route',
-					method
+					method: 'GET'
 				})
 			).to.eventually.be.deep.equal({
-				method,
-				url: '/not/existing/route'
+				statusCode: 404
 			});
 		});
 	});

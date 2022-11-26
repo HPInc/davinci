@@ -2,13 +2,7 @@
  * © Copyright 2022 HP Development Company, L.P.
  * SPDX-License-Identifier: MIT
  */
-import {
-	httpErrors,
-	HttpServerModule,
-	HttpServerModuleOptions,
-	ParameterSource,
-	RequestHandler
-} from '@davinci/http-server';
+import { HttpServerModule, HttpServerModuleOptions, ParameterSource, RequestHandler } from '@davinci/http-server';
 import type { App } from '@davinci/core';
 import { Router } from './Router';
 import { Request, Response } from './types';
@@ -52,9 +46,9 @@ export class AgnosticRouterModule<Req extends Request = Request> extends HttpSer
 		}
 		await super.createRoutes();
 
-		this.instance.all('*', () => {
+		/* this.instance.all('*', () => {
 			throw new httpErrors.NotFound();
-		});
+		}); */
 
 		Object.defineProperty(this.app, 'injectHttpRequest', {
 			value: this.injectRequest.bind(this)
@@ -74,13 +68,14 @@ export class AgnosticRouterModule<Req extends Request = Request> extends HttpSer
 	}
 
 	public reply(response: Response, body: unknown, statusCode?: number) {
-		const options = { status: statusCode ?? 200, headers: response?.headers ?? {} };
+		response.statusCode = statusCode ?? 200;
 
-		if (typeof body === 'object' && !options.headers['content-type']) {
-			options.headers['content-type'] = 'application/json';
+		if (typeof body === 'object' && !response.headers['content-type']) {
+			response.headers = response.headers ?? {};
+			response.headers['content-type'] = 'application/json';
 		}
 
-		return { payload: body, ...options };
+		return { payload: body, ...response };
 	}
 
 	public get(path: string, handler: RequestHandler<Request, Response>) {
@@ -124,6 +119,7 @@ export class AgnosticRouterModule<Req extends Request = Request> extends HttpSer
 	}
 
 	public setHeader(response: Response, name: string, value: string) {
+		response.headers = response.headers ?? {};
 		response.headers[name] = value;
 	}
 
@@ -160,13 +156,13 @@ export class AgnosticRouterModule<Req extends Request = Request> extends HttpSer
 	}) {
 		switch (source) {
 			case 'path':
-				return request.params[name];
+				return request.params?.[name];
 
 			case 'header':
-				return request.headers[name];
+				return request.headers?.[name];
 
 			case 'query':
-				return request.query[name];
+				return request.query?.[name];
 
 			case 'body':
 				return request.body;

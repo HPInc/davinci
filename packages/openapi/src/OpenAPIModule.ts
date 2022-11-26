@@ -333,7 +333,7 @@ export class OpenAPIModule extends Module {
 			const path = this.moduleOptions.document?.path;
 			this.httpServerModule.get(path, (_req, res) => {
 				this.httpServerModule.setHeader(res, 'content-type', 'application/json');
-				this.httpServerModule.reply(res, this.openAPIDoc);
+				return this.httpServerModule.reply(res, this.openAPIDoc);
 			});
 		}
 
@@ -345,7 +345,7 @@ export class OpenAPIModule extends Module {
 			const path = this.moduleOptions.explorer?.path;
 			this.httpServerModule.get(path, (_req, res) => {
 				this.httpServerModule.setHeader(res, 'content-type', 'text/html');
-				this.httpServerModule.reply(res, swaggerUiHtml);
+				return this.httpServerModule.reply(res, swaggerUiHtml);
 			});
 		}
 	}
