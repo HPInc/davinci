@@ -9,28 +9,20 @@ import {
 	ParameterSource,
 	RequestHandler
 } from '@davinci/http-server';
-import { Request as IttyRequest, Router } from 'itty-router';
 import type { App } from '@davinci/core';
+import { Router } from './Router';
+import { Request, Response } from './types';
 
-interface Request extends IttyRequest {
-	headers?: HeadersInit;
+export interface AgnosticRouterModuleOptions<Req extends Request = Request> extends HttpServerModuleOptions {
+	app?: Router<Req>;
 }
 
-type Response = {
-	statusCode: number;
-	headers: HeadersInit;
-};
-
-export interface AgnosticRouterModuleOptions extends HttpServerModuleOptions {
-	app?: Router;
-}
-
-export class AgnosticRouter extends HttpServerModule<{
+export class AgnosticRouterModule<Req extends Request = Request> extends HttpServerModule<{
 	Request: Request;
 	Response: Response;
-	ModuleOptions: AgnosticRouterModuleOptions;
+	ModuleOptions: AgnosticRouterModuleOptions<Req>;
 }> {
-	instance: Router;
+	instance: Router<Req>;
 	app: App;
 	// TODO: find better solution
 	close: undefined;
@@ -43,10 +35,10 @@ export class AgnosticRouter extends HttpServerModule<{
 	static: undefined;
 	initHttpServer: undefined;
 
-	constructor(options?: AgnosticRouterModuleOptions) {
+	constructor(options?: AgnosticRouterModuleOptions<Req>) {
 		const { app, ...moduleOptions } = options ?? {};
 		super(moduleOptions);
-		this.instance = app ?? Router<Request>();
+		this.instance = app ?? new Router<Req>();
 		if (this.moduleOptions.logger?.level) {
 			this.logger.level = this.moduleOptions.logger?.level;
 		}
@@ -63,16 +55,32 @@ export class AgnosticRouter extends HttpServerModule<{
 		this.instance.all('*', () => {
 			throw new httpErrors.NotFound();
 		});
+
+		Object.defineProperty(this.app, 'injectHttpRequest', {
+			value: this.injectRequest.bind(this)
+		});
+	}
+
+	async injectRequest(req: Req) {
+		return this.instance.handle(
+			{
+				url: req.url,
+				method: req.method,
+				params: req.params,
+				headers: req.headers ?? {}
+			} as Req,
+			{}
+		);
 	}
 
 	public reply(response: Response, body: unknown, statusCode?: number) {
-		const options = { status: statusCode ?? 200, headers: response.headers ?? {} };
+		const options = { status: statusCode ?? 200, headers: response?.headers ?? {} };
 
 		if (typeof body === 'object' && !options.headers['content-type']) {
 			options.headers['content-type'] = 'application/json';
 		}
 
-		return { content: body, ...options };
+		return { payload: body, ...options };
 	}
 
 	public get(path: string, handler: RequestHandler<Request, Response>) {
@@ -132,7 +140,7 @@ export class AgnosticRouter extends HttpServerModule<{
 	}
 
 	public getRequestBody(request: Request) {
-		return request.json();
+		return request.body;
 	}
 
 	public getRequestQuerystring(request: Request) {
@@ -161,13 +169,13 @@ export class AgnosticRouter extends HttpServerModule<{
 				return request.query[name];
 
 			case 'body':
-				return request.json();
+				return request.body;
 
 			case 'request':
 				return request;
 
 			case 'response':
-				return response;
+				return response ?? {};
 
 			default:
 				return undefined;

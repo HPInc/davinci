@@ -20,19 +20,19 @@
 	"author": "HP",
 	"license": "MIT",
 	"dependencies": {
+		"@davinci/core": "^2.0.0-next.17",
 		"@davinci/http-server": "^2.0.0-next.20",
 		"@davinci/reflector": "^2.0.0-next.13",
-		"itty-router-extras": "^0.4.2"
+		"url-parse": "^1.5.10"
 	},
 	"peerDependencies": {
 		"express": "^4.0.0",
-		"itty-router": "^2.6.6"
+		"qs": "^6.11.0"
 	},
 	"devDependencies": {
-		"@davinci/core": "^2.0.0-next.17",
-		"@types/itty-router-extras": "^0.4.0",
+		"@types/url-parse": "^1.4.8",
 		"axios": "0.26.1",
-		"itty-router": "^2.6.6",
+		"qs": "^6.11.0",
 		"supertest": "6.2.2",
 		"typescript": "^4.6.2"
 	}

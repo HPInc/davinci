@@ -7,8 +7,8 @@ import { route } from '@davinci/http-server';
 import { createSandbox } from 'sinon';
 import { reflect } from '@davinci/reflector';
 import { expect } from '../support/chai';
-import { AgnosticRouter } from '../../src';
-import { Router } from 'itty-router';
+import { AgnosticRouterModule } from '../../src/AgnosticRouterModule';
+import { Router } from '../../src/Router';
 
 const sinon = createSandbox();
 
@@ -29,14 +29,14 @@ describe('AgnosticRouter', () => {
 
 	describe('lifecycle', () => {
 		it('should initialize a router', async () => {
-			const router = Router();
-			const agnosticRouterModule = new AgnosticRouter({ app: router });
+			const router = new Router();
+			const agnosticRouterModule = new AgnosticRouterModule({ app: router });
 			app.registerModule(agnosticRouterModule);
 
 			await app.init();
 
 			const { error } = await router
-				.handle({ method: 'get', url: 'http://baseurl.com/' })
+				.handle({ method: 'GET', url: 'http://baseurl.com/' })
 				.then(response => ({ error: null, response }))
 				.catch(error => ({ error }));
 
@@ -46,7 +46,7 @@ describe('AgnosticRouter', () => {
 
 	describe('#createRequestHandler', () => {
 		it('should create a request handler for a controller method that succeed', async () => {
-			const agnosticRouterModule = new AgnosticRouter();
+			const agnosticRouterModule = new AgnosticRouterModule();
 			class MyController {
 				@route.get({ path: '/all' })
 				getAll(
@@ -68,7 +68,7 @@ describe('AgnosticRouter', () => {
 				params: { path: 'path' },
 				query: { filter: 'myFilter' },
 				headers: { 'x-accountid': 123 },
-				json: () => ({ isBody: true })
+				body: { isBody: true }
 			};
 			const res = {};
 			const parametersConfig = await agnosticRouterModule.createParametersConfigurations({
@@ -87,7 +87,7 @@ describe('AgnosticRouter', () => {
 			const result = await handler(req, res);
 
 			expect(result).to.containSubset({
-				content: {
+				payload: {
 					path: 'path',
 					filter: 'myFilter',
 					body: {
@@ -118,7 +118,7 @@ describe('AgnosticRouter', () => {
 		});
 
 		it('should create a request handler for a controller method that fails', async () => {
-			const agnosticRouterModule = new AgnosticRouter();
+			const agnosticRouterModule = new AgnosticRouterModule();
 			class MyController {
 				@route.get({ path: '/all' })
 				getAll(@route.query() filter: string) {
@@ -148,7 +148,7 @@ describe('AgnosticRouter', () => {
 			const result = await handler(req, res);
 
 			expect(result).to.containSubset({
-				content: {
+				payload: {
 					error: true,
 					message: 'Invalid'
 				},
@@ -201,7 +201,7 @@ describe('AgnosticRouter', () => {
 				}
 			}
 
-			const agnosticRouterModule = new AgnosticRouter();
+			const agnosticRouterModule = new AgnosticRouterModule();
 			app.registerController(MyController);
 			app.registerModule(agnosticRouterModule);
 			await app.init();

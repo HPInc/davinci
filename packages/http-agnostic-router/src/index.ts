@@ -3,4 +3,8 @@
  * SPDX-License-Identifier: MIT
  */
 
-export * from './AgnosticRouter';
+import './augment';
+
+export * from './Router';
+export * from './AgnosticRouterModule';
+export * from './types';
