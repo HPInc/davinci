@@ -2,7 +2,13 @@
  * © Copyright 2022 HP Development Company, L.P.
  * SPDX-License-Identifier: MIT
  */
-import { HttpServerModule, HttpServerModuleOptions, ParameterSource, RequestHandler } from '@davinci/http-server';
+import {
+	httpErrors,
+	HttpServerModule,
+	HttpServerModuleOptions,
+	ParameterSource,
+	RequestHandler
+} from '@davinci/http-server';
 import type { App } from '@davinci/core';
 import { Router } from './Router';
 import { Request, Response } from './types';
@@ -46,9 +52,11 @@ export class AgnosticRouterModule<Req extends Request = Request> extends HttpSer
 		}
 		await super.createRoutes();
 
-		/* this.instance.all('*', () => {
-			throw new httpErrors.NotFound();
-		}); */
+		this.app.eventBus.once('initialized', () => {
+			this.instance.all('*', () => {
+				throw new httpErrors.NotFound();
+			});
+		});
 
 		Object.defineProperty(this.app, 'injectHttpRequest', {
 			value: this.injectRequest.bind(this)
@@ -70,7 +78,7 @@ export class AgnosticRouterModule<Req extends Request = Request> extends HttpSer
 	public reply(response: Response, body: unknown, statusCode?: number) {
 		response.statusCode = statusCode ?? 200;
 
-		if (typeof body === 'object' && !response.headers['content-type']) {
+		if (typeof body === 'object' && !response.headers?.['content-type']) {
 			response.headers = response.headers ?? {};
 			response.headers['content-type'] = 'application/json';
 		}

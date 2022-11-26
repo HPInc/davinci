@@ -109,7 +109,7 @@ describe('AgnosticRouter', () => {
 						}
 					}
 				},
-				status: 200,
+				statusCode: 200,
 				headers: {
 					'content-type': 'application/json'
 				}
@@ -152,7 +152,7 @@ describe('AgnosticRouter', () => {
 					error: true,
 					message: 'Invalid'
 				},
-				status: 500,
+				statusCode: 500,
 				headers: {
 					'content-type': 'application/json'
 				}
