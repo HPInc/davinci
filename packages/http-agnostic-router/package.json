@@ -31,9 +31,7 @@
 	},
 	"devDependencies": {
 		"@types/url-parse": "^1.4.8",
-		"axios": "0.26.1",
 		"qs": "^6.11.0",
-		"supertest": "6.2.2",
 		"typescript": "^4.6.2"
 	}
 }

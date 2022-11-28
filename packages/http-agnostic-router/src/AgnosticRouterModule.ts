@@ -15,6 +15,7 @@ import { Request, Response } from './types';
 
 export interface AgnosticRouterModuleOptions<Req extends Request = Request> extends HttpServerModuleOptions {
 	app?: Router<Req>;
+	querystringParser?: (qs: string) => any;
 }
 
 export class AgnosticRouterModule<Req extends Request = Request> extends HttpServerModule<{

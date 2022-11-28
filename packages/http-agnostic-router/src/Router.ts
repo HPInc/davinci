@@ -7,8 +7,22 @@ import URL from 'url-parse';
 import qs from 'qs';
 import { Request, RouteEntry, RouteHandler } from './types';
 
+export interface RouterOptions {
+	querystringParser?: (qstring: string) => any;
+}
+
+const defaultOptions: Partial<RouterOptions> = {
+	querystringParser: qstring => qs.parse(qstring, { depth: 10, parseArrays: true })
+};
+
 export class Router<Req extends Request = Request> {
 	routes: Array<RouteEntry<Req>> = [];
+	private routerOptions: RouterOptions;
+
+	constructor(options?: RouterOptions) {
+		this.routerOptions = { ...defaultOptions, ...options };
+	}
+
 	addRoute(method: string, path: string, handler: RouteHandler<Req>) {
 		this.routes.push([
 			String(method).toUpperCase(),
@@ -53,7 +67,7 @@ export class Router<Req extends Request = Request> {
 	async handle(request: Req, ...args: unknown[]) {
 		const url = new URL(request.url);
 		if (url.query) {
-			request.query = qs.parse(url.query.substring(1), { parseArrays: true });
+			request.query = this.routerOptions.querystringParser(url.query.substring(1));
 		}
 		// eslint-disable-next-line no-restricted-syntax
 		for (const [method, route, handler] of this.routes) {
