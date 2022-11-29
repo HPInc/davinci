@@ -65,10 +65,17 @@ export type ValidationFunction = (data: unknown) => typeof data;
 
 export type ValidationFactory = (route: Route<any>) => ValidationFunction | Promise<ValidationFunction>;
 
-export type HttpServerInterceptor<
-	IBD extends InterceptorBagDetails = InterceptorBagDetails,
-	Request = unknown
-> = Interceptor<IBD, { request?: Request }>;
+export interface HttpServerInterceptorSpec {
+	Request?: unknown;
+	Response?: unknown;
+}
+
+export type HttpInterceptorBag = InterceptorBagDetails & HttpServerInterceptorSpec;
+
+export type HttpServerInterceptor<Bag extends HttpInterceptorBag = HttpInterceptorBag> = Interceptor<
+	Bag,
+	{ request?: Bag['Request']; response?: Bag['Response']; route: Route<Bag['Request']> }
+>;
 
 export interface HttpServerModuleOptions {
 	port?: number | string;
