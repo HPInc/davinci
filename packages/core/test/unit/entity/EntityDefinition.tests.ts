@@ -18,13 +18,13 @@ describe('EntityDefinition', () => {
 			@entity.prop()
 			isDefault: boolean;
 
-			@entity.prop({ required: true })
+			@entity.prop({ type: 'string', required: true })
 			phone: number;
 		}
 
 		@entity()
 		class Birth {
-			@entity.prop()
+			@entity.prop() // example of type override
 			date: Date;
 
 			@entity.prop()
@@ -70,7 +70,7 @@ describe('EntityDefinition', () => {
 								type: 'boolean'
 							},
 							phone: {
-								type: 'number'
+								type: 'string'
 							}
 						},
 						required: ['phone']
