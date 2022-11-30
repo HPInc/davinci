@@ -29,9 +29,8 @@
 		"@godaddy/terminus": "^4.11.1"
 	},
 	"devDependencies": {
-		"@davinci/http-server-fastify": "^2.0.0-next.26",
-		"@godaddy/terminus": "^4.11.2",
-		"typescript": "^4.6.2"
+		"@davinci/http-server-fastify": "^2.0.0-next.25",
+		"@godaddy/terminus": "^4.11.2"
 	},
 	"gitHead": "451fc8dbdbf23b7f019391dcfce5f85c24cd40f4"
 }

@@ -25,8 +25,5 @@
 		"pino": "7.9.1",
 		"tsyringe": "^4.7.0"
 	},
-	"devDependencies": {
-		"typescript": "^4.6.2"
-	},
 	"gitHead": "451fc8dbdbf23b7f019391dcfce5f85c24cd40f4"
 }
