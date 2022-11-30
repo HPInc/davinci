@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-next.18](https://github.com/HPInc/davinci/compare/@davinci/core@2.0.0-next.17...@davinci/core@2.0.0-next.18) (2022-11-30)
+
+
+### Features
+
+* **entity:** allow type override ([#158](https://github.com/HPInc/davinci/issues/158)) ([ed93f77](https://github.com/HPInc/davinci/commit/ed93f773337c18510ca1e39602c62ff19f2b41bd))
+
+
+
+
+
 # [2.0.0-next.17](https://github.com/HPInc/davinci/compare/@davinci/core@2.0.0-next.16...@davinci/core@2.0.0-next.17) (2022-11-23)
 
 

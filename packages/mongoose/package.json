@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/mongoose",
-	"version": "2.0.0-next.19",
+	"version": "2.0.0-next.20",
 	"description": "Integration with Mongoose ODM",
 	"author": "HP",
 	"license": "MIT",
@@ -20,7 +20,7 @@
 		"cover": "nyc npm test"
 	},
 	"dependencies": {
-		"@davinci/core": "^2.0.0-next.17",
+		"@davinci/core": "^2.0.0-next.18",
 		"@davinci/reflector": "^2.0.0-next.13",
 		"deepmerge": "^4.2.2",
 		"pino": "^8.6.1"

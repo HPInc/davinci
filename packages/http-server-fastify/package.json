@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/http-server-fastify",
-	"version": "2.0.0-next.23",
+	"version": "2.0.0-next.24",
 	"description": "Framework for rapid and consistent API development",
 	"main": "build-cjs/index.js",
 	"module": "build-esm/index.js",
@@ -20,7 +20,7 @@
 	"author": "HP",
 	"license": "MIT",
 	"dependencies": {
-		"@davinci/http-server": "^2.0.0-next.21",
+		"@davinci/http-server": "^2.0.0-next.22",
 		"@davinci/reflector": "^2.0.0-next.13"
 	},
 	"peerDependencies": {
@@ -30,7 +30,7 @@
 		"qs": "^6.11.0"
 	},
 	"devDependencies": {
-		"@davinci/core": "^2.0.0-next.17",
+		"@davinci/core": "^2.0.0-next.18",
 		"@fastify/cors": "^8.1.1",
 		"@fastify/static": "^6.5.0",
 		"axios": "0.26.1",
