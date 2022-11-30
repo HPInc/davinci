@@ -50,4 +50,4 @@ export default expressApp;
 <br/><br/>  
 Now, point your browser to the `https?://{URL}/explorer` to consult the Swagger UI.
 
-![](./../../../static/0.x/images/basics/swagger-ui/swagger-ui-screenshot.png)
+![](./../../../static/1.x/images/basics/swagger-ui/swagger-ui-screenshot.png)
