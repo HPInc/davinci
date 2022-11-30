@@ -114,11 +114,19 @@ export class EntityDefinition {
 
 						const entityPropDecorator = this.findEntityPropDecorator(prop);
 						const extractedJsonSchema = omit(entityPropDecorator?.options ?? {}, ['type', 'required']);
-						accumulator.properties[prop.name] = deepMerge(
-							extractedJsonSchema,
-							makeSchema(entityPropDecorator.options?.type ?? prop.type, prop.name),
-							{ isMergeableObject: isPlainObject }
-						);
+
+						const hasConstType =
+							entityPropDecorator.options?.type &&
+							!Array.isArray(entityPropDecorator.options?.type) &&
+							typeof entityPropDecorator.options?.type !== 'function';
+
+						const generatedJsonSchema = hasConstType
+							? { type: entityPropDecorator.options?.type }
+							: makeSchema(entityPropDecorator.options?.type ?? prop.type, prop.name);
+
+						accumulator.properties[prop.name] = deepMerge(extractedJsonSchema, generatedJsonSchema, {
+							isMergeableObject: isPlainObject
+						});
 
 						if (entityPropDecorator.options?.required) {
 							accumulator.required.push(prop.name);
