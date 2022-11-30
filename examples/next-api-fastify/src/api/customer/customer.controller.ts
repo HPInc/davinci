@@ -5,18 +5,16 @@
 
 import { route } from '@davinci/http-server';
 import { context, interceptor } from '@davinci/core';
-import { Context } from '../../types';
-import { Customer } from './customer.schema';
 import { healthCheck } from '@davinci/health-checks';
+import { Customer } from './customer.schema';
+import { logInterceptor } from '../../interceptors/logInterceptor';
+import { Context } from '../../types';
 
+@interceptor(logInterceptor)
 @route.controller({
 	basePath: '/api/customers'
 })
 export default class CustomerController {
-	@interceptor<{ Context: Context }>((next, { handlerArgs, context, state, module }) => {
-		console.log(handlerArgs, context, state, module);
-		return next();
-	})
 	@route.get({ path: '/hello', summary: 'That is a hello method' })
 	hello(
 		@route.query({ required: true }) firstname: string,
@@ -38,6 +36,8 @@ export default class CustomerController {
 		return { query };
 	}
 
+	// this health check function is on the controller just for
+	// illustration purposes. Realistically it should be registered within a module
 	@healthCheck('liveness')
 	liveness() {
 		return { success: true };
