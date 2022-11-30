@@ -339,12 +339,13 @@ describe('HttpServerModule', () => {
 					},
 					originalUrl: 'http://path/to/url'
 				},
+				route: {},
 				response: {},
 				state: {}
 			};
-			expect(interceptor1.getCall(0).args[1]).to.be.deep.equal(interceptorArgs);
+			expect(interceptor1.getCall(0).args[1]).containSubset(interceptorArgs);
 			expect(interceptor2.called).to.be.true;
-			expect(interceptor2.getCall(0).args[1]).to.be.deep.equal(interceptorArgs);
+			expect(interceptor2.getCall(0).args[1]).containSubset(interceptorArgs);
 		});
 
 		it('should be able to pass global interceptors', async () => {
@@ -422,9 +423,10 @@ describe('HttpServerModule', () => {
 					originalUrl: 'http://path/to/url'
 				},
 				response: {},
+				route: {},
 				state: {}
 			};
-			expect(globalInterceptor.getCall(0).args[1]).to.be.deep.equal(interceptorArgs);
+			expect(globalInterceptor.getCall(0).args[1]).to.containSubset(interceptorArgs);
 		});
 
 		it('should be able to process the context parameter', async () => {
