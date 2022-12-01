@@ -72,7 +72,7 @@ export type HttpInterceptorBag = InterceptorBagDetails & {
 
 export type HttpServerInterceptor<Bag extends HttpInterceptorBag = HttpInterceptorBag> = Interceptor<
 	Bag,
-	{ request?: Bag['Request']; response?: Bag['Response']; route: Route<Bag['Request']> }
+	{ request?: Bag['Request']; response?: Bag['Response']; route?: Route<Bag['Request']> }
 >;
 
 export interface HttpServerModuleOptions {
