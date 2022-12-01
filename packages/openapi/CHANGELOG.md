@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-next.29](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.0.0-next.28...@davinci/openapi@2.0.0-next.29) (2022-12-01)
+
+
+### Bug Fixes
+
+* **openapi:** correctly format path parameters ([#162](https://github.com/HPInc/davinci/issues/162)) ([87e4170](https://github.com/HPInc/davinci/commit/87e4170d4317d3070f26762dc809f435a3568907))
+
+
+
+
+
 # [2.0.0-next.28](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.0.0-next.27...@davinci/openapi@2.0.0-next.28) (2022-11-30)
 
 **Note:** Version bump only for package @davinci/openapi

@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/example-next-api-express",
-	"version": "2.0.0-next.30",
+	"version": "2.0.0-next.31",
 	"private": true,
 	"description": "",
 	"main": "index.js",
@@ -16,7 +16,7 @@
 		"@davinci/health-checks": "^2.0.0-next.27",
 		"@davinci/http-server": "^2.0.0-next.23",
 		"@davinci/http-server-express": "^2.0.0-next.23",
-		"@davinci/openapi": "^2.0.0-next.28",
+		"@davinci/openapi": "^2.0.0-next.29",
 		"ajv": "^8.11.0",
 		"ajv-formats": "^2.1.1",
 		"express": "^4.18.1"
