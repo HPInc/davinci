@@ -107,7 +107,7 @@ export class OpenAPIModule extends Module {
 
 	async createPathAndSchema(route: Route<unknown>): Promise<void> {
 		const {
-			path,
+			path: origPath,
 			verb,
 			parametersConfig,
 			methodReflection,
@@ -116,6 +116,9 @@ export class OpenAPIModule extends Module {
 			controllerReflection
 		} = route;
 		if (methodDecoratorMetadata.options?.hidden) return;
+
+		// transform path parameters, e.g. :id to {id}
+		const path = origPath.replace(/:([\w-]+)/g, '{$1}');
 
 		this.openAPIDoc.paths[path] = this.openAPIDoc.paths[path] ?? {};
 

@@ -180,7 +180,7 @@ describe('OpenAPIModule', () => {
 							}
 						}
 					},
-					'/api/customers/:id': {
+					'/api/customers/{id}': {
 						patch: {
 							description: 'Update customer',
 							tags: ['Customer'],
@@ -929,7 +929,7 @@ describe('OpenAPIModule', () => {
 							tags: ['Customer methods']
 						}
 					},
-					'/api/customers/:id': {
+					'/api/customers/{id}': {
 						patch: {
 							tags: ['Customer methods']
 						}
