@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/http-server-express",
-	"version": "2.0.0-next.24",
+	"version": "2.0.0",
 	"description": "Framework for rapid and consistent API development",
 	"main": "build-cjs/index.js",
 	"module": "build-esm/index.js",
@@ -20,19 +20,17 @@
 	"author": "HP",
 	"license": "MIT",
 	"dependencies": {
-		"@davinci/http-server": "^2.0.0-next.24",
-		"@davinci/reflector": "^2.0.0-next.13"
+		"@davinci/http-server": "^2.0.0",
+		"@davinci/reflector": "^2.0.0"
 	},
 	"peerDependencies": {
 		"express": "^4.0.0"
 	},
 	"devDependencies": {
-		"@davinci/core": "^2.0.0-next.18",
-		"@types/express": "4.17.13",
-		"axios": "0.26.1",
+		"@davinci/core": "^2.0.0",
+		"axios": "^1.2.0",
 		"body-parser": "^1.20.0",
 		"express": "^4.18.2",
-		"supertest": "6.2.2",
 		"typescript": "^4.6.2"
 	},
 	"gitHead": "451fc8dbdbf23b7f019391dcfce5f85c24cd40f4"

@@ -22,7 +22,7 @@
 		"emitDecoratorMetadata": true,
 		"esModuleInterop": true,
 		"removeComments": false,
-		"skipLibCheck": false,
+		"skipLibCheck": true,
 		"lib": ["ES2019", "DOM"]
 	},
 	"include": ["packages/**/*", "examples/**/*"]
