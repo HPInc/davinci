@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-next.24](https://github.com/HPInc/davinci/compare/@davinci/http-server@2.0.0-next.23...@davinci/http-server@2.0.0-next.24) (2022-12-01)
+
+
+### Bug Fixes
+
+* **http-server-interceptor:** route is optional ([7b78a4e](https://github.com/HPInc/davinci/commit/7b78a4e6ebb6fa61a466d351aaea73c4671b6aad))
+
+
+
+
+
 # [2.0.0-next.23](https://github.com/HPInc/davinci/compare/@davinci/http-server@2.0.0-next.22...@davinci/http-server@2.0.0-next.23) (2022-11-30)
 
 **Note:** Version bump only for package @davinci/http-server
