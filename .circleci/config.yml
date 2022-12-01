@@ -72,25 +72,7 @@ jobs:
             git config --global user.name "CircleCI"
             git checkout -f
             npm run semantic-release
-  publish-next:
-      docker:
-          - image: cimg/node:16.18.1
-      steps:
-          - restore_cache:
-                key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
-          - add_ssh_keys
-          - run:
-                name: Add github to known_hosts
-                command: |
-                    mkdir -p ~/.ssh
-                    ssh-keyscan github.com >> ~/.ssh/known_hosts
-          - run:
-                name: publish-next
-                command: |
-                    git config --global user.email "circleci@hp.com"
-                    git config --global user.name "CircleCI"
-                    git checkout -f
-                    npm run publish-next -- -y
+
   publish_docs:
     docker:
       - image: cimg/node:16.18.1
@@ -120,17 +102,10 @@ workflows:
             branches:
               only:
                 - master
-      - publish-next:
-            requires:
-                - checkout_and_test
-            filters:
-                branches:
-                    only:
-                        - next
       - publish_docs:
           requires:
             - checkout_and_test
           filters:
             branches:
               only:
-                - next
+                - master
