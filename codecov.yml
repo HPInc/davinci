@@ -6,15 +6,30 @@ coverage:
       core:
         flags:
           - core
-      reflector:
+      http-server:
         flags:
-          - reflector
+          - http-server
+      http-server-express:
+        flags:
+          - http-server-express
+      http-server-fastify:
+          flags:
+              - http-server-fastify
+      openapi:
+          flags:
+              - openapi
+      health-checks:
+          flags:
+              - health-checks
       mongoose:
-        flags:
-          - mongoose
-      graphql:
-        flags:
-          - graphql
+          flags:
+              - mongoose
+      messaging-amqp:
+          flags:
+              - messaging-amqp
+      reflector:
+          flags:
+              - reflector
 
 comment:
   layout: "reach, diff, flags, files"
@@ -28,14 +43,34 @@ flags:
     paths:
       - packages/core
     carryforward: true
-  graphql:
+  http-server:
     paths:
-      - packages/graphql
+      - packages/http-server
     carryforward: true
+  http-server-express:
+    paths:
+      - packages/http-server-express
+    carryforward: true
+  http-server-fastify:
+      paths:
+          - packages/http-server-fastify
+      carryforward: true
+  openapi:
+      paths:
+          - packages/openapi
+      carryforward: true
+  health-checks:
+      paths:
+          - packages/health-checks
+      carryforward: true
   mongoose:
-    paths:
-      - packages/mongoose
-    carryforward: true
+      paths:
+          - packages/mongoose
+      carryforward: true
+  messaging-amqp:
+      paths:
+          - packages/messaging-amqp
+      carryforward: true
   reflector:
     paths:
       - packages/reflector

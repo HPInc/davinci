@@ -1,7 +1,8 @@
 /*
- * © Copyright 2020 HP Development Company, L.P.
+ * © Copyright 2022 HP Development Company, L.P.
  * SPDX-License-Identifier: MIT
  */
 
-export { default as Reflector } from './Reflector';
+export * from './reflect';
+export * from './walker';
 export * from './shared-types';

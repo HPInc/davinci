@@ -45,7 +45,7 @@
 		"no-plusplus": 0,
 
 		// disallow underscore dangle with the exceptions '_id' & '__v'
-		"no-underscore-dangle": [2, { "allow": ["_id", "__v"] }],
+		"no-underscore-dangle": [2, { "allow": ["_id", "__v", "_$ref"] }],
 
 		// allow tabs!
 		"no-tabs": 0,
@@ -67,18 +67,29 @@
 		// discourage the use of @ts-ignore to hide TypeScript warnings/errors
 		"@typescript-eslint/ban-ts-comment": [1, { "ts-ignore": true }],
 
+		"@typescript-eslint/explicit-module-boundary-types": "off",
+
 		// disable banning of specific types used in the codebase
-		"@typescript-eslint/ban-types": [2, {
-			"types": {
-				"Function": false,
-				"object": false,
-				"{}": false
+		"@typescript-eslint/ban-types": [
+			2,
+			{
+				"types": {
+					"Function": false,
+					"object": false,
+					"{}": false
+				}
 			}
-		}],
+		],
 
 		"import/prefer-default-export": 0,
 
-		"prefer-destructuring": "warn"
+		"prefer-destructuring": "warn",
+
+		"lines-between-class-members": "off",
+
+		"class-methods-use-this": "off",
+
+		"no-useless-constructor": "warn"
 	},
 	"settings": {
 		"import/resolver": {

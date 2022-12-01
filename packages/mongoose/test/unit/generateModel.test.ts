@@ -1,11 +1,14 @@
-import should from 'should';
+/*
+ * © Copyright 2022 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
+
 import Sinon from 'sinon';
-import { Model, SchemaTypes } from 'mongoose';
+import { Model, Schema, SchemaTypes } from 'mongoose';
+import { expect } from '../support/chai';
 import { mgoose } from '../../src';
 
 const sinon = Sinon.createSandbox();
-
-const { generateSchema, generateModel, prop, index, method, virtual } = mgoose;
 
 describe('typed mongoose', () => {
 	afterEach(() => {
@@ -15,47 +18,47 @@ describe('typed mongoose', () => {
 	describe('schema generation', () => {
 		it('supports primitive types', () => {
 			class Customer {
-				@prop()
+				@mgoose.prop()
 				firstname: string;
-				@prop()
+				@mgoose.prop()
 				age: number;
-				@prop()
+				@mgoose.prop()
 				isActive: boolean;
 			}
 
-			const schema = generateSchema(Customer, {}, false);
+			const schema = mgoose.generateSchema(Customer, {});
 
-			should(schema).be.deepEqual({
+			expect(schema.obj).to.be.deep.equal({
 				firstname: {
-					type: String
+					$type: String
 				},
 				age: {
-					type: Number
+					$type: Number
 				},
 				isActive: {
-					type: Boolean
+					$type: Boolean
 				}
 			});
 		});
 
 		it('supports nested classes', () => {
 			class CustomerBirth {
-				@prop()
+				@mgoose.prop()
 				place: string;
 			}
 
 			class Customer {
-				@prop()
+				@mgoose.prop()
 				birth: CustomerBirth;
 			}
 
-			const schema = generateSchema(Customer, {}, false);
+			const schema = mgoose.generateSchema(Customer, {});
 
-			should(schema).be.deepEqual({
+			expect(schema.obj).to.be.deep.equal({
 				birth: {
-					type: {
+					$type: {
 						place: {
-							type: String
+							$type: String
 						}
 					}
 				}
@@ -64,90 +67,137 @@ describe('typed mongoose', () => {
 
 		it('supports arrays', () => {
 			class CustomerBirth {
-				@prop()
+				@mgoose.prop()
 				place: string;
 			}
 
 			class Customer {
-				@prop({ type: [CustomerBirth] })
+				@mgoose.prop({ type: [CustomerBirth] })
 				birth: CustomerBirth[];
 
-				@prop({ type: [String] })
+				@mgoose.prop({ type: [String] })
 				tags: string[];
 			}
 
-			const schema = generateSchema(Customer, {}, false);
+			const schema = mgoose.generateSchema(Customer, {});
 
-			should(schema).be.deepEqual({
+			expect(schema.obj).to.be.deep.equal({
 				birth: [
 					{
-						type: {
+						$type: {
 							place: {
-								type: String
+								$type: String
 							}
 						}
 					}
 				],
-				tags: [{ type: String }]
+				tags: [{ $type: String }]
 			});
 		});
 
 		it('supports class inheritance', () => {
 			class BaseSchema {
-				@prop()
+				@mgoose.prop()
 				createdAt: string;
-				@prop()
+				@mgoose.prop()
 				updatedAt: number;
 			}
 
 			class MyClass1 extends BaseSchema {
-				@prop()
+				@mgoose.prop()
 				otherProp1: string;
 			}
 
 			class MyClass2 extends BaseSchema {
-				@prop()
+				@mgoose.prop()
 				otherProp2: string;
 			}
 
-			const schema1 = generateSchema(MyClass1, {}, false);
-			const schema2 = generateSchema(MyClass2, {}, false);
-			const baseSchema = generateSchema(BaseSchema, {}, false);
+			const schema1 = mgoose.generateSchema(MyClass1, {});
+			const schema2 = mgoose.generateSchema(MyClass2, {});
+			const baseSchema = mgoose.generateSchema(BaseSchema, {});
 
-			should(Object.keys(schema1)).be.deepEqual(['createdAt', 'updatedAt', 'otherProp1']);
-			should(Object.keys(schema2)).be.deepEqual(['createdAt', 'updatedAt', 'otherProp2']);
-			should(Object.keys(baseSchema)).be.deepEqual(['createdAt', 'updatedAt']);
+			expect(Object.keys(schema1.obj)).be.deep.equal(['otherProp1', 'createdAt', 'updatedAt']);
+			expect(Object.keys(schema2.obj)).be.deep.equal(['otherProp2', 'createdAt', 'updatedAt']);
+			expect(Object.keys(baseSchema.obj)).be.deep.equal(['createdAt', 'updatedAt']);
+		});
+
+		it('supports nested properties with name "type"', () => {
+			class Phones {
+				@mgoose.prop()
+				type: string;
+
+				@mgoose.prop()
+				number: string;
+			}
+
+			class Profile {
+				@mgoose.prop()
+				name: string;
+
+				@mgoose.prop({ type: [Phones], required: true })
+				phones: Phones[];
+			}
+
+			class Customer {
+				@mgoose.prop({ type: [Profile], required: true })
+				profiles: Profile[];
+			}
+
+			const schema = mgoose.generateSchema(Customer, {});
+
+			expect(schema.obj).to.be.deep.equal({
+				profiles: [
+					{
+						required: true,
+						$type: {
+							name: { $type: String },
+							phones: [
+								{
+									required: true,
+									$type: {
+										type: { $type: String },
+										number: { $type: String }
+									}
+								}
+							]
+						}
+					}
+				]
+			});
 		});
 	});
 
-	describe('#generateSchema', () => {
+	describe('#mgoose.generateSchema', () => {
 		it('attach statics and model methods', () => {
+			@mgoose.schema()
 			class Customer {
-				@method()
-				static myStaticMethod() {}
+				/*@mgoose.method()
+				static myStaticMethod() {}*/
 
-				@method()
+				@mgoose.method()
 				myMethod() {}
 			}
 
-			const schema = generateSchema(Customer);
-			should(schema.statics.myStaticMethod).be.equal(Customer.myStaticMethod);
-			should(schema.methods.myMethod).be.equal(Customer.prototype.myMethod);
+			const schema = mgoose.generateSchema(Customer);
+			// expect(schema.statics.myStaticMethod).be.equal(Customer.myStaticMethod);
+			expect(schema.methods.myMethod).be.equal(Customer.prototype.myMethod);
 		});
 
 		it('should add the indexes', () => {
-			@index({ firstname: 1, lastname: 1 })
-			@index({ lastname: 1, unique: true })
+			@mgoose.index({ firstname: 1, lastname: 1 })
+			@mgoose.index({ lastname: 1, unique: true })
+			@mgoose.schema()
 			class Customer {
-				@prop({ index: true })
+				@mgoose.prop({ index: true })
 				firstname: string;
 
-				@prop()
+				@mgoose.prop()
 				lastname: string;
 			}
 
-			const schema = generateSchema(Customer);
-			should(schema.indexes()).be.deepEqual([
+			const schema = mgoose.generateSchema(Customer);
+			expect(schema.indexes()).be.deep.equal([
 				[
 					{
 						firstname: 1
@@ -180,86 +230,162 @@ describe('typed mongoose', () => {
 		it('should add validators', () => {
 			const validateFn = sinon.stub().returns(true);
 
+			@mgoose.schema()
 			class Customer {
-				@prop({ validate: validateFn })
+				@mgoose.prop({ validate: validateFn })
 				firstname: string;
 			}
 
-			const schema = generateSchema(Customer);
-			// @ts-ignore
-			should(schema.path('firstname').validators).match([{ validator: validateFn }]);
+			const schema = mgoose.generateSchema(Customer);
+			// @mgoose.ts-ignore
+			expect(schema.path('firstname').validators).to.containSubset([{ validator: validateFn }]);
 		});
 
 		it('should support passing raw mongoose types', () => {
+			@mgoose.schema()
 			class Customer {
-				@prop({ required: true, index: true, rawType: SchemaTypes.Decimal128 })
+				@mgoose.prop({ required: true, index: true, rawType: SchemaTypes.Decimal128 })
 				firstname: string;
 			}
 
-			const schema = generateSchema(Customer);
-			// @ts-ignore
-			should(schema.path('firstname')).be.instanceOf(SchemaTypes.Decimal128);
-			should(schema.path('firstname')).match({
+			const schema = mgoose.generateSchema(Customer);
+			// @mgoose.ts-ignore
+			expect(schema.path('firstname')).be.instanceOf(SchemaTypes.Decimal128);
+			expect(schema.path('firstname')).to.containSubset({
 				options: { required: true, index: true }
 			});
 		});
 
 		it('should support attaching mongoose functionalities to sub-schemas', () => {
+			@mgoose.schema()
 			class Item {
-				@virtual()
+				@mgoose.virtual()
 				categories() {}
 			}
 
+			@mgoose.schema()
 			class Order {
-				@prop({ index: true })
+				@mgoose.prop({ index: true })
 				firstname: string;
 
-				@prop({ type: [Item] })
+				@mgoose.prop({ type: [Item] })
 				items: Item[];
 			}
 
-			const schema = generateSchema(Order);
-			should(schema.path('items').schema.virtualpath('categories')).be.ok();
+			const schema = mgoose.generateSchema(Order);
+			expect(schema.path('items').schema.virtualpath('categories')).be.ok;
+		});
+
+		it('should support attaching mongoose functionalities to the root schemas', () => {
+			class Item {
+				@mgoose.populate({ name: 'categories', opts: { ref: 'Ref', foreignField: '_id' } })
+				categoryIds: string[];
+
+				@mgoose.virtual()
+				popularCategories() {}
+
+				@mgoose.method()
+				getTopCategories(limit: number) {
+					return [].slice(0, limit);
+				}
+			}
+
+			@mgoose.schema()
+			class Order {
+				@mgoose.prop({ index: true })
+				firstname: string;
+
+				@mgoose.prop({ type: [Item] })
+				items: Item[];
+			}
+
+			const schema = mgoose.generateSchema(Order);
+			expect(schema.virtualpath('categories')).be.ok;
+			expect(schema.virtualpath('popularCategories')).be.ok;
+			expect(schema.methods.getTopCategories).be.a('function').and.have.length(1);
+		});
+
+		it('should attach methods, virtuals and pupulates defined in subclasses, to the main schema', () => {
+			class Item {
+				@mgoose.populate({ name: 'categories', opts: { ref: 'Ref', foreignField: '_id' } })
+				categoryIds: string[];
+
+				@mgoose.virtual()
+				popularCategories() {}
+			}
+
+			@mgoose.schema()
+			class Order {
+				@mgoose.prop({ index: true })
+				firstname: string;
+
+				@mgoose.prop({ type: [Item] })
+				items: Item[];
+			}
+
+			const schema = mgoose.generateSchema(Order);
+			expect(schema.path('items').schema).to.be.undefined;
 		});
 
 		it('avoid passing the schema options down to subschemas', () => {
+			@mgoose.schema()
 			class Item {
-				@virtual()
+				@mgoose.virtual()
 				categories() {}
 			}
 
+			@mgoose.schema({ timestamps: true })
 			class Order {
-				@prop({ index: true })
+				@mgoose.prop({ index: true })
 				firstname: string;
 
-				@prop({ type: [Item] })
+				@mgoose.prop({ type: [Item] })
 				items: Item[];
 			}
 
-			const schema = generateSchema(Order, { timestamps: true });
-			should(schema.options.timestamps).be.True();
-			should(schema.path('items').schema.options.timestamps).not.be.True();
+			const schema = mgoose.generateSchema(Order);
+			// @ts-ignore
+			expect(schema.options.timestamps).be.true;
+			// @ts-ignore
+			expect(schema.path('items').schema.options.timestamps).not.be.true;
 		});
 
 		it('should allow passing the schema options using the decorator', () => {
 			@mgoose.schema({ timestamps: false, id: false, _id: false })
 			class Item {
-				@virtual()
+				@mgoose.virtual()
 				categories() {}
 			}
 
 			@mgoose.schema({ timestamps: true, id: true, _id: true })
 			class Order {
-				@prop({ index: true })
+				@mgoose.prop({ index: true })
 				firstname: string;
 
-				@prop({ type: [Item] })
+				@mgoose.prop({ type: [Item] })
 				items: Item[];
 			}
 
-			const schema = generateSchema(Order);
-			should(schema.options).match({ timestamps: true, id: true, _id: true });
-			should(schema.path('items').schema.options).match({ timestamps: false, id: false, _id: false });
+			const schema = mgoose.generateSchema(Order);
+			// @ts-ignore
+			expect(schema.options).to.containSubset({ timestamps: true, id: true, _id: true });
+			// @ts-ignore
+			expect(schema.path('items').schema.options).to.containSubset({ timestamps: false, id: false, _id: false });
+		});
+
+		it('should allow omitting the schema decorator for classes passed explicitely to generateSchema', () => {
+			class Customer {
+				@mgoose.prop()
+				firstname: string;
+				@mgoose.prop()
+				age: number;
+				@mgoose.prop()
+				isActive: boolean;
+			}
+
+			const schema = mgoose.generateSchema(Customer, {});
+
+			expect(schema).to.be.instanceOf(Schema);
 		});
 	});
 
@@ -268,8 +394,8 @@ describe('typed mongoose', () => {
 			class Customer {
 				firstname: string;
 			}
-			const CustomerModel = generateModel(Customer);
-			should(CustomerModel.prototype).be.instanceOf(Model);
+			const CustomerModel = mgoose.generateModel(Customer);
+			expect(CustomerModel.prototype).be.instanceOf(Model);
 		});
 	});
 });

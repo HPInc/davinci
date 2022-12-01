@@ -1,36 +1,44 @@
 /*
- * © Copyright 2020 HP Development Company, L.P.
+ * © Copyright 2022 HP Development Company, L.P.
  * SPDX-License-Identifier: MIT
  */
 
-import { Reflector } from '@davinci/reflector';
-import { SchemaOptions } from 'mongoose';
-import { IPropDecoratorOptions, IPropDecoratorOptionsFactory, IPropDecoratorMetadata } from './types';
+import { IndexOptions, SchemaOptions } from 'mongoose';
+import { decorate, DecoratorId } from '@davinci/reflector';
+import { IPropDecoratorOptions } from './types';
 
 /**
  * Decorate a props as mongoose schema property
  * @param options
  */
-export function prop(options?: IPropDecoratorOptions | IPropDecoratorOptionsFactory): PropertyDecorator {
-	return (prototype: object, key: string): void => {
-		const optsFactory = () => (typeof options === 'function' ? options() : options);
-
-		const metadata: IPropDecoratorMetadata = { key, optsFactory };
-		Reflector.pushMetadata('davinci:mongoose:props', metadata, prototype.constructor);
-	};
+export function prop(options?: IPropDecoratorOptions): PropertyDecorator {
+	return decorate(
+		{
+			[DecoratorId]: 'mongoose.prop',
+			options
+		},
+		['Property', 'Method'],
+		{ allowMultiple: false, inherit: true }
+	);
 }
 
 /**
  * Gives the ability to add compound indexes to a schema.
  * It decorates classes
- * @param index
+ * @param name
  * @param options
  */
 // eslint-disable-next-line no-shadow
-export function index(index, options?: any): ClassDecorator {
-	return (target: Function): void => {
-		Reflector.pushMetadata('davinci:mongoose:indexes', { index, options }, target);
-	};
+export function index(name, options?: IndexOptions): ClassDecorator {
+	return decorate(
+		{
+			[DecoratorId]: 'mongoose.index',
+			name,
+			options
+		},
+		['Class'],
+		{ allowMultiple: false, inherit: true }
+	);
 }
 
 /**
@@ -39,19 +47,13 @@ export function index(index, options?: any): ClassDecorator {
  * - mongoose method is the class method is a `prototype` method
  */
 export function method(): MethodDecorator {
-	return (target: Function | object, key: string): void => {
-		const isPrototype = typeof target === 'object' && typeof target.constructor === 'function';
-		const isStatic = typeof target === 'function' && typeof target.prototype === 'object';
-		const realTarget = isPrototype ? target.constructor : target;
-		const type = (isPrototype && 'prototype') || (isStatic && 'static');
-		const handler = target[key];
-
-		Reflector.pushMetadata(
-			'davinci:mongoose:methods',
-			{ name: key, type, handler, isStatic, isPrototype },
-			realTarget
-		);
-	};
+	return decorate(
+		{
+			[DecoratorId]: 'mongoose.method'
+		},
+		['Method'],
+		{ allowMultiple: false, inherit: true }
+	);
 }
 
 export interface IVirtualArgs {
@@ -77,10 +79,15 @@ export interface IVirtualArgs {
  * @param opts
  */
 export function populate({ name, opts }: { name: string; opts: IVirtualArgs }): PropertyDecorator {
-	return (target: object, key: string): void => {
-		const options = { ...opts, localField: key };
-		Reflector.pushMetadata('davinci:mongoose:populates', { name, options }, target.constructor);
-	};
+	return decorate(
+		{
+			[DecoratorId]: 'mongoose.populate',
+			name,
+			options: opts
+		},
+		['Property'],
+		{ allowMultiple: false, inherit: true }
+	);
 }
 
 /**
@@ -88,7 +95,8 @@ export function populate({ name, opts }: { name: string; opts: IVirtualArgs }): 
  * The annotated method will be used as the `getter` of the virtual
  */
 export function virtual(options?: IVirtualArgs): MethodDecorator & PropertyDecorator {
-	return (target: object, key: string): void => {
+	return (...args: [target: object, key: string]): void => {
+		const [target, key] = args;
 		const handler = target[key];
 		if (options?.ref && typeof handler === 'function') {
 			throw new Error(
@@ -96,7 +104,15 @@ export function virtual(options?: IVirtualArgs): MethodDecorator & PropertyDecor
 			);
 		}
 
-		Reflector.pushMetadata('davinci:mongoose:virtuals', { name: key, handler, options }, target.constructor);
+		return decorate(
+			{
+				[DecoratorId]: 'mongoose.virtual',
+				handler,
+				options
+			},
+			['Method', 'Property'],
+			{ allowMultiple: false, inherit: true }
+		)(...args);
 	};
 }
 
@@ -104,7 +120,12 @@ export function virtual(options?: IVirtualArgs): MethodDecorator & PropertyDecor
  * Decorator that annotates a schema, allowing to pass options to the mongoose 'Schema' constructor
  */
 export function schema(options?: SchemaOptions): ClassDecorator {
-	return (target: Function): void => {
-		Reflector.defineMetadata('davinci:mongoose:schemaOptions', options, target);
-	};
+	return decorate(
+		{
+			[DecoratorId]: 'mongoose.schema',
+			options
+		},
+		['Class'],
+		{ allowMultiple: false, inherit: true }
+	);
 }
