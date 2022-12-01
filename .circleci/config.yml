@@ -10,6 +10,7 @@ jobs:
     docker:
       - image: circleci/node:<< parameters.node-version >>
       - image: circleci/mongo:<< parameters.mongo-version >>
+      - image: rabbitmq:3.9-alpine
     steps:
       - checkout
 #      - restore_cache:
@@ -28,13 +29,13 @@ jobs:
 #          paths:
 #            - node_modules
       - run:
-          name: test
-          command: |
-           npx lerna run cover
-      - run:
           name: build
           command: |
-            npx lerna run build
+           npx lerna run build --ignore '@davinci/example*' --concurrency 1
+      - run:
+          name: test
+          command: |
+           npx lerna run cover --ignore '@davinci/example*' --concurrency 1
       - when:
           condition:
             and:
@@ -45,8 +46,8 @@ jobs:
                 name: upload coverage report
                 command: |
                   npx codecov -f packages/core/coverage/lcov.info -F core
-                  npx codecov -f packages/graphql/coverage/lcov.info -F graphql
-                  npx codecov -f packages/mongoose/coverage/lcov.info -F mongoose
+                  npx codecov -f packages/http-server/coverage/lcov.info -F http-server
+                  npx codecov -f packages/http-server-express/coverage/lcov.info -F http-server-express
                   npx codecov -f packages/reflector/coverage/lcov.info -F reflector
             - save_cache:
                 key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
@@ -54,7 +55,7 @@ jobs:
                   - "~"
   publish:
     docker:
-      - image: cimg/node:16.4
+      - image: cimg/node:16.18.1
     steps:
       - restore_cache:
           key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
@@ -74,7 +75,7 @@ jobs:
 
   publish_docs:
     docker:
-      - image: cimg/node:16.4
+      - image: cimg/node:16.18.1
     steps:
       - restore_cache:
           key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
@@ -93,7 +94,7 @@ workflows:
           matrix:
             parameters:
               mongo-version: ["4.4", "5"]
-              node-version: ["12", "14", "16"]
+              node-version: ["14", "16"]
       - publish:
           requires:
             - checkout_and_test

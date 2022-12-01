@@ -1,0 +1,43 @@
+{
+	"name": "@davinci/openapi",
+	"version": "2.0.1",
+	"description": "Framework for rapid and consistent API development",
+	"main": "build-cjs/index.js",
+	"module": "build-esm/index.js",
+	"types": "build-cjs/index.d.ts",
+	"sideEffects": false,
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"build": "npm run build-cj && npm run build-esm",
+		"build-cj": "../../node_modules/typescript/bin/tsc -p tsconfig.cjs.release.json",
+		"build-esm": "../../node_modules/typescript/bin/tsc -p tsconfig.esm.release.json",
+		"lint": "../../node_modules/eslint/bin/eslint.js --color --c .eslintrc 'src/**/*.ts'",
+		"test": "mocha --exit",
+		"cover": "nyc npm test"
+	},
+	"author": "HP",
+	"license": "MIT",
+	"dependencies": {
+		"@davinci/core": "^2.0.1",
+		"@davinci/reflector": "^2.0.1",
+		"@fastify/deepmerge": "^1.1.0",
+		"hyperscript": "^2.0.2",
+		"openapi-types": "^12.0.0",
+		"pino": "^7.11.0"
+	},
+	"peerDependencies": {
+		"@davinci/http-server": "^2.0.0-next.11"
+	},
+	"devDependencies": {
+		"@davinci/http-server": "^2.0.1",
+		"@davinci/http-server-express": "^2.0.1",
+		"@davinci/http-server-fastify": "^2.0.1",
+		"@types/hyperscript": "^0.0.4",
+		"@types/swagger-ui-dist": "^3.30.1",
+		"axios": "^1.2.0",
+		"swagger-ui-dist": "^4.14.0"
+	},
+	"gitHead": "451fc8dbdbf23b7f019391dcfce5f85c24cd40f4"
+}

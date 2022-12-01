@@ -1,5 +1,11 @@
-import should from 'should';
+/*
+ * © Copyright 2022 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
+
+import { expect } from '../../support/chai';
 import { mgoose } from '../../../src';
+import { reflect } from '@davinci/reflector';
 
 describe('mgoose decorators', () => {
 	describe('@mgoose.prop()', () => {
@@ -9,15 +15,9 @@ describe('mgoose decorators', () => {
 				firstname: string;
 			}
 
-			const propsMetadata = Reflect.getMetadata('davinci:mongoose:props', Customer);
-			should(propsMetadata[0])
-				.have.property('key')
-				.equal('firstname');
-			should(propsMetadata[0])
-				.have.property('optsFactory')
-				.type('function');
-
-			should(propsMetadata[0].optsFactory()).match({ required: false });
+			const { properties } = reflect(Customer);
+			expect(properties[0]).have.property('name').equal('firstname');
+			expect(properties[0].decorators[0]).to.have.property('options').that.containSubset({ required: false });
 		});
 	});
 
@@ -29,8 +29,8 @@ describe('mgoose decorators', () => {
 				firstname: string;
 			}
 
-			const propsMetadata = Reflect.getMetadata('davinci:mongoose:schemaOptions', Customer);
-			should(propsMetadata).be.deepEqual({ timestamps: true });
+			const { decorators } = reflect(Customer);
+			expect(decorators[0]).to.have.property('options').that.is.deep.equal({ timestamps: true });
 		});
 	});
 
@@ -43,23 +43,24 @@ describe('mgoose decorators', () => {
 				firstname: string;
 			}
 
-			const propsMetadata = Reflect.getMetadata('davinci:mongoose:virtuals', Customer);
-			should(propsMetadata[0].name).be.equal('firstname');
-			should(propsMetadata[0].handler).be.undefined();
+			const { properties } = reflect(Customer);
+			expect(properties[0].name).be.equal('firstname');
+			expect(properties[0].decorators[0].handler).be.undefined;
 		});
 
-		it('should decorate method correctly', () => {
+		/*it('should decorate method correctly', () => {
 			@mgoose.schema({ timestamps: true })
 			class Customer {
 				@mgoose.virtual()
 				@mgoose.prop({ required: false })
-				firstname(): string { return 'firstName' };
+				firstname(): string {
+					return 'firstName';
+				}
 			}
 
-			const propsMetadata = Reflect.getMetadata('davinci:mongoose:virtuals', Customer);
-			should(propsMetadata[0].name).be.equal('firstname');
-			should(propsMetadata[0].handler).not.be.undefined();
-		});
+			const { properties } = reflect(Customer);
+			expect(properties[0].name).be.equal('firstname');
+			expect(properties[0].decorators[0].handler).not.be.undefined;
+		});*/
 	});
-
 });

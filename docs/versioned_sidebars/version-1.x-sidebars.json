@@ -1,0 +1,26 @@
+{
+	"mySidebar": [
+		{
+			"type": "category",
+			"label": "Basics",
+			"items": [
+				"basics/getting-started",
+				"basics/directory-structure",
+				"basics/controllers",
+				"basics/openapi-definitions",
+				"basics/swagger-ui",
+				"basics/context"
+			]
+		},
+		{
+			"type": "category",
+			"label": "Database",
+			"items": ["database/mongoose"]
+		},
+		{
+			"type": "category",
+			"label": "GraphQL",
+			"items": ["graphql/controllers", "graphql/getting-started"]
+		}
+	]
+}

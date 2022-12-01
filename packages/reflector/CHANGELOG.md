@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.1](https://github.com/HPInc/davinci/compare/@davinci/reflector@2.0.0-next.13...@davinci/reflector@2.0.1) (2022-12-01)
+
+**Note:** Version bump only for package @davinci/reflector
+
+
+
+
+
+# [2.0.0](https://github.com/HPInc/davinci/compare/@davinci/reflector@2.0.0-next.13...@davinci/reflector@2.0.0) (2022-12-01)
+
+**Note:** Version bump only for package @davinci/reflector
+
+
+
+
+
 ## [1.1.1](https://github.com/HPInc/davinci/compare/@davinci/reflector@1.1.0...@davinci/reflector@1.1.1) (2021-07-06)
 
 **Note:** Version bump only for package @davinci/reflector
