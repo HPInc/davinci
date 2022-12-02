@@ -7,7 +7,7 @@ Each decorated method in the controller acts as a resolver.
 
 A controller method is a decorated class method that takes parameter and return a result.
 
-The `@grapqhl.[query|mutation]()` decorators mark a class method as a query or mutation resolver.
+The `@graphql.[query|mutation]()` decorators mark a class method as a query or mutation resolver.
 
 A resolver can accept arguments, that can be defined using the `@graphql.arg()` decorator.
 The type of each argument will be inferred and inspected, and validated against the value provided.\
