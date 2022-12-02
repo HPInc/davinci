@@ -6,9 +6,9 @@
 	},
 	"scripts": {
 		"postinstall": "npm run bootstrap",
-		"build": "lerna run build",
-		"test": "lerna run test",
-		"cover": "lerna run cover",
+		"build": "lerna run build --ignore '@davinci/example*'",
+		"test": "lerna run test --ignore '@davinci/example*' --concurrency 1",
+		"cover": "lerna run cover --ignore '@davinci/example*' --concurrency 1",
 		"bootstrap": "lerna bootstrap --ignore '@davinci/example*'",
 		"semantic-release": "lerna version --conventional-commits --create-release github -y && lerna publish from-package -y"
 	},

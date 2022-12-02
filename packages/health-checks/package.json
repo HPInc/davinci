@@ -22,15 +22,16 @@
 	"dependencies": {
 		"@davinci/core": "^2.1.0",
 		"@davinci/http-server": "^2.1.0",
-		"@davinci/reflector": "^2.1.0",
-		"pino": "^7.11.0"
+		"@davinci/reflector": "^2.1.0"
 	},
 	"peerDependencies": {
-		"@godaddy/terminus": "^4.11.1"
+		"@godaddy/terminus": "^4.11.1",
+		"pino": "^8.7.0"
 	},
 	"devDependencies": {
 		"@davinci/http-server-fastify": "^2.1.0",
-		"@godaddy/terminus": "^4.11.2"
+		"@godaddy/terminus": "^4.11.2",
+		"pino": "^8.7.0"
 	},
 	"gitHead": "451fc8dbdbf23b7f019391dcfce5f85c24cd40f4"
 }

@@ -353,7 +353,7 @@ export class OpenAPIModule extends Module {
 		}
 	}
 
-	getOpenAPIDocument() {
+	getOpenAPIDocument(): PartialDeep<OpenAPIV3.Document> {
 		return this.openAPIDoc;
 	}
 

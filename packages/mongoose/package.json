@@ -22,14 +22,15 @@
 	"dependencies": {
 		"@davinci/core": "^2.1.0",
 		"@davinci/reflector": "^2.1.0",
-		"deepmerge": "^4.2.2",
-		"pino": "^8.6.1"
+		"deepmerge": "^4.2.2"
 	},
 	"peerDependencies": {
-		"mongoose": "^6.6.2"
+		"mongoose": "^6.6.2",
+		"pino": "^8.7.0"
 	},
 	"gitHead": "451fc8dbdbf23b7f019391dcfce5f85c24cd40f4",
 	"devDependencies": {
-		"mongoose": "^6.6.2"
+		"mongoose": "^6.6.2",
+		"pino": "^8.7.0"
 	}
 }
