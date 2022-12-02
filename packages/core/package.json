@@ -27,6 +27,8 @@
 	"peerDependencies": {
 		"pino": "^8.7.0"
 	},
-	"devDependencies": {},
+	"devDependencies": {
+		"pino": "^8.7.0"
+	},
 	"gitHead": "451fc8dbdbf23b7f019391dcfce5f85c24cd40f4"
 }
