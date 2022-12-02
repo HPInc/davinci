@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.1.1](https://github.com/HPInc/davinci/compare/@davinci/example-next-api-fastify@2.1.0...@davinci/example-next-api-fastify@2.1.1) (2022-12-02)
+
+
+### Performance Improvements
+
+* optimizing dependencies and compiled code for size ([#170](https://github.com/HPInc/davinci/issues/170)) ([9b7bd96](https://github.com/HPInc/davinci/commit/9b7bd96654479b8dd03faeb56e70476b15d4420f))
+
+
+
+
+
 # 2.1.0 (2022-12-01)
 
 
