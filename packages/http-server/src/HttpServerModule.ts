@@ -307,7 +307,7 @@ export abstract class HttpServerModule<
 
 	abstract setInstance(instance: unknown): void;
 
-	abstract getInstance(): void;
+	abstract getInstance(): unknown;
 
 	abstract reply(response, body: unknown, statusCode?: number);
 

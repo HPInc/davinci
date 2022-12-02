@@ -22,8 +22,13 @@
 	"dependencies": {
 		"@davinci/reflector": "^2.1.0",
 		"deepmerge": "^4.2.2",
-		"pino": "7.9.1",
 		"tsyringe": "^4.7.0"
+	},
+	"peerDependencies": {
+		"pino": "^8.7.0"
+	},
+	"devDependencies": {
+		"pino": "^8.7.0"
 	},
 	"gitHead": "451fc8dbdbf23b7f019391dcfce5f85c24cd40f4"
 }

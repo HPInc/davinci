@@ -18,7 +18,7 @@ import type { OptionsJson, OptionsUrlencoded } from 'body-parser';
 type Server = HttpServer | HttpsServer;
 
 export interface ExpressHttpServerModuleOptions extends HttpServerModuleOptions {
-	app?: Express;
+	instance?: Express;
 	https?: ServerOptions;
 	middlewares?: {
 		json?: OptionsJson;
@@ -36,9 +36,9 @@ export class ExpressHttpServer extends HttpServerModule<{
 	app: App;
 
 	constructor(options?: ExpressHttpServerModuleOptions) {
-		const { app, ...moduleOptions } = options ?? {};
+		const { instance, ...moduleOptions } = options ?? {};
 		super(moduleOptions);
-		this.instance = app ?? express();
+		this.instance = instance ?? express();
 		if (this.moduleOptions.logger?.level) {
 			this.logger.level = this.moduleOptions.logger?.level;
 		}

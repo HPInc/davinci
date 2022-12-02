@@ -24,17 +24,18 @@
 		"@davinci/messaging": "^2.1.0",
 		"@davinci/reflector": "^2.1.0",
 		"@fastify/deepmerge": "^1.1.0",
-		"fast-json-stable-stringify": "^2.1.0",
-		"pino": "^8.6.1"
+		"fast-json-stable-stringify": "^2.1.0"
 	},
 	"peerDependencies": {
 		"amqp-connection-manager": "^4.0.0",
-		"amqplib": "^0.10.0"
+		"amqplib": "^0.10.0",
+		"pino": "^8.7.0"
 	},
 	"devDependencies": {
 		"@types/amqplib": "^0.8.2",
 		"amqp-connection-manager": "^4.0.0",
-		"amqplib": "^0.10.3"
+		"amqplib": "^0.10.3",
+		"pino": "^8.7.0"
 	},
 	"gitHead": "451fc8dbdbf23b7f019391dcfce5f85c24cd40f4"
 }
