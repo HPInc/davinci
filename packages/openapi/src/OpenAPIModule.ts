@@ -162,7 +162,7 @@ export class OpenAPIModule extends Module {
 			)
 				return;
 
-			const entityJsonSchema = this.entityRegistry.getJsonSchema(parameterConfig.type);
+			const entityJsonSchema = this.entityRegistry.getEntityDefinitionJsonSchema(parameterConfig.type);
 
 			const jsonSchema =
 				this.jsonSchemasMap.get(entityJsonSchema.title) ?? this.createJsonSchema(entityJsonSchema);
@@ -451,7 +451,7 @@ export class OpenAPIModule extends Module {
 	}
 
 	private getAndSetJsonSchema(item: ClassType) {
-		const entityJsonSchema = this.entityRegistry.getJsonSchema(item);
+		const entityJsonSchema = this.entityRegistry.getEntityDefinitionJsonSchema(item);
 		const jsonSchema = this.jsonSchemasMap.get(entityJsonSchema.title) ?? this.createJsonSchema(entityJsonSchema);
 
 		if (!this.jsonSchemasMap.has(entityJsonSchema.title) && jsonSchema.$id) {

@@ -99,7 +99,7 @@ export class AjvValidator<Request = unknown> {
 
 			const enabledValidation = !parameterConfig.options?.validation?.disabled;
 
-			const entityJsonSchema = this.entityRegistry.getJsonSchema(parameterConfig.type);
+			const entityJsonSchema = this.entityRegistry.getEntityDefinitionJsonSchema(parameterConfig.type);
 			const entityDefinition = this.entityRegistry.getEntityDefinitionMap().get(parameterConfig.type);
 
 			const jsonSchema = this.jsonSchemasMap.get(parameterConfig.type) ?? this.createJsonSchema(entityJsonSchema);

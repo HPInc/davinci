@@ -32,7 +32,7 @@ describe('EntityRegistry', () => {
 			birth: Birth;
 		}
 
-		const jsonSchema = entityRegistry.getJsonSchema(Customer);
+		const jsonSchema = entityRegistry.getEntityDefinitionJsonSchema(Customer);
 		const entries = Array.from(entityRegistry.getEntityDefinitionMap().entries());
 
 		expect(jsonSchema).to.containSubset({
@@ -69,9 +69,9 @@ describe('EntityRegistry', () => {
 			lastname: string;
 		}
 
-		entityRegistry.getJsonSchema(Customer);
-		entityRegistry.getJsonSchema(Customer);
-		entityRegistry.getJsonSchema(Customer);
+		entityRegistry.getEntityDefinitionJsonSchema(Customer);
+		entityRegistry.getEntityDefinitionJsonSchema(Customer);
+		entityRegistry.getEntityDefinitionJsonSchema(Customer);
 
 		expect(cacheGet.callCount).to.be.equal(2);
 		expect(cacheSet.callCount).to.be.equal(1);
@@ -80,9 +80,12 @@ describe('EntityRegistry', () => {
 	it('should be able to generate json schema for primitive type contructors', () => {
 		const entityRegistry = new EntityRegistry();
 
-		expect(entityRegistry.getJsonSchema(String)).to.be.deep.equal({ type: 'string' });
-		expect(entityRegistry.getJsonSchema(Number)).to.be.deep.equal({ type: 'number' });
-		expect(entityRegistry.getJsonSchema(Boolean)).to.be.deep.equal({ type: 'boolean' });
-		expect(entityRegistry.getJsonSchema(Date)).to.be.deep.equal({ type: 'string', format: 'date-time' });
+		expect(entityRegistry.getEntityDefinitionJsonSchema(String)).to.be.deep.equal({ type: 'string' });
+		expect(entityRegistry.getEntityDefinitionJsonSchema(Number)).to.be.deep.equal({ type: 'number' });
+		expect(entityRegistry.getEntityDefinitionJsonSchema(Boolean)).to.be.deep.equal({ type: 'boolean' });
+		expect(entityRegistry.getEntityDefinitionJsonSchema(Date)).to.be.deep.equal({
+			type: 'string',
+			format: 'date-time'
+		});
 	});
 });

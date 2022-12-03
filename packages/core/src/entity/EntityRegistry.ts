@@ -5,7 +5,7 @@
 
 import { TypeValue } from '@davinci/reflector';
 import { EntityDefinition } from './EntityDefinition';
-import { JSONSchema } from './types';
+import { EntityDefinitionJSONSchema } from './types';
 import { di } from '../di';
 
 const primitiveTypes = [String, Number, Boolean, Date] as unknown[];
@@ -15,7 +15,7 @@ export class EntityRegistry {
 	// entityDefinitions = new Set<EntityDefinition[]>();
 	entityDefinitionMap = new Map<TypeValue, EntityDefinition>();
 
-	public getJsonSchema(typeValue: TypeValue): Partial<JSONSchema> {
+	public getEntityDefinitionJsonSchema(typeValue: TypeValue): Partial<EntityDefinitionJSONSchema> {
 		const isPrimitiveType = primitiveTypes.includes(typeValue);
 		if (isPrimitiveType) {
 			const type = typeValue as StringConstructor | NumberConstructor | BooleanConstructor | DateConstructor;
