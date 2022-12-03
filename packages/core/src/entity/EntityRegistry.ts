@@ -30,7 +30,7 @@ export class EntityRegistry {
 		}
 
 		if (this.entityDefinitionMap.has(typeValue)) {
-			return this.entityDefinitionMap.get(typeValue).getJsonSchema();
+			return this.entityDefinitionMap.get(typeValue).getEntityDefinitionJsonSchema();
 		}
 
 		const entityDefinition = new EntityDefinition({
@@ -40,7 +40,7 @@ export class EntityRegistry {
 
 		this.entityDefinitionMap.set(typeValue, entityDefinition);
 
-		return entityDefinition.getJsonSchema();
+		return entityDefinition.getEntityDefinitionJsonSchema();
 	}
 
 	getEntityDefinitionMap() {

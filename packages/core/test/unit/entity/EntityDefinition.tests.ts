@@ -48,7 +48,7 @@ describe('EntityDefinition', () => {
 
 		const entityDefinition = new EntityDefinition({ type: Customer });
 
-		expect(entityDefinition.getJsonSchema()).to.containSubset({
+		expect(entityDefinition.getEntityDefinitionJsonSchema()).to.containSubset({
 			title: 'Customer',
 			type: 'object',
 			properties: {
@@ -79,7 +79,7 @@ describe('EntityDefinition', () => {
 			},
 			required: ['lastname']
 		});
-		expect(entityDefinition.getJsonSchema().properties)
+		expect(entityDefinition.getEntityDefinitionJsonSchema().properties)
 			.to.haveOwnProperty('birth')
 			.to.haveOwnProperty('_$ref')
 			.to.be.instanceof(EntityDefinition);
@@ -116,7 +116,7 @@ describe('EntityDefinition', () => {
 			entityDefinitionsMapCache
 		});
 
-		expect(customerEntityDefinition.getJsonSchema()).to.containSubset({
+		expect(customerEntityDefinition.getEntityDefinitionJsonSchema()).to.containSubset({
 			title: 'Customer',
 			type: 'object',
 			properties: {
@@ -129,7 +129,7 @@ describe('EntityDefinition', () => {
 			},
 			required: ['lastname']
 		});
-		expect(customerEntityDefinition.getJsonSchema().properties)
+		expect(customerEntityDefinition.getEntityDefinitionJsonSchema().properties)
 			.to.haveOwnProperty('birth')
 			.to.haveOwnProperty('_$ref')
 			.to.be.instanceof(EntityDefinition);

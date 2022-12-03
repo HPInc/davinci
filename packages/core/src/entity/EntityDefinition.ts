@@ -27,28 +27,28 @@ interface EntityDefinitionOptions {
 export class EntityDefinition {
 	private name?: string;
 	private readonly type?: TypeValue;
-	private readonly jsonSchema?: EntityDefinitionJSONSchema;
+	private readonly entityDefinitionJsonSchema?: EntityDefinitionJSONSchema;
 	private entityDefinitionsMapCache = new Map<TypeValue, EntityDefinition>();
 
 	constructor(options: EntityDefinitionOptions) {
 		if (!options.type && !options.jsonSchema) {
-			throw new Error('type or jsonSchema must be passed');
+			throw new Error('type or entityDefinitionJsonSchema must be passed');
 		}
 		this.type = options.type;
 		this.name = options.name ?? (this.type as ClassType)?.name;
 		this.entityDefinitionsMapCache = options.entityDefinitionsMapCache;
-		this.jsonSchema = this.reflect();
+		this.entityDefinitionJsonSchema = this.reflect();
 	}
 
 	public getName() {
 		return this.name;
 	}
 
-	public getJsonSchema() {
-		return this.jsonSchema;
+	public getEntityDefinitionJsonSchema() {
+		return this.entityDefinitionJsonSchema;
 	}
 
-	private reflect(/* jsonSchema?: JSONSchema */): EntityDefinitionJSONSchema {
+	private reflect(/* entityDefinitionJsonSchema?: JSONSchema */): EntityDefinitionJSONSchema {
 		const makeSchema = (
 			typeOrClass: TypeValue | StringConstructor | NumberConstructor | BooleanConstructor | Date,
 			key?: string

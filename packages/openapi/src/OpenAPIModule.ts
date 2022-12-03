@@ -366,7 +366,8 @@ export class OpenAPIModule extends Module {
 						return mapObject(p, propValue => {
 							if (propValue._$ref) {
 								const refEntityDefinitionJson = this.createJsonSchema(
-									this.jsonSchemasMap.get(propValue._$ref) ?? propValue._$ref?.getJsonSchema()
+									this.jsonSchemasMap.get(propValue._$ref) ??
+										propValue._$ref?.getEntityDefinitionJsonSchema()
 								);
 
 								if (!this.jsonSchemasMap.has(propValue._$ref)) {
@@ -385,7 +386,7 @@ export class OpenAPIModule extends Module {
 							if (propValue.type === 'array' && propValue.items?._$ref) {
 								const $ref = propValue.items?._$ref;
 								const refEntityDefinitionJson = this.createJsonSchema(
-									this.jsonSchemasMap.get($ref) ?? $ref?.getJsonSchema()
+									this.jsonSchemasMap.get($ref) ?? $ref?.getEntityDefinitionJsonSchema()
 								);
 
 								if (!this.jsonSchemasMap.has($ref)) {
@@ -411,7 +412,7 @@ export class OpenAPIModule extends Module {
 					if (key === 'items' && p._$ref) {
 						const $ref = p._$ref;
 						const refEntityDefinitionJson = this.createJsonSchema(
-							this.jsonSchemasMap.get($ref) ?? $ref?.getJsonSchema()
+							this.jsonSchemasMap.get($ref) ?? $ref?.getEntityDefinitionJsonSchema()
 						);
 
 						if (!this.jsonSchemasMap.has($ref)) {
