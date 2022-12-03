@@ -1,5 +1,5 @@
 {
-	"name": "@davinci/example-next-amqp",
+	"name": "@davinci/example-amqp",
 	"version": "2.1.1",
 	"private": true,
 	"description": "",
