@@ -138,6 +138,34 @@ describe('EntityDefinition', () => {
 		expect(entityDefinitionsMapCacheGetSpy.called).to.be.equal(true);
 	});
 
+	it('should reflect a class with properties using anyOf, oneOf, allOf and correctly generate a json schema', () => {
+		@entity()
+		class Dog {
+			@entity.prop() // example of type override
+			name: string;
+		}
+
+		@entity()
+		class Cat {
+			@entity.prop() // example of type override
+			name: string;
+		}
+
+		@entity()
+		class Owner {
+			@entity.prop({ oneOf: [Dog, Cat, String] })
+			pet: Dog | Cat | string;
+		}
+
+		const entityDefinition = new EntityDefinition({ type: Owner });
+
+		const jsonSchema = entityDefinition.getJsonSchema();
+
+		expect(jsonSchema.properties.pet.oneOf[0]._$ref).to.be.instanceof(EntityDefinition);
+		expect(jsonSchema.properties.pet.oneOf[1]._$ref).to.be.instanceof(EntityDefinition);
+		expect(jsonSchema.properties.pet.oneOf[2]).to.be.deep.equal({ type: 'string' });
+	});
+
 	describe('getName', () => {
 		it('should infer the entity name from the class', () => {
 			@entity()

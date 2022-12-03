@@ -37,7 +37,8 @@ export class EntityDefinition {
 		this.type = options.type;
 		this.name = options.name ?? (this.type as ClassType)?.name;
 		this.entityDefinitionsMapCache = options.entityDefinitionsMapCache;
-		this.jsonSchema = this.reflect();
+		const schemaToProcess = deepMerge<JSONSchema>({ type: options.type }, options.jsonSchema ?? {});
+		this.jsonSchema = this.reflect(schemaToProcess);
 	}
 
 	public getName() {
@@ -48,7 +49,7 @@ export class EntityDefinition {
 		return this.jsonSchema;
 	}
 
-	private reflect(/* jsonSchema?: JSONSchema */) {
+	private reflect(jsonSchemaToProcess?: JSONSchema) {
 		const makeSchema = (
 			typeOrClass: TypeValue | StringConstructor | NumberConstructor | BooleanConstructor | Date,
 			key?: string
@@ -80,6 +81,11 @@ export class EntityDefinition {
 			if (typeof typeOrClass === 'function') {
 				const reflection = reflect(typeOrClass as ClassType);
 				const entityDecorator = this.findEntityDecorator(reflection);
+
+				if (entityDecorator?.options?.schema) {
+					const res = processAllSchemaSources(entityDecorator.options.schema);
+					return res;
+				}
 
 				if (entityDecorator && this.type === typeOrClass) {
 					this.name = entityDecorator.options?.name ?? this.name;
@@ -115,18 +121,14 @@ export class EntityDefinition {
 						const entityPropDecorator = this.findEntityPropDecorator(prop);
 						const extractedJsonSchema = omit(entityPropDecorator?.options ?? {}, ['type', 'required']);
 
-						const hasConstType =
-							entityPropDecorator.options?.type &&
-							!Array.isArray(entityPropDecorator.options?.type) &&
-							typeof entityPropDecorator.options?.type !== 'function';
-
-						const generatedJsonSchema = hasConstType
-							? { type: entityPropDecorator.options?.type }
-							: makeSchema(entityPropDecorator.options?.type ?? prop.type, prop.name);
-
-						accumulator.properties[prop.name] = deepMerge(extractedJsonSchema, generatedJsonSchema, {
-							isMergeableObject: isPlainObject
-						});
+						accumulator.properties[prop.name] = deepMerge(
+							extractedJsonSchema,
+							processAllSchemaSources(
+								deepMerge<JSONSchema>({ type: prop.type }, { ...entityPropDecorator.options }),
+								prop.name
+							),
+							{ isMergeableObject: isPlainObject }
+						);
 
 						if (entityPropDecorator.options?.required) {
 							accumulator.required.push(prop.name);
@@ -148,7 +150,21 @@ export class EntityDefinition {
 			return null;
 		};
 
-		return makeSchema(this.type);
+		function processAllSchemaSources(jsonSchema: JSONSchema, key?: string) {
+			const processedType = makeSchema(jsonSchema.type, key);
+			const processedOneOf = jsonSchema.oneOf?.map(o => makeSchema(o, key));
+			const processedAllOf = jsonSchema.allOf?.map(o => makeSchema(o, key));
+			const processedAnyOf = jsonSchema.anyOf?.map(o => makeSchema(o, key));
+
+			return {
+				...processedType,
+				...(processedOneOf ? { oneOf: processedOneOf } : {}),
+				...(processedAllOf ? { allOf: processedAllOf } : {}),
+				...(processedAnyOf ? { anyOf: processedAnyOf } : {})
+			};
+		}
+
+		return processAllSchemaSources(jsonSchemaToProcess);
 	}
 
 	private findEntityDecorator(reflection: ClassReflection): Maybe<{ [DecoratorId]: string; options: EntityOptions }> {

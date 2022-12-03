@@ -404,7 +404,30 @@ export class OpenAPIModule extends Module {
 								return refEntityDefinitionJson;
 							}
 
-							return propValue;
+							const additionalProps = ['allOf', 'anyOf', 'oneOf'].reduce((acc, key) => {
+								if (propValue[key]) {
+									acc[key] = propValue[key].map(s => {
+										const $ref = s._$ref;
+										if (!$ref) return s;
+
+										const refEntityDefinitionJson = this.createJsonSchema(
+											this.jsonSchemasMap.get($ref) ?? $ref?.getJsonSchema()
+										);
+
+										if (!this.jsonSchemasMap.has($ref)) {
+											this.jsonSchemasMap.set($ref, refEntityDefinitionJson);
+										}
+
+										this.openAPIDoc.components.schemas[refEntityDefinitionJson.$id] =
+											refEntityDefinitionJson;
+										return { $ref: `#/components/schemas/${refEntityDefinitionJson.$id}` };
+									});
+								}
+
+								return acc;
+							}, {});
+
+							return { ...propValue, ...additionalProps };
 						});
 					}
 

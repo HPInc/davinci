@@ -16,9 +16,10 @@
 		"@davinci/http-server": "^2.1.1",
 		"@davinci/http-server-fastify": "^2.1.1",
 		"@davinci/mongoose": "^2.1.1",
+		"@davinci/openapi": "^2.1.1",
 		"@davinci/reflector": "^2.1.1",
 		"fastify": "^4.10.2",
-		"mongoose": "^6.6.4"
+		"mongoose": "^6.6.2"
 	},
 	"devDependencies": {
 		"ts-node": "^10.0.0",

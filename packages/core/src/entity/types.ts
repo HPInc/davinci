@@ -18,6 +18,7 @@ export interface EntityPropReflection<T = unknown> {
 	options?: EntityPropOptions<T>;
 }
 
-export type EntityOptions = {
+export type EntityOptions<T = any> = {
 	name?: string;
+	schema?: JSONSchema<T>;
 };

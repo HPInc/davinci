@@ -4,7 +4,8 @@
 		"outDir": "./build",
 		"rootDir": ".",
 		"resolveJsonModule": true,
-		"preserveSymlinks": true
+		"preserveSymlinks": true,
+		"declaration": false
 	},
 	"include": ["src/**/*"]
 }

@@ -71,8 +71,7 @@ export function walker<T = unknown>(type: ClassType, iterator: WalkerIterator): 
 	const NewClass = reflect.create({}, { name: classIteratorResult.name });
 
 	// assign name
-	const nameDescriptors = Object.getOwnPropertyDescriptor(NewClass, 'name');
-	Object.defineProperty(NewClass, 'name', { ...nameDescriptors, value: classIteratorResult.name });
+	renameClass(NewClass, classIteratorResult.name);
 
 	// iterate through properties
 	// eslint-disable-next-line no-unused-expressions

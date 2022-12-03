@@ -4,7 +4,7 @@
  */
 
 import { route } from '@davinci/http-server';
-import { Customer, CustomerPartial } from './customer.schema';
+import { Customer, CustomerPartial, CustomerQuery } from './customer.schema';
 import { CustomerModel } from './customer.model';
 
 @route.controller({
@@ -12,8 +12,10 @@ import { CustomerModel } from './customer.model';
 })
 export default class CustomerController {
 	@route.get({ path: '/' })
-	list() {
-		return CustomerModel.find();
+	list(@route.query() query: CustomerQuery) {
+		return query;
+		/*console.log(where);
+		return CustomerModel.find();*/
 	}
 
 	@route.post({ path: '/' })

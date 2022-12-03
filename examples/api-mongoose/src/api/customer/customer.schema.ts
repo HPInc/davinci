@@ -6,7 +6,9 @@
 import { entity } from '@davinci/core';
 import { mgoose } from '@davinci/mongoose';
 import { createPartialEntity } from '../../lib/createPartialEntity';
+import { withQuery } from '../../lib/withQuery';
 
+@entity()
 class Phone {
 	@mgoose.prop()
 	@entity.prop()
@@ -17,7 +19,6 @@ class Phone {
 	phone: number;
 }
 
-@entity()
 class Birth {
 	@mgoose.prop()
 	@entity.prop()
@@ -52,3 +53,5 @@ export class Customer {
 }
 
 export class CustomerPartial extends createPartialEntity<Customer>(Customer) {}
+
+export class CustomerQuery extends withQuery(Customer, ['firstname', 'phones']) {}

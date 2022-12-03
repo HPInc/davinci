@@ -227,7 +227,31 @@ export class AjvValidator<Request = unknown> {
 							return { ...propValue, items: { $ref: refEntityDefinitionJson.$id } };
 						}
 
-						return propValue;
+						const additionalProps = ['allOf', 'anyOf', 'oneOf'].reduce((acc, key) => {
+							if (propValue[key]) {
+								acc[key] = propValue[key].map(s => {
+									const $ref = s?._$ref;
+									if (!$ref) {
+										return s;
+									}
+
+									const refEntityDefinitionJson = this.createJsonSchema(
+										this.jsonSchemasMap.get($ref) ?? $ref?.getJsonSchema()
+									);
+
+									if (!this.jsonSchemasMap.has($ref)) {
+										this.jsonSchemasMap.set($ref, refEntityDefinitionJson);
+										this.addSchemaToAjvInstances(refEntityDefinitionJson);
+									}
+
+									return { $ref: refEntityDefinitionJson.$id };
+								});
+							}
+
+							return acc;
+						}, {});
+
+						return { ...propValue, ...additionalProps };
 					});
 				}
 
