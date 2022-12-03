@@ -13,7 +13,7 @@ import {
 	TypeValue
 } from '@davinci/reflector';
 import deepMerge from 'deepmerge';
-import { EntityOptions, EntityPropReflection, JSONSchema } from './types';
+import { EntityDefinitionJSONSchema, EntityOptions, EntityPropReflection, JSONSchema } from './types';
 import { isPlainObject, omit } from '../lib/object-utils';
 
 interface EntityDefinitionOptions {
@@ -27,7 +27,7 @@ interface EntityDefinitionOptions {
 export class EntityDefinition {
 	private name?: string;
 	private readonly type?: TypeValue;
-	private readonly jsonSchema?: JSONSchema;
+	private readonly jsonSchema?: EntityDefinitionJSONSchema;
 	private entityDefinitionsMapCache = new Map<TypeValue, EntityDefinition>();
 
 	constructor(options: EntityDefinitionOptions) {
@@ -48,7 +48,7 @@ export class EntityDefinition {
 		return this.jsonSchema;
 	}
 
-	private reflect(/* jsonSchema?: JSONSchema */) {
+	private reflect(/* jsonSchema?: JSONSchema */): EntityDefinitionJSONSchema {
 		const makeSchema = (
 			typeOrClass: TypeValue | StringConstructor | NumberConstructor | BooleanConstructor | Date,
 			key?: string
@@ -100,6 +100,7 @@ export class EntityDefinition {
 						type: theClass,
 						entityDefinitionsMapCache: this.entityDefinitionsMapCache
 					});
+					// eslint-disable-next-line no-unused-expressions
 					this.entityDefinitionsMapCache?.set(theClass, entityDefinition);
 
 					return {
