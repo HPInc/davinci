@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.2.0](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.1.1...@davinci/mongoose@2.2.0) (2022-12-05)
+
+
+### Features
+
+* allowing [@mgoose](https://github.com/mgoose).virtual on class properties ([#171](https://github.com/HPInc/davinci/issues/171)) ([f98d5ea](https://github.com/HPInc/davinci/commit/f98d5ea216e058ccffade47695dc813080719ef7))
+
+
+
+
+
 ## [2.1.1](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.1.0...@davinci/mongoose@2.1.1) (2022-12-02)
 
 

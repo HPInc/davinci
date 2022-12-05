@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/example-next-api-mongoose",
-	"version": "2.1.1",
+	"version": "2.1.2",
 	"private": true,
 	"description": "",
 	"main": "index.js",
@@ -15,7 +15,7 @@
 		"@davinci/core": "^2.1.1",
 		"@davinci/http-server": "^2.1.1",
 		"@davinci/http-server-fastify": "^2.1.1",
-		"@davinci/mongoose": "^2.1.1",
+		"@davinci/mongoose": "^2.2.0",
 		"@davinci/reflector": "^2.1.1",
 		"fastify": "^4.10.2",
 		"mongoose": "^6.6.4"
