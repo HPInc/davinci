@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { entity, EntityDefinition, EntityRegistry } from '../../../src';
-import { expect } from '../../support/chai';
 import sinon from 'sinon';
+import set from 'lodash.set';
+import { entity, EntityDefinition, EntityRegistry, omit } from '../../../src';
+import { expect } from '../../support/chai';
 
 describe('EntityRegistry', () => {
 	it('should be able to add and create json schema for entities', () => {
@@ -86,6 +87,81 @@ describe('EntityRegistry', () => {
 		expect(entityRegistry.getEntityDefinitionJsonSchema(Date)).to.be.deep.equal({
 			type: 'string',
 			format: 'date-time'
+		});
+	});
+
+	describe('#entityDefinitionSchemaTransform', () => {
+		it('should', () => {
+			const entityRegistry = new EntityRegistry();
+
+			@entity()
+			class Birth {
+				@entity.prop()
+				date: Date;
+
+				@entity.prop()
+				country: string;
+			}
+
+			@entity()
+			class HomeAddress {
+				@entity.prop()
+				line1: string;
+
+				@entity.prop()
+				number: string;
+			}
+
+			class OfficeAddress {
+				@entity.prop()
+				line1: string;
+
+				@entity.prop()
+				number: string;
+			}
+
+			@entity()
+			class Customer {
+				@entity.prop()
+				firstname: string;
+
+				@entity.prop({ required: true })
+				lastname: string;
+
+				@entity.prop()
+				birth: Birth;
+
+				@entity.prop({ anyOf: [HomeAddress, OfficeAddress] })
+				address: HomeAddress | OfficeAddress;
+			}
+
+			const entityJsonSchema = entityRegistry.getEntityDefinitionJsonSchema(Customer);
+
+			let obj = {};
+			entityRegistry.transformEntityDefinitionSchema(entityJsonSchema, args => {
+				if (args.pointerPath === '') {
+					obj = omit(args.schema, ['properties']);
+				} else if (args.schema._$ref) {
+					const ref: EntityDefinition = args.schema._$ref;
+					const childEntityJsonSchema = ref.getEntityDefinitionJsonSchema();
+					if (childEntityJsonSchema.$id) {
+						set(obj, args.pointerPath, { $ref: `#/${childEntityJsonSchema.$id}` });
+					} else {
+						set(obj, args.pointerPath, childEntityJsonSchema);
+					}
+				} else if (typeof args.schema === 'function') {
+					const childEntityJsonSchema = entityRegistry.getEntityDefinitionJsonSchema(args.schema);
+					if (childEntityJsonSchema.$id) {
+						set(obj, args.pointerPath, { $ref: `#/${childEntityJsonSchema.$id}` });
+					} else {
+						set(obj, args.pointerPath, childEntityJsonSchema);
+					}
+				} else if (args.parentKeyword === 'properties') {
+					set(obj, args.pointerPath, args.schema);
+				}
+			});
+
+			console.log(obj);
 		});
 	});
 });

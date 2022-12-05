@@ -21,7 +21,10 @@
 	"license": "MIT",
 	"dependencies": {
 		"@davinci/reflector": "^2.1.1",
+		"@types/lodash.set": "^4.3.7",
 		"deepmerge": "^4.2.2",
+		"json-schema-traverse": "^1.0.0",
+		"lodash.set": "^4.3.2",
 		"tsyringe": "^4.7.0"
 	},
 	"peerDependencies": {

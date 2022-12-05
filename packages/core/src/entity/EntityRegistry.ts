@@ -4,6 +4,7 @@
  */
 
 import { TypeValue } from '@davinci/reflector';
+import * as jsonSchemaTraverse from './jsonSchemaTraverse';
 import { EntityDefinition } from './EntityDefinition';
 import { EntityDefinitionJSONSchema } from './types';
 import { di } from '../di';
@@ -12,8 +13,8 @@ const primitiveTypes = [String, Number, Boolean, Date] as unknown[];
 
 @di.singleton()
 export class EntityRegistry {
-	// entityDefinitions = new Set<EntityDefinition[]>();
-	entityDefinitionMap = new Map<TypeValue, EntityDefinition>();
+	private entityDefinitionMap = new Map<TypeValue, EntityDefinition>();
+	// private jsonSchemasMap = new Map<TypeValue, JSONSchema>();
 
 	public getEntityDefinitionJsonSchema(typeValue: TypeValue): Partial<EntityDefinitionJSONSchema> {
 		const isPrimitiveType = primitiveTypes.includes(typeValue);
@@ -43,7 +44,40 @@ export class EntityRegistry {
 		return entityDefinition.getEntityDefinitionJsonSchema();
 	}
 
-	getEntityDefinitionMap() {
+	public getEntityDefinitionMap() {
 		return this.entityDefinitionMap;
+	}
+
+	// '/properties/address/properties/line1/properties/town'.replace(/(\/properties)(\/\w+)/g, '$2').replace(/\//g, '.').slice(1)/
+	public transformEntityDefinitionSchema(
+		entityDefinitionSchema: Partial<EntityDefinitionJSONSchema>,
+		cb: (args: jsonSchemaTraverse.CallbackArgs & { pointerPath: string; pointerPathParts: string[] }) => {
+			path: string;
+			value: unknown;
+		}
+	) {
+		return jsonSchemaTraverse.jsonSchemaTraverse(
+			entityDefinitionSchema,
+			{ allKeys: true },
+			({ schema, jsonPtr, rootSchema, parentJsonPtr, parentKeyword, parentSchema, keyIndex }) => {
+				const pointerPath = jsonPtr
+					// .replace(/(\/properties)(\/\w+)/g, '$2')
+					.replace(/\//g, '.')
+					.slice(1);
+				const pointerPathParts = pointerPath.split('.');
+
+				cb({
+					schema,
+					jsonPtr,
+					pointerPath,
+					pointerPathParts,
+					rootSchema,
+					parentJsonPtr,
+					parentKeyword,
+					parentSchema,
+					keyIndex
+				});
+			}
+		);
 	}
 }

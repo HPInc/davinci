@@ -143,6 +143,10 @@ export class EntityDefinition {
 					required
 				};
 
+				if (entityDecorator) {
+					jsonSchema.$id = jsonSchema.title;
+				}
+
 				return jsonSchema;
 			}
 
