@@ -4,7 +4,6 @@
  */
 
 import sinon from 'sinon';
-import set from 'lodash.set';
 import { entity, EntityDefinition, EntityRegistry, omit } from '../../../src';
 import { expect } from '../../support/chai';
 
@@ -103,10 +102,18 @@ describe('EntityRegistry', () => {
 				country: string;
 			}
 
+			class Line1 {
+				@entity.prop()
+				one: string;
+
+				@entity.prop()
+				two: string;
+			}
+
 			@entity()
 			class HomeAddress {
 				@entity.prop()
-				line1: string;
+				line1: Line1;
 
 				@entity.prop()
 				number: string;
@@ -114,7 +121,7 @@ describe('EntityRegistry', () => {
 
 			class OfficeAddress {
 				@entity.prop()
-				line1: string;
+				line1: Line1;
 
 				@entity.prop()
 				number: string;
@@ -137,31 +144,32 @@ describe('EntityRegistry', () => {
 
 			const entityJsonSchema = entityRegistry.getEntityDefinitionJsonSchema(Customer);
 
-			let obj = {};
-			entityRegistry.transformEntityDefinitionSchema(entityJsonSchema, args => {
+			let result = entityRegistry.transformEntityDefinitionSchema(entityJsonSchema, args => {
 				if (args.pointerPath === '') {
-					obj = omit(args.schema, ['properties']);
+					return { path: '', value: omit(args.schema, ['properties']) };
 				} else if (args.schema._$ref) {
 					const ref: EntityDefinition = args.schema._$ref;
 					const childEntityJsonSchema = ref.getEntityDefinitionJsonSchema();
 					if (childEntityJsonSchema.$id) {
-						set(obj, args.pointerPath, { $ref: `#/${childEntityJsonSchema.$id}` });
+						return { path: args.pointerPath, value: { $ref: `#/${childEntityJsonSchema.$id}` } };
 					} else {
-						set(obj, args.pointerPath, childEntityJsonSchema);
+						return { path: args.pointerPath, value: childEntityJsonSchema };
 					}
 				} else if (typeof args.schema === 'function') {
 					const childEntityJsonSchema = entityRegistry.getEntityDefinitionJsonSchema(args.schema);
 					if (childEntityJsonSchema.$id) {
-						set(obj, args.pointerPath, { $ref: `#/${childEntityJsonSchema.$id}` });
+						return { path: args.pointerPath, value: { $ref: `#/${childEntityJsonSchema.$id}` } };
 					} else {
-						set(obj, args.pointerPath, childEntityJsonSchema);
+						return { path: args.pointerPath, value: childEntityJsonSchema };
 					}
 				} else if (args.parentKeyword === 'properties') {
-					set(obj, args.pointerPath, args.schema);
+					return { path: args.pointerPath, value: args.schema };
 				}
+
+				return null;
 			});
 
-			console.log(obj);
+			console.log(result);
 		});
 	});
 });

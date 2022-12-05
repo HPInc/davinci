@@ -4,6 +4,7 @@
  */
 
 import { TypeValue } from '@davinci/reflector';
+import set from 'lodash.set';
 import * as jsonSchemaTraverse from './jsonSchemaTraverse';
 import { EntityDefinition } from './EntityDefinition';
 import { EntityDefinitionJSONSchema } from './types';
@@ -48,7 +49,6 @@ export class EntityRegistry {
 		return this.entityDefinitionMap;
 	}
 
-	// '/properties/address/properties/line1/properties/town'.replace(/(\/properties)(\/\w+)/g, '$2').replace(/\//g, '.').slice(1)/
 	public transformEntityDefinitionSchema(
 		entityDefinitionSchema: Partial<EntityDefinitionJSONSchema>,
 		cb: (args: jsonSchemaTraverse.CallbackArgs & { pointerPath: string; pointerPathParts: string[] }) => {
@@ -56,7 +56,8 @@ export class EntityRegistry {
 			value: unknown;
 		}
 	) {
-		return jsonSchemaTraverse.jsonSchemaTraverse(
+		let obj = {};
+		jsonSchemaTraverse.jsonSchemaTraverse(
 			entityDefinitionSchema,
 			{ allKeys: true },
 			({ schema, jsonPtr, rootSchema, parentJsonPtr, parentKeyword, parentSchema, keyIndex }) => {
@@ -66,7 +67,7 @@ export class EntityRegistry {
 					.slice(1);
 				const pointerPathParts = pointerPath.split('.');
 
-				cb({
+				const result = cb({
 					schema,
 					jsonPtr,
 					pointerPath,
@@ -77,7 +78,16 @@ export class EntityRegistry {
 					parentSchema,
 					keyIndex
 				});
+				if (result && typeof result.path !== 'undefined' && result.path !== null) {
+					if (result.path === '') {
+						obj = result.value;
+					} else {
+						set(obj, result.path, result.value);
+					}
+				}
 			}
 		);
+
+		return obj;
 	}
 }
