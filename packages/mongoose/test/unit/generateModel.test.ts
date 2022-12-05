@@ -10,7 +10,7 @@ import { mgoose } from '../../src';
 
 const sinon = Sinon.createSandbox();
 
-describe('typed mongoose', () => {
+describe('generateModel', () => {
 	afterEach(() => {
 		sinon.restore();
 	});
@@ -256,6 +256,91 @@ describe('typed mongoose', () => {
 			});
 		});
 
+		it('should add virtual getters, by decorating a class method with @mgoose.virtual()', () => {
+			@mgoose.schema()
+			class Order {
+				@mgoose.prop()
+				date: Date;
+
+				@mgoose.virtual()
+				totalPrice() {}
+			}
+
+			const schema = mgoose.generateSchema(Order);
+			expect(schema.virtuals).to.containSubset({
+				totalPrice: {
+					path: 'totalPrice',
+					getters: [Order.prototype.totalPrice],
+					setters: [],
+					options: {}
+				}
+			});
+		});
+
+		it('should add virtual properties that populate, by decorating a class property with @mgoose.virtual({...})', () => {
+			@mgoose.schema()
+			class Order {
+				@mgoose.prop()
+				date: Date;
+
+				@mgoose.virtual({ ref: 'LineItem', foreignField: '_id', options: { lean: true } })
+				lineItems: object[];
+			}
+
+			const schema = mgoose.generateSchema(Order);
+			expect(schema.virtuals).to.containSubset({
+				lineItems: {
+					path: 'lineItems',
+					getters: [],
+					options: {
+						localField: 'lineItems',
+						ref: 'LineItem',
+						foreignField: '_id',
+						options: {
+							lean: true
+						}
+					}
+				}
+			});
+
+			// @ts-ignore
+			expect(schema.virtuals.lineItems.setters[0]).to.be.a('function');
+		});
+
+		it('should add virtual properties that populate, by decorating a class property with @mgoose.populate({...})', () => {
+			@mgoose.schema()
+			class Order {
+				@mgoose.prop()
+				date: Date;
+
+				@mgoose.populate({
+					name: 'lineItems',
+					opts: { ref: 'LineItem', foreignField: '_id', options: { lean: true } }
+				})
+				@mgoose.prop()
+				lineItemIds: object[];
+			}
+
+			const schema = mgoose.generateSchema(Order);
+			expect(schema.virtuals).to.containSubset({
+				lineItems: {
+					path: 'lineItems',
+					getters: [],
+					options: {
+						localField: 'lineItems',
+						ref: 'LineItem',
+						foreignField: '_id',
+						options: {
+							lean: true
+						}
+					}
+				}
+			});
+
+			// @ts-ignore
+			expect(schema.virtuals.lineItems.setters[0]).to.be.a('function');
+		});
+
 		it('should support attaching mongoose functionalities to sub-schemas', () => {
 			@mgoose.schema()
 			class Item {
@@ -270,6 +355,9 @@ describe('typed mongoose', () => {
 
 				@mgoose.prop({ type: [Item] })
 				items: Item[];
+
+				@mgoose.virtual({ ref: 'Something', localField: '_id', foreignField: '_id' })
+				myField: string;
 			}
 
 			const schema = mgoose.generateSchema(Order);
@@ -305,7 +393,7 @@ describe('typed mongoose', () => {
 			expect(schema.methods.getTopCategories).be.a('function').and.have.length(1);
 		});
 
-		it('should attach methods, virtuals and pupulates defined in subclasses, to the main schema', () => {
+		it('should attach methods, virtuals and populates defined in subclasses, to the main schema', () => {
 			class Item {
 				@mgoose.populate({ name: 'categories', opts: { ref: 'Ref', foreignField: '_id' } })
 				categoryIds: string[];
@@ -373,7 +461,7 @@ describe('typed mongoose', () => {
 			expect(schema.path('items').schema.options).to.containSubset({ timestamps: false, id: false, _id: false });
 		});
 
-		it('should allow omitting the schema decorator for classes passed explicitely to generateSchema', () => {
+		it('should allow omitting the schema decorator for classes passed explicitly to generateSchema', () => {
 			class Customer {
 				@mgoose.prop()
 				firstname: string;
