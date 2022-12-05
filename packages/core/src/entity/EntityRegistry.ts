@@ -5,9 +5,9 @@
 
 import { TypeValue } from '@davinci/reflector';
 import set from 'immutable-set';
-import * as jsonSchemaTraverse from './jsonSchemaTraverse';
+import { JSONSchemaTraverser } from './JSONSchemaTraverser';
 import { EntityDefinition } from './EntityDefinition';
-import { EntityDefinitionJSONSchema } from './types';
+import { EntityDefinitionJSONSchema, TransformEntityDefinitionSchemaCallback } from './types';
 import { di } from '../di';
 
 const primitiveTypes = [String, Number, Boolean, Date] as unknown[];
@@ -50,15 +50,11 @@ export class EntityRegistry {
 
 	public transformEntityDefinitionSchema(
 		entityDefinitionSchema: Partial<EntityDefinitionJSONSchema>,
-		cb: (args: jsonSchemaTraverse.CallbackArgs & { pointerPath: string; pointerPathParts: string[] }) => {
-			path: string;
-			value: unknown;
-		}
+		cb: TransformEntityDefinitionSchemaCallback
 	) {
 		let obj = {};
-		jsonSchemaTraverse.jsonSchemaTraverse(
+		JSONSchemaTraverser.traverse(
 			entityDefinitionSchema,
-			{ allKeys: true },
 			({ schema, jsonPtr, rootSchema, parentJsonPtr, parentKeyword, parentSchema, keyIndex }) => {
 				const pointerPath = jsonPtr
 					.replace(/\//g, '.') // replace slashes with dots
@@ -85,7 +81,8 @@ export class EntityRegistry {
 						obj = set(obj, result.path, result.value, { withArrays: true });
 					}
 				}
-			}
+			},
+			{ allKeys: true }
 		);
 
 		return obj;

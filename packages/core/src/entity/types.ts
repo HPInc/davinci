@@ -6,6 +6,7 @@
 import { DecoratorId, TypeValue } from '@davinci/reflector';
 import { UncheckedJSONSchemaType } from './jsonSchemaTypes';
 import type { EntityDefinition } from './EntityDefinition';
+import { CallbackArgs } from './JSONSchemaTraverser';
 
 export type JSONSchema<T = any> = UncheckedJSONSchemaType<T, true>;
 
@@ -23,4 +24,11 @@ export interface EntityPropReflection<T = unknown> {
 
 export type EntityOptions = {
 	name?: string;
+};
+
+export type TransformEntityDefinitionSchemaCallback = (
+	args: CallbackArgs & { pointerPath: string; pointerPathParts: string[] }
+) => {
+	path: string;
+	value: unknown;
 };
