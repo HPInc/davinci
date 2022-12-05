@@ -90,7 +90,7 @@ describe('EntityRegistry', () => {
 	});
 
 	describe('#entityDefinitionSchemaTransform', () => {
-		it('should', () => {
+		it('should traverse and allow transforming json schemas structures', () => {
 			const entityRegistry = new EntityRegistry();
 
 			@entity()
@@ -169,7 +169,55 @@ describe('EntityRegistry', () => {
 				return null;
 			});
 
-			console.log(result);
+			expect(result).to.containSubset({
+				title: 'Customer',
+				type: 'object',
+				required: ['lastname'],
+				$id: 'Customer',
+				properties: {
+					firstname: {
+						type: 'string'
+					},
+					lastname: {
+						type: 'string'
+					},
+					birth: {
+						$ref: '#/Birth'
+					},
+					address: {
+						anyOf: [
+							{
+								$ref: '#/HomeAddress'
+							},
+							{
+								title: 'OfficeAddress',
+								type: 'object',
+								properties: {
+									line1: {
+										title: 'line1',
+										type: 'object',
+										properties: {
+											one: {
+												type: 'string'
+											},
+											two: {
+												type: 'string'
+											}
+										},
+										required: []
+									},
+									number: {
+										type: 'string'
+									}
+								},
+								required: []
+							}
+						],
+						title: 'address',
+						type: 'object'
+					}
+				}
+			});
 		});
 	});
 });

@@ -4,7 +4,7 @@
  */
 
 import { TypeValue } from '@davinci/reflector';
-import set from 'lodash.set';
+import set from 'immutable-set';
 import * as jsonSchemaTraverse from './jsonSchemaTraverse';
 import { EntityDefinition } from './EntityDefinition';
 import { EntityDefinitionJSONSchema } from './types';
@@ -17,7 +17,7 @@ export class EntityRegistry {
 	private entityDefinitionMap = new Map<TypeValue, EntityDefinition>();
 	// private jsonSchemasMap = new Map<TypeValue, JSONSchema>();
 
-	public getEntityDefinitionJsonSchema(typeValue: TypeValue): Partial<EntityDefinitionJSONSchema> {
+	public getEntityDefinitionJsonSchema(typeValue: TypeValue): EntityDefinitionJSONSchema {
 		const isPrimitiveType = primitiveTypes.includes(typeValue);
 		if (isPrimitiveType) {
 			const type = typeValue as StringConstructor | NumberConstructor | BooleanConstructor | DateConstructor;
@@ -27,7 +27,7 @@ export class EntityRegistry {
 					return { type: 'string', format: 'date-time' };
 				}
 
-				return { type: type.name.toLowerCase() };
+				return { type: type.name.toLowerCase() } as EntityDefinitionJSONSchema;
 			}
 		}
 
@@ -62,8 +62,8 @@ export class EntityRegistry {
 			{ allKeys: true },
 			({ schema, jsonPtr, rootSchema, parentJsonPtr, parentKeyword, parentSchema, keyIndex }) => {
 				const pointerPath = jsonPtr
-					// .replace(/(\/properties)(\/\w+)/g, '$2')
 					.replace(/\//g, '.')
+					.replace(/(\.(\d))((\.)|$)/g, '[$2]$3')
 					.slice(1);
 				const pointerPathParts = pointerPath.split('.');
 
@@ -78,11 +78,12 @@ export class EntityRegistry {
 					parentSchema,
 					keyIndex
 				});
+
 				if (result && typeof result.path !== 'undefined' && result.path !== null) {
 					if (result.path === '') {
 						obj = result.value;
 					} else {
-						set(obj, result.path, result.value);
+						obj = set(obj, result.path, result.value, { withArrays: true });
 					}
 				}
 			}

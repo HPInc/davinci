@@ -58,19 +58,3 @@ export function isPlainObject(o) {
 	// Most likely a plain Object
 	return true;
 }
-
-export const setProperty = (obj: object, path: string, value: unknown, mutable = false) => {
-	const [head, ...rest] = path.split('.');
-	const setValue = rest.length ? setProperty(obj?.[head] ?? {}, rest.join('.'), value) : value;
-
-	if (mutable) {
-		obj[head] = setValue;
-		return;
-	}
-
-	// eslint-disable-next-line consistent-return
-	return {
-		...obj,
-		[head]: setValue
-	};
-};

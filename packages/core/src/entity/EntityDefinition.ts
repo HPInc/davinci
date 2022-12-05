@@ -48,6 +48,10 @@ export class EntityDefinition {
 		return this.entityDefinitionJsonSchema;
 	}
 
+	public getType() {
+		return this.type;
+	}
+
 	private reflect(/* entityDefinitionJsonSchema?: JSONSchema */): EntityDefinitionJSONSchema {
 		const makeSchema = (
 			typeOrClass: TypeValue | StringConstructor | NumberConstructor | BooleanConstructor | Date,

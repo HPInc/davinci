@@ -4,7 +4,7 @@
  */
 
 import { expect } from 'chai';
-import { isPlainObject, mapObject, omit, setProperty } from '../../../src';
+import { isPlainObject, mapObject, omit } from '../../../src';
 
 describe('object-utils', () => {
 	describe('mapValues', () => {
@@ -63,14 +63,6 @@ describe('object-utils', () => {
 
 		it('should return true if a a plain object is passed', () => {
 			expect(isPlainObject({})).to.be.true;
-		});
-	});
-
-	describe('#setProperty', () => {
-		it('should', () => {
-			expect(setProperty({ a: { b: {} } }, 'a.b.c', 'val')).to.be.deep.equal({ a: { b: { c: 'val' } } });
-			expect(setProperty({}, 'a.b.c', 'val')).to.be.deep.equal({ a: { b: { c: 'val' } } });
-			expect(setProperty({}, 'a.b[0]', 'val')).to.be.deep.equal({ a: { b: { c: 'val' } } });
 		});
 	});
 });
