@@ -203,65 +203,6 @@ export class AjvValidator<Request = unknown> {
 		});
 	}
 
-	/*
-	private createJsonSchemaOld(jsonSchema: Partial<JSONSchema>) {
-		return {
-			...(jsonSchema.title ? { $id: jsonSchema.title } : {}),
-			...mapObject<Partial<JSONSchema>>(jsonSchema, (p, key) => {
-				if (key === 'properties' && p) {
-					return mapObject(p, propValue => {
-						if (propValue._$ref) {
-							const refEntityDefinitionJson = this.createJsonSchema(
-								this.jsonSchemasMap.get(propValue._$ref) ??
-									propValue._$ref?.getEntityDefinitionJsonSchema()
-							);
-
-							if (!this.jsonSchemasMap.has(propValue._$ref)) {
-								this.jsonSchemasMap.set(propValue._$ref, refEntityDefinitionJson);
-								this.addSchemaToAjvInstances(refEntityDefinitionJson);
-							}
-
-							return { $ref: refEntityDefinitionJson.$id };
-						}
-
-						if (propValue.type === 'array' && propValue.items?._$ref) {
-							const $ref = propValue.items?._$ref;
-							const refEntityDefinitionJson = this.createJsonSchema(
-								this.jsonSchemasMap.get($ref) ?? $ref?.getEntityDefinitionJsonSchema()
-							);
-
-							if (!this.jsonSchemasMap.has($ref)) {
-								this.jsonSchemasMap.set($ref, refEntityDefinitionJson);
-								this.addSchemaToAjvInstances(refEntityDefinitionJson);
-							}
-
-							return { ...propValue, items: { $ref: refEntityDefinitionJson.$id } };
-						}
-
-						return propValue;
-					});
-				}
-
-				if (key === 'items' && p._$ref) {
-					const $ref = p._$ref;
-					const refEntityDefinitionJson = this.createJsonSchema(
-						this.jsonSchemasMap.get($ref) ?? $ref?.getEntityDefinitionJsonSchema()
-					);
-
-					if (!this.jsonSchemasMap.has($ref)) {
-						this.jsonSchemasMap.set($ref, refEntityDefinitionJson);
-						this.addSchemaToAjvInstances(refEntityDefinitionJson);
-					}
-
-					return { $ref: refEntityDefinitionJson.$id };
-				}
-
-				return p;
-			})
-		};
-	}
-*/
-
 	private createJsonSchema(entityJsonSchema: EntityDefinitionJSONSchema): Partial<JSONSchema> {
 		return this.entityRegistry.transformEntityDefinitionSchema(entityJsonSchema, args => {
 			if (args.pointerPath === '') {

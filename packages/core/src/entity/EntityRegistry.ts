@@ -15,7 +15,6 @@ const primitiveTypes = [String, Number, Boolean, Date] as unknown[];
 @di.singleton()
 export class EntityRegistry {
 	private entityDefinitionMap = new Map<TypeValue, EntityDefinition>();
-	// private jsonSchemasMap = new Map<TypeValue, JSONSchema>();
 
 	public getEntityDefinitionJsonSchema(typeValue: TypeValue): EntityDefinitionJSONSchema {
 		const isPrimitiveType = primitiveTypes.includes(typeValue);
@@ -62,9 +61,9 @@ export class EntityRegistry {
 			{ allKeys: true },
 			({ schema, jsonPtr, rootSchema, parentJsonPtr, parentKeyword, parentSchema, keyIndex }) => {
 				const pointerPath = jsonPtr
-					.replace(/\//g, '.')
-					.replace(/(\.(\d))((\.)|$)/g, '[$2]$3')
-					.slice(1);
+					.replace(/\//g, '.') // replace slashes with dots
+					.replace(/(\.(\d))((\.)|$)/g, '[$2]$3') // replace `.{number}.` to `[number].
+					.slice(1); // remove trailing slash
 				const pointerPathParts = pointerPath.split('.');
 
 				const result = cb({
