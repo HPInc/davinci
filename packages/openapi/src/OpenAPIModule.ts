@@ -336,7 +336,7 @@ export class OpenAPIModule extends Module {
 			const path = this.moduleOptions.document?.path;
 			this.httpServerModule.get(path, (_req, res) => {
 				this.httpServerModule.setHeader(res, 'content-type', 'application/json');
-				this.httpServerModule.reply(res, this.openAPIDoc);
+				return this.httpServerModule.reply(res, this.openAPIDoc);
 			});
 		}
 
