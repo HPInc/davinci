@@ -30,7 +30,7 @@ describe('AgnosticRouter', () => {
 	describe('lifecycle', () => {
 		it('should initialize a router', async () => {
 			const router = new Router();
-			const agnosticRouterModule = new AgnosticRouterModule({ app: router });
+			const agnosticRouterModule = new AgnosticRouterModule({ instance: router });
 			app.registerModule(agnosticRouterModule);
 
 			await app.init();
