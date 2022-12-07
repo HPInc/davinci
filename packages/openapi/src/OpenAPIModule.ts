@@ -107,7 +107,7 @@ export class OpenAPIModule extends Module {
 
 	async createPathAndSchema(route: Route<unknown>): Promise<void> {
 		const {
-			path,
+			path: origPath,
 			verb,
 			parametersConfig,
 			methodReflection,
@@ -116,6 +116,9 @@ export class OpenAPIModule extends Module {
 			controllerReflection
 		} = route;
 		if (methodDecoratorMetadata.options?.hidden) return;
+
+		// transform path parameters, e.g. :id to {id}
+		const path = origPath.replace(/:([\w-]+)/g, '{$1}');
 
 		this.openAPIDoc.paths[path] = this.openAPIDoc.paths[path] ?? {};
 
@@ -333,7 +336,7 @@ export class OpenAPIModule extends Module {
 			const path = this.moduleOptions.document?.path;
 			this.httpServerModule.get(path, (_req, res) => {
 				this.httpServerModule.setHeader(res, 'content-type', 'application/json');
-				return this.httpServerModule.reply(res, this.openAPIDoc);
+				this.httpServerModule.reply(res, this.openAPIDoc);
 			});
 		}
 
@@ -345,12 +348,12 @@ export class OpenAPIModule extends Module {
 			const path = this.moduleOptions.explorer?.path;
 			this.httpServerModule.get(path, (_req, res) => {
 				this.httpServerModule.setHeader(res, 'content-type', 'text/html');
-				return this.httpServerModule.reply(res, swaggerUiHtml);
+				this.httpServerModule.reply(res, swaggerUiHtml);
 			});
 		}
 	}
 
-	getOpenAPIDocument() {
+	getOpenAPIDocument(): PartialDeep<OpenAPIV3.Document> {
 		return this.openAPIDoc;
 	}
 

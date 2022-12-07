@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/messaging",
-	"version": "2.0.0-next.13",
+	"version": "2.1.1",
 	"description": "Generic messaging module",
 	"author": "HP",
 	"license": "MIT",
@@ -19,11 +19,8 @@
 		"test": "mocha --exit",
 		"cover": "nyc npm test"
 	},
+	"gitHead": "451fc8dbdbf23b7f019391dcfce5f85c24cd40f4",
 	"dependencies": {
-		"@davinci/reflector": "^2.0.0-next.13"
-	},
-	"devDependencies": {
-		"typescript": "^4.3.5"
-	},
-	"gitHead": "451fc8dbdbf23b7f019391dcfce5f85c24cd40f4"
+		"@davinci/reflector": "^2.1.1"
+	}
 }

@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/mongoose",
-	"version": "2.0.0-next.19",
+	"version": "2.2.0",
 	"description": "Integration with Mongoose ODM",
 	"author": "HP",
 	"license": "MIT",
@@ -20,17 +20,17 @@
 		"cover": "nyc npm test"
 	},
 	"dependencies": {
-		"@davinci/core": "^2.0.0-next.17",
-		"@davinci/reflector": "^2.0.0-next.13",
-		"deepmerge": "^4.2.2",
-		"pino": "^8.6.1"
+		"@davinci/core": "^2.1.1",
+		"@davinci/reflector": "^2.1.1",
+		"deepmerge": "^4.2.2"
 	},
 	"peerDependencies": {
-		"mongoose": "^6.6.2"
+		"mongoose": "^6.6.2",
+		"pino": "^8.7.0"
 	},
+	"gitHead": "451fc8dbdbf23b7f019391dcfce5f85c24cd40f4",
 	"devDependencies": {
 		"mongoose": "^6.6.2",
-		"typescript": "^4.3.5"
-	},
-	"gitHead": "451fc8dbdbf23b7f019391dcfce5f85c24cd40f4"
+		"pino": "^8.7.0"
+	}
 }

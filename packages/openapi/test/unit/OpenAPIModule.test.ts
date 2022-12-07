@@ -6,11 +6,13 @@
 import { App, entity } from '@davinci/core';
 import { ControllerDecoratorOptions, MethodDecoratorOptions, MethodResponses, route } from '@davinci/http-server';
 import { FastifyHttpServer } from '@davinci/http-server-fastify';
-import deepMerge from 'deepmerge';
+import { deepmerge as createDeepMerge } from '@fastify/deepmerge';
 import axios from 'axios';
 import { PartialDeep } from '@davinci/reflector';
 import { OpenAPIModule, OpenAPIModuleOptions } from '../../src';
 import { expect } from '../support/chai';
+
+const deepMerge = createDeepMerge({ all: true });
 
 describe('OpenAPIModule', () => {
 	@entity()
@@ -69,7 +71,7 @@ describe('OpenAPIModule', () => {
 				}
 			},
 			openapiModuleOptions ?? {}
-		);
+		) as OpenAPIModuleOptions;
 
 		@route.controller({ basePath: '/api/customers', ...controllerDecoratorOptions })
 		class CustomerController {
@@ -180,7 +182,7 @@ describe('OpenAPIModule', () => {
 							}
 						}
 					},
-					'/api/customers/:id': {
+					'/api/customers/{id}': {
 						patch: {
 							description: 'Update customer',
 							tags: ['Customer'],
@@ -929,7 +931,7 @@ describe('OpenAPIModule', () => {
 							tags: ['Customer methods']
 						}
 					},
-					'/api/customers/:id': {
+					'/api/customers/{id}': {
 						patch: {
 							tags: ['Customer methods']
 						}

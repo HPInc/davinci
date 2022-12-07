@@ -3,81 +3,36 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-# [2.0.0-next.20](https://github.com/HPInc/davinci/compare/@davinci/http-server-express@2.0.0-next.19...@davinci/http-server-express@2.0.0-next.20) (2022-11-23)
-
-**Note:** Version bump only for package @davinci/http-server-express
+## [2.1.1](https://github.com/HPInc/davinci/compare/@davinci/http-server-express@2.1.0...@davinci/http-server-express@2.1.1) (2022-12-02)
 
 
+### Performance Improvements
 
-
-
-# [2.0.0-next.19](https://github.com/HPInc/davinci/compare/@davinci/http-server-express@2.0.0-next.18...@davinci/http-server-express@2.0.0-next.19) (2022-11-23)
-
-**Note:** Version bump only for package @davinci/http-server-express
+* optimizing dependencies and compiled code for size ([#170](https://github.com/HPInc/davinci/issues/170)) ([9b7bd96](https://github.com/HPInc/davinci/commit/9b7bd96654479b8dd03faeb56e70476b15d4420f))
 
 
 
 
 
-# [2.0.0-next.18](https://github.com/HPInc/davinci/compare/@davinci/http-server-express@2.0.0-next.17...@davinci/http-server-express@2.0.0-next.18) (2022-11-22)
-
-**Note:** Version bump only for package @davinci/http-server-express
-
-
-
-
-
-# [2.0.0-next.17](https://github.com/HPInc/davinci/compare/@davinci/http-server-express@2.0.0-next.16...@davinci/http-server-express@2.0.0-next.17) (2022-11-21)
-
-**Note:** Version bump only for package @davinci/http-server-express
-
-
-
-
-
-# [2.0.0-next.16](https://github.com/HPInc/davinci/compare/@davinci/http-server-express@2.0.0-next.15...@davinci/http-server-express@2.0.0-next.16) (2022-11-18)
-
-**Note:** Version bump only for package @davinci/http-server-express
-
-
-
-
-
-# [2.0.0-next.15](https://github.com/HPInc/davinci/compare/@davinci/http-server-express@2.0.0-next.14...@davinci/http-server-express@2.0.0-next.15) (2022-11-17)
-
-**Note:** Version bump only for package @davinci/http-server-express
-
-
-
-
-
-# [2.0.0-next.14](https://github.com/HPInc/davinci/compare/@davinci/http-server-express@2.0.0-next.13...@davinci/http-server-express@2.0.0-next.14) (2022-11-09)
-
-**Note:** Version bump only for package @davinci/http-server-express
-
-
-
-
-
-# [2.0.0-next.13](https://github.com/HPInc/davinci/compare/@davinci/http-server-express@2.0.0-next.12...@davinci/http-server-express@2.0.0-next.13) (2022-11-09)
-
-**Note:** Version bump only for package @davinci/http-server-express
-
-
-
-
-
-# 2.0.0-next.12 (2022-11-08)
+# 2.1.0 (2022-12-01)
 
 
 ### Features
 
-* core, http-server and http-server-express packages ([#111](https://github.com/HPInc/davinci/issues/111)) ([e6e4ce0](https://github.com/HPInc/davinci/commit/e6e4ce0dcc81a3b44976cde471353f77ad872e65)), closes [#125](https://github.com/HPInc/davinci/issues/125) [#2](https://github.com/HPInc/davinci/issues/2) [#127](https://github.com/HPInc/davinci/issues/127) [#2](https://github.com/HPInc/davinci/issues/2) [#129](https://github.com/HPInc/davinci/issues/129) [#126](https://github.com/HPInc/davinci/issues/126) [#2](https://github.com/HPInc/davinci/issues/2) [#128](https://github.com/HPInc/davinci/issues/128) [#132](https://github.com/HPInc/davinci/issues/132) [#131](https://github.com/HPInc/davinci/issues/131) [#2](https://github.com/HPInc/davinci/issues/2) [#128](https://github.com/HPInc/davinci/issues/128)
+* DaVinci v2 ([6a10e09](https://github.com/HPInc/davinci/commit/6a10e09e22c8561ee8d54c93d4fb8c7fe0d564a9))
 
 
 
 
 
-# [2.0.0-next.11](https://github.com/HPInc/davinci/compare/@davinci/http-server-express@2.0.0-next.10...@davinci/http-server-express@2.0.0-next.11) (2022-11-03)
+## [2.0.1](https://github.com/HPInc/davinci/compare/@davinci/http-server-express@2.0.0-next.24...@davinci/http-server-express@2.0.1) (2022-12-01)
+
+**Note:** Version bump only for package @davinci/http-server-express
+
+
+
+
+
+# [2.0.0](https://github.com/HPInc/davinci/compare/@davinci/http-server-express@2.0.0-next.24...@davinci/http-server-express@2.0.0) (2022-12-01)
 
 **Note:** Version bump only for package @davinci/http-server-express

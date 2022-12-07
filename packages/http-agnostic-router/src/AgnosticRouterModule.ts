@@ -14,7 +14,7 @@ import { Router } from './Router';
 import { Request, Response } from './types';
 
 export interface AgnosticRouterModuleOptions<Req extends Request = Request> extends HttpServerModuleOptions {
-	app?: Router<Req>;
+	instance?: Router<Req>;
 	querystringParser?: (qs: string) => any;
 }
 
@@ -37,9 +37,9 @@ export class AgnosticRouterModule<Req extends Request = Request> extends HttpSer
 	initHttpServer: undefined;
 
 	constructor(options?: AgnosticRouterModuleOptions<Req>) {
-		const { app, ...moduleOptions } = options ?? {};
+		const { instance, ...moduleOptions } = options ?? {};
 		super(moduleOptions);
-		this.instance = app ?? new Router<Req>();
+		this.instance = instance ?? new Router<Req>();
 		if (this.moduleOptions.logger?.level) {
 			this.logger.level = this.moduleOptions.logger?.level;
 		}

@@ -3,61 +3,29 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-# [2.0.0-next.18](https://github.com/HPInc/davinci/compare/@davinci/messaging-amqp@2.0.0-next.17...@davinci/messaging-amqp@2.0.0-next.18) (2022-11-23)
-
-**Note:** Version bump only for package @davinci/messaging-amqp
+## [2.1.1](https://github.com/HPInc/davinci/compare/@davinci/messaging-amqp@2.1.0...@davinci/messaging-amqp@2.1.1) (2022-12-02)
 
 
+### Performance Improvements
 
-
-
-# [2.0.0-next.17](https://github.com/HPInc/davinci/compare/@davinci/messaging-amqp@2.0.0-next.16...@davinci/messaging-amqp@2.0.0-next.17) (2022-11-22)
-
-
-### Features
-
-* **Amqp:** provide ability to inject ChannelManager in controllers ([#150](https://github.com/HPInc/davinci/issues/150)) ([e3d09fd](https://github.com/HPInc/davinci/commit/e3d09fd52291aa73efcaaaa29f7fcf8113ef8289))
+* optimizing dependencies and compiled code for size ([#170](https://github.com/HPInc/davinci/issues/170)) ([9b7bd96](https://github.com/HPInc/davinci/commit/9b7bd96654479b8dd03faeb56e70476b15d4420f))
 
 
 
 
 
-# [2.0.0-next.16](https://github.com/HPInc/davinci/compare/@davinci/messaging-amqp@2.0.0-next.15...@davinci/messaging-amqp@2.0.0-next.16) (2022-11-18)
-
-**Note:** Version bump only for package @davinci/messaging-amqp
-
-
-
-
-
-# [2.0.0-next.15](https://github.com/HPInc/davinci/compare/@davinci/messaging-amqp@2.0.0-next.14...@davinci/messaging-amqp@2.0.0-next.15) (2022-11-17)
-
-**Note:** Version bump only for package @davinci/messaging-amqp
-
-
-
-
-
-# [2.0.0-next.14](https://github.com/HPInc/davinci/compare/@davinci/messaging-amqp@2.0.0-next.13...@davinci/messaging-amqp@2.0.0-next.14) (2022-11-09)
-
-**Note:** Version bump only for package @davinci/messaging-amqp
-
-
-
-
-
-# [2.0.0-next.13](https://github.com/HPInc/davinci/compare/@davinci/messaging-amqp@2.0.0-next.12...@davinci/messaging-amqp@2.0.0-next.13) (2022-11-09)
+# 2.1.0 (2022-12-01)
 
 
 ### Features
 
-* **DI:** adopted tsyringe as DI container ([#147](https://github.com/HPInc/davinci/issues/147)) ([a0004a8](https://github.com/HPInc/davinci/commit/a0004a87bf060861b632f87e70c453bf86135225))
+* DaVinci v2 ([6a10e09](https://github.com/HPInc/davinci/commit/6a10e09e22c8561ee8d54c93d4fb8c7fe0d564a9))
 
 
 
 
 
-# 2.0.0-next.12 (2022-11-08)
+## [2.0.1](https://github.com/HPInc/davinci/compare/@davinci/messaging-amqp@2.0.0-next.19...@davinci/messaging-amqp@2.0.1) (2022-12-01)
 
 **Note:** Version bump only for package @davinci/messaging-amqp
 
@@ -65,6 +33,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-# [2.0.0-next.11](https://github.com/HPInc/davinci/compare/@davinci/messaging-amqp@2.0.0-next.10...@davinci/messaging-amqp@2.0.0-next.11) (2022-11-03)
+# [2.0.0](https://github.com/HPInc/davinci/compare/@davinci/messaging-amqp@2.0.0-next.19...@davinci/messaging-amqp@2.0.0) (2022-12-01)
 
 **Note:** Version bump only for package @davinci/messaging-amqp

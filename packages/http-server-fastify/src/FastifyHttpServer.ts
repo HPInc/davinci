@@ -27,7 +27,7 @@ import qs from 'qs';
 type Server = HttpServer | HttpsServer;
 
 export interface FastifyHttpServerModuleOptions extends HttpServerModuleOptions {
-	app?: FastifyInstance;
+	instance?: FastifyInstance;
 	middlewares?: {
 		cors?: FastifyCorsOptions;
 	};
@@ -44,9 +44,9 @@ export class FastifyHttpServer extends HttpServerModule<{
 	app: App;
 
 	constructor(options?: FastifyHttpServerModuleOptions) {
-		const { app, ...moduleOptions } = options ?? {};
+		const { instance, ...moduleOptions } = options ?? {};
 		super(moduleOptions);
-		this.instance = app;
+		this.instance = instance;
 		if (this.moduleOptions.logger?.level) {
 			this.logger.level = this.moduleOptions.logger?.level;
 		}

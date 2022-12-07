@@ -15,9 +15,6 @@ coverage:
       http-server-fastify:
           flags:
               - http-server-fastify
-      http-agnostic-router:
-          flags:
-              - http-agnostic-router
       openapi:
           flags:
               - openapi
@@ -57,10 +54,6 @@ flags:
   http-server-fastify:
       paths:
           - packages/http-server-fastify
-      carryforward: true
-  http-agnostic-router:
-      paths:
-          - packages/http-agnostic-router
       carryforward: true
   openapi:
       paths:

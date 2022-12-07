@@ -3,85 +3,48 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-# [2.0.0-next.19](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.0.0-next.18...@davinci/mongoose@2.0.0-next.19) (2022-11-23)
-
-
-### Bug Fixes
-
-* **mongoose:** set typeKey schema option to '$type' ([#155](https://github.com/HPInc/davinci/issues/155)) ([4c416a3](https://github.com/HPInc/davinci/commit/4c416a34da5e89071c2ac88024ff244d33c708f2))
-
-
-
-
-
-# [2.0.0-next.18](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.0.0-next.17...@davinci/mongoose@2.0.0-next.18) (2022-11-22)
-
-**Note:** Version bump only for package @davinci/mongoose
-
-
-
-
-
-# [2.0.0-next.17](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.0.0-next.16...@davinci/mongoose@2.0.0-next.17) (2022-11-18)
-
-**Note:** Version bump only for package @davinci/mongoose
-
-
-
-
-
-# [2.0.0-next.16](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.0.0-next.15...@davinci/mongoose@2.0.0-next.16) (2022-11-17)
-
-**Note:** Version bump only for package @davinci/mongoose
-
-
-
-
-
-# [2.0.0-next.15](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.0.0-next.14...@davinci/mongoose@2.0.0-next.15) (2022-11-09)
-
-**Note:** Version bump only for package @davinci/mongoose
-
-
-
-
-
-# [2.0.0-next.14](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.0.0-next.13...@davinci/mongoose@2.0.0-next.14) (2022-11-09)
-
-**Note:** Version bump only for package @davinci/mongoose
-
-
-
-
-
-# [2.0.0-next.13](https://github.com/HPInc/davinci/compare/@davinci/mongoose@0.17.9...@davinci/mongoose@2.0.0-next.13) (2022-11-08)
-
-
-### Bug Fixes
-
-* **mongoose:** renamed to davinciContext, changed generateSchema behaviour ([#146](https://github.com/HPInc/davinci/issues/146)) ([d6d03b5](https://github.com/HPInc/davinci/commit/d6d03b50458a1b61d866b6511dfd85c7d503de2e))
+# [2.2.0](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.1.1...@davinci/mongoose@2.2.0) (2022-12-05)
 
 
 ### Features
 
-* **next:** starting from scratch ([bed4989](https://github.com/HPInc/davinci/commit/bed498970f64146d81aa78d5b0a2cef2d4ece046))
+* allowing [@mgoose](https://github.com/mgoose).virtual on class properties ([#171](https://github.com/HPInc/davinci/issues/171)) ([f98d5ea](https://github.com/HPInc/davinci/commit/f98d5ea216e058ccffade47695dc813080719ef7))
 
 
 
 
 
-# [2.0.0-next.12](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.0.0-next.11...@davinci/mongoose@2.0.0-next.12) (2022-11-03)
+## [2.1.1](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.1.0...@davinci/mongoose@2.1.1) (2022-12-02)
 
 
-### Bug Fixes
+### Performance Improvements
 
-* **mongoose:** renamed to davinciContext, changed generateSchema behaviour ([#146](https://github.com/HPInc/davinci/issues/146)) ([90f60dd](https://github.com/HPInc/davinci/commit/90f60ddc292d1f2bac8d5bd14082fbcfad1a0bde))
-
-
+* optimizing dependencies and compiled code for size ([#170](https://github.com/HPInc/davinci/issues/170)) ([9b7bd96](https://github.com/HPInc/davinci/commit/9b7bd96654479b8dd03faeb56e70476b15d4420f))
 
 
 
-# [2.0.0-next.11](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.0.0-next.10...@davinci/mongoose@2.0.0-next.11) (2022-11-03)
+
+
+# [2.1.0](https://github.com/HPInc/davinci/compare/@davinci/mongoose@1.1.0...@davinci/mongoose@2.1.0) (2022-12-01)
+
+
+### Features
+
+* DaVinci v2 ([6a10e09](https://github.com/HPInc/davinci/commit/6a10e09e22c8561ee8d54c93d4fb8c7fe0d564a9))
+
+
+
+
+
+## [2.0.1](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.0.0-next.20...@davinci/mongoose@2.0.1) (2022-12-01)
+
+**Note:** Version bump only for package @davinci/mongoose
+
+
+
+
+
+# [2.0.0](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.0.0-next.20...@davinci/mongoose@2.0.0) (2022-12-01)
 
 **Note:** Version bump only for package @davinci/mongoose
 

@@ -239,6 +239,7 @@ export abstract class HttpServerModule<
 				const interceptorsBag = httpServerModule.prepareInterceptorBag({
 					request,
 					response,
+					route,
 					parameters: parametersConfigWithValues.map(p => p.value),
 					context: contextValue
 				});
@@ -306,7 +307,7 @@ export abstract class HttpServerModule<
 
 	abstract setInstance(instance: unknown): void;
 
-	abstract getInstance(): void;
+	abstract getInstance(): unknown;
 
 	abstract reply(response, body: unknown, statusCode?: number);
 
@@ -437,11 +438,13 @@ export abstract class HttpServerModule<
 	private prepareInterceptorBag({
 		request,
 		response,
+		route,
 		parameters,
 		context
 	}: {
 		request: SMG['Request'];
 		response: SMG['Response'];
+		route: Route<SMG['Request']>;
 		parameters: any[];
 		context: any;
 	}) {
@@ -451,7 +454,8 @@ export abstract class HttpServerModule<
 			context,
 			state: {},
 			request,
-			response
+			response,
+			route
 		};
 	}
 
