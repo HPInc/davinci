@@ -82,7 +82,7 @@ export interface HttpServerModuleOptions {
 	errorsHandling?: {
 		exposeStack?: boolean;
 	};
-	globalInterceptors?: Array<HttpServerInterceptor>;
+	globalInterceptors?: Array<HttpServerInterceptor<any>>;
 	logger?: {
 		name?: string;
 		level?: Level | 'silent';
