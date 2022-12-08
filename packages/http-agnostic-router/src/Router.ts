@@ -25,7 +25,7 @@ export class Router<Req extends Request = Request> {
 	constructor(options?: RouterOptions<Req>) {
 		this.routerOptions = { ...defaultOptions, ...options };
 		// eslint-disable-next-line @typescript-eslint/no-var-requires,global-require
-		this.cache = options?.cache ?? new (require('lru-cache'))({ max: 500 });
+		this.cache = options?.cache ?? new (require('lru-cache'))({ max: 1000 });
 	}
 
 	addRoute(method: Method, path: string, handler: RouteHandler<Req>) {

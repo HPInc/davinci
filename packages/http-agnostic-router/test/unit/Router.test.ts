@@ -24,6 +24,7 @@ describe('Router', () => {
 			const methods: Array<Method> = ['get', 'post', 'patch', 'put', 'delete', 'head', 'options'];
 
 			await mapSeries(methods, async (method: Method) => {
+				// path parameters
 				router[method]('/customers/:id', identity);
 				await expect(router.handle({ url: '/customers/100', method })).to.eventually.be.deep.equal({
 					method,
@@ -31,6 +32,7 @@ describe('Router', () => {
 					params: { id: '100' }
 				});
 
+				// multiple path parameters
 				router[method]('/customers/:customerId/token/:tokenId', identity);
 				await expect(
 					router.handle({ url: '/customers/100/token/u12lasdj1', method })
@@ -40,6 +42,18 @@ describe('Router', () => {
 					params: { customerId: '100', tokenId: 'u12lasdj1' }
 				});
 
+				// multiple path parameters and multiple querystrings
+				router[method]('/customers/:customerId/token/:tokenId', identity);
+				await expect(
+					router.handle({ url: '/customers/100/token/8123?one=yes&two=no', method })
+				).to.eventually.be.deep.equal({
+					method,
+					url: '/customers/100/token/8123?one=yes&two=no',
+					params: { customerId: '100', tokenId: '8123' },
+					query: { one: 'yes', two: 'no' }
+				});
+
+				// wildcard and querystring
 				router[method]('/phones/*', identity);
 				await expect(router.handle({ url: '/phones/first/second?test=1', method })).to.eventually.be.deep.equal(
 					{
@@ -49,24 +63,27 @@ describe('Router', () => {
 					}
 				);
 
+				// nested querystring
 				await expect(
 					router.handle({
-						url: '/customers/100?where[nested]=1',
+						url: '/customers/100?where[nested]=1&root=yes',
 						method,
 						headers: { account: '900' },
 						body: { address: 'My street' }
 					})
 				).to.eventually.be.deep.equal({
 					method,
-					url: '/customers/100?where[nested]=1',
+					url: '/customers/100?where[nested]=1&root=yes',
 					params: { id: '100' },
 					query: {
-						where: { nested: '1' }
+						where: { nested: '1' },
+						root: 'yes'
 					},
 					headers: { account: '900' },
 					body: { address: 'My street' }
 				});
 
+				// catch all
 				router[method]('*', () => ({ statusCode: 404 }));
 				await expect(
 					router.handle({
