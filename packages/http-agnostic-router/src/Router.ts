@@ -5,27 +5,33 @@
 
 import URL from 'url-parse';
 import qs from 'qs';
-import { Request, RouteEntry, RouteHandler } from './types';
+import { Cache, Method, Request, RouteEntry, RouteHandler, UppercaseMethod } from './types';
 
-export interface RouterOptions {
+export interface RouterOptions<Req> {
 	querystringParser?: (qstring: string) => any;
+	cache?: Cache<Req>;
 }
 
-const defaultOptions: Partial<RouterOptions> = {
+const defaultOptions: Partial<RouterOptions<any>> = {
 	querystringParser: qstring => qs.parse(qstring, { depth: 10, parseArrays: true })
 };
 
 export class Router<Req extends Request = Request> {
 	routes: Array<RouteEntry<Req>> = [];
-	private routerOptions: RouterOptions;
+	routesDict: Record<Method | string, Array<RouteEntry<Req>>> = {};
+	cache: Cache<Req>;
+	private routerOptions: RouterOptions<Req>;
 
-	constructor(options?: RouterOptions) {
+	constructor(options?: RouterOptions<Req>) {
 		this.routerOptions = { ...defaultOptions, ...options };
+		// eslint-disable-next-line @typescript-eslint/no-var-requires,global-require
+		this.cache = options?.cache ?? new (require('lru-cache'))({ max: 500 });
 	}
 
-	addRoute(method: string, path: string, handler: RouteHandler<Req>) {
-		this.routes.push([
-			String(method).toUpperCase(),
+	addRoute(method: Method, path: string, handler: RouteHandler<Req>) {
+		const uppercaseMethod = String(method).toUpperCase();
+		const route: RouteEntry<Req> = [
+			uppercaseMethod,
 			RegExp(
 				`^${
 					path
@@ -38,8 +44,13 @@ export class Router<Req extends Request = Request> {
 				}/*$`
 			),
 			handler
-		]);
+		];
+
+		this.routes.push(route);
+		this.routesDict[uppercaseMethod] = this.routesDict[uppercaseMethod] ?? [];
+		this.routesDict[uppercaseMethod].push(route);
 	}
+
 	get(path: string, handler: RouteHandler<Req>) {
 		this.addRoute('GET', path, handler);
 	}
@@ -64,19 +75,46 @@ export class Router<Req extends Request = Request> {
 	all(path: string, handler: RouteHandler<Req>) {
 		this.addRoute('ALL', path, handler);
 	}
+
 	async handle(request: Req, ...args: unknown[]) {
+		const uppercaseMethod = request.method.toUpperCase() as UppercaseMethod;
 		const url = new URL(request.url);
 		if (url.query) {
 			request.query = this.routerOptions.querystringParser(url.query.substring(1));
 		}
+
+		if (!this.routesDict[uppercaseMethod]) {
+			return null;
+		}
+
+		const cacheKey = `${uppercaseMethod}:${url}`;
+		const cachedRouteEntry = this.cache.get(cacheKey);
+		if (cachedRouteEntry) {
+			const [, , handler] = cachedRouteEntry;
+
+			return handler(request, ...args);
+		}
+
+		const routeEntry = this.findRequestRoute(request, uppercaseMethod, url);
+
+		if (routeEntry) {
+			this.cache.set(cacheKey, routeEntry);
+			return routeEntry[2](request, ...args);
+		}
+
+		return null;
+	}
+
+	findRequestRoute(request: Req, method: UppercaseMethod, url: URL<unknown>): RouteEntry<Req> | null {
 		// eslint-disable-next-line no-restricted-syntax
-		for (const [method, route, handler] of this.routes) {
+		for (const routeEntry of this.routesDict[method]) {
+			const [routeMethod, route] = routeEntry;
 			const match = url.pathname.match(route);
-			if ((method === request.method.toUpperCase() || method === 'ALL') && match) {
+			if ((routeMethod === method || routeMethod === 'ALL') && match) {
 				if (match.groups) {
 					request.params = match.groups;
 				}
-				return handler(request, ...args);
+				return routeEntry;
 			}
 		}
 

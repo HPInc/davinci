@@ -9,9 +9,10 @@ export interface RouteHandler<TRequest> {
 
 export type RouteEntry<TRequest> = [string, RegExp, RouteHandler<TRequest>];
 
-type LowercaseMethod = 'get' | 'post' | 'patch' | 'put' | 'delete' | 'head' | 'options' | 'all';
+export type LowercaseMethod = 'get' | 'post' | 'patch' | 'put' | 'delete' | 'head' | 'options' | 'all';
+export type UppercaseMethod = Uppercase<LowercaseMethod>;
 
-export type Method = LowercaseMethod | Uppercase<LowercaseMethod>;
+export type Method = LowercaseMethod | UppercaseMethod;
 
 export interface Request {
 	method: Method;
@@ -27,3 +28,8 @@ export type Response = {
 	headers: Record<string, string>;
 	payload?: unknown;
 };
+
+export interface Cache<TRequest> {
+	set: (key: string, value: RouteEntry<TRequest>) => void;
+	get: (key: string) => RouteEntry<TRequest>;
+}

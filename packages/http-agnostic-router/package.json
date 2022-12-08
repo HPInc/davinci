@@ -26,10 +26,12 @@
 		"url-parse": "^1.5.10"
 	},
 	"peerDependencies": {
-		"qs": "^6.11.0"
+		"qs": "^6.11.0",
+		"lru-cache": "^7.14.1"
 	},
 	"devDependencies": {
 		"@types/url-parse": "^1.4.8",
+		"lru-cache": "^7.14.1",
 		"qs": "^6.11.0",
 		"typescript": "^4.6.2"
 	}
