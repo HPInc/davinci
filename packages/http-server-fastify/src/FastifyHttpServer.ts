@@ -141,7 +141,7 @@ export class FastifyHttpServer extends HttpServerModule<{
 
 	async listen() {
 		const port = Number(this.moduleOptions?.port) || 3000;
-		await this.instance.listen({ port: Number(port) });
+		await this.instance.listen({ port: Number(port), host: '0.0.0.0' });
 		this.logger.info(`Server listening on port: ${port}`);
 	}
 
