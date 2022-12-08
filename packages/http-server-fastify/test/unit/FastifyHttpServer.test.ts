@@ -36,7 +36,7 @@ describe('FastifyHttpServer', () => {
 			await app.init();
 
 			const { error } = await axios
-				.get('http://localhost:3000')
+				.get('http://127.0.0.1:3000')
 				.then(response => ({ error: null, response }))
 				.catch(error => ({ error }));
 
@@ -51,7 +51,7 @@ describe('FastifyHttpServer', () => {
 			await app.shutdown().catch(err => err);
 
 			const { error } = await axios
-				.get('http://localhost:3000')
+				.get('http://127.0.0.1:3000')
 				.then(response => ({ error: null, response }))
 				.catch(error => ({ error }));
 
@@ -232,7 +232,7 @@ describe('FastifyHttpServer', () => {
 				{ root: '/', redirect: true }
 			]);
 			fastifyHttpServer.listen();
-			expect(fastifyMocks.listen.firstCall.args).to.be.deep.equal([{ port: 3000 }]);
+			expect(fastifyMocks.listen.firstCall.args).to.be.deep.equal([{ port: 3000, host: '0.0.0.0' }]);
 		});
 
 		it('should propagate the calls to the underlying response', async () => {
