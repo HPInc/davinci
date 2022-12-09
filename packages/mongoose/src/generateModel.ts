@@ -96,7 +96,7 @@ export const generateSchema = <T>(
 
 			const prop = {
 				...omit(options, ['type']),
-				$type: type
+				type
 			};
 
 			return {
@@ -109,8 +109,7 @@ export const generateSchema = <T>(
 		const schemaDecoration = classReflection.decorators.find(d => d[DecoratorId] === 'mongoose.schema');
 		const schemaOptions = schemaDecoration?.options;
 		const schema =
-			(forceCreateSchema || schemaDecoration) &&
-			new Schema(definition, { ...(options ?? schemaOptions), typeKey: '$type' });
+			(forceCreateSchema || schemaDecoration) && new Schema(definition, { ...(options ?? schemaOptions) });
 
 		// register methods
 		const methods = classReflection.methods.reduce((acc, methodReflection) => {
