@@ -30,13 +30,13 @@ describe('generateModel', () => {
 
 			expect(schema.obj).to.be.deep.equal({
 				firstname: {
-					$type: String
+					type: String
 				},
 				age: {
-					$type: Number
+					type: Number
 				},
 				isActive: {
-					$type: Boolean
+					type: Boolean
 				}
 			});
 		});
@@ -56,9 +56,9 @@ describe('generateModel', () => {
 
 			expect(schema.obj).to.be.deep.equal({
 				birth: {
-					$type: {
+					type: {
 						place: {
-							$type: String
+							type: String
 						}
 					}
 				}
@@ -84,14 +84,14 @@ describe('generateModel', () => {
 			expect(schema.obj).to.be.deep.equal({
 				birth: [
 					{
-						$type: {
+						type: {
 							place: {
-								$type: String
+								type: String
 							}
 						}
 					}
 				],
-				tags: [{ $type: String }]
+				tags: [{ type: String }]
 			});
 		});
 
@@ -122,8 +122,9 @@ describe('generateModel', () => {
 			expect(Object.keys(baseSchema.obj)).be.deep.equal(['createdAt', 'updatedAt']);
 		});
 
-		it('supports nested properties with name "type"', () => {
-			class Phones {
+		/*
+		it('supports nested properties, with name "type"', () => {
+			class Phone {
 				@mgoose.prop()
 				type: string;
 
@@ -131,17 +132,9 @@ describe('generateModel', () => {
 				number: string;
 			}
 
-			class Profile {
-				@mgoose.prop()
-				name: string;
-
-				@mgoose.prop({ type: [Phones], required: true })
-				phones: Phones[];
-			}
-
 			class Customer {
-				@mgoose.prop({ type: [Profile], required: true })
-				profiles: Profile[];
+				@mgoose.prop({ type: [Phone], required: true })
+				phones: Phone[];
 			}
 
 			const schema = mgoose.generateSchema(Customer, {});
@@ -150,14 +143,14 @@ describe('generateModel', () => {
 				profiles: [
 					{
 						required: true,
-						$type: {
-							name: { $type: String },
+						type: {
+							name: { type: String },
 							phones: [
 								{
 									required: true,
-									$type: {
-										type: { $type: String },
-										number: { $type: String }
+									type: {
+										type: { type: String },
+										number: { type: String }
 									}
 								}
 							]
@@ -166,6 +159,7 @@ describe('generateModel', () => {
 				]
 			});
 		});
+*/
 	});
 
 	describe('#mgoose.generateSchema', () => {
