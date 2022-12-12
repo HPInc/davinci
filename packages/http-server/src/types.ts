@@ -82,6 +82,7 @@ export interface HttpServerModuleOptions {
 	errorsHandling?: {
 		exposeStack?: boolean;
 	};
+	querystringJsonParsing?: boolean;
 	globalInterceptors?: Array<HttpServerInterceptor>;
 	logger?: {
 		name?: string;

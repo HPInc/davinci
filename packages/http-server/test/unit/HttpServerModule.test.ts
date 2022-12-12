@@ -16,7 +16,7 @@ import {
 } from '@davinci/core';
 import * as http from 'http';
 import { reflect } from '@davinci/reflector';
-import { HttpServerModule, ParameterConfiguration, route } from '../../src';
+import { HttpServerModule, HttpServerModuleOptions, ParameterConfiguration, route } from '../../src';
 import { expect } from '../support/chai';
 
 const sinon = require('sinon').createSandbox();
@@ -30,7 +30,7 @@ describe('HttpServerModule', () => {
 		query?: Record<string, string>;
 	};
 
-	class DummyHttpServer extends HttpServerModule<{ Request: Request }> {
+	class DummyHttpServer extends HttpServerModule<{ Request: Request; ModuleOptions: HttpServerModuleOptions }> {
 		onInit(app: App) {
 			this.app = app;
 		}
@@ -475,6 +475,52 @@ describe('HttpServerModule', () => {
 			expect(contextFactory.getCall(0).args[0]).have.property('reflection');
 			expect(contextFactory.getCall(0).args[0].reflection).haveOwnProperty('controllerReflection');
 			expect(contextFactory.getCall(0).args[0].reflection).haveOwnProperty('methodReflection');
+		});
+
+		it('should create a request handler that parse stringified querystring parameters', async () => {
+			@route.controller({ basePath: '/api/customers' })
+			class CustomerController {
+				@route.get({ path: '/' })
+				find(
+					@route.query() shouldBeParsed: object,
+					@route.query() shouldNotBeParsed: string,
+					@route.query() invalidJsonShouldNotBeParsed: string
+				) {
+					return { shouldBeParsed, shouldNotBeParsed, invalidJsonShouldNotBeParsed };
+				}
+			}
+			const dummyHttpServer = new DummyHttpServer({ querystringJsonParsing: true });
+			const controllerReflection = reflect(CustomerController);
+			const methodReflection = controllerReflection.methods[0];
+			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+				path: '/',
+				verb: 'get',
+				controllerReflection,
+				methodReflection,
+				parametersConfig: dummyHttpServer.createParametersConfigurations({
+					controllerReflection,
+					methodReflection
+				})
+			});
+			const reqMock: Request = {
+				query: {
+					shouldBeParsed: '{ "nested":{ "object": true } }',
+					shouldNotBeParsed: 'some string',
+					invalidJsonShouldNotBeParsed: '{ blah }'
+				}
+			};
+			const resMock = {};
+			const result = await requestHandler(reqMock, resMock);
+
+			expect(result[1]).to.be.deep.equal({
+				shouldBeParsed: {
+					nested: {
+						object: true
+					}
+				},
+				shouldNotBeParsed: 'some string',
+				invalidJsonShouldNotBeParsed: '{ blah }'
+			});
 		});
 
 		it('should inject the context as parameter in the interceptors', async () => {
