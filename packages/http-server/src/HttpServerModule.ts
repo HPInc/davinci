@@ -41,7 +41,7 @@ interface HttpServerModuleGenerics<ModuleOptions> {
 }
 
 export abstract class HttpServerModule<
-	SMG extends HttpServerModuleGenerics<HttpServerModuleOptions> = {}
+	SMG extends HttpServerModuleGenerics<HttpServerModuleOptions> = HttpServerModuleGenerics<HttpServerModuleOptions>
 > extends Module {
 	app: App;
 	validationFactory?: ValidationFactory;
@@ -204,12 +204,19 @@ export abstract class HttpServerModule<
 							};
 						}
 
-						const value = await httpServerModule.getRequestParameter({
+						let value = await httpServerModule.getRequestParameter({
 							source: parameterConfig.source,
 							name: parameterConfig.name,
 							request,
 							response
 						});
+
+						if (
+							parameterConfig.source === 'query' &&
+							httpServerModule.moduleOptions?.querystringJsonParsing
+						) {
+							value = httpServerModule.maybeParseJsonifiedQuerystring(value);
+						}
 
 						return {
 							value,
@@ -285,10 +292,10 @@ export abstract class HttpServerModule<
 	// abstract delete(handler: RequestHandler<SMG['Request]>, SMG['Response]);
 	abstract delete(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>);
 
-	// public createNotFoundHandler() {}
-
 	// abstract put(handler: RequestHandler<SMG['Request]>, SMG['Response]);
 	abstract put(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>);
+
+	// public createNotFoundHandler() {}
 
 	// abstract patch(handler: RequestHandler<SMG['Request]>, SMG['Response]);
 	abstract patch(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>);
@@ -433,6 +440,19 @@ export abstract class HttpServerModule<
 
 	getRoutes() {
 		return this.routes;
+	}
+
+	private maybeParseJsonifiedQuerystring(str: unknown) {
+		if (typeof str === 'string' && str.charAt(0) === '{' && str.charAt(str.length - 1) === '}') {
+			// the string looks like a jsonified string, let's try to parse it
+			try {
+				return JSON.parse(str);
+			} catch (err) {
+				return str;
+			}
+		}
+
+		return str;
 	}
 
 	private prepareInterceptorBag({
