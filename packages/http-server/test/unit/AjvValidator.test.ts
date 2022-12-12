@@ -684,5 +684,22 @@ describe('AjvValidator', () => {
 				]
 			});
 		});
+
+		it('should register the given ajv plugins for each source', async () => {
+			const plugin1 = sinon.stub();
+			const plugin1opts = { opt: 1 };
+			const plugin2 = sinon.stub();
+			const options: AjvValidatorOptions = {
+				plugins: [[plugin1, plugin1opts], [plugin2]]
+			};
+			
+			createAjvValidator(options);
+			
+			expect(plugin1.callCount).to.eql(4);
+			expect(plugin1.firstCall.args[1]).to.be.deep.equal(plugin1opts);
+
+			expect(plugin2.callCount).to.eql(4);
+			expect(plugin2.firstCall.args[1]).to.be.undefined;
+		});
 	});
 });

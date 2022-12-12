@@ -4,7 +4,7 @@
  */
 
 import { di, EntityRegistry, JSONSchema, mapObject, mapSeries } from '@davinci/core';
-import Ajv, { DefinedError, Options } from 'ajv';
+import Ajv, { DefinedError, Options, Plugin } from 'ajv';
 import addFormats from 'ajv-formats';
 import { TypeValue } from '@davinci/reflector';
 import { EndpointSchema, ParameterConfiguration, Route, ValidationFactory, ValidationFunction } from './types';
@@ -21,8 +21,8 @@ const sources = ['path', 'header', 'query', 'body'] as const;
 type Source = typeof sources[number];
 type AjvInstancesMap = Record<Source, Ajv>;
 
-type AjvPlugin = Function;
 type AjvPluginOptions = unknown;
+type AjvPlugin = Plugin<AjvPluginOptions>;
 
 export interface AjvValidatorOptions {
 	ajvOptions?: Options;
@@ -46,6 +46,7 @@ export class AjvValidator<Request = unknown> {
 
 	constructor(private options: AjvValidatorOptions, private entityRegistry?: EntityRegistry) {
 		this.initializeInstances();
+		this.registerPlugins();
 	}
 
 	public async createValidatorFunction(route: Route<Request>): Promise<ValidationFunction> {
@@ -180,6 +181,16 @@ export class AjvValidator<Request = unknown> {
 				ajvInstances
 			);
 		}
+	}
+
+	private registerPlugins() {
+		this.options?.plugins?.forEach(p => {
+			const [plugin, opts] = p;
+
+			sources.forEach(source => {
+				plugin(this.getAjvInstances()[source], opts);
+			})
+		})
 	}
 
 	private addSchemaToAjvInstances(schema: Partial<JSONSchema>) {
