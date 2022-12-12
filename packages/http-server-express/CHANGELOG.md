@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.2.2](https://github.com/HPInc/davinci/compare/@davinci/http-server-express@2.2.1...@davinci/http-server-express@2.2.2) (2022-12-12)
+
+**Note:** Version bump only for package @davinci/http-server-express
+
+
+
+
+
 ## [2.2.1](https://github.com/HPInc/davinci/compare/@davinci/http-server-express@2.2.0...@davinci/http-server-express@2.2.1) (2022-12-12)
 
 **Note:** Version bump only for package @davinci/http-server-express

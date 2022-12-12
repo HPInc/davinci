@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.3.0](https://github.com/HPInc/davinci/compare/@davinci/http-server@2.2.0...@davinci/http-server@2.3.0) (2022-12-12)
+
+
+### Bug Fixes
+
+* check plugins is not undefined before foreach ([f8f06e1](https://github.com/HPInc/davinci/commit/f8f06e19da649d28cc3b186b82e0a4be87934039))
+* options can be undefined in registerPlugins ([f9b153c](https://github.com/HPInc/davinci/commit/f9b153c1c5809c6cad9b6bbbdca7c6fe005c9c2c))
+
+
+### Features
+
+* register ajv plugins on init for all ajv instances ([483beca](https://github.com/HPInc/davinci/commit/483beca46bb1b84edcdf9f04bf0680443fa44d8e))
+
+
+
+
+
 # [2.2.0](https://github.com/HPInc/davinci/compare/@davinci/http-server@2.1.2...@davinci/http-server@2.2.0) (2022-12-12)
 
 
