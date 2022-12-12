@@ -184,7 +184,7 @@ export class AjvValidator<Request = unknown> {
 	}
 
 	private registerPlugins() {
-		this.options.plugins.forEach(p => {
+		this.options.plugins?.forEach(p => {
 			const [plugin, opts] = p;
 
 			sources.forEach(source => {
