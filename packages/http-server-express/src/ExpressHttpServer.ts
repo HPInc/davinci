@@ -14,6 +14,7 @@ import http, { Server as HttpServer } from 'http';
 import https, { Server as HttpsServer, ServerOptions } from 'https';
 import type { App } from '@davinci/core';
 import type { OptionsJson, OptionsUrlencoded } from 'body-parser';
+import cors, { CorsOptions } from 'cors';
 
 type Server = HttpServer | HttpsServer;
 
@@ -23,6 +24,7 @@ export interface ExpressHttpServerModuleOptions extends HttpServerModuleOptions 
 	middlewares?: {
 		json?: OptionsJson;
 		urlencoded?: OptionsUrlencoded;
+		cors?: CorsOptions;
 	};
 }
 
@@ -66,10 +68,11 @@ export class ExpressHttpServer extends HttpServerModule<{
 	}
 
 	registerMiddlewares() {
-		const { json, urlencoded } = this.moduleOptions?.middlewares ?? {};
+		const { json, urlencoded, cors: corsOptions } = this.moduleOptions?.middlewares ?? {};
 
 		this.instance.use(express.json({ ...json }));
 		this.instance.use(express.urlencoded({ extended: true, ...urlencoded }));
+		if (corsOptions) this.instance.use(cors(corsOptions));
 	}
 
 	initHttpServer() {
