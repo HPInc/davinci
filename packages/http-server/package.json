@@ -21,7 +21,8 @@
 	"license": "MIT",
 	"dependencies": {
 		"@davinci/core": "^2.1.2",
-		"@davinci/reflector": "^2.1.1"
+		"@davinci/reflector": "^2.1.1",
+		"light-my-request": "^5.8.0"
 	},
 	"peerDependencies": {
 		"ajv": "^8.0.0",

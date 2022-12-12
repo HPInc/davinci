@@ -18,6 +18,7 @@ import * as http from 'http';
 import { reflect } from '@davinci/reflector';
 import { HttpServerModule, HttpServerModuleOptions, ParameterConfiguration, route } from '../../src';
 import { expect } from '../support/chai';
+import { InjectOptions } from 'light-my-request';
 
 const sinon = require('sinon').createSandbox();
 
@@ -802,6 +803,131 @@ describe('HttpServerModule', () => {
 					}
 				}
 			]);
+		});
+	});
+
+	describe('#performHttpInjection', () => {
+		it('should be able to inject http requests', async () => {
+			class MyDummyHttpServer extends DummyHttpServer {
+				onRegister(app) {
+					this.app = app;
+					super.addInjectFunction();
+				}
+
+				async performHttpInjection(injectOptions: InjectOptions): Promise<unknown> {
+					return { injectOptions };
+				}
+			}
+			const dummyHttpServer = new MyDummyHttpServer();
+			const app = new App();
+			await app.registerModule(dummyHttpServer);
+			await app.init();
+
+			const result1 = await app.commands.injectHttpRequest({
+				path: '/api/customers',
+				method: 'get',
+				headers: { authorization: 'token' },
+				query: { filter: 'true' }
+			});
+
+			expect(result1).to.containSubset({
+				injectOptions: {
+					path: '/api/customers',
+					method: 'get',
+					headers: {
+						authorization: 'token'
+					},
+					query: {
+						filter: 'true'
+					}
+				}
+			});
+
+			const result2 = await app.commands.injectHttpRequest({
+				path: '/api/customers/123',
+				method: 'patch',
+				headers: { authorization: 'token' },
+				payload: { firstname: 'John' }
+			});
+
+			expect(result2).to.containSubset({
+				injectOptions: {
+					path: '/api/customers/123',
+					method: 'patch',
+					headers: {
+						authorization: 'token'
+					},
+					payload: {
+						firstname: 'John'
+					}
+				}
+			});
+		});
+
+		it('should error if the underlying http server does not implement the performHttpInjection method', async () => {
+			class MyDummyHttpServer extends DummyHttpServer {
+				onRegister(app) {
+					this.app = app;
+					super.addInjectFunction();
+				}
+			}
+			const dummyHttpServer = new MyDummyHttpServer();
+			const app = new App();
+			await app.registerModule(dummyHttpServer);
+			await app.init();
+
+			await expect(
+				app.commands.injectHttpRequest({ path: '/api/customers', method: 'get' })
+			).to.eventually.be.rejectedWith(
+				Error,
+				'injectHttpRequest is not supported by the underlying http server implementation'
+			);
+		});
+
+		it('should be able to select a specific http module for the injection', async () => {
+			class MyDummyHttpServer1 extends DummyHttpServer {
+				getModuleId() {
+					return 'dummy1';
+				}
+
+				onRegister(app) {
+					this.app = app;
+					super.addInjectFunction();
+				}
+
+				async performHttpInjection(injectOptions: InjectOptions): Promise<unknown> {
+					return { injectOptions };
+				}
+			}
+
+			class MyDummyHttpServer2 extends MyDummyHttpServer1 {
+				getModuleId() {
+					return 'dummy2';
+				}
+			}
+
+			const dummyHttpServer1 = new MyDummyHttpServer1();
+			const dummyHttpServer2 = new MyDummyHttpServer2();
+
+			const spy1 = sinon.spy(dummyHttpServer1, 'performHttpInjection');
+			const spy2 = sinon.spy(dummyHttpServer2, 'performHttpInjection');
+
+			const app = new App();
+			await app.registerModule([dummyHttpServer1, dummyHttpServer2]);
+			await app.init();
+
+			await app.commands.injectHttpRequest(
+				{
+					path: '/api/customers',
+					method: 'get',
+					headers: { authorization: 'token' },
+					query: { filter: 'true' }
+				},
+				'dummy2'
+			);
+
+			expect(spy1.called).to.be.false;
+			expect(spy2.called).to.be.true;
 		});
 	});
 });

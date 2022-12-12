@@ -17,6 +17,7 @@ import {
 import pathUtils from 'path';
 import pino from 'pino';
 import { ClassReflection, ClassType, DecoratorId, MethodReflection } from '@davinci/reflector';
+import { InjectOptions } from 'light-my-request';
 import {
 	ContextFactory,
 	ContextFactoryArguments,
@@ -86,6 +87,8 @@ export abstract class HttpServerModule<
 	}
 
 	public async createRoutes() {
+		this.addInjectFunction();
+
 		const controllersReflection = this.app
 			.getControllersWithReflection()
 			.filter(
@@ -292,10 +295,10 @@ export abstract class HttpServerModule<
 	// abstract delete(handler: RequestHandler<SMG['Request]>, SMG['Response]);
 	abstract delete(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>);
 
+	// public createNotFoundHandler() {}
+
 	// abstract put(handler: RequestHandler<SMG['Request]>, SMG['Response]);
 	abstract put(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>);
-
-	// public createNotFoundHandler() {}
 
 	// abstract patch(handler: RequestHandler<SMG['Request]>, SMG['Response]);
 	abstract patch(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>);
@@ -440,6 +443,26 @@ export abstract class HttpServerModule<
 
 	getRoutes() {
 		return this.routes;
+	}
+
+	public performHttpInjection?(injectOptions: InjectOptions): Promise<unknown>;
+
+	protected addInjectFunction() {
+		Object.defineProperty(this.app.commands, 'injectHttpRequest', {
+			configurable: true,
+			value: async (req: InjectOptions, preferredHttpModule = 'http') => {
+				if (!this.performHttpInjection) {
+					throw new Error('injectHttpRequest is not supported by the underlying http server implementation');
+				}
+
+				const httpModule = await this.app.getModuleById<HttpServerModule>(preferredHttpModule);
+				if (!httpModule) {
+					throw new Error(`Module ${preferredHttpModule} not found`);
+				}
+
+				return httpModule.performHttpInjection(req);
+			}
+		});
 	}
 
 	private maybeParseJsonifiedQuerystring(str: unknown) {

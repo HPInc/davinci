@@ -42,4 +42,25 @@ export abstract class Module {
 	public getStatus() {
 		return this[statusSym];
 	}
+
+	public async waitForStatus(status: ModuleStatus): Promise<this> {
+		const WEIGHTED_STATUSES: Array<ModuleStatus> = [
+			'unloaded',
+			'registering',
+			'registered',
+			'initializing',
+			'initialized',
+			'destroying',
+			'destroyed',
+			'error'
+		];
+
+		if (WEIGHTED_STATUSES.indexOf(this.getStatus()) >= WEIGHTED_STATUSES.indexOf(status)) {
+			return this;
+		}
+
+		return new Promise(resolve => {
+			this.eventBus.once(status, () => resolve(this));
+		});
+	}
 }

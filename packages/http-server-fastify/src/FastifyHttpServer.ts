@@ -15,7 +15,8 @@ import {
 	FastifyPluginCallback,
 	FastifyPluginOptions,
 	FastifyReply,
-	FastifyRequest
+	FastifyRequest,
+	InjectOptions
 } from 'fastify';
 import { Server as HttpServer } from 'http';
 import { Server as HttpsServer } from 'https';
@@ -234,5 +235,9 @@ export class FastifyHttpServer extends HttpServerModule<{
 			default:
 				return undefined;
 		}
+	}
+
+	performHttpInjection(injectOptions: InjectOptions) {
+		return this.instance.inject(injectOptions);
 	}
 }

@@ -10,45 +10,7 @@ import { Module, ModuleStatus } from './Module';
 import { mapSeries } from './lib/async-utils';
 import { coerceArray } from './lib/array-utils';
 import { di } from './di';
-
-type Signals =
-	| 'SIGABRT'
-	| 'SIGALRM'
-	| 'SIGBUS'
-	| 'SIGCHLD'
-	| 'SIGCONT'
-	| 'SIGFPE'
-	| 'SIGHUP'
-	| 'SIGILL'
-	| 'SIGINT'
-	| 'SIGIO'
-	| 'SIGIOT'
-	| 'SIGKILL'
-	| 'SIGPIPE'
-	| 'SIGPOLL'
-	| 'SIGPROF'
-	| 'SIGPWR'
-	| 'SIGQUIT'
-	| 'SIGSEGV'
-	| 'SIGSTKFLT'
-	| 'SIGSTOP'
-	| 'SIGSYS'
-	| 'SIGTERM'
-	| 'SIGTRAP'
-	| 'SIGTSTP'
-	| 'SIGTTIN'
-	| 'SIGTTOU'
-	| 'SIGUNUSED'
-	| 'SIGURG'
-	| 'SIGUSR1'
-	| 'SIGUSR2'
-	| 'SIGVTALRM'
-	| 'SIGWINCH'
-	| 'SIGXCPU'
-	| 'SIGXFSZ'
-	| 'SIGBREAK'
-	| 'SIGLOST'
-	| 'SIGINFO';
+import { Commands, CommandsExecutor, Signals } from './types';
 
 export interface AppOptions {
 	controllers?: ClassType[];
@@ -62,8 +24,9 @@ export interface AppOptions {
 	};
 }
 
-export class App extends Module {
+export class App extends Module implements CommandsExecutor {
 	logger: Logger;
+	public commands: Commands = {};
 	private options?: AppOptions;
 	private modules: Module[] = [];
 	private controllers: ClassType[];
@@ -213,25 +176,9 @@ export class App extends Module {
 	}
 
 	public async getModuleById<M extends Module = Module>(moduleId: string, waitForStatus?: ModuleStatus): Promise<M> {
-		const WEIGHTED_STATUSES = [
-			'unloaded',
-			'registering',
-			'registered',
-			'initializing',
-			'initialized',
-			'destroying',
-			'destroyed',
-			'error'
-		];
 		const module = this.modulesDic[moduleId];
 		if (waitForStatus) {
-			if (WEIGHTED_STATUSES.indexOf(module.getStatus()) >= WEIGHTED_STATUSES.indexOf(waitForStatus)) {
-				return module as M;
-			}
-
-			return new Promise(resolve => {
-				module.eventBus.once(waitForStatus, () => resolve(module as M));
-			});
+			return (await module.waitForStatus(waitForStatus)) as M;
 		}
 
 		return module as M;
