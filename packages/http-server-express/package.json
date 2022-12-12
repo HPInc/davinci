@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/http-server-express",
-	"version": "2.1.2",
+	"version": "2.2.0",
 	"description": "Framework for rapid and consistent API development",
 	"main": "build-cjs/index.js",
 	"module": "build-esm/index.js",
@@ -24,8 +24,8 @@
 		"@davinci/reflector": "^2.1.1"
 	},
 	"peerDependencies": {
-		"express": "^4.0.0",
-		"cors": "^2.8.5"
+		"cors": "^2.8.5",
+		"express": "^4.0.0"
 	},
 	"devDependencies": {
 		"@davinci/core": "^2.1.2",
