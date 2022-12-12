@@ -11,7 +11,7 @@ import addErrors from 'ajv-errors';
 import { createAjvValidator } from '@davinci/http-server';
 import { CustomerController } from './api/customer';
 
-const app = createApp();
+export const app = createApp();
 const contextFactory = ({ request }) => ({ accountId: request.headers['x-accountid'] });
 
 app.registerController(CustomerController).registerModule(
@@ -51,5 +51,3 @@ app.registerController(CustomerController).registerModule(
 if (require.main === module) {
 	app.init();
 }
-
-export default app;
