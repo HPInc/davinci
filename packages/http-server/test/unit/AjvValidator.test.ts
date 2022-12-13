@@ -695,10 +695,10 @@ describe('AjvValidator', () => {
 			
 			createAjvValidator(options);
 			
-			expect(plugin1.callCount).to.eql(4);
+			expect(plugin1.callCount).to.eql(1);
 			expect(plugin1.firstCall.args[1]).to.be.deep.equal(plugin1opts);
 
-			expect(plugin2.callCount).to.eql(4);
+			expect(plugin2.callCount).to.eql(1);
 			expect(plugin2.firstCall.args[1]).to.be.undefined;
 		});
 	});
