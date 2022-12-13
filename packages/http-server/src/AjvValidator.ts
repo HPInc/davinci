@@ -20,19 +20,23 @@ const defaultAjvOptions: Options = {
 const sources = ['path', 'header', 'query', 'body'] as const;
 type Source = typeof sources[number];
 type AjvInstancesMap = Record<Source, Ajv>;
+type AjvOptionsMap = Record<Source, Options>;
 
 type AjvPluginOptions = unknown;
 type AjvPlugin = Plugin<AjvPluginOptions>;
 
 export interface AjvValidatorOptions {
-	ajvOptions?: Options;
+	ajvOptions?: Options | Partial<AjvOptionsMap>;
 	plugins?: Array<[AjvPlugin, AjvPluginOptions?]>;
-	instances?: Ajv | Partial<AjvInstancesMap>;
+}
+
+const isAjvOptionsMap = (options: Options | Partial<AjvOptionsMap>): options is AjvOptionsMap => {
+	return typeof options === 'object' && Object.keys(options).some(k => k as Source)
 }
 
 @di.autoInjectable()
 export class AjvValidator<Request = unknown> {
-	private ajvInstances?: Partial<AjvInstancesMap>;
+	private ajvInstances?: Partial<AjvInstancesMap> = {};
 	private jsonSchemasMap = new Map<TypeValue, JSONSchema>();
 
 	private sourceToSchemaMap: Partial<
@@ -156,36 +160,32 @@ export class AjvValidator<Request = unknown> {
 	}
 
 	private initializeInstances() {
-		const ajvInstances = this.options?.instances;
-
-		if (ajvInstances instanceof Ajv || ajvInstances?.constructor?.name === 'Ajv') {
-			const ajv = ajvInstances as Ajv;
-			this.ajvInstances = {
-				body: ajv,
-				query: ajv,
-				path: ajv,
-				header: ajv
-			};
-		} else if (typeof ajvInstances === 'object' || !ajvInstances) {
+		if (isAjvOptionsMap(this.options?.ajvOptions)) {
+			sources.forEach(source => {
+				const ajv = new Ajv({
+					...defaultAjvOptions,
+					...this.options.ajvOptions[source]
+				});
+				this.ajvInstances[source] = addFormats(ajv);
+			})
+		} else {
 			const ajv = new Ajv({
 				...defaultAjvOptions,
 				...this.options?.ajvOptions
 			});
 			addFormats(ajv);
-
-			this.ajvInstances = sources.reduce(
-				(acc: AjvInstancesMap, source) => ({
-					...acc,
-					[source]: acc?.[source] ?? ajv
-				}),
-				ajvInstances
-			);
+			sources.forEach(source => {
+				this.ajvInstances[source] = ajv;
+			})
 		}
 	}
 
 	private registerPlugins() {
+		// eslint-disable-next-line no-unused-expressions
 		this.options?.plugins?.forEach(p => {
 			const [plugin, opts] = p;
+			
+			if (plugin.name === 'formatsPlugin') return;
 
 			sources.forEach(source => {
 				plugin(this.getAjvInstances()[source], opts);

@@ -4,11 +4,10 @@
  */
 
 import { entity, EntityRegistry } from '@davinci/core';
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
 import { createSandbox } from 'sinon';
 import { expect } from '../support/chai';
 import { AjvValidator, AjvValidatorOptions, createAjvValidator, ParameterConfiguration, Route } from '../../src';
+import { Options } from 'ajv';
 
 const toPromise = async (fn: Function) => fn();
 
@@ -483,95 +482,91 @@ describe('AjvValidator', () => {
 			});
 		});
 
-		it('should validates using the Ajv instance passed as parameters', async () => {
-			const ajv = new Ajv({ coerceTypes: false, allErrors: true });
-			addFormats(ajv);
+		// it('should validates using the Ajv instance passed as parameters', async () => {
+		// 	const ajv = new Ajv({ coerceTypes: false, allErrors: true });
+		// 	addFormats(ajv);
 
-			const compileSpy = sinon.spy(ajv, 'compile');
+		// 	const compileSpy = sinon.spy(ajv, 'compile');
 
-			const { ajvValidator, parametersConfig } = initAjvValidator([], {
-				instances: ajv
-			});
+		// 	const { ajvValidator, parametersConfig } = initAjvValidator([], {
+		// 		instances: ajv
+		// 	});
 
-			const validatorFunction = await ajvValidator.createValidatorFunction({
-				parametersConfig,
-				path: '/',
-				verb: 'get',
-				methodReflection: {} as any,
-				controllerReflection: {} as any
-			});
+		// 	const validatorFunction = await ajvValidator.createValidatorFunction({
+		// 		parametersConfig,
+		// 		path: '/',
+		// 		verb: 'get',
+		// 		methodReflection: {} as any,
+		// 		controllerReflection: {} as any
+		// 	});
 
-			const invalidData = {
-				params: { customerId: '4000' },
-				body: {
-					firstname: 'Larry'
-				},
-				querystring: {
-					additionalProp: true,
-					street: 'My road',
-					houseNumber: '40',
-					customerArray: [
-						{
-							lastname: 'Bird'
-						}
-					],
-					payingCustomerArray: [
-						{
-							lastname: 'Bird'
-						}
-					]
-				},
-				headers: {
-					additionalHeader: true,
-					accountId: 1000
-				}
-			};
+		// 	const invalidData = {
+		// 		params: { customerId: '4000' },
+		// 		body: {
+		// 			firstname: 'Larry'
+		// 		},
+		// 		querystring: {
+		// 			additionalProp: true,
+		// 			street: 'My road',
+		// 			houseNumber: '40',
+		// 			customerArray: [
+		// 				{
+		// 					lastname: 'Bird'
+		// 				}
+		// 			],
+		// 			payingCustomerArray: [
+		// 				{
+		// 					lastname: 'Bird'
+		// 				}
+		// 			]
+		// 		},
+		// 		headers: {
+		// 			additionalHeader: true,
+		// 			accountId: 1000
+		// 		}
+		// 	};
 
-			const promise = toPromise(() => validatorFunction(invalidData));
-			const error = await promise.catch(err => err);
+		// 	const promise = toPromise(() => validatorFunction(invalidData));
+		// 	const error = await promise.catch(err => err);
 
-			expect(compileSpy.callCount).to.be.equal(4);
-			// additionalProps allowed
-			expect(invalidData.querystring.additionalProp).to.be.ok;
-			expect(invalidData.headers.additionalHeader).to.be.ok;
+		// 	expect(compileSpy.callCount).to.be.equal(4);
+		// 	// additionalProps allowed
+		// 	expect(invalidData.querystring.additionalProp).to.be.ok;
+		// 	expect(invalidData.headers.additionalHeader).to.be.ok;
 
-			// type coercion disabled in body
-			expect(error).to.containSubset({
-				errors: [
-					{
-						instancePath: '/params/customerId',
-						schemaPath: '#/params/properties/customerId/type',
-						keyword: 'type',
-						params: { type: 'number' },
-						message: 'must be number'
-					},
-					{
-						instancePath: '/body',
-						schemaPath: '#/required',
-						keyword: 'required',
-						params: { missingProperty: 'lastname' },
-						message: "must have required property 'lastname'"
-					}
-				]
-			});
-		});
+		// 	// type coercion disabled in body
+		// 	expect(error).to.containSubset({
+		// 		errors: [
+		// 			{
+		// 				instancePath: '/params/customerId',
+		// 				schemaPath: '#/params/properties/customerId/type',
+		// 				keyword: 'type',
+		// 				params: { type: 'number' },
+		// 				message: 'must be number'
+		// 			},
+		// 			{
+		// 				instancePath: '/body',
+		// 				schemaPath: '#/required',
+		// 				keyword: 'required',
+		// 				params: { missingProperty: 'lastname' },
+		// 				message: "must have required property 'lastname'"
+		// 			}
+		// 		]
+		// 	});
+		// });
 
 		it('should validates using the different Ajv instances passed as parameters', async () => {
-			const pathAjvInstance = new Ajv({ coerceTypes: true });
-			addFormats(pathAjvInstance);
-			const headerAjvInstance = new Ajv({ removeAdditional: 'all' });
-			addFormats(headerAjvInstance);
-			const queryAjvInstance = new Ajv({ removeAdditional: false, coerceTypes: true });
-			addFormats(queryAjvInstance);
-			const bodyAjvInstance = new Ajv({ removeAdditional: false, coerceTypes: false });
-			addFormats(bodyAjvInstance);
+			const pathAjvOptions = { coerceTypes: true };
+			const headerAjvOptions: Options = { removeAdditional: 'all' };
+			const queryAjvOptions = { removeAdditional: false, coerceTypes: true };
+			const bodyAjvOptions = { removeAdditional: false, coerceTypes: false };
 
 			const { ajvValidator, parametersConfig } = initAjvValidator([], {
-				instances: {
-					path: pathAjvInstance,
-					header: headerAjvInstance,
-					query: queryAjvInstance,
-					body: bodyAjvInstance
+				ajvOptions: {
+					path: pathAjvOptions,
+					header: headerAjvOptions,
+					query: queryAjvOptions,
+					body: bodyAjvOptions
 				}
 			});
 
