@@ -189,8 +189,6 @@ export class AjvValidator<Request = unknown> {
 		this.options?.plugins?.forEach(p => {
 			const [plugin, opts] = p;
 
-			if (plugin.name === 'formatsPlugin') return;
-			
 			plugin(ajv, opts);
 		});
 	}
