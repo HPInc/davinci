@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.3.1](https://github.com/HPInc/davinci/compare/@davinci/http-server@2.3.0...@davinci/http-server@2.3.1) (2022-12-13)
+
+
+### Bug Fixes
+
+* do not check if addFormats plugin is duplicated ([903de94](https://github.com/HPInc/davinci/commit/903de947c31c7955daa4c7d974e104e26f63fbc2))
+* register ajv plugins once per ajv instance ([27a3813](https://github.com/HPInc/davinci/commit/27a381349e1014d4efedfebc2e78739f0abd033e))
+
+
+
+
+
 # [2.3.0](https://github.com/HPInc/davinci/compare/@davinci/http-server@2.2.0...@davinci/http-server@2.3.0) (2022-12-12)
 
 
