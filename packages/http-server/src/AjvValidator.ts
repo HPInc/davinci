@@ -24,14 +24,12 @@ type AjvOptionsMap = Record<Source, Options>;
 
 type AjvPluginOptions = unknown;
 type AjvPlugin = Plugin<AjvPluginOptions>;
+type AjvPlugins = Array<[AjvPlugin, AjvPluginOptions?]>;
+type AjvPluginsMap = Record<Source, AjvPlugins>;
 
 export interface AjvValidatorOptions {
 	ajvOptions?: Options | Partial<AjvOptionsMap>;
-	plugins?: Array<[AjvPlugin, AjvPluginOptions?]>;
-}
-
-const isAjvOptionsMap = (options: Options | Partial<AjvOptionsMap>): options is AjvOptionsMap => {
-	return typeof options === 'object' && Object.keys(options).some(k => k as Source)
+	plugins?: AjvPlugins | Partial<AjvPluginsMap>;
 }
 
 @di.autoInjectable()
@@ -160,37 +158,32 @@ export class AjvValidator<Request = unknown> {
 	}
 
 	private initializeInstances() {
-		if (isAjvOptionsMap(this.options?.ajvOptions)) {
-			sources.forEach(source => {
-				const ajv = new Ajv({
-					...defaultAjvOptions,
-					...this.options.ajvOptions[source]
-				});
-				this.ajvInstances[source] = addFormats(ajv);
-			})
-		} else {
+		sources.forEach(source => {
 			const ajv = new Ajv({
 				...defaultAjvOptions,
-				...this.options?.ajvOptions
+				...this.options?.ajvOptions?.[source]
 			});
-			addFormats(ajv);
-			sources.forEach(source => {
-				this.ajvInstances[source] = ajv;
-			})
-		}
+			this.ajvInstances[source] = addFormats(ajv);
+		});
 	}
 
 	private registerPlugins() {
-		// eslint-disable-next-line no-unused-expressions
-		this.options?.plugins?.forEach(p => {
-			const [plugin, opts] = p;
-			
-			if (plugin.name === 'formatsPlugin') return;
+		const plugins = this.options?.plugins;
+		if (!plugins) return;
 
-			sources.forEach(source => {
-				plugin(this.getAjvInstances()[source], opts);
-			})
-		})
+		sources.forEach(source => {
+			if (plugins[source]) {
+				(plugins[source] as AjvPlugins).forEach(p => {
+					const [plugin, opts] = p;
+					plugin(this.ajvInstances[source], opts);
+				});
+			} else {
+				(plugins as AjvPlugins).forEach(p => {
+					const [plugin, opts] = p;
+					plugin(this.ajvInstances[source], opts);
+				});
+			}
+		});
 	}
 
 	private addSchemaToAjvInstances(schema: Partial<JSONSchema>) {
