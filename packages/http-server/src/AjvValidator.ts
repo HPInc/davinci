@@ -46,7 +46,6 @@ export class AjvValidator<Request = unknown> {
 
 	constructor(private options: AjvValidatorOptions, private entityRegistry?: EntityRegistry) {
 		this.initializeInstances();
-		this.registerPlugins();
 	}
 
 	public async createValidatorFunction(route: Route<Request>): Promise<ValidationFunction> {
@@ -160,6 +159,7 @@ export class AjvValidator<Request = unknown> {
 
 		if (ajvInstances instanceof Ajv || ajvInstances?.constructor?.name === 'Ajv') {
 			const ajv = ajvInstances as Ajv;
+			this.registerPlugins(ajv);
 			this.ajvInstances = {
 				body: ajv,
 				query: ajv,
@@ -172,6 +172,7 @@ export class AjvValidator<Request = unknown> {
 				...this.options?.ajvOptions
 			});
 			addFormats(ajv);
+			this.registerPlugins(ajv);
 
 			this.ajvInstances = sources.reduce(
 				(acc: AjvInstancesMap, source) => ({
@@ -183,14 +184,13 @@ export class AjvValidator<Request = unknown> {
 		}
 	}
 
-	private registerPlugins() {
+	private registerPlugins(ajv: Ajv) {
+		// eslint-disable-next-line no-unused-expressions
 		this.options?.plugins?.forEach(p => {
 			const [plugin, opts] = p;
 
-			sources.forEach(source => {
-				plugin(this.getAjvInstances()[source], opts);
-			})
-		})
+			plugin(ajv, opts);
+		});
 	}
 
 	private addSchemaToAjvInstances(schema: Partial<JSONSchema>) {
