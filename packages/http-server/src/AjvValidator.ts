@@ -161,7 +161,7 @@ export class AjvValidator<Request = unknown> {
 		sources.forEach(source => {
 			const ajv = new Ajv({
 				...defaultAjvOptions,
-				...this.options?.ajvOptions?.[source]
+				...(this.options?.ajvOptions?.[source] || this.options?.ajvOptions)
 			});
 			this.ajvInstances[source] = addFormats(ajv);
 		});
