@@ -7,7 +7,7 @@ import { entity, EntityRegistry } from '@davinci/core';
 import { createSandbox } from 'sinon';
 import { expect } from '../support/chai';
 import { AjvValidator, AjvValidatorOptions, createAjvValidator, ParameterConfiguration, Route } from '../../src';
-import { Options } from 'ajv';
+import Ajv, { Options } from 'ajv';
 
 const toPromise = async (fn: Function) => fn();
 
@@ -607,21 +607,221 @@ describe('AjvValidator', () => {
 			});
 		});
 
-		it('should register the given ajv plugins for each source', async () => {
+		it('should create AjvValidator given simple options and simple plugins', async () => {
 			const plugin1 = sinon.stub();
 			const plugin1opts = { opt: 1 };
 			const plugin2 = sinon.stub();
 			const options: AjvValidatorOptions = {
+				ajvOptions: { strict: true, strictNumbers: true },
 				plugins: [[plugin1, plugin1opts], [plugin2]]
 			};
 			
-			createAjvValidator(options);
+			const ajvInstances = new AjvValidator(options).getAjvInstances();
+			
+			Object.keys(ajvInstances || {}).forEach(source => {
+				expect((ajvInstances?.[source] as Ajv).opts).to.include((options.ajvOptions as Options));
+			});
 			
 			expect(plugin1.callCount).to.eql(4);
 			expect(plugin1.firstCall.args[1]).to.be.deep.equal(plugin1opts);
 
 			expect(plugin2.callCount).to.eql(4);
 			expect(plugin2.firstCall.args[1]).to.be.undefined;
+		});
+		
+		it('should create AjvValidator given simple options and plugins map', async () => {
+			const plugin1 = sinon.stub();
+			const plugin1opts = { opt: 1 };
+			const plugin2 = sinon.stub();
+			const options: AjvValidatorOptions = {
+				ajvOptions: { strict: true, strictNumbers: true },
+				plugins: {
+					path: [[plugin1, plugin1opts]],
+					body: [[plugin2]]
+				}
+			};
+			
+			const ajvInstances = new AjvValidator(options).getAjvInstances();
+			
+			Object.keys(ajvInstances || {}).forEach(source => {
+				expect((ajvInstances?.[source] as Ajv).opts).to.include((options.ajvOptions as Options));
+			});
+			
+			expect(plugin1.callCount).to.eql(1);
+			expect(plugin1.firstCall.args[1]).to.be.deep.equal(plugin1opts);
+
+			expect(plugin2.callCount).to.eql(1);
+			expect(plugin2.firstCall.args[1]).to.be.undefined;
+		});
+
+		it('should create AjvValidator given options map and simple plugins', async () => {
+			const plugin1 = sinon.stub();
+			const plugin1opts = { opt: 1 };
+			const plugin2 = sinon.stub();
+			const options: AjvValidatorOptions = {
+				ajvOptions: {
+					header: { strict: true, strictNumbers: false },
+					path: { coerceTypes: true }
+				},
+				plugins: [[plugin1, plugin1opts], [plugin2]]
+			};
+			
+			const ajvInstances = new AjvValidator(options).getAjvInstances();
+			
+			expect(ajvInstances?.body?.opts).to.not.include({ ...options.ajvOptions?.['header'], ...options.ajvOptions?.['path']});
+			expect(ajvInstances?.query?.opts).to.not.include({ ...options.ajvOptions?.['header'], ...options.ajvOptions?.['path']});
+			
+			expect(ajvInstances?.header?.opts).to.include(options.ajvOptions?.['header']);
+			expect(ajvInstances?.header?.opts).to.not.include(options.ajvOptions?.['path']);
+
+			expect(ajvInstances?.path?.opts).to.include(options.ajvOptions?.['path']);
+			expect(ajvInstances?.path?.opts).to.not.include(options.ajvOptions?.['header']);
+			
+			expect(plugin1.callCount).to.eql(4);
+			expect(plugin1.firstCall.args[1]).to.be.deep.equal(plugin1opts);
+
+			expect(plugin2.callCount).to.eql(4);
+			expect(plugin2.firstCall.args[1]).to.be.undefined;
+		});
+
+		it('should create AjvValidator given options map and plugins map', async () => {
+			const plugin1 = sinon.stub();
+			const plugin1opts = { opt: 1 };
+			const plugin2 = sinon.stub();
+			const options: AjvValidatorOptions = {
+				ajvOptions: {
+					header: { strict: true, strictNumbers: false },
+					path: { coerceTypes: true }
+				},
+				plugins: {
+					path: [[plugin1, plugin1opts]],
+					body: [[plugin2]]
+				}
+			};
+			
+			const ajvInstances = new AjvValidator(options).getAjvInstances();
+			
+			expect(ajvInstances?.body?.opts).to.not.include({ ...options.ajvOptions?.['header'], ...options.ajvOptions?.['path']});
+			expect(ajvInstances?.query?.opts).to.not.include({ ...options.ajvOptions?.['header'], ...options.ajvOptions?.['path']});
+			
+			expect(ajvInstances?.header?.opts).to.include(options.ajvOptions?.['header']);
+			expect(ajvInstances?.header?.opts).to.not.include(options.ajvOptions?.['path']);
+
+			expect(ajvInstances?.path?.opts).to.include(options.ajvOptions?.['path']);
+			expect(ajvInstances?.path?.opts).to.not.include(options.ajvOptions?.['header']);
+			
+			expect(plugin1.callCount).to.eql(1);
+			expect(plugin1.firstCall.args[0].opts).to.include(options.ajvOptions?.['path']);
+			expect(plugin1.firstCall.args[1]).to.be.deep.equal(plugin1opts);
+
+			expect(plugin2.callCount).to.eql(1);
+			expect(plugin2.firstCall.args[0].opts).to.not.include(options.ajvOptions?.['path']);
+			expect(plugin2.firstCall.args[1]).to.be.undefined;
+		});
+
+		it('should create AjvValidator given no options and simple plugins', async () => {
+			const plugin1 = sinon.stub();
+			const plugin1opts = { opt: 1 };
+			const plugin2 = sinon.stub();
+			const options: AjvValidatorOptions = {
+				plugins: [[plugin1, plugin1opts], [plugin2]]
+			};
+			const defaultOptions = {
+				removeAdditional: 'all',
+				coerceTypes: 'array',
+				allErrors: true,
+				useDefaults: true
+			};
+			
+			const ajvInstances = new AjvValidator(options).getAjvInstances();
+			
+			Object.keys(ajvInstances || {}).forEach(source => {
+				expect((ajvInstances?.[source] as Ajv).opts).to.include(defaultOptions);
+			});
+			
+			expect(plugin1.callCount).to.eql(4);
+			expect(plugin1.firstCall.args[1]).to.be.deep.equal(plugin1opts);
+
+			expect(plugin2.callCount).to.eql(4);
+			expect(plugin2.firstCall.args[1]).to.be.undefined;
+		});
+
+		it('should create AjvValidator given no options and plugins map', async () => {
+			const plugin1 = sinon.stub();
+			const plugin1opts = { opt: 1 };
+			const plugin2 = sinon.stub();
+			const options: AjvValidatorOptions = {
+				plugins: {
+					path: [[plugin1, plugin1opts]],
+					body: [[plugin2]],
+					header: [[plugin2]]
+				}
+			};
+			const defaultOptions = {
+				removeAdditional: 'all',
+				coerceTypes: 'array',
+				allErrors: true,
+				useDefaults: true
+			};
+			
+			const ajvInstances = new AjvValidator(options).getAjvInstances();
+			
+			Object.keys(ajvInstances || {}).forEach(source => {
+				expect((ajvInstances?.[source] as Ajv).opts).to.include(defaultOptions);
+			});
+			
+			expect(plugin1.callCount).to.eql(1);
+			expect(plugin1.firstCall.args[1]).to.be.deep.equal(plugin1opts);
+
+			expect(plugin2.callCount).to.eql(2);
+			expect(plugin2.firstCall.args[1]).to.be.undefined;
+		});
+
+		it('should create AjvValidator given simple options and no plugins', async () => {
+			const options: AjvValidatorOptions = {
+				ajvOptions: { coerceTypes: true }
+			};
+			
+			const ajvInstances = new AjvValidator(options).getAjvInstances();
+			
+			Object.keys(ajvInstances || {}).forEach(source => {
+				expect((ajvInstances?.[source] as Ajv).opts).to.include(options.ajvOptions);
+			});
+		});
+
+		it('should create AjvValidator given options map and no plugins', async () => {
+			const options: AjvValidatorOptions = {
+				ajvOptions: {
+					header: { strict: true, strictNumbers: false },
+					path: { coerceTypes: true }
+				}
+			};
+			
+			const ajvInstances = new AjvValidator(options).getAjvInstances();
+			
+			expect(ajvInstances?.body?.opts).to.not.include({ ...options.ajvOptions?.['header'], ...options.ajvOptions?.['path']});
+			expect(ajvInstances?.query?.opts).to.not.include({ ...options.ajvOptions?.['header'], ...options.ajvOptions?.['path']});
+			
+			expect(ajvInstances?.header?.opts).to.include(options.ajvOptions?.['header']);
+			expect(ajvInstances?.header?.opts).to.not.include(options.ajvOptions?.['path']);
+
+			expect(ajvInstances?.path?.opts).to.include(options.ajvOptions?.['path']);
+			expect(ajvInstances?.path?.opts).to.not.include(options.ajvOptions?.['header']);
+		});
+
+		it('should create AjvValidator given no options and no plugins', async () => {
+			const defaultOptions = {
+				removeAdditional: 'all',
+				coerceTypes: 'array',
+				allErrors: true,
+				useDefaults: true
+			};
+			
+			const ajvInstances = new AjvValidator({}).getAjvInstances();
+			
+			Object.keys(ajvInstances || {}).forEach(source => {
+				expect((ajvInstances?.[source] as Ajv).opts).to.include(defaultOptions);
+			});
 		});
 	});
 });
