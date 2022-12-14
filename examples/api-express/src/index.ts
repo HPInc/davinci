@@ -22,7 +22,7 @@ app.registerController(CustomerController).registerModule(
 				header: { coerceTypes: true },
 				query: { coerceTypes: true }
 			},
-			plugins: [[addErrors as any]]
+			plugins: [[addErrors]]
 		})
 	}),
 	new HealthChecksModule({ healthChecks: [{ name: 'liveness', endpoint: '/.ah/live' }] }),
