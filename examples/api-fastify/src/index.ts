@@ -7,13 +7,23 @@ import { createApp } from '@davinci/core';
 import { FastifyHttpServer } from '@davinci/http-server-fastify';
 import { HealthChecksModule } from '@davinci/health-checks';
 import { OpenAPIModule } from '@davinci/openapi';
+import addErrors from 'ajv-errors';
+import { createAjvValidator } from '@davinci/http-server';
 import { CustomerController } from './api/customer';
 
 const app = createApp();
 const contextFactory = ({ request }) => ({ accountId: request.headers['x-accountid'] });
 
 app.registerController(CustomerController).registerModule(
-	new FastifyHttpServer({ contextFactory }),
+	new FastifyHttpServer({
+		contextFactory,
+		validationFactory: createAjvValidator({
+			ajvOptions: { strict: true, coerceTypes: false },
+			plugins: {
+				body: [[addErrors as any]]
+			}
+		})
+	}),
 	new HealthChecksModule({ healthChecks: [{ name: 'liveness', endpoint: '/.ah/live' }] }),
 	new OpenAPIModule({
 		document: {

@@ -18,6 +18,7 @@
 		"@davinci/http-server-express": "^2.2.3",
 		"@davinci/openapi": "^2.1.7",
 		"ajv": "^8.11.0",
+		"ajv-errors": "^3.0.0",
 		"ajv-formats": "^2.1.1",
 		"express": "^4.18.1"
 	},
