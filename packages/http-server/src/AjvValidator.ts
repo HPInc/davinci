@@ -20,19 +20,21 @@ const defaultAjvOptions: Options = {
 const sources = ['path', 'header', 'query', 'body'] as const;
 type Source = typeof sources[number];
 type AjvInstancesMap = Record<Source, Ajv>;
+type AjvOptionsMap = Record<Source, Options>;
 
 type AjvPluginOptions = unknown;
 type AjvPlugin = Plugin<AjvPluginOptions>;
+type AjvPlugins = Array<[AjvPlugin, AjvPluginOptions?]>;
+type AjvPluginsMap = Record<Source, AjvPlugins>;
 
 export interface AjvValidatorOptions {
-	ajvOptions?: Options;
-	plugins?: Array<[AjvPlugin, AjvPluginOptions?]>;
-	instances?: Ajv | Partial<AjvInstancesMap>;
+	ajvOptions?: Options | Partial<AjvOptionsMap>;
+	plugins?: AjvPlugins | Partial<AjvPluginsMap>;
 }
 
 @di.autoInjectable()
 export class AjvValidator<Request = unknown> {
-	private ajvInstances?: Partial<AjvInstancesMap>;
+	private ajvInstances?: Partial<AjvInstancesMap> = {};
 	private jsonSchemasMap = new Map<TypeValue, JSONSchema>();
 
 	private sourceToSchemaMap: Partial<
@@ -46,6 +48,7 @@ export class AjvValidator<Request = unknown> {
 
 	constructor(private options: AjvValidatorOptions, private entityRegistry?: EntityRegistry) {
 		this.initializeInstances();
+		this.registerPlugins();
 	}
 
 	public async createValidatorFunction(route: Route<Request>): Promise<ValidationFunction> {
@@ -155,41 +158,36 @@ export class AjvValidator<Request = unknown> {
 	}
 
 	private initializeInstances() {
-		const ajvInstances = this.options?.instances;
-
-		if (ajvInstances instanceof Ajv || ajvInstances?.constructor?.name === 'Ajv') {
-			const ajv = ajvInstances as Ajv;
-			this.registerPlugins(ajv);
-			this.ajvInstances = {
-				body: ajv,
-				query: ajv,
-				path: ajv,
-				header: ajv
-			};
-		} else if (typeof ajvInstances === 'object' || !ajvInstances) {
+		sources.forEach(source => {
 			const ajv = new Ajv({
 				...defaultAjvOptions,
-				...this.options?.ajvOptions
+				...(this.options?.ajvOptions?.[source] || this.options?.ajvOptions)
 			});
-			addFormats(ajv);
-			this.registerPlugins(ajv);
-
-			this.ajvInstances = sources.reduce(
-				(acc: AjvInstancesMap, source) => ({
-					...acc,
-					[source]: acc?.[source] ?? ajv
-				}),
-				ajvInstances
-			);
-		}
+			this.ajvInstances[source] = addFormats(ajv);
+		});
 	}
 
-	private registerPlugins(ajv: Ajv) {
-		// eslint-disable-next-line no-unused-expressions
-		this.options?.plugins?.forEach(p => {
-			const [plugin, opts] = p;
+	private isPluginsMap = (plugins: AjvPlugins | Partial<AjvPluginsMap>): plugins is AjvPluginsMap => {
+		return !Array.isArray(plugins);
+	}
 
-			plugin(ajv, opts);
+	private registerPlugins() {
+		const plugins = this.options?.plugins;
+		if (!plugins) return;
+
+		sources.forEach(source => {
+			if (this.isPluginsMap(plugins)) {
+				// eslint-disable-next-line no-unused-expressions
+				(plugins[source] as AjvPlugins)?.forEach(p => {
+					const [plugin, opts] = p;
+					plugin(this.ajvInstances[source], opts);
+				});
+			} else {
+				(plugins as AjvPlugins).forEach(p => {
+					const [plugin, opts] = p;
+					plugin(this.ajvInstances[source], opts);
+				});
+			}
 		});
 	}
 
