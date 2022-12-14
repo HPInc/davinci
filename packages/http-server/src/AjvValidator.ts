@@ -167,13 +167,18 @@ export class AjvValidator<Request = unknown> {
 		});
 	}
 
+	private isPluginsMap = (plugins: AjvPlugins | Partial<AjvPluginsMap>): plugins is AjvPluginsMap => {
+		return !Array.isArray(plugins);
+	}
+
 	private registerPlugins() {
 		const plugins = this.options?.plugins;
 		if (!plugins) return;
 
 		sources.forEach(source => {
-			if (plugins[source]) {
-				(plugins[source] as AjvPlugins).forEach(p => {
+			if (this.isPluginsMap(plugins)) {
+				// eslint-disable-next-line no-unused-expressions
+				(plugins[source] as AjvPlugins)?.forEach(p => {
 					const [plugin, opts] = p;
 					plugin(this.ajvInstances[source], opts);
 				});
