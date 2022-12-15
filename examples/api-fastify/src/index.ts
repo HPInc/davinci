@@ -18,7 +18,7 @@ app.registerController(CustomerController).registerModule(
 	new FastifyHttpServer({
 		contextFactory,
 		validationFactory: createAjvValidator({
-			ajvOptions: { strict: true, coerceTypes: false },
+			ajvOptions: { strict: true, coerceTypes: true },
 			ajvPlugins: {
 				body: [[addErrors]]
 			}

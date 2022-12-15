@@ -18,7 +18,7 @@ import * as http from 'http';
 import { reflect } from '@davinci/reflector';
 import { HttpServerModule, HttpServerModuleOptions, ParameterConfiguration, route } from '../../src';
 import { expect } from '../support/chai';
-import { InjectOptions } from 'light-my-request';
+import type { InjectOptions } from 'light-my-request';
 
 const sinon = require('sinon').createSandbox();
 

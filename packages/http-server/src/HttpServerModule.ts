@@ -17,7 +17,7 @@ import {
 import pathUtils from 'path';
 import pino from 'pino';
 import { ClassReflection, ClassType, DecoratorId, MethodReflection } from '@davinci/reflector';
-import { InjectOptions } from 'light-my-request';
+import type { InjectOptions } from 'light-my-request';
 import {
 	ContextFactory,
 	ContextFactoryArguments,

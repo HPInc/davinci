@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { Chain, InjectOptions } from 'light-my-request';
+import type { Chain, InjectOptions } from 'light-my-request';
 
 export * from './HttpServerModule';
 export * as httpErrors from './httpErrors';
