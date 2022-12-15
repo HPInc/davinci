@@ -154,6 +154,48 @@ describe('decorators', () => {
 			});
 		});
 
+		it('should allow multiple decorators on a single method', () => {
+			class CustomerController {
+				@route.get({ path: '/', summary: 'Get customers', description: 'Get a list of customers' })
+				@route.post({ path: '/', summary: 'Create customers', description: 'Create customers' })
+				getpost() {}
+			}
+
+			const reflection = reflect(CustomerController);
+
+			expect(reflection).to.containSubset({
+				methods: [
+					{
+						kind: 'Method',
+						name: 'getpost',
+						parameters: [],
+						decorators: [
+							{
+								module: 'http-server',
+								type: 'route',
+								verb: 'get',
+								options: {
+									path: '/',
+									summary: 'Get customers',
+									description: 'Get a list of customers'
+								}
+							},
+							{
+								module: 'http-server',
+								type: 'route',
+								verb: 'post',
+								options: {
+									path: '/',
+									summary: 'Create customers',
+									description: 'Create customers'
+								}
+							}
+						]
+					}
+				]
+			});
+		});
+
 		it('should apply the decorator from the class itself, not the one from the super class', () => {
 			class BaseController {
 				@route.get({ path: '/', summary: 'Base method', description: 'Base method' })
