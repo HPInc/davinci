@@ -7,6 +7,7 @@ import { model, Model, Schema, SchemaOptions } from 'mongoose';
 import { ClassType, DecoratorId, PropertyReflection, reflect, TypeValue } from '@davinci/reflector';
 import { omit } from '@davinci/core';
 import { IPropDecoratorOptions, IPropDecoratorOptionsFactory } from './decorators/types';
+import { IVirtualArgs } from './decorators';
 
 /**
  * Utility function that given a class passed as parameter,
@@ -95,7 +96,7 @@ export const generateSchema = <T>(
 
 			const prop = {
 				...omit(options, ['type']),
-				$type: type
+				type
 			};
 
 			return {
@@ -108,8 +109,7 @@ export const generateSchema = <T>(
 		const schemaDecoration = classReflection.decorators.find(d => d[DecoratorId] === 'mongoose.schema');
 		const schemaOptions = schemaDecoration?.options;
 		const schema =
-			(forceCreateSchema || schemaDecoration) &&
-			new Schema(definition, { ...(options ?? schemaOptions), typeKey: '$type' });
+			(forceCreateSchema || schemaDecoration) && new Schema(definition, { ...(options ?? schemaOptions) });
 
 		// register methods
 		const methods = classReflection.methods.reduce((acc, methodReflection) => {
@@ -126,20 +126,36 @@ export const generateSchema = <T>(
 		// indexes
 		const indexes = classReflection.decorators.filter(m => m[DecoratorId] === 'mongoose.index');
 
-		// virtual fields that populates
-		const populatedVirtuals = classReflection.properties.reduce((acc, propReflection) => {
-			const populateDecorator = propReflection.decorators.find(d => d[DecoratorId] === 'mongoose.populate');
-			if (populateDecorator) {
-				acc.push({
-					name: populateDecorator.name,
-					options: { localField: populateDecorator.name, ...populateDecorator.options }
-				});
-			}
+		const populatedVirtuals = [
+			// properties with @populate decorator
+			...classReflection.properties.reduce((acc, propReflection) => {
+				const populateDecorator = propReflection.decorators.find(d => d[DecoratorId] === 'mongoose.populate');
+				if (populateDecorator) {
+					acc.push({
+						name: populateDecorator.name,
+						options: { localField: populateDecorator.name, ...populateDecorator.options }
+					});
+				}
 
-			return acc;
-		}, []);
+				return acc;
+			}, []),
+			// properties with @virtual decorator
+			...classReflection.properties.reduce((acc, propReflection) => {
+				const virtualDecorator: { options: IVirtualArgs } = propReflection.decorators.find(
+					d => d[DecoratorId] === 'mongoose.virtual'
+				);
+				if (virtualDecorator) {
+					acc.push({
+						name: propReflection.name,
+						options: { localField: propReflection.name, ...virtualDecorator.options }
+					});
+				}
 
-		// virtual fields
+				return acc;
+			}, [])
+		];
+
+		// virtual fields with getter method
 		const virtuals = classReflection.methods.reduce((acc, methodReflection) => {
 			const virtualDecorator = methodReflection.decorators.find(d => d[DecoratorId] === 'mongoose.virtual');
 			if (virtualDecorator) {

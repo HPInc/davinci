@@ -12,7 +12,7 @@ import {
 	mapSeries,
 	omit
 } from '@davinci/core';
-import Ajv, { DefinedError, Options } from 'ajv';
+import Ajv, { DefinedError, Options, Plugin } from 'ajv';
 import addFormats from 'ajv-formats';
 import { TypeValue } from '@davinci/reflector';
 import { EndpointSchema, ParameterConfiguration, Route, ValidationFactory, ValidationFunction } from './types';
@@ -28,14 +28,16 @@ const defaultAjvOptions: Options = {
 const sources = ['path', 'header', 'query', 'body'] as const;
 type Source = typeof sources[number];
 type AjvInstancesMap = Record<Source, Ajv>;
+type AjvOptionsMap = Record<Source, Options>;
 
-type AjvPlugin = Function;
 type AjvPluginOptions = unknown;
+type AjvPlugin = Plugin<AjvPluginOptions>;
+type AjvPlugins = Array<[AjvPlugin, AjvPluginOptions?]>;
+type AjvPluginsMap = Record<Source, AjvPlugins>;
 
 export interface AjvValidatorOptions {
-	ajvOptions?: Options;
-	plugins?: Array<[AjvPlugin, AjvPluginOptions?]>;
-	instances?: Ajv | Partial<AjvInstancesMap>;
+	ajvOptions?: Options | Partial<AjvOptionsMap>;
+	ajvPlugins?: AjvPlugins | Partial<AjvPluginsMap>;
 }
 
 @di.autoInjectable()
@@ -54,6 +56,7 @@ export class AjvValidator<Request = unknown> {
 
 	constructor(private options: AjvValidatorOptions, private entityRegistry?: EntityRegistry) {
 		this.initializeInstances();
+		this.registerPlugins();
 	}
 
 	public async createValidatorFunction(route: Route<Request>): Promise<ValidationFunction> {
@@ -164,31 +167,37 @@ export class AjvValidator<Request = unknown> {
 	}
 
 	private initializeInstances() {
-		const ajvInstances = this.options?.instances;
-
-		if (ajvInstances instanceof Ajv || ajvInstances?.constructor?.name === 'Ajv') {
-			const ajv = ajvInstances as Ajv;
-			this.ajvInstances = {
-				body: ajv,
-				query: ajv,
-				path: ajv,
-				header: ajv
-			};
-		} else if (typeof ajvInstances === 'object' || !ajvInstances) {
+		sources.forEach(source => {
 			const ajv = new Ajv({
 				...defaultAjvOptions,
-				...this.options?.ajvOptions
+				...(this.options?.ajvOptions?.[source] || this.options?.ajvOptions)
 			});
-			addFormats(ajv);
+			this.ajvInstances[source] = addFormats(ajv);
+		});
+	}
 
-			this.ajvInstances = sources.reduce(
-				(acc: AjvInstancesMap, source) => ({
-					...acc,
-					[source]: acc?.[source] ?? ajv
-				}),
-				ajvInstances
-			);
-		}
+	private isPluginsMap = (plugins: AjvPlugins | Partial<AjvPluginsMap>): plugins is AjvPluginsMap => {
+		return !Array.isArray(plugins);
+	};
+
+	private registerPlugins() {
+		const plugins = this.options?.ajvPlugins;
+		if (!plugins) return;
+
+		sources.forEach(source => {
+			if (this.isPluginsMap(plugins)) {
+				// eslint-disable-next-line no-unused-expressions
+				plugins[source]?.forEach(p => {
+					const [plugin, opts] = p;
+					plugin(this.ajvInstances[source], opts);
+				});
+			} else if (Array.isArray(plugins)) {
+				plugins.forEach(p => {
+					const [plugin, opts] = p;
+					plugin(this.ajvInstances[source], opts);
+				});
+			}
+		});
 	}
 
 	private addSchemaToAjvInstances(schema: Partial<JSONSchema>) {

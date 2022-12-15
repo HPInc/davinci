@@ -3,6 +3,71 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.0.0](https://github.com/HPInc/davinci/compare/@davinci/http-server@2.3.1...@davinci/http-server@3.0.0) (2022-12-15)
+
+
+### Features
+
+* remove support for passing ajv instances to AjvValidator ([7538413](https://github.com/HPInc/davinci/commit/7538413ef454350bf22c38e6c3559a3ddae35c20))
+
+
+### BREAKING CHANGES
+
+* AjvValidator does not support ajv instances anymore
+AjvValidator instances can be configured fully through the options
+
+
+
+
+
+## [2.3.1](https://github.com/HPInc/davinci/compare/@davinci/http-server@2.3.0...@davinci/http-server@2.3.1) (2022-12-13)
+
+
+### Bug Fixes
+
+* do not check if addFormats plugin is duplicated ([903de94](https://github.com/HPInc/davinci/commit/903de947c31c7955daa4c7d974e104e26f63fbc2))
+* register ajv plugins once per ajv instance ([27a3813](https://github.com/HPInc/davinci/commit/27a381349e1014d4efedfebc2e78739f0abd033e))
+
+
+
+
+
+# [2.3.0](https://github.com/HPInc/davinci/compare/@davinci/http-server@2.2.0...@davinci/http-server@2.3.0) (2022-12-12)
+
+
+### Bug Fixes
+
+* check plugins is not undefined before foreach ([f8f06e1](https://github.com/HPInc/davinci/commit/f8f06e19da649d28cc3b186b82e0a4be87934039))
+* options can be undefined in registerPlugins ([f9b153c](https://github.com/HPInc/davinci/commit/f9b153c1c5809c6cad9b6bbbdca7c6fe005c9c2c))
+
+
+### Features
+
+* register ajv plugins on init for all ajv instances ([483beca](https://github.com/HPInc/davinci/commit/483beca46bb1b84edcdf9f04bf0680443fa44d8e))
+
+
+
+
+
+# [2.2.0](https://github.com/HPInc/davinci/compare/@davinci/http-server@2.1.2...@davinci/http-server@2.2.0) (2022-12-12)
+
+
+### Features
+
+* added parameter that enables jsonified querystring parsing ([#180](https://github.com/HPInc/davinci/issues/180)) ([990647f](https://github.com/HPInc/davinci/commit/990647f1d38cb674a42da56d699055afa7b61714))
+
+
+
+
+
+## [2.1.2](https://github.com/HPInc/davinci/compare/@davinci/http-server@2.1.1...@davinci/http-server@2.1.2) (2022-12-09)
+
+**Note:** Version bump only for package @davinci/http-server
+
+
+
+
+
 ## [2.1.1](https://github.com/HPInc/davinci/compare/@davinci/http-server@2.1.0...@davinci/http-server@2.1.1) (2022-12-02)
 
 

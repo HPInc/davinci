@@ -139,6 +139,7 @@ export type UncheckedJSONSchemaType<T, IsPartial extends boolean> = (
 	$ref?: string;
 	$defs?: Record<string, UncheckedJSONSchemaType<Known, true>>;
 	definitions?: Record<string, UncheckedJSONSchemaType<Known, true>>;
+	default?: unknown;
 };
 
 export type JSONSchemaType<T> = StrictNullChecksWrapper<'JSONSchemaType', UncheckedJSONSchemaType<T, false>>;

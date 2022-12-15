@@ -3,6 +3,57 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.2.4](https://github.com/HPInc/davinci/compare/@davinci/http-server-express@2.2.3...@davinci/http-server-express@2.2.4) (2022-12-15)
+
+**Note:** Version bump only for package @davinci/http-server-express
+
+
+
+
+
+## [2.2.3](https://github.com/HPInc/davinci/compare/@davinci/http-server-express@2.2.2...@davinci/http-server-express@2.2.3) (2022-12-13)
+
+**Note:** Version bump only for package @davinci/http-server-express
+
+
+
+
+
+## [2.2.2](https://github.com/HPInc/davinci/compare/@davinci/http-server-express@2.2.1...@davinci/http-server-express@2.2.2) (2022-12-12)
+
+**Note:** Version bump only for package @davinci/http-server-express
+
+
+
+
+
+## [2.2.1](https://github.com/HPInc/davinci/compare/@davinci/http-server-express@2.2.0...@davinci/http-server-express@2.2.1) (2022-12-12)
+
+**Note:** Version bump only for package @davinci/http-server-express
+
+
+
+
+
+# [2.2.0](https://github.com/HPInc/davinci/compare/@davinci/http-server-express@2.1.2...@davinci/http-server-express@2.2.0) (2022-12-12)
+
+
+### Features
+
+* allow cors in middlewares options ([79f7d81](https://github.com/HPInc/davinci/commit/79f7d8103607abd143ec8eb49cda1b7d55f99301))
+
+
+
+
+
+## [2.1.2](https://github.com/HPInc/davinci/compare/@davinci/http-server-express@2.1.1...@davinci/http-server-express@2.1.2) (2022-12-09)
+
+**Note:** Version bump only for package @davinci/http-server-express
+
+
+
+
+
 ## [2.1.1](https://github.com/HPInc/davinci/compare/@davinci/http-server-express@2.1.0...@davinci/http-server-express@2.1.1) (2022-12-02)
 
 

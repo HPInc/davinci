@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { IndexOptions, SchemaOptions } from 'mongoose';
+import { IndexOptions, SchemaOptions, VirtualTypeOptions } from 'mongoose';
 import { decorate, DecoratorId } from '@davinci/reflector';
 import { IPropDecoratorOptions } from './types';
 
@@ -56,15 +56,7 @@ export function method(): MethodDecorator {
 	);
 }
 
-export interface IVirtualArgs {
-	ref: string; // The model to use
-	localField?: string; // Find people where `localField`
-	foreignField: string; // is equal to `foreignField`
-	// If `justOne` is true, 'members' will be a single doc as opposed to
-	// an array. `justOne` is false by default.
-	justOne?: boolean;
-	options?: object;
-}
+export type IVirtualArgs = VirtualTypeOptions;
 
 /**
  * Decorator that annotates a field as localField

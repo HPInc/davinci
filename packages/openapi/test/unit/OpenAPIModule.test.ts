@@ -971,7 +971,7 @@ describe('OpenAPIModule', () => {
 		it('should expose an endpoint returning the spec', async () => {
 			await initApp({ document: { path: '/swagger-doc', spec: { info: { title: '', version: '' } } } });
 
-			const { data } = await axios.get('http://localhost:3000/swagger-doc');
+			const { data } = await axios.get('http://127.0.0.1:3000/swagger-doc');
 
 			expect(data).to.have.keys('openapi', 'paths', 'info', 'components', 'security');
 		});
@@ -979,7 +979,7 @@ describe('OpenAPIModule', () => {
 		it('should expose an endpoint returning the swagger UI', async () => {
 			await initApp({ explorer: { path: '/swagger-ui' } });
 
-			const { data } = await axios.get('http://localhost:3000/swagger-ui');
+			const { data } = await axios.get('http://127.0.0.1:3000/swagger-ui');
 
 			expect(data).to.match(/<html.+>(.|\n)+<\/html>/);
 		});
@@ -990,7 +990,7 @@ describe('OpenAPIModule', () => {
 				explorer: { path: '/swagger-ui' }
 			});
 
-			const { data } = await axios.get('http://localhost:3000/swagger-ui');
+			const { data } = await axios.get('http://127.0.0.1:3000/swagger-ui');
 
 			expect(data).to.match(/<html.+>(.|\n)+<\/html>/);
 		});
