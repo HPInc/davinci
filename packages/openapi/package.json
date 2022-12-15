@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/openapi",
-	"version": "2.1.8",
+	"version": "2.1.9",
 	"description": "Framework for rapid and consistent API development",
 	"main": "build-cjs/index.js",
 	"module": "build-esm/index.js",
