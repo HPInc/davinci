@@ -42,7 +42,7 @@ export interface AjvValidatorOptions {
 
 @di.autoInjectable()
 export class AjvValidator<Request = unknown> {
-	private ajvInstances?: Partial<AjvInstancesMap>;
+	private ajvInstances: Partial<AjvInstancesMap>  = {}
 	private jsonSchemasMap = new Map<TypeValue, JSONSchema | Partial<JSONSchema>>();
 
 	private sourceToSchemaMap: Partial<
