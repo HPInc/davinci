@@ -141,18 +141,10 @@ describe('HttpServerModule', () => {
 				find() {}
 				@route.post({ path: '/create/', responses: { 201: { description: '' } } })
 				create() {}
-				@route.patch({ path: '/:id', responses: { 201: { description: '' } } })
-				@route.put({ path: '/:id', responses: { 201: { description: '' } } })
-				update() {}
 			}
 			class MyDummyHttpServer extends DummyHttpServer {
 				get() {}
-
 				post() {}
-
-				patch() {}
-
-				put() {}
 			}
 			const dummyHttpServer = new MyDummyHttpServer();
 			const app = new App();
@@ -185,24 +177,238 @@ describe('HttpServerModule', () => {
 							}
 						}
 					},
+					controllerDecoratorMetadata: {
+						module: 'http-server',
+						type: 'controller',
+						options: {
+							basePath: '/api/customers'
+						}
+					},
 					responseStatusCodes: [200, 400]
 				},
 				{
 					path: '/api/customers/create',
 					verb: 'post',
 					parametersConfig: [],
+					methodDecoratorMetadata: {
+						module: 'http-server',
+						type: 'route',
+						verb: 'post',
+						options: {
+							path: '/create/',
+							responses: {
+								'201': {
+									description: ''
+								}
+							}
+						}
+					},
+					controllerDecoratorMetadata: {
+						module: 'http-server',
+						type: 'controller',
+						options: {
+							basePath: '/api/customers'
+						}
+					},
 					responseStatusCodes: [201]
+				}
+			]);
+		});
+
+		it('should support multiple decorations at the controller and method levels', async () => {
+			@route.controller({ basePath: '/api/customers' })
+			@route.controller({ basePath: '/api/users' })
+			class PersonController {
+				@route.get({
+					path: '/all',
+					responses: { 400: { description: '' }, 200: { description: '' }, default: { description: '' } }
+				})
+				find() {}
+
+				@route.patch({ path: '/:id', responses: { 201: { description: '' } } })
+				@route.put({ path: '/:id', responses: { 201: { description: '' } } })
+				update() {}
+			}
+			class MyDummyHttpServer extends DummyHttpServer {
+				get() {}
+				post() {}
+				patch() {}
+				put() {}
+			}
+			const dummyHttpServer = new MyDummyHttpServer();
+			const app = new App();
+			await app.registerController(PersonController).registerModule(dummyHttpServer);
+			await app.init();
+
+			const routes = await dummyHttpServer.createRoutes();
+
+			expect(routes).to.containSubset([
+				{
+					path: '/api/users/all',
+					verb: 'get',
+					parametersConfig: [],
+					methodDecoratorMetadata: {
+						module: 'http-server',
+						type: 'route',
+						verb: 'get',
+						options: {
+							path: '/all',
+							responses: {
+								'200': {
+									description: ''
+								},
+								'400': {
+									description: ''
+								},
+								default: {
+									description: ''
+								}
+							}
+						}
+					},
+					controllerDecoratorMetadata: {
+						module: 'http-server',
+						type: 'controller',
+						options: {
+							basePath: '/api/users'
+						}
+					},
+					responseStatusCodes: [200, 400]
+				},
+				{
+					path: '/api/users/:id',
+					verb: 'put',
+					parametersConfig: [],
+					methodDecoratorMetadata: {
+						module: 'http-server',
+						type: 'route',
+						verb: 'put',
+						options: {
+							path: '/:id',
+							responses: {
+								'201': {
+									description: ''
+								}
+							}
+						}
+					},
+					controllerDecoratorMetadata: {
+						module: 'http-server',
+						type: 'controller',
+						options: {
+							basePath: '/api/users'
+						}
+					},
+					responseStatusCodes: [201]
+				},
+				{
+					path: '/api/users/:id',
+					verb: 'patch',
+					parametersConfig: [],
+					methodDecoratorMetadata: {
+						module: 'http-server',
+						type: 'route',
+						verb: 'patch',
+						options: {
+							path: '/:id',
+							responses: {
+								'201': {
+									description: ''
+								}
+							}
+						}
+					},
+					controllerDecoratorMetadata: {
+						module: 'http-server',
+						type: 'controller',
+						options: {
+							basePath: '/api/users'
+						}
+					},
+					responseStatusCodes: [201]
+				},
+				{
+					path: '/api/customers/all',
+					verb: 'get',
+					parametersConfig: [],
+					methodDecoratorMetadata: {
+						module: 'http-server',
+						type: 'route',
+						verb: 'get',
+						options: {
+							path: '/all',
+							responses: {
+								'200': {
+									description: ''
+								},
+								'400': {
+									description: ''
+								},
+								default: {
+									description: ''
+								}
+							}
+						}
+					},
+					controllerDecoratorMetadata: {
+						module: 'http-server',
+						type: 'controller',
+						options: {
+							basePath: '/api/customers'
+						}
+					},
+					responseStatusCodes: [200, 400]
 				},
 				{
 					path: '/api/customers/:id',
 					verb: 'put',
 					parametersConfig: [],
+					methodDecoratorMetadata: {
+						module: 'http-server',
+						type: 'route',
+						verb: 'put',
+						options: {
+							path: '/:id',
+							responses: {
+								'201': {
+									description: ''
+								}
+							}
+						}
+					},
+					controllerDecoratorMetadata: {
+						module: 'http-server',
+						type: 'controller',
+						options: {
+							basePath: '/api/customers'
+						}
+					},
 					responseStatusCodes: [201]
 				},
 				{
 					path: '/api/customers/:id',
 					verb: 'patch',
 					parametersConfig: [],
+					methodDecoratorMetadata: {
+						module: 'http-server',
+						type: 'route',
+						verb: 'patch',
+						options: {
+							path: '/:id',
+							responses: {
+								'201': {
+									description: ''
+								}
+							}
+						}
+					},
+					controllerDecoratorMetadata: {
+						module: 'http-server',
+						type: 'controller',
+						options: {
+							basePath: '/api/customers'
+						}
+					},
 					responseStatusCodes: [201]
 				}
 			]);
