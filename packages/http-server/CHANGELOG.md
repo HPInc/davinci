@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.1.0](https://github.com/HPInc/davinci/compare/@davinci/http-server@3.0.0...@davinci/http-server@3.1.0) (2022-12-15)
+
+
+### Features
+
+* allow multiple http method decorators ([bf843aa](https://github.com/HPInc/davinci/commit/bf843aa30941c1e98af1a41db6556b85bd4c3513))
+* **http-server:** createRoutes method now handle multiple decorations ([80e48bd](https://github.com/HPInc/davinci/commit/80e48bd7f67e435f16bfd6541e9eec309320ea53))
+
+
+
+
+
 # [3.0.0](https://github.com/HPInc/davinci/compare/@davinci/http-server@2.3.1...@davinci/http-server@3.0.0) (2022-12-15)
 
 
