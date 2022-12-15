@@ -7,13 +7,24 @@ import { createApp } from '@davinci/core';
 import { ExpressHttpServer } from '@davinci/http-server-express';
 import { HealthChecksModule } from '@davinci/health-checks';
 import { OpenAPIModule } from '@davinci/openapi';
+import addErrors from 'ajv-errors';
+import { createAjvValidator } from '@davinci/http-server';
 import { CustomerController } from './api/customer';
 
 const app = createApp();
 const contextFactory = ({ request }) => ({ accountId: request.headers['x-accountid'] });
 
 app.registerController(CustomerController).registerModule(
-	new ExpressHttpServer({ contextFactory }),
+	new ExpressHttpServer({
+		contextFactory,
+		validationFactory: createAjvValidator({
+			ajvOptions: {
+				header: { coerceTypes: true },
+				query: { coerceTypes: true }
+			},
+			ajvPlugins: [[addErrors]]
+		})
+	}),
 	new HealthChecksModule({ healthChecks: [{ name: 'liveness', endpoint: '/.ah/live' }] }),
 	new OpenAPIModule({
 		document: {
