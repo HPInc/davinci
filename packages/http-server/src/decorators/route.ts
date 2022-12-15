@@ -63,7 +63,7 @@ export function controller(options?: ControllerDecoratorOptions): ClassDecorator
 			type: 'controller',
 			options
 		},
-		{ allowMultiple: false }
+		{ allowMultiple: true }
 	);
 }
 
