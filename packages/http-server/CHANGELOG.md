@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.0.0](https://github.com/HPInc/davinci/compare/@davinci/http-server@2.3.1...@davinci/http-server@3.0.0) (2022-12-15)
+
+
+### Features
+
+* remove support for passing ajv instances to AjvValidator ([7538413](https://github.com/HPInc/davinci/commit/7538413ef454350bf22c38e6c3559a3ddae35c20))
+
+
+### BREAKING CHANGES
+
+* AjvValidator does not support ajv instances anymore
+AjvValidator instances can be configured fully through the options
+
+
+
+
+
 ## [2.3.1](https://github.com/HPInc/davinci/compare/@davinci/http-server@2.3.0...@davinci/http-server@2.3.1) (2022-12-13)
 
 
