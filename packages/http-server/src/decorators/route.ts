@@ -22,7 +22,7 @@ const createRouteMethodDecorator = (verb: Verb) => (options: MethodDecoratorOpti
 			verb,
 			options
 		},
-		{ allowMultiple: false }
+		{ allowMultiple: true }
 	);
 };
 
