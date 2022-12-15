@@ -141,29 +141,27 @@ describe('HttpServerModule', () => {
 				find() {}
 				@route.post({ path: '/create/', responses: { 201: { description: '' } } })
 				create() {}
+				@route.patch({ path: '/:id', responses: { 201: { description: '' } } })
+				@route.put({ path: '/:id', responses: { 201: { description: '' } } })
+				update() {}
 			}
 			class MyDummyHttpServer extends DummyHttpServer {
-				get(...args) {
-					return ['get', ...args];
-				}
+				get() {}
 
-				post(...args) {
-					return ['post', ...args];
-				}
+				post() {}
+
+				patch() {}
+
+				put() {}
 			}
 			const dummyHttpServer = new MyDummyHttpServer();
 			const app = new App();
 			await app.registerController(CustomerController).registerModule(dummyHttpServer);
 			await app.init();
 
-			const [[getRoute, postRoute]] = await dummyHttpServer.createRoutes();
-			expect(getRoute[0]).to.be.equal('get');
-			expect(getRoute[1]).to.be.equal('/api/customers/all');
-			expect(postRoute[0]).to.be.equal('post');
-			expect(postRoute[1]).to.be.equal('/api/customers/create');
+			const routes = await dummyHttpServer.createRoutes();
 
-			const routesDefinition = dummyHttpServer.getRoutes();
-			expect(routesDefinition).to.containSubset([
+			expect(routes).to.containSubset([
 				{
 					path: '/api/customers/all',
 					verb: 'get',
@@ -193,19 +191,18 @@ describe('HttpServerModule', () => {
 					path: '/api/customers/create',
 					verb: 'post',
 					parametersConfig: [],
-					methodDecoratorMetadata: {
-						module: 'http-server',
-						type: 'route',
-						verb: 'post',
-						options: {
-							path: '/create/',
-							responses: {
-								'201': {
-									description: ''
-								}
-							}
-						}
-					},
+					responseStatusCodes: [201]
+				},
+				{
+					path: '/api/customers/:id',
+					verb: 'put',
+					parametersConfig: [],
+					responseStatusCodes: [201]
+				},
+				{
+					path: '/api/customers/:id',
+					verb: 'patch',
+					parametersConfig: [],
 					responseStatusCodes: [201]
 				}
 			]);
