@@ -19,7 +19,7 @@ app.registerController(CustomerController).registerModule(
 		contextFactory,
 		validationFactory: createAjvValidator({
 			ajvOptions: { strict: true, coerceTypes: false },
-			plugins: {
+			ajvPlugins: {
 				body: [[addErrors]]
 			}
 		})

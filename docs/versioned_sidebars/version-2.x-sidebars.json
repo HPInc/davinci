@@ -1,29 +1,30 @@
 {
-  "mySidebar": [
-    "intro",
-    "getting-started",
-    {
-      "type": "category",
-      "label": "Modules",
-      "items": [
-        "modules/modules",
-        {
-          "type": "category",
-          "label": "Http Server",
-          "items": [
-            "modules/http-server/intro",
-            "modules/http-server/fastify",
-            "modules/http-server/express",
-            "modules/http-server/controllers",
-            "modules/http-server/context",
-            "modules/openapi/openapi"
-          ]
-        },
-        "modules/mongoose/mongoose",
-        "modules/health-checks/health-checks"
-      ]
-    },
-    "interceptors",
-    "migration-from-v1"
-  ]
+	"mySidebar": [
+		"intro",
+		"getting-started",
+		{
+			"type": "category",
+			"label": "Modules",
+			"items": [
+				"modules/modules",
+				{
+					"type": "category",
+					"label": "Http Server",
+					"items": [
+						"modules/http-server/intro",
+						"modules/http-server/fastify",
+						"modules/http-server/express",
+						"modules/http-server/controllers",
+						"modules/http-server/context",
+						"modules/http-server/validation",
+						"modules/openapi/openapi"
+					]
+				},
+				"modules/mongoose/mongoose",
+				"modules/health-checks/health-checks"
+			]
+		},
+		"interceptors",
+		"migration-from-v1"
+	]
 }

@@ -613,40 +613,40 @@ describe('AjvValidator', () => {
 			const plugin2 = sinon.stub();
 			const options: AjvValidatorOptions = {
 				ajvOptions: { strict: true, strictNumbers: true },
-				plugins: [[plugin1, plugin1opts], [plugin2]]
+				ajvPlugins: [[plugin1, plugin1opts], [plugin2]]
 			};
-			
+
 			const ajvInstances = new AjvValidator(options).getAjvInstances();
-			
+
 			Object.keys(ajvInstances || {}).forEach(source => {
-				expect((ajvInstances?.[source] as Ajv).opts).to.include((options.ajvOptions as Options));
+				expect((ajvInstances?.[source] as Ajv).opts).to.include(options.ajvOptions as Options);
 			});
-			
+
 			expect(plugin1.callCount).to.eql(4);
 			expect(plugin1.firstCall.args[1]).to.be.deep.equal(plugin1opts);
 
 			expect(plugin2.callCount).to.eql(4);
 			expect(plugin2.firstCall.args[1]).to.be.undefined;
 		});
-		
+
 		it('should create AjvValidator given simple options and plugins map', async () => {
 			const plugin1 = sinon.stub();
 			const plugin1opts = { opt: 1 };
 			const plugin2 = sinon.stub();
 			const options: AjvValidatorOptions = {
 				ajvOptions: { strict: true, strictNumbers: true },
-				plugins: {
+				ajvPlugins: {
 					path: [[plugin1, plugin1opts]],
 					body: [[plugin2]]
 				}
 			};
-			
+
 			const ajvInstances = new AjvValidator(options).getAjvInstances();
-			
+
 			Object.keys(ajvInstances || {}).forEach(source => {
-				expect((ajvInstances?.[source] as Ajv).opts).to.include((options.ajvOptions as Options));
+				expect((ajvInstances?.[source] as Ajv).opts).to.include(options.ajvOptions as Options);
 			});
-			
+
 			expect(plugin1.callCount).to.eql(1);
 			expect(plugin1.firstCall.args[1]).to.be.deep.equal(plugin1opts);
 
@@ -663,20 +663,26 @@ describe('AjvValidator', () => {
 					header: { strict: true, strictNumbers: false },
 					path: { coerceTypes: true }
 				},
-				plugins: [[plugin1, plugin1opts], [plugin2]]
+				ajvPlugins: [[plugin1, plugin1opts], [plugin2]]
 			};
-			
+
 			const ajvInstances = new AjvValidator(options).getAjvInstances();
-			
-			expect(ajvInstances?.body?.opts).to.not.include({ ...options.ajvOptions?.['header'], ...options.ajvOptions?.['path']});
-			expect(ajvInstances?.query?.opts).to.not.include({ ...options.ajvOptions?.['header'], ...options.ajvOptions?.['path']});
-			
+
+			expect(ajvInstances?.body?.opts).to.not.include({
+				...options.ajvOptions?.['header'],
+				...options.ajvOptions?.['path']
+			});
+			expect(ajvInstances?.query?.opts).to.not.include({
+				...options.ajvOptions?.['header'],
+				...options.ajvOptions?.['path']
+			});
+
 			expect(ajvInstances?.header?.opts).to.include(options.ajvOptions?.['header']);
 			expect(ajvInstances?.header?.opts).to.not.include(options.ajvOptions?.['path']);
 
 			expect(ajvInstances?.path?.opts).to.include(options.ajvOptions?.['path']);
 			expect(ajvInstances?.path?.opts).to.not.include(options.ajvOptions?.['header']);
-			
+
 			expect(plugin1.callCount).to.eql(4);
 			expect(plugin1.firstCall.args[1]).to.be.deep.equal(plugin1opts);
 
@@ -693,23 +699,29 @@ describe('AjvValidator', () => {
 					header: { strict: true, strictNumbers: false },
 					path: { coerceTypes: true }
 				},
-				plugins: {
+				ajvPlugins: {
 					path: [[plugin1, plugin1opts]],
 					body: [[plugin2]]
 				}
 			};
-			
+
 			const ajvInstances = new AjvValidator(options).getAjvInstances();
-			
-			expect(ajvInstances?.body?.opts).to.not.include({ ...options.ajvOptions?.['header'], ...options.ajvOptions?.['path']});
-			expect(ajvInstances?.query?.opts).to.not.include({ ...options.ajvOptions?.['header'], ...options.ajvOptions?.['path']});
-			
+
+			expect(ajvInstances?.body?.opts).to.not.include({
+				...options.ajvOptions?.['header'],
+				...options.ajvOptions?.['path']
+			});
+			expect(ajvInstances?.query?.opts).to.not.include({
+				...options.ajvOptions?.['header'],
+				...options.ajvOptions?.['path']
+			});
+
 			expect(ajvInstances?.header?.opts).to.include(options.ajvOptions?.['header']);
 			expect(ajvInstances?.header?.opts).to.not.include(options.ajvOptions?.['path']);
 
 			expect(ajvInstances?.path?.opts).to.include(options.ajvOptions?.['path']);
 			expect(ajvInstances?.path?.opts).to.not.include(options.ajvOptions?.['header']);
-			
+
 			expect(plugin1.callCount).to.eql(1);
 			expect(plugin1.firstCall.args[0].opts).to.include(options.ajvOptions?.['path']);
 			expect(plugin1.firstCall.args[1]).to.be.deep.equal(plugin1opts);
@@ -724,7 +736,7 @@ describe('AjvValidator', () => {
 			const plugin1opts = { opt: 1 };
 			const plugin2 = sinon.stub();
 			const options: AjvValidatorOptions = {
-				plugins: [[plugin1, plugin1opts], [plugin2]]
+				ajvPlugins: [[plugin1, plugin1opts], [plugin2]]
 			};
 			const defaultOptions = {
 				removeAdditional: 'all',
@@ -732,13 +744,13 @@ describe('AjvValidator', () => {
 				allErrors: true,
 				useDefaults: true
 			};
-			
+
 			const ajvInstances = new AjvValidator(options).getAjvInstances();
-			
+
 			Object.keys(ajvInstances || {}).forEach(source => {
 				expect((ajvInstances?.[source] as Ajv).opts).to.include(defaultOptions);
 			});
-			
+
 			expect(plugin1.callCount).to.eql(4);
 			expect(plugin1.firstCall.args[1]).to.be.deep.equal(plugin1opts);
 
@@ -751,7 +763,7 @@ describe('AjvValidator', () => {
 			const plugin1opts = { opt: 1 };
 			const plugin2 = sinon.stub();
 			const options: AjvValidatorOptions = {
-				plugins: {
+				ajvPlugins: {
 					path: [[plugin1, plugin1opts]],
 					body: [[plugin2]],
 					header: [[plugin2]]
@@ -763,13 +775,13 @@ describe('AjvValidator', () => {
 				allErrors: true,
 				useDefaults: true
 			};
-			
+
 			const ajvInstances = new AjvValidator(options).getAjvInstances();
-			
+
 			Object.keys(ajvInstances || {}).forEach(source => {
 				expect((ajvInstances?.[source] as Ajv).opts).to.include(defaultOptions);
 			});
-			
+
 			expect(plugin1.callCount).to.eql(1);
 			expect(plugin1.firstCall.args[1]).to.be.deep.equal(plugin1opts);
 
@@ -781,9 +793,9 @@ describe('AjvValidator', () => {
 			const options: AjvValidatorOptions = {
 				ajvOptions: { coerceTypes: true }
 			};
-			
+
 			const ajvInstances = new AjvValidator(options).getAjvInstances();
-			
+
 			Object.keys(ajvInstances || {}).forEach(source => {
 				expect((ajvInstances?.[source] as Ajv).opts).to.include(options.ajvOptions);
 			});
@@ -796,12 +808,18 @@ describe('AjvValidator', () => {
 					path: { coerceTypes: true }
 				}
 			};
-			
+
 			const ajvInstances = new AjvValidator(options).getAjvInstances();
-			
-			expect(ajvInstances?.body?.opts).to.not.include({ ...options.ajvOptions?.['header'], ...options.ajvOptions?.['path']});
-			expect(ajvInstances?.query?.opts).to.not.include({ ...options.ajvOptions?.['header'], ...options.ajvOptions?.['path']});
-			
+
+			expect(ajvInstances?.body?.opts).to.not.include({
+				...options.ajvOptions?.['header'],
+				...options.ajvOptions?.['path']
+			});
+			expect(ajvInstances?.query?.opts).to.not.include({
+				...options.ajvOptions?.['header'],
+				...options.ajvOptions?.['path']
+			});
+
 			expect(ajvInstances?.header?.opts).to.include(options.ajvOptions?.['header']);
 			expect(ajvInstances?.header?.opts).to.not.include(options.ajvOptions?.['path']);
 
@@ -816,9 +834,9 @@ describe('AjvValidator', () => {
 				allErrors: true,
 				useDefaults: true
 			};
-			
+
 			const ajvInstances = new AjvValidator({}).getAjvInstances();
-			
+
 			Object.keys(ajvInstances || {}).forEach(source => {
 				expect((ajvInstances?.[source] as Ajv).opts).to.include(defaultOptions);
 			});

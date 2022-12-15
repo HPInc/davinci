@@ -29,7 +29,7 @@ type AjvPluginsMap = Record<Source, AjvPlugins>;
 
 export interface AjvValidatorOptions {
 	ajvOptions?: Options | Partial<AjvOptionsMap>;
-	plugins?: AjvPlugins | Partial<AjvPluginsMap>;
+	ajvPlugins?: AjvPlugins | Partial<AjvPluginsMap>;
 }
 
 @di.autoInjectable()
@@ -169,21 +169,21 @@ export class AjvValidator<Request = unknown> {
 
 	private isPluginsMap = (plugins: AjvPlugins | Partial<AjvPluginsMap>): plugins is AjvPluginsMap => {
 		return !Array.isArray(plugins);
-	}
+	};
 
 	private registerPlugins() {
-		const plugins = this.options?.plugins;
+		const plugins = this.options?.ajvPlugins;
 		if (!plugins) return;
 
 		sources.forEach(source => {
 			if (this.isPluginsMap(plugins)) {
 				// eslint-disable-next-line no-unused-expressions
-				(plugins[source] as AjvPlugins)?.forEach(p => {
+				plugins[source]?.forEach(p => {
 					const [plugin, opts] = p;
 					plugin(this.ajvInstances[source], opts);
 				});
-			} else {
-				(plugins as AjvPlugins).forEach(p => {
+			} else if (Array.isArray(plugins)) {
+				plugins.forEach(p => {
 					const [plugin, opts] = p;
 					plugin(this.ajvInstances[source], opts);
 				});
