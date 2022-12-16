@@ -22,7 +22,8 @@ const delay = (fn: Function, ms: number) =>
 		}, ms)
 	);
 
-describe('AmqpModule', () => {
+describe('AmqpModule', function () {
+	this.retries(3);
 	let subscriptions: Array<Subscription>;
 	let app: App;
 
