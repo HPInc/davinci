@@ -22,6 +22,7 @@
 	"dependencies": {
 		"@davinci/reflector": "^2.1.1",
 		"deepmerge": "^4.2.2",
+		"immutable-set": "^2.2.2",
 		"tsyringe": "^4.7.0"
 	},
 	"peerDependencies": {

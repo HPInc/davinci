@@ -2,13 +2,23 @@
  * © Copyright 2022 HP Development Company, L.P.
  * SPDX-License-Identifier: MIT
  */
-import { App, EntityRegistry, JSONSchema, mapObject, mapSeries, Module } from '@davinci/core';
+import {
+	App,
+	EntityDefinition,
+	EntityDefinitionJSONSchema,
+	EntityRegistry,
+	JSONSchema,
+	mapObject,
+	mapSeries,
+	Module,
+	omit
+} from '@davinci/core';
 import type { HttpServerModule, MethodResponses, Route } from '@davinci/http-server';
 import http, { Server } from 'http';
 import pino, { Level } from 'pino';
 import { OpenAPIV3 } from 'openapi-types';
 import createDeepMerge from '@fastify/deepmerge';
-import { ClassType, PartialDeep } from '@davinci/reflector';
+import { ClassType, PartialDeep, TypeValue } from '@davinci/reflector';
 import { generateSwaggerUiHtml } from './swaggerUi';
 
 const deepMerge = createDeepMerge();
@@ -39,12 +49,12 @@ export interface OpenAPIModuleOptions {
 export class OpenAPIModule extends Module {
 	app: App;
 	moduleOptions: OpenAPIModuleOptions;
-	jsonSchemasMap = new Map<string, Partial<JSONSchema>>();
 	logger = pino({ name: 'openAPI-module' });
 	httpServerModule: HttpServerModule<{ Server: Server }>;
 	httpServer: Server;
 	entityRegistry: EntityRegistry;
 	openAPIDoc: PartialDeep<OpenAPIV3.Document>;
+	private jsonSchemasMap = new Map<string, JSONSchema | Partial<JSONSchema>>();
 
 	constructor(moduleOptions: OpenAPIModuleOptions) {
 		super();
@@ -162,7 +172,7 @@ export class OpenAPIModule extends Module {
 			)
 				return;
 
-			const entityJsonSchema = this.entityRegistry.getJsonSchema(parameterConfig.type);
+			const entityJsonSchema = this.entityRegistry.getEntityDefinitionJsonSchema(parameterConfig.type);
 
 			const jsonSchema =
 				this.jsonSchemasMap.get(entityJsonSchema.title) ?? this.createJsonSchema(entityJsonSchema);
@@ -357,81 +367,52 @@ export class OpenAPIModule extends Module {
 		return this.openAPIDoc;
 	}
 
-	private createJsonSchema(jsonSchema: Partial<JSONSchema>) {
-		if (typeof jsonSchema === 'object') {
-			return {
-				...(jsonSchema.title ? { $id: jsonSchema.title } : {}),
-				...mapObject<Partial<JSONSchema>>(jsonSchema, (p, key) => {
-					if (key === 'properties' && p) {
-						return mapObject(p, propValue => {
-							if (propValue._$ref) {
-								const refEntityDefinitionJson = this.createJsonSchema(
-									this.jsonSchemasMap.get(propValue._$ref) ?? propValue._$ref?.getJsonSchema()
-								);
+	private createJsonSchema(entityJsonSchema: EntityDefinitionJSONSchema): Partial<JSONSchema> {
+		return this.entityRegistry.transformEntityDefinitionSchema(entityJsonSchema, args => {
+			if (args.pointerPath === '') {
+				return { path: '', value: omit(args.schema, ['properties']) };
+			}
 
-								if (!this.jsonSchemasMap.has(propValue._$ref)) {
-									this.jsonSchemasMap.set(propValue._$ref, refEntityDefinitionJson);
-								}
-
-								if (refEntityDefinitionJson?.$id) {
-									this.openAPIDoc.components.schemas[refEntityDefinitionJson.$id] =
-										refEntityDefinitionJson;
-									return { $ref: `#/components/schemas/${refEntityDefinitionJson.$id}` };
-								}
-
-								return refEntityDefinitionJson;
-							}
-
-							if (propValue.type === 'array' && propValue.items?._$ref) {
-								const $ref = propValue.items?._$ref;
-								const refEntityDefinitionJson = this.createJsonSchema(
-									this.jsonSchemasMap.get($ref) ?? $ref?.getJsonSchema()
-								);
-
-								if (!this.jsonSchemasMap.has($ref)) {
-									this.jsonSchemasMap.set($ref, refEntityDefinitionJson);
-								}
-
-								if (refEntityDefinitionJson?.$id) {
-									this.openAPIDoc.components.schemas[refEntityDefinitionJson.$id] =
-										refEntityDefinitionJson;
-									return {
-										...propValue,
-										items: { $ref: `#/components/schemas/${refEntityDefinitionJson.$id}` }
-									};
-								}
-
-								return refEntityDefinitionJson;
-							}
-
-							return propValue;
-						});
+			if (args.schema._$ref) {
+				const ref: EntityDefinition = args.schema._$ref;
+				const childEntityDefJsonSchema = this.createJsonSchema(ref.getEntityDefinitionJsonSchema());
+				if (childEntityDefJsonSchema.$id) {
+					if (!this.jsonSchemasMap.has(childEntityDefJsonSchema.$id)) {
+						this.jsonSchemasMap.set(childEntityDefJsonSchema.$id, childEntityDefJsonSchema);
 					}
+					this.openAPIDoc.components.schemas[childEntityDefJsonSchema.$id] = childEntityDefJsonSchema;
 
-					if (key === 'items' && p._$ref) {
-						const $ref = p._$ref;
-						const refEntityDefinitionJson = this.createJsonSchema(
-							this.jsonSchemasMap.get($ref) ?? $ref?.getJsonSchema()
-						);
+					return {
+						path: args.pointerPath,
+						value: { $ref: `#/components/schemas/${childEntityDefJsonSchema.$id}` }
+					};
+				}
+				return { path: args.pointerPath, value: childEntityDefJsonSchema };
+			}
 
-						if (!this.jsonSchemasMap.has($ref)) {
-							this.jsonSchemasMap.set($ref, refEntityDefinitionJson);
-						}
-
-						if (refEntityDefinitionJson?.$id) {
-							this.openAPIDoc.components.schemas[refEntityDefinitionJson.$id] = refEntityDefinitionJson;
-							return { $ref: `#/components/schemas/${refEntityDefinitionJson.$id}` };
-						}
-
-						return refEntityDefinitionJson;
+			if (typeof args.schema === 'function') {
+				const childEntityDefJsonSchema = this.createJsonSchema(
+					this.entityRegistry.getEntityDefinitionJsonSchema(args.schema)
+				);
+				if (childEntityDefJsonSchema.$id) {
+					if (!this.jsonSchemasMap.has(childEntityDefJsonSchema.$id)) {
+						this.jsonSchemasMap.set(childEntityDefJsonSchema.$id, childEntityDefJsonSchema);
 					}
+					this.openAPIDoc.components.schemas[childEntityDefJsonSchema.$id] = childEntityDefJsonSchema;
 
-					return p;
-				})
-			};
-		}
+					return {
+						path: args.pointerPath,
+						value: { $ref: `#/components/schemas/${childEntityDefJsonSchema.$id}` }
+					};
+				}
+				return { path: args.pointerPath, value: childEntityDefJsonSchema };
+			}
+			if (args.parentKeyword === 'properties') {
+				return { path: args.pointerPath, value: args.schema };
+			}
 
-		return jsonSchema;
+			return null;
+		});
 	}
 
 	// DRY function to generate single item or array definition objects
@@ -450,8 +431,8 @@ export class OpenAPIModule extends Module {
 		return singleJsonSchema;
 	}
 
-	private getAndSetJsonSchema(item: ClassType) {
-		const entityJsonSchema = this.entityRegistry.getJsonSchema(item);
+	private getAndSetJsonSchema(item: TypeValue) {
+		const entityJsonSchema = this.entityRegistry.getEntityDefinitionJsonSchema(item);
 		const jsonSchema = this.jsonSchemasMap.get(entityJsonSchema.title) ?? this.createJsonSchema(entityJsonSchema);
 
 		if (!this.jsonSchemasMap.has(entityJsonSchema.title) && jsonSchema.$id) {

@@ -13,7 +13,7 @@ import {
 	TypeValue
 } from '@davinci/reflector';
 import deepMerge from 'deepmerge';
-import { EntityOptions, EntityPropReflection, JSONSchema } from './types';
+import { EntityDefinitionJSONSchema, EntityOptions, EntityPropReflection, JSONSchema } from './types';
 import { isPlainObject, omit } from '../lib/object-utils';
 
 interface EntityDefinitionOptions {
@@ -27,28 +27,32 @@ interface EntityDefinitionOptions {
 export class EntityDefinition {
 	private name?: string;
 	private readonly type?: TypeValue;
-	private readonly jsonSchema?: JSONSchema;
+	private readonly entityDefinitionJsonSchema?: EntityDefinitionJSONSchema;
 	private entityDefinitionsMapCache = new Map<TypeValue, EntityDefinition>();
 
 	constructor(options: EntityDefinitionOptions) {
 		if (!options.type && !options.jsonSchema) {
-			throw new Error('type or jsonSchema must be passed');
+			throw new Error('type or entityDefinitionJsonSchema must be passed');
 		}
 		this.type = options.type;
 		this.name = options.name ?? (this.type as ClassType)?.name;
 		this.entityDefinitionsMapCache = options.entityDefinitionsMapCache;
-		this.jsonSchema = this.reflect();
+		this.entityDefinitionJsonSchema = this.reflect();
 	}
 
 	public getName() {
 		return this.name;
 	}
 
-	public getJsonSchema() {
-		return this.jsonSchema;
+	public getEntityDefinitionJsonSchema() {
+		return this.entityDefinitionJsonSchema;
 	}
 
-	private reflect(/* jsonSchema?: JSONSchema */) {
+	public getType() {
+		return this.type;
+	}
+
+	private reflect(/* entityDefinitionJsonSchema?: JSONSchema */): EntityDefinitionJSONSchema {
 		const makeSchema = (
 			typeOrClass: TypeValue | StringConstructor | NumberConstructor | BooleanConstructor | Date,
 			key?: string
@@ -100,6 +104,7 @@ export class EntityDefinition {
 						type: theClass,
 						entityDefinitionsMapCache: this.entityDefinitionsMapCache
 					});
+					// eslint-disable-next-line no-unused-expressions
 					this.entityDefinitionsMapCache?.set(theClass, entityDefinition);
 
 					return {
@@ -141,6 +146,10 @@ export class EntityDefinition {
 					properties,
 					required
 				};
+
+				if (entityDecorator) {
+					jsonSchema.$id = jsonSchema.title;
+				}
 
 				return jsonSchema;
 			}
