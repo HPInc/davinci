@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.2.0](https://github.com/HPInc/davinci/compare/@davinci/core@2.1.2...@davinci/core@2.2.0) (2022-12-16)
+
+
+### Features
+
+* entity definition json walker ([#172](https://github.com/HPInc/davinci/issues/172)) ([da0a80d](https://github.com/HPInc/davinci/commit/da0a80dde0dee79bb3a21407afc0ea70909fd30b))
+
+
+
+
+
 ## [2.1.2](https://github.com/HPInc/davinci/compare/@davinci/core@2.1.1...@davinci/core@2.1.2) (2022-12-09)
 
 **Note:** Version bump only for package @davinci/core
