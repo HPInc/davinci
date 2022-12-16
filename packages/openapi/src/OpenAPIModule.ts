@@ -174,7 +174,6 @@ export class OpenAPIModule extends Module {
 
 			const entityJsonSchema = this.entityRegistry.getEntityDefinitionJsonSchema(parameterConfig.type);
 
-			console.log(entityJsonSchema);
 			const jsonSchema =
 				this.jsonSchemasMap.get(entityJsonSchema.title) ?? this.createJsonSchema(entityJsonSchema);
 			if (!this.jsonSchemasMap.has(entityJsonSchema.title) && jsonSchema.$id) {
