@@ -15,6 +15,7 @@ import {
 import deepMerge from 'deepmerge';
 import { EntityDefinitionJSONSchema, EntityOptions, EntityPropReflection, JSONSchema } from './types';
 import { isPlainObject, omit } from '../lib/object-utils';
+import { transformEntityDefinitionSchema } from './json/transformEntityDefinitionSchema';
 
 interface EntityDefinitionOptions {
 	name?: string;
@@ -24,6 +25,10 @@ interface EntityDefinitionOptions {
 	entityDefinitionsMapCache?: Map<TypeValue, EntityDefinition>;
 }
 
+/**
+ * The EntityDefinition class serves as a base class that provides a wrapper for "complex" entities and their properties.
+ * In this context, "complex" refers to schemas that are represented by classes.
+ */
 export class EntityDefinition {
 	private name?: string;
 	private readonly type?: TypeValue;
@@ -52,7 +57,10 @@ export class EntityDefinition {
 		return this.type;
 	}
 
-	private reflect(/* entityDefinitionJsonSchema?: JSONSchema */): EntityDefinitionJSONSchema {
+	/**
+	 * This method traverses the class and generates the EntityDefinitionJSONSchema
+	 */
+	private reflect(): EntityDefinitionJSONSchema {
 		const makeSchema = (
 			typeOrClass: TypeValue | StringConstructor | NumberConstructor | BooleanConstructor | Date,
 			key?: string
@@ -118,7 +126,34 @@ export class EntityDefinition {
 						const accumulator = acc ?? { properties: {}, required: [] };
 
 						const entityPropDecorator = this.findEntityPropDecorator(prop);
-						const extractedJsonSchema = omit(entityPropDecorator?.options ?? {}, ['type', 'required']);
+
+						// traverse the json of the json schema that is explicitly passed in the decorator
+						// This is useful to traverse and reflect complex classes nested in json schema keywords (like anyOf, allOf, oneOf)
+						// e.g.
+						// @entity.prop({ anyOf: [MyClassOne, MyClassTwo]  })
+						const extractedJsonSchema = transformEntityDefinitionSchema(
+							omit(entityPropDecorator?.options ?? {}, ['type', 'required']),
+							args => {
+								if (args.pointerPath === '') {
+									return { path: '', value: omit(args.schema, ['properties']) };
+								}
+
+								if (typeof args.schema === 'function') {
+									const value = makeSchema(args.schema);
+
+									return {
+										path: args.pointerPath,
+										value
+									};
+								}
+
+								if (args.parentKeyword === 'properties') {
+									return { path: args.pointerPath, value: args.schema };
+								}
+
+								return null;
+							}
+						);
 
 						const hasConstType =
 							entityPropDecorator.options?.type &&
@@ -140,12 +175,18 @@ export class EntityDefinition {
 						return accumulator;
 					}, null) ?? {};
 
-				const jsonSchema: JSONSchema = {
+				const jsonSchema: Partial<JSONSchema> = {
 					title: entityDecorator?.options?.name ?? key ?? typeOrClass.name,
-					type: 'object',
-					properties,
-					required
+					type: 'object'
 				};
+
+				if (properties) {
+					jsonSchema.properties = properties;
+				}
+
+				if (required) {
+					jsonSchema.required = required;
+				}
 
 				if (entityDecorator) {
 					jsonSchema.$id = jsonSchema.title;

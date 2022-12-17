@@ -138,6 +138,66 @@ describe('EntityDefinition', () => {
 		expect(entityDefinitionsMapCacheGetSpy.called).to.be.equal(true);
 	});
 
+	it('should correctly traverse and reflect class types nested in keywords (anyOf, oneOf, allOf)', () => {
+		class HomeAddress {
+			@entity.prop()
+			line1: string;
+
+			@entity.prop()
+			number: string;
+		}
+
+		@entity()
+		class OfficeAddress {
+			@entity.prop()
+			line1: string;
+
+			@entity.prop()
+			number: string;
+		}
+
+		@entity()
+		class Customer {
+			@entity.prop({ anyOf: [HomeAddress, OfficeAddress] })
+			address: HomeAddress | OfficeAddress;
+		}
+
+		const entityDefinition = new EntityDefinition({ type: Customer });
+		const entityDefinitionJsonSchema = entityDefinition.getEntityDefinitionJsonSchema();
+
+		expect(entityDefinitionJsonSchema).to.containSubset({
+			$id: 'Customer',
+			title: 'Customer',
+			type: 'object',
+			properties: {
+				address: {
+					title: 'address',
+					type: 'object',
+					anyOf: [
+						{
+							title: 'HomeAddress',
+							type: 'object',
+							properties: {
+								line1: {
+									type: 'string'
+								},
+								number: {
+									type: 'string'
+								}
+							},
+							required: []
+						},
+						{}
+					]
+				}
+			},
+			required: []
+		});
+		expect(entityDefinitionJsonSchema.properties.address.anyOf[1])
+			.to.haveOwnProperty('_$ref')
+			.to.be.instanceof(EntityDefinition);
+	});
+
 	describe('getName', () => {
 		it('should infer the entity name from the class', () => {
 			@entity()

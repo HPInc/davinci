@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { JSONSchema } from '../../../src';
-import { JSONSchemaTraverser } from '../../../src/entity/JSONSchemaTraverser';
-import { expect } from '../../support/chai';
+import { JSONSchema } from '../../../../src';
+import { JSONSchemaTraverser } from '../../../../src/entity/json/JSONSchemaTraverser';
+import { expect } from '../../../support/chai';
 
 describe('json-schema-traverse', () => {
 	it('should traverse the json schema object', () => {

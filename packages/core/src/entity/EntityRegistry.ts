@@ -4,10 +4,8 @@
  */
 
 import { TypeValue } from '@davinci/reflector';
-import set from 'immutable-set';
-import { JSONSchemaTraverser } from './JSONSchemaTraverser';
 import { EntityDefinition } from './EntityDefinition';
-import { EntityDefinitionJSONSchema, TransformEntityDefinitionSchemaCallback } from './types';
+import { EntityDefinitionJSONSchema } from './types';
 import { di } from '../di';
 
 const primitiveTypes = [String, Number, Boolean, Date] as unknown[];
@@ -46,45 +44,5 @@ export class EntityRegistry {
 
 	public getEntityDefinitionMap() {
 		return this.entityDefinitionMap;
-	}
-
-	public transformEntityDefinitionSchema(
-		entityDefinitionSchema: Partial<EntityDefinitionJSONSchema>,
-		cb: TransformEntityDefinitionSchemaCallback
-	) {
-		let obj = {};
-		JSONSchemaTraverser.traverse(
-			entityDefinitionSchema,
-			({ schema, jsonPtr, rootSchema, parentJsonPtr, parentKeyword, parentSchema, keyIndex }) => {
-				const pointerPath = jsonPtr
-					.replace(/\//g, '.') // replace slashes with dots
-					.replace(/(\.(\d))((\.)|$)/g, '[$2]$3') // replace `.{number}.` to `[number].
-					.slice(1); // remove trailing slash
-				const pointerPathParts = pointerPath.split('.');
-
-				const result = cb({
-					schema,
-					jsonPtr,
-					pointerPath,
-					pointerPathParts,
-					rootSchema,
-					parentJsonPtr,
-					parentKeyword,
-					parentSchema,
-					keyIndex
-				});
-
-				if (result && typeof result.path !== 'undefined' && result.path !== null) {
-					if (result.path === '') {
-						obj = result.value;
-					} else {
-						obj = set(obj, result.path, result.value, { withArrays: true });
-					}
-				}
-			},
-			{ allKeys: true }
-		);
-
-		return obj;
 	}
 }

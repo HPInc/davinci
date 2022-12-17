@@ -4,7 +4,7 @@
  */
 
 import sinon from 'sinon';
-import { entity, EntityDefinition, EntityRegistry, omit } from '../../../src';
+import { entity, EntityDefinition, EntityRegistry, omit, transformEntityDefinitionSchema } from '../../../src';
 import { expect } from '../../support/chai';
 
 describe('EntityRegistry', () => {
@@ -144,7 +144,7 @@ describe('EntityRegistry', () => {
 
 			const entityJsonSchema = entityRegistry.getEntityDefinitionJsonSchema(Customer);
 
-			let result = entityRegistry.transformEntityDefinitionSchema(entityJsonSchema, args => {
+			let result = transformEntityDefinitionSchema(entityJsonSchema, args => {
 				if (args.pointerPath === '') {
 					return { path: '', value: omit(args.schema, ['properties']) };
 				} else if (args.schema._$ref) {
