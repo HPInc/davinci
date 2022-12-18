@@ -31,6 +31,14 @@ describe('AjvValidator', () => {
 		number: string;
 	}
 
+	class OfficeAddress {
+		@entity.prop()
+		line1: string;
+
+		@entity.prop()
+		number: string;
+	}
+
 	@entity()
 	class Birth {
 		@entity.prop()
@@ -59,6 +67,9 @@ describe('AjvValidator', () => {
 
 		@entity.prop()
 		birth: Birth;
+
+		@entity.prop({ anyOf: [Address, OfficeAddress] })
+		address: Address | OfficeAddress;
 	}
 
 	@entity()
@@ -214,6 +225,28 @@ describe('AjvValidator', () => {
 					},
 					birth: {
 						$ref: 'Birth'
+					},
+					address: {
+						title: 'address',
+						type: 'object',
+						anyOf: [
+							{
+								$ref: 'Address'
+							},
+							{
+								title: 'OfficeAddress',
+								type: 'object',
+								properties: {
+									line1: {
+										type: 'string'
+									},
+									number: {
+										type: 'string'
+									}
+								},
+								required: []
+							}
+						]
 					}
 				},
 				required: ['lastname']
@@ -288,6 +321,28 @@ describe('AjvValidator', () => {
 					},
 					creditCard: {
 						type: 'string'
+					},
+					address: {
+						title: 'address',
+						type: 'object',
+						anyOf: [
+							{
+								$ref: 'Address'
+							},
+							{
+								title: 'OfficeAddress',
+								type: 'object',
+								properties: {
+									line1: {
+										type: 'string'
+									},
+									number: {
+										type: 'string'
+									}
+								},
+								required: []
+							}
+						]
 					}
 				},
 				required: ['lastname']
