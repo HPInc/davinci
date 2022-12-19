@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.2.3](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.2.2...@davinci/mongoose@2.2.3) (2022-12-19)
+
+
+### Bug Fixes
+
+* **mongoose:** removed 'type' nesting for schemas in array ([#192](https://github.com/HPInc/davinci/issues/192)) ([1c88852](https://github.com/HPInc/davinci/commit/1c888526e2640265a8ecb06c446ca5b1bd014d27))
+
+
+
+
+
 ## [2.2.2](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.2.1...@davinci/mongoose@2.2.2) (2022-12-16)
 
 **Note:** Version bump only for package @davinci/mongoose
