@@ -7,9 +7,15 @@ import set from 'immutable-set';
 import { EntityDefinitionJSONSchema, TransformEntityDefinitionSchemaCallback } from '../types';
 import { JSONSchemaTraverser } from './JSONSchemaTraverser';
 
+/**
+ * This function helps to traverse an EntityDefinitionJSONSchema object.
+ * This can be useful for creating derived schemas, like those used by OpenAPI or Ajv.
+ * @param entityDefinitionSchema
+ * @param callback
+ */
 export function transformEntityDefinitionSchema(
 	entityDefinitionSchema: Partial<EntityDefinitionJSONSchema>,
-	cb: TransformEntityDefinitionSchemaCallback
+	callback: TransformEntityDefinitionSchemaCallback
 ) {
 	let obj = {};
 	JSONSchemaTraverser.traverse(
@@ -21,7 +27,7 @@ export function transformEntityDefinitionSchema(
 				.slice(1); // remove trailing slash
 			const pointerPathParts = pointerPath.split('.');
 
-			const result = cb({
+			const result = callback({
 				schema,
 				jsonPtr,
 				pointerPath,

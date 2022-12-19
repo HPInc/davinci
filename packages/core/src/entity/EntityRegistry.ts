@@ -10,6 +10,10 @@ import { di } from '../di';
 
 const primitiveTypes = [String, Number, Boolean, Date] as unknown[];
 
+/**
+ * The EntityRegistry class stores all of the EntityDefinition objects and provides a way
+ * to cache and retrieve the EntityDefinitionJSONSchema objects.
+ */
 @di.singleton()
 export class EntityRegistry {
 	private entityDefinitionMap = new Map<TypeValue, EntityDefinition>();
