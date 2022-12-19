@@ -157,8 +157,27 @@ describe('EntityDefinition', () => {
 		}
 
 		@entity()
+		class FamilyAddressNested {
+			@entity.prop()
+			line1: string;
+
+			@entity.prop()
+			number: string;
+		}
+
+		@entity()
 		class Customer {
-			@entity.prop({ anyOf: [HomeAddress, OfficeAddress] })
+			@entity.prop({
+				anyOf: [
+					HomeAddress,
+					OfficeAddress,
+					{
+						type: 'object',
+						properties: { nested: FamilyAddressNested, otherProp: { type: 'string' } },
+						required: ['nested']
+					}
+				]
+			})
 			address: HomeAddress | OfficeAddress;
 		}
 
@@ -171,8 +190,6 @@ describe('EntityDefinition', () => {
 			type: 'object',
 			properties: {
 				address: {
-					title: 'address',
-					type: 'object',
 					anyOf: [
 						{
 							title: 'HomeAddress',
@@ -187,13 +204,28 @@ describe('EntityDefinition', () => {
 							},
 							required: []
 						},
-						{}
-					]
+						{},
+						{
+							type: 'object',
+							properties: {
+								nested: {},
+								otherProp: {
+									type: 'string'
+								}
+							},
+							required: ['nested']
+						}
+					],
+					title: 'address',
+					type: 'object'
 				}
 			},
 			required: []
 		});
 		expect(entityDefinitionJsonSchema.properties.address.anyOf[1])
+			.to.haveOwnProperty('_$ref')
+			.to.be.instanceof(EntityDefinition);
+		expect(entityDefinitionJsonSchema.properties.address.anyOf[2].properties.nested)
 			.to.haveOwnProperty('_$ref')
 			.to.be.instanceof(EntityDefinition);
 	});
