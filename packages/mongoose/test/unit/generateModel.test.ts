@@ -4,14 +4,17 @@
  */
 
 import Sinon from 'sinon';
-import { Model, Schema, SchemaTypes } from 'mongoose';
+import mongoose, { model, Model, Schema, SchemaTypes } from 'mongoose';
 import { expect } from '../support/chai';
 import { mgoose } from '../../src';
 
 const sinon = Sinon.createSandbox();
 
 describe('generateModel', () => {
-	afterEach(() => {
+	afterEach(async () => {
+		Object.keys(mongoose.models).forEach(modelName => {
+			delete mongoose.models[modelName];
+		});
 		sinon.restore();
 	});
 
@@ -65,7 +68,7 @@ describe('generateModel', () => {
 			});
 		});
 
-		it('supports arrays', () => {
+		it('supports arrays', async () => {
 			class CustomerBirth {
 				@mgoose.prop()
 				place: string;
@@ -80,19 +83,20 @@ describe('generateModel', () => {
 			}
 
 			const schema = mgoose.generateSchema(Customer, {});
-
 			expect(schema.obj).to.be.deep.equal({
 				birth: [
 					{
-						type: {
-							place: {
-								type: String
-							}
+						place: {
+							type: String
 						}
 					}
 				],
-				tags: [{ type: String }]
+				tags: [String]
 			});
+
+			const CustomerModel = model('Customer', schema);
+			await expect(CustomerModel.create({ birth: [{ place: 'Rome' }], tags: ['nice'] })).to.eventually.be
+				.fulfilled;
 		});
 
 		it('supports class inheritance', () => {
@@ -478,6 +482,65 @@ describe('generateModel', () => {
 			}
 			const CustomerModel = mgoose.generateModel(Customer);
 			expect(CustomerModel.prototype).be.instanceOf(Model);
+		});
+	});
+
+	describe('mongoose tests', () => {
+		before(async () => {
+			await mongoose.connect(process.env.MONGODB_URL);
+		});
+
+		it('should generate a valid schema - raw', async () => {
+			const productComponentSchema = {
+				type: {
+					type: String,
+					required: true,
+					default: 'press',
+					enum: ['press', 'stock', '3d']
+				}
+			};
+			const productSchema = {
+				type: {
+					type: String
+				},
+				components: [productComponentSchema]
+			};
+
+			const schema = new mongoose.Schema(productSchema);
+			const ProductModel = model('ProductRaw', schema);
+
+			const product = await ProductModel.create({
+				type: 'test',
+				components: [{ type: 'press' }]
+			});
+			console.log(product);
+		});
+
+		it('should generate a valid schema - davinci', async () => {
+			class ProductComponent {
+				@mgoose.prop({
+					required: true,
+					default: 'press',
+					enum: ['press', 'stock', '3d']
+				})
+				type: string;
+			}
+			class Product {
+				@mgoose.prop()
+				type: string;
+
+				@mgoose.prop({ type: [ProductComponent] })
+				components: [ProductComponent];
+			}
+
+			const schema = mgoose.generateSchema(Product);
+			const ProductModel = model('ProductDavinci', schema);
+
+			const product = await ProductModel.create({
+				type: 'test',
+				components: [{ type: 'press' }]
+			});
+			console.log(product);
 		});
 	});
 });
