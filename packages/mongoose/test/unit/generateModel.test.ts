@@ -4,14 +4,17 @@
  */
 
 import Sinon from 'sinon';
-import { Model, Schema, SchemaTypes } from 'mongoose';
+import mongoose, { model, Model, Schema, SchemaTypes } from 'mongoose';
 import { expect } from '../support/chai';
 import { mgoose } from '../../src';
 
 const sinon = Sinon.createSandbox();
 
 describe('generateModel', () => {
-	afterEach(() => {
+	afterEach(async () => {
+		Object.keys(mongoose.models).forEach(modelName => {
+			delete mongoose.models[modelName];
+		});
 		sinon.restore();
 	});
 
@@ -65,7 +68,7 @@ describe('generateModel', () => {
 			});
 		});
 
-		it('supports arrays', () => {
+		it('supports arrays', async () => {
 			class CustomerBirth {
 				@mgoose.prop()
 				place: string;
@@ -80,19 +83,20 @@ describe('generateModel', () => {
 			}
 
 			const schema = mgoose.generateSchema(Customer, {});
-
 			expect(schema.obj).to.be.deep.equal({
 				birth: [
 					{
-						type: {
-							place: {
-								type: String
-							}
+						place: {
+							type: String
 						}
 					}
 				],
-				tags: [{ type: String }]
+				tags: [String]
 			});
+
+			const CustomerModel = model('Customer', schema);
+			await expect(CustomerModel.create({ birth: [{ place: 'Rome' }], tags: ['nice'] })).to.eventually.be
+				.fulfilled;
 		});
 
 		it('supports class inheritance', () => {

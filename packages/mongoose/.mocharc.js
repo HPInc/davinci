@@ -14,6 +14,6 @@ module.exports = {
 	bail: true,
 	checkLeaks: true,
 	require: ['ts-node/register', 'source-map-support/register'],
-	file: ['test/support/env'],
+	file: ['test/support/env', 'test/support/db'],
 	spec: 'test/**/*.{js,ts}'
 };
