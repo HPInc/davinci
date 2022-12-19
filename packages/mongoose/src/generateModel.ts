@@ -133,7 +133,7 @@ export const generateSchema = <T>(
 				if (populateDecorator) {
 					acc.push({
 						name: populateDecorator.name,
-						options: { localField: populateDecorator.name, ...populateDecorator.options }
+						options: { localField: propReflection.name, ...populateDecorator.options }
 					});
 				}
 
