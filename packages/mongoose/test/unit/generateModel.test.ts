@@ -325,7 +325,7 @@ describe('generateModel', () => {
 					path: 'lineItems',
 					getters: [],
 					options: {
-						localField: 'lineItems',
+						localField: 'lineItemIds',
 						ref: 'LineItem',
 						foreignField: '_id',
 						options: {
