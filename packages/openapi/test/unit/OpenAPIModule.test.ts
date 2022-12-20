@@ -24,6 +24,23 @@ describe('OpenAPIModule', () => {
 		number: number;
 	}
 
+	class HomeAddress {
+		@entity.prop()
+		line1: string;
+
+		@entity.prop()
+		number: string;
+	}
+
+	@entity()
+	class OfficeAddress {
+		@entity.prop()
+		line1: string;
+
+		@entity.prop()
+		number: string;
+	}
+
 	@entity({ name: 'MyCustomer' })
 	class Customer {
 		@entity.prop({ required: true, minLength: 2 })
@@ -37,6 +54,9 @@ describe('OpenAPIModule', () => {
 
 		@entity.prop({ type: [Phone] })
 		phones: Phone[];
+
+		@entity.prop({ anyOf: [HomeAddress, OfficeAddress] })
+		address: HomeAddress | OfficeAddress;
 	}
 
 	@entity()
@@ -215,15 +235,29 @@ describe('OpenAPIModule', () => {
 				components: {
 					schemas: {
 						Phone: {
-							$id: 'Phone',
 							title: 'Phone',
 							type: 'object',
+							required: [],
+							$id: 'Phone',
 							properties: {
 								isDefault: {
 									type: 'boolean'
 								},
 								number: {
 									type: 'number'
+								}
+							}
+						},
+						OfficeAddress: {
+							$id: 'OfficeAddress',
+							title: 'OfficeAddress',
+							type: 'object',
+							properties: {
+								line1: {
+									type: 'string'
+								},
+								number: {
+									type: 'string'
 								}
 							},
 							required: []
@@ -249,6 +283,28 @@ describe('OpenAPIModule', () => {
 									items: {
 										$ref: '#/components/schemas/Phone'
 									}
+								},
+								address: {
+									anyOf: [
+										{
+											title: 'HomeAddress',
+											type: 'object',
+											properties: {
+												line1: {
+													type: 'string'
+												},
+												number: {
+													type: 'string'
+												}
+											},
+											required: []
+										},
+										{
+											$ref: '#/components/schemas/OfficeAddress'
+										}
+									],
+									title: 'address',
+									type: 'object'
 								}
 							},
 							required: ['firstname', 'lastname']
@@ -274,6 +330,28 @@ describe('OpenAPIModule', () => {
 									items: {
 										$ref: '#/components/schemas/Phone'
 									}
+								},
+								address: {
+									anyOf: [
+										{
+											title: 'HomeAddress',
+											type: 'object',
+											properties: {
+												line1: {
+													type: 'string'
+												},
+												number: {
+													type: 'string'
+												}
+											},
+											required: []
+										},
+										{
+											$ref: '#/components/schemas/OfficeAddress'
+										}
+									],
+									title: 'address',
+									type: 'object'
 								}
 							},
 							required: ['firstname', 'lastname']

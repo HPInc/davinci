@@ -11,7 +11,8 @@ import {
 	mapObject,
 	mapSeries,
 	Module,
-	omit
+	omit,
+	transformEntityDefinitionSchema
 } from '@davinci/core';
 import type { HttpServerModule, MethodResponses, Route } from '@davinci/http-server';
 import http, { Server } from 'http';
@@ -368,7 +369,7 @@ export class OpenAPIModule extends Module {
 	}
 
 	private createJsonSchema(entityJsonSchema: EntityDefinitionJSONSchema): Partial<JSONSchema> {
-		return this.entityRegistry.transformEntityDefinitionSchema(entityJsonSchema, args => {
+		return transformEntityDefinitionSchema(entityJsonSchema, args => {
 			if (args.pointerPath === '') {
 				return { path: '', value: omit(args.schema, ['properties']) };
 			}
@@ -390,23 +391,6 @@ export class OpenAPIModule extends Module {
 				return { path: args.pointerPath, value: childEntityDefJsonSchema };
 			}
 
-			if (typeof args.schema === 'function') {
-				const childEntityDefJsonSchema = this.createJsonSchema(
-					this.entityRegistry.getEntityDefinitionJsonSchema(args.schema)
-				);
-				if (childEntityDefJsonSchema.$id) {
-					if (!this.jsonSchemasMap.has(childEntityDefJsonSchema.$id)) {
-						this.jsonSchemasMap.set(childEntityDefJsonSchema.$id, childEntityDefJsonSchema);
-					}
-					this.openAPIDoc.components.schemas[childEntityDefJsonSchema.$id] = childEntityDefJsonSchema;
-
-					return {
-						path: args.pointerPath,
-						value: { $ref: `#/components/schemas/${childEntityDefJsonSchema.$id}` }
-					};
-				}
-				return { path: args.pointerPath, value: childEntityDefJsonSchema };
-			}
 			if (args.parentKeyword === 'properties') {
 				return { path: args.pointerPath, value: args.schema };
 			}

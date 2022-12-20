@@ -138,6 +138,98 @@ describe('EntityDefinition', () => {
 		expect(entityDefinitionsMapCacheGetSpy.called).to.be.equal(true);
 	});
 
+	it('should correctly traverse and reflect class types nested in keywords (anyOf, oneOf, allOf)', () => {
+		class HomeAddress {
+			@entity.prop()
+			line1: string;
+
+			@entity.prop()
+			number: string;
+		}
+
+		@entity()
+		class OfficeAddress {
+			@entity.prop()
+			line1: string;
+
+			@entity.prop()
+			number: string;
+		}
+
+		@entity()
+		class FamilyAddressNested {
+			@entity.prop()
+			line1: string;
+
+			@entity.prop()
+			number: string;
+		}
+
+		@entity()
+		class Customer {
+			@entity.prop({
+				anyOf: [
+					HomeAddress,
+					OfficeAddress,
+					{
+						type: 'object',
+						properties: { nested: FamilyAddressNested, otherProp: { type: 'string' } },
+						required: ['nested']
+					}
+				]
+			})
+			address: HomeAddress | OfficeAddress;
+		}
+
+		const entityDefinition = new EntityDefinition({ type: Customer });
+		const entityDefinitionJsonSchema = entityDefinition.getEntityDefinitionJsonSchema();
+
+		expect(entityDefinitionJsonSchema).to.containSubset({
+			$id: 'Customer',
+			title: 'Customer',
+			type: 'object',
+			properties: {
+				address: {
+					anyOf: [
+						{
+							title: 'HomeAddress',
+							type: 'object',
+							properties: {
+								line1: {
+									type: 'string'
+								},
+								number: {
+									type: 'string'
+								}
+							},
+							required: []
+						},
+						{},
+						{
+							type: 'object',
+							properties: {
+								nested: {},
+								otherProp: {
+									type: 'string'
+								}
+							},
+							required: ['nested']
+						}
+					],
+					title: 'address',
+					type: 'object'
+				}
+			},
+			required: []
+		});
+		expect(entityDefinitionJsonSchema.properties.address.anyOf[1])
+			.to.haveOwnProperty('_$ref')
+			.to.be.instanceof(EntityDefinition);
+		expect(entityDefinitionJsonSchema.properties.address.anyOf[2].properties.nested)
+			.to.haveOwnProperty('_$ref')
+			.to.be.instanceof(EntityDefinition);
+	});
+
 	describe('getName', () => {
 		it('should infer the entity name from the class', () => {
 			@entity()

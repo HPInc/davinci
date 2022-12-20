@@ -43,6 +43,8 @@ export class Customer {
 	modifiedCount?: number;
 }
 
+@entity()
 export class CustomerPartial extends createPartialEntity<Customer>(Customer) {}
 
+@entity()
 export class CustomerList extends createResourceListResponseEntity<Customer>(Customer) {}

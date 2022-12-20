@@ -10,7 +10,8 @@ import {
 	EntityRegistry,
 	JSONSchema,
 	mapSeries,
-	omit
+	omit,
+	transformEntityDefinitionSchema
 } from '@davinci/core';
 import Ajv, { DefinedError, Options, Plugin } from 'ajv';
 import addFormats from 'ajv-formats';
@@ -42,7 +43,7 @@ export interface AjvValidatorOptions {
 
 @di.autoInjectable()
 export class AjvValidator<Request = unknown> {
-	private ajvInstances: Partial<AjvInstancesMap>  = {}
+	private ajvInstances: Partial<AjvInstancesMap> = {};
 	private jsonSchemasMap = new Map<TypeValue, JSONSchema | Partial<JSONSchema>>();
 
 	private sourceToSchemaMap: Partial<
@@ -213,7 +214,7 @@ export class AjvValidator<Request = unknown> {
 	}
 
 	private createJsonSchema(entityJsonSchema: EntityDefinitionJSONSchema): Partial<JSONSchema> {
-		return this.entityRegistry.transformEntityDefinitionSchema(entityJsonSchema, args => {
+		return transformEntityDefinitionSchema(entityJsonSchema, args => {
 			if (args.pointerPath === '') {
 				return { path: '', value: omit(args.schema, ['properties']) };
 			}
@@ -231,19 +232,6 @@ export class AjvValidator<Request = unknown> {
 				return { path: args.pointerPath, value: childEntityDefJsonSchema };
 			}
 
-			if (typeof args.schema === 'function') {
-				const childEntityDefJsonSchema = this.createJsonSchema(
-					this.entityRegistry.getEntityDefinitionJsonSchema(args.schema)
-				);
-				if (childEntityDefJsonSchema.$id) {
-					if (!this.jsonSchemasMap.has(args.schema)) {
-						this.jsonSchemasMap.set(args.schema, childEntityDefJsonSchema);
-						this.addSchemaToAjvInstances(childEntityDefJsonSchema);
-					}
-					return { path: args.pointerPath, value: { $ref: childEntityDefJsonSchema.$id } };
-				}
-				return { path: args.pointerPath, value: childEntityDefJsonSchema };
-			}
 			if (args.parentKeyword === 'properties') {
 				return { path: args.pointerPath, value: args.schema };
 			}

@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: MIT
  */
 
-// code taken from: https://github.com/epoberezkin/json-schema-traverse
-import { isPlainObject } from '../lib/object-utils';
+// code heavily inspired by: https://github.com/epoberezkin/json-schema-traverse
+import { isPlainObject } from '../../lib/object-utils';
 
 interface SchemaObject {
 	$id?: string;
