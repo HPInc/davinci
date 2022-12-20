@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.2.4](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.2.3...@davinci/mongoose@2.2.4) (2022-12-20)
+
+
+### Bug Fixes
+
+* [@populates](https://github.com/populates)() now correctly set the localField value ([#193](https://github.com/HPInc/davinci/issues/193)) ([ba41dd5](https://github.com/HPInc/davinci/commit/ba41dd5516784a30d96d12939c5b96d7ed934b69))
+
+
+
+
+
 ## [2.2.3](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.2.2...@davinci/mongoose@2.2.3) (2022-12-19)
 
 
