@@ -230,6 +230,56 @@ describe('EntityDefinition', () => {
 			.to.be.instanceof(EntityDefinition);
 	});
 
+	it('should disable the type detection, if type is set to "false"', () => {
+		@entity()
+		class Customer {
+			@entity.prop({
+				type: false,
+				anyOf: [
+					{
+						type: 'number'
+					},
+					{
+						type: 'string'
+					}
+				]
+			})
+			address: number | string;
+
+			@entity.prop({
+				type: null,
+				anyOf: [
+					{
+						type: 'number'
+					},
+					{
+						type: 'string'
+					}
+				]
+			})
+			number: number | string;
+		}
+
+		const entityDefinition = new EntityDefinition({ type: Customer });
+		const entityDefinitionJsonSchema = entityDefinition.getEntityDefinitionJsonSchema();
+
+		expect(entityDefinitionJsonSchema).to.containSubset({
+			$id: 'Customer',
+			title: 'Customer',
+			properties: {
+				address: {
+					anyOf: [{ type: 'number' }, { type: 'string' }]
+				},
+				number: {
+					anyOf: [{ type: 'number' }, { type: 'string' }]
+				}
+			},
+			required: []
+		});
+		expect(entityDefinitionJsonSchema.properties.address.type).to.be.undefined;
+		expect(entityDefinitionJsonSchema.properties.number.type).to.be.undefined;
+	});
+
 	describe('getName', () => {
 		it('should infer the entity name from the class', () => {
 			@entity()

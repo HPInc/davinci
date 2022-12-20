@@ -155,14 +155,32 @@ export class EntityDefinition {
 							}
 						);
 
+						// passing false or null as the type value, will disable the automatic
+						// detection of the type
+						// e.g. e.g. @entity.prop({ type: false })
+						const hasFalseOrNullType =
+							entityPropDecorator.options?.type === false || entityPropDecorator.options?.type === null;
+
+						// the type is 'explicit', when is explicitly passed as parameter to the @entity.prop decorator
+						// e.g. @entity.prop({ type: String })
+						const hasExplicitType =
+							!hasFalseOrNullType && typeof entityPropDecorator.options?.type !== 'undefined';
+
+						// a constant type is a standard JSON schema type, like 'string', 'number', etc
 						const hasConstType =
-							entityPropDecorator.options?.type &&
+							!hasFalseOrNullType &&
+							hasExplicitType &&
 							!Array.isArray(entityPropDecorator.options?.type) &&
 							typeof entityPropDecorator.options?.type !== 'function';
 
-						const generatedJsonSchema = hasConstType
-							? { type: entityPropDecorator.options?.type }
-							: makeSchema(entityPropDecorator.options?.type ?? prop.type, prop.name);
+						let generatedJsonSchema;
+						if (hasFalseOrNullType) {
+							generatedJsonSchema = {};
+						} else if (hasConstType) {
+							generatedJsonSchema = { type: entityPropDecorator.options?.type };
+						} else {
+							generatedJsonSchema = makeSchema(entityPropDecorator.options?.type ?? prop.type, prop.name);
+						}
 
 						accumulator.properties[prop.name] = deepMerge(extractedJsonSchema, generatedJsonSchema, {
 							isMergeableObject: isPlainObject
