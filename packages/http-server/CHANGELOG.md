@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.2.1](https://github.com/HPInc/davinci/compare/@davinci/http-server@3.2.0...@davinci/http-server@3.2.1) (2022-12-20)
+
+
+### Bug Fixes
+
+* EntityDefinition now can traverse json schema keywords ([#191](https://github.com/HPInc/davinci/issues/191)) ([ec0ba10](https://github.com/HPInc/davinci/commit/ec0ba1084fe0126e920d324b21bfa42af5639dc3))
+
+
+
+
+
 # [3.2.0](https://github.com/HPInc/davinci/compare/@davinci/http-server@3.1.0...@davinci/http-server@3.2.0) (2022-12-16)
 
 
