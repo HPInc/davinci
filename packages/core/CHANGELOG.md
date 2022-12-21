@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.5.0](https://github.com/HPInc/davinci/compare/@davinci/core@2.4.0...@davinci/core@2.5.0) (2022-12-21)
+
+
+### Features
+
+* **entity:** added support for recursive schemas ([#196](https://github.com/HPInc/davinci/issues/196)) ([ab977ac](https://github.com/HPInc/davinci/commit/ab977ac424fd29a5a1d1b31bb19d290f61639e2c))
+
+
+
+
+
 # [2.4.0](https://github.com/HPInc/davinci/compare/@davinci/core@2.3.0...@davinci/core@2.4.0) (2022-12-21)
 
 
