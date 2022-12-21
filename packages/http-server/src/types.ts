@@ -4,7 +4,7 @@
  */
 
 import { ClassReflection, MethodReflection, TypeValue } from '@davinci/reflector';
-import { Interceptor, InterceptorBagDetails, JSONSchema } from '@davinci/core';
+import { Interceptor, InterceptorBagDetails, InterceptorDecoratorMeta, JSONSchema } from '@davinci/core';
 import { Level } from 'pino';
 import { ControllerDecoratorMetadata, MethodDecoratorMetadata, ParameterDecoratorOptions, Verb } from './decorators';
 
@@ -70,9 +70,18 @@ export type HttpInterceptorBag = InterceptorBagDetails & {
 	Response?: unknown;
 };
 
+export type HttpServerInterceptorStage = 'preValidation' | 'postValidation';
+
 export type HttpServerInterceptor<Bag extends HttpInterceptorBag = HttpInterceptorBag> = Interceptor<
 	Bag,
-	{ request?: Bag['Request']; response?: Bag['Response']; route?: Route<Bag['Request']> }
+	{
+		request?: Bag['Request'];
+		response?: Bag['Response'];
+		route?: Route<Bag['Request']>;
+		meta?: {
+			stage?: HttpServerInterceptorStage;
+		};
+	}
 >;
 
 export interface HttpServerModuleOptions {
@@ -83,7 +92,9 @@ export interface HttpServerModuleOptions {
 		exposeStack?: boolean;
 	};
 	querystringJsonParsing?: boolean;
-	globalInterceptors?: Array<HttpServerInterceptor>;
+	globalInterceptors?: Array<
+		HttpServerInterceptor | { handler: InterceptorDecoratorMeta['handler']; stage: HttpServerInterceptorStage }
+	>;
 	logger?: {
 		name?: string;
 		level?: Level | 'silent';

@@ -4,12 +4,17 @@
  */
 
 import { ClassReflection, DecoratorId, MethodReflection } from '@davinci/reflector';
-import { Interceptor, InterceptorBag, InterceptorBagDetails, InterceptorNext } from './types';
+import { Interceptor, InterceptorBag, InterceptorBagDetails, InterceptorDecoratorMeta, InterceptorNext } from './types';
 
-export function getInterceptorsHandlers<
-	IBD extends InterceptorBagDetails = InterceptorBagDetails,
-	AdditionalProps = {}
->(reflection: MethodReflection | ClassReflection): Interceptor<IBD, AdditionalProps>[] {
+export function getInterceptorsDecorators<I extends Interceptor = Interceptor>(
+	reflection: MethodReflection | ClassReflection
+): Array<InterceptorDecoratorMeta<I>> {
+	return reflection.decorators.filter(decorator => decorator[DecoratorId] === 'interceptor');
+}
+
+export function getInterceptorsHandlers<I extends Interceptor = Interceptor>(
+	reflection: MethodReflection | ClassReflection
+): Array<I> {
 	return reflection.decorators.filter(decorator => decorator[DecoratorId] === 'interceptor').map(d => d.handler);
 }
 

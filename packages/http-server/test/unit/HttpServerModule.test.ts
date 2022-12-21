@@ -16,7 +16,13 @@ import {
 } from '@davinci/core';
 import * as http from 'http';
 import { reflect } from '@davinci/reflector';
-import { HttpServerModule, HttpServerModuleOptions, ParameterConfiguration, route } from '../../src';
+import {
+	HttpServerInterceptor,
+	HttpServerModule,
+	HttpServerModuleOptions,
+	ParameterConfiguration,
+	route
+} from '../../src';
 import { expect } from '../support/chai';
 
 const sinon = require('sinon').createSandbox();
@@ -343,6 +349,123 @@ describe('HttpServerModule', () => {
 			expect(interceptor1.getCall(0).args[1]).containSubset(interceptorArgs);
 			expect(interceptor2.called).to.be.true;
 			expect(interceptor2.getCall(0).args[1]).containSubset(interceptorArgs);
+		});
+
+		it('should create a request handler that process preValidation interceptors', async () => {
+			const ctrlInterceptorPre = sinon.stub().callsFake(next => next());
+			const ctrlInterceptorPost = sinon.stub().callsFake(next => next());
+
+			const methodInterceptorPre = sinon.stub().callsFake(next => next());
+			const methodInterceptorPost = sinon.stub().callsFake(next => next());
+
+			@interceptor<HttpServerInterceptor>(ctrlInterceptorPre, { stage: 'preValidation' })
+			@interceptor<HttpServerInterceptor>(ctrlInterceptorPost, { stage: 'postValidation' })
+			@route.controller({ basePath: '/api/customers' })
+			class CustomerController {
+				@interceptor<HttpServerInterceptor>(methodInterceptorPre, { stage: 'preValidation' })
+				@interceptor<HttpServerInterceptor>(methodInterceptorPost, { stage: 'postValidation' })
+				@route.post({ path: '/all' })
+				find(@route.body({ required: true }) body) {
+					return { body };
+				}
+			}
+			const dummyHttpServer = new DummyHttpServer();
+			const controllerReflection = reflect(CustomerController);
+			const methodReflection = controllerReflection.methods[0];
+			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+				path: '/all',
+				verb: 'get',
+				controllerReflection,
+				methodReflection,
+				parametersConfig: dummyHttpServer.createParametersConfigurations({
+					controllerReflection,
+					methodReflection
+				})
+			});
+			const reqMock = {};
+			const resMock = {};
+			const result = await requestHandler(reqMock, resMock);
+
+			expect(result[1]).to.containSubset({
+				statusCode: 400,
+				name: 'BadRequest',
+				errors: [
+					{
+						instancePath: '/body',
+						schemaPath: '#/type',
+						keyword: 'type',
+						params: {
+							type: 'object'
+						},
+						message: 'must be object'
+					}
+				]
+			});
+			expect(ctrlInterceptorPre.called).to.be.true;
+			expect(ctrlInterceptorPost.called).to.be.false;
+
+			expect(methodInterceptorPre.called).to.be.true;
+			expect(methodInterceptorPost.called).to.be.false;
+		});
+
+		it('should create a request handler tha process interceptors in the correct order', async () => {
+			const callsOrder = [];
+			const createHandler = name => next => {
+				callsOrder.push(name);
+				return next();
+			};
+			const globalInterceptorPre = sinon.stub().callsFake(createHandler('globalInterceptorPre'));
+			const globalInterceptorPost = sinon.stub().callsFake(createHandler('globalInterceptorPost'));
+			const ctrlInterceptorPre = sinon.stub().callsFake(createHandler('ctrlInterceptorPre'));
+			const ctrlInterceptorPost = sinon.stub().callsFake(createHandler('ctrlInterceptorPost'));
+			const methodInterceptorPre = sinon.stub().callsFake(createHandler('methodInterceptorPre'));
+			const methodInterceptorPost = sinon.stub().callsFake(createHandler('methodInterceptorPost'));
+			sinon
+				.stub(DummyHttpServer.prototype, 'createValidationInterceptor')
+				.callsFake(() => createHandler('validationInterceptor'));
+
+			@interceptor<HttpServerInterceptor>(ctrlInterceptorPre, { stage: 'preValidation' })
+			@interceptor<HttpServerInterceptor>(ctrlInterceptorPost, { stage: 'postValidation' })
+			@route.controller({ basePath: '/api/customers' })
+			class CustomerController {
+				@interceptor<HttpServerInterceptor>(methodInterceptorPre, { stage: 'preValidation' })
+				@interceptor<HttpServerInterceptor>(methodInterceptorPost, { stage: 'postValidation' })
+				@route.post({ path: '/' })
+				find(@route.body() body) {
+					return { body };
+				}
+			}
+			const dummyHttpServer = new DummyHttpServer({
+				globalInterceptors: [
+					{ handler: globalInterceptorPre, stage: 'preValidation' },
+					{ handler: globalInterceptorPost, stage: 'postValidation' }
+				]
+			});
+			const controllerReflection = reflect(CustomerController);
+			const methodReflection = controllerReflection.methods[0];
+			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+				path: '/',
+				verb: 'post',
+				controllerReflection,
+				methodReflection,
+				parametersConfig: dummyHttpServer.createParametersConfigurations({
+					controllerReflection,
+					methodReflection
+				})
+			});
+			const reqMock = { body: {} };
+			const resMock = {};
+			await requestHandler(reqMock, resMock);
+
+			expect(callsOrder).to.be.deep.equal([
+				'globalInterceptorPre',
+				'ctrlInterceptorPre',
+				'methodInterceptorPre',
+				'validationInterceptor',
+				'globalInterceptorPost',
+				'ctrlInterceptorPost',
+				'methodInterceptorPost'
+			]);
 		});
 
 		it('should be able to pass global interceptors', async () => {

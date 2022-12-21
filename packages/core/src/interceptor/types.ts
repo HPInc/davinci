@@ -3,9 +3,12 @@
  * SPDX-License-Identifier: MIT
  */
 
+import { DecoratorId } from '@davinci/reflector';
+
 export interface InterceptorBagDetails {
 	Context?: unknown;
 	State?: unknown;
+	Meta?: unknown;
 }
 
 /**
@@ -19,6 +22,7 @@ export type InterceptorBag<IBD extends InterceptorBagDetails = InterceptorBagDet
 	handlerArgs: unknown[];
 	context?: IBD['Context'];
 	state?: IBD['State'];
+	meta?: IBD['Meta'];
 } & AdditionalProps;
 
 /**
@@ -43,3 +47,12 @@ export type InterceptorNext<
 	IBD extends InterceptorBagDetails = InterceptorBagDetails,
 	AdditionalProps = {}
 > = () => ReturnType<Interceptor<IBD, AdditionalProps>>;
+
+/**
+ * Interceptor decorator metadata
+ */
+export interface InterceptorDecoratorMeta<I extends Interceptor = Interceptor> {
+	[DecoratorId]: 'interceptor';
+	handler: I;
+	meta?: Parameters<I>[1]['meta'];
+}

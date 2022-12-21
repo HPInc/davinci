@@ -7,8 +7,9 @@ import {
 	di,
 	EntityRegistry,
 	executeInterceptorsStack,
-	getInterceptorsHandlers,
+	getInterceptorsDecorators,
 	Interceptor,
+	InterceptorDecoratorMeta,
 	InterceptorNext,
 	mapParallel,
 	mapSeries,
@@ -46,7 +47,7 @@ export abstract class HttpServerModule<
 	app: App;
 	validationFactory?: ValidationFactory;
 	contextFactory?: ContextFactory<unknown>;
-	globalInterceptors: Array<HttpServerInterceptor> = [];
+	globalInterceptors: Array<Omit<InterceptorDecoratorMeta<HttpServerInterceptor>, typeof DecoratorId>> = [];
 	entityRegistry = di.container.resolve(EntityRegistry);
 	routes: Route<SMG['Request']>[] = [];
 	logger = pino({ name: 'http-server' });
@@ -56,7 +57,7 @@ export abstract class HttpServerModule<
 		super();
 		this.contextFactory = moduleOptions?.contextFactory;
 		this.validationFactory = moduleOptions?.validationFactory ?? createAjvValidator();
-		this.globalInterceptors = moduleOptions?.globalInterceptors ?? [];
+		this.setGlobalInterceptors(moduleOptions?.globalInterceptors ?? []);
 	}
 
 	getModuleId() {
@@ -75,8 +76,12 @@ export abstract class HttpServerModule<
 		this.httpServer = httpServer;
 	}
 
-	public setGlobalInterceptors(interceptors: Array<HttpServerInterceptor>) {
-		this.globalInterceptors = interceptors;
+	public setGlobalInterceptors(interceptors: HttpServerModuleOptions['globalInterceptors']) {
+		this.globalInterceptors = interceptors.map(i => {
+			return typeof i === 'function'
+				? { handler: i, meta: { stage: 'postValidation' } }
+				: { handler: i.handler, meta: { stage: i.stage } };
+		});
 	}
 
 	public setContextFactory<Context>(contextFactory: ContextFactory<Context, SMG['Request']>): this {
@@ -164,11 +169,20 @@ export abstract class HttpServerModule<
 		const { methodReflection, controllerReflection, parametersConfig } = route;
 		// eslint-disable-next-line @typescript-eslint/no-this-alias
 		const httpServerModule = this;
+
 		const interceptors = [
 			...this.globalInterceptors,
-			...getInterceptorsHandlers(controllerReflection),
-			...getInterceptorsHandlers(methodReflection)
-		];
+			...getInterceptorsDecorators<HttpServerInterceptor>(controllerReflection),
+			...getInterceptorsDecorators<HttpServerInterceptor>(methodReflection)
+		].reduce(
+			(acc, interceptor) => {
+				const stage = interceptor.meta?.stage ?? 'postValidation';
+				acc[stage].push(interceptor.handler);
+
+				return acc;
+			},
+			{ preValidation: [], postValidation: [] }
+		);
 
 		const validatorFunction: ValidationFunction | null = await this.validationFactory?.(route);
 
@@ -257,8 +271,9 @@ export abstract class HttpServerModule<
 
 				const result = await executeInterceptorsStack(
 					[
+						...interceptors.preValidation,
 						validationInterceptor,
-						...interceptors,
+						...interceptors.postValidation,
 						(_next, context) => controller[methodName](...context.handlerArgs)
 					],
 					interceptorsBag
