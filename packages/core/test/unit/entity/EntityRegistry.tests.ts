@@ -145,20 +145,20 @@ describe('EntityRegistry', () => {
 
 		@entity()
 		class Populate {
-			@entity.prop({ anyOf: [{ type: 'string' }, Populate] })
+			@entity.prop({ type: false, anyOf: [{ type: 'string' }, Populate] })
 			populate: string | Populate;
 		}
 
 		const jsonSchema = entityRegistry.getEntityDefinitionJsonSchema(Populate);
 		const populateEntityDefinition = entityRegistry.getEntityDefinitionMap().get(Populate);
 
-		expect(jsonSchema).to.containSubset({
+		expect(jsonSchema).to.be.containSubset({
 			$id: 'Populate',
 			title: 'Populate',
 			type: 'object',
 			properties: {
 				populate: {
-					_$ref: populateEntityDefinition
+					anyOf: [{ type: 'string' }, { _$ref: populateEntityDefinition }]
 				}
 			}
 		});
