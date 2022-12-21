@@ -23,6 +23,7 @@ interface EntityDefinitionOptions {
 	jsonSchema?: JSONSchema;
 	// eslint-disable-next-line no-use-before-define
 	entityDefinitionsMapCache?: Map<TypeValue, EntityDefinition>;
+	reflect?: boolean;
 }
 
 /**
@@ -42,7 +43,9 @@ export class EntityDefinition {
 		this.type = options.type;
 		this.name = options.name ?? (this.type as ClassType)?.name;
 		this.entityDefinitionsMapCache = options.entityDefinitionsMapCache;
-		this.entityDefinitionJsonSchema = this.reflect();
+		if (!options.reflect) {
+			this.entityDefinitionJsonSchema = this.reflect();
+		}
 	}
 
 	public getName() {
@@ -110,10 +113,12 @@ export class EntityDefinition {
 
 					const entityDefinition = new EntityDefinition({
 						type: theClass,
-						entityDefinitionsMapCache: this.entityDefinitionsMapCache
+						entityDefinitionsMapCache: this.entityDefinitionsMapCache,
+						reflect: false
 					});
 					// eslint-disable-next-line no-unused-expressions
 					this.entityDefinitionsMapCache?.set(theClass, entityDefinition);
+					entityDefinition.reflect();
 
 					return {
 						_$ref: entityDefinition
@@ -126,6 +131,10 @@ export class EntityDefinition {
 						const accumulator = acc ?? { properties: {}, required: [] };
 
 						const entityPropDecorator = this.findEntityPropDecorator(prop);
+						const explicitType = entityPropDecorator.options?.type;
+						const type = explicitType ?? prop.type;
+
+						const isArray = Array.isArray(type);
 
 						// traverse the json of the json schema that is explicitly passed in the decorator
 						// This is useful to traverse and reflect complex classes nested in json schema keywords (like anyOf, allOf, oneOf)
@@ -139,6 +148,13 @@ export class EntityDefinition {
 								}
 
 								if (typeof args.schema === 'function') {
+									// this check allow to support recursive schemas, specified in oneOf, allOf or anyOf keywords
+									if (args.schema === this.type) {
+										return {
+											path: args.pointerPath,
+											value: { _$ref: this }
+										};
+									}
 									const value = makeSchema(args.schema);
 
 									return {
@@ -158,24 +174,29 @@ export class EntityDefinition {
 						// passing false or null as the type value, will disable the automatic
 						// detection of the type
 						// e.g. e.g. @entity.prop({ type: false })
-						const hasFalseOrNullType =
-							entityPropDecorator.options?.type === false || entityPropDecorator.options?.type === null;
+						const hasFalseOrNullType = explicitType === false || explicitType === null;
+
+						let isRecursiveType = false;
+						if ((isArray && type[0] === this.type) || type === this.type) {
+							isRecursiveType = true;
+						}
 
 						// the type is 'explicit', when is explicitly passed as parameter to the @entity.prop decorator
 						// e.g. @entity.prop({ type: String })
-						const hasExplicitType =
-							!hasFalseOrNullType && typeof entityPropDecorator.options?.type !== 'undefined';
+						const hasExplicitType = !hasFalseOrNullType && typeof explicitType !== 'undefined';
 
 						// a constant type is a standard JSON schema type, like 'string', 'number', etc
 						const hasConstType =
 							!hasFalseOrNullType &&
 							hasExplicitType &&
-							!Array.isArray(entityPropDecorator.options?.type) &&
+							!Array.isArray(explicitType) &&
 							typeof entityPropDecorator.options?.type !== 'function';
 
 						let generatedJsonSchema;
 						if (hasFalseOrNullType) {
 							generatedJsonSchema = {};
+						} else if (isRecursiveType) {
+							generatedJsonSchema = isArray ? { type: 'array', items: { _$ref: this } } : { _$ref: this };
 						} else if (hasConstType) {
 							generatedJsonSchema = { type: entityPropDecorator.options?.type };
 						} else {

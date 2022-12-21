@@ -1043,6 +1043,64 @@ describe('OpenAPIModule', () => {
 
 			await app.shutdown();
 		});
+
+		it('should support recursive types', async () => {
+			@entity()
+			class Order {
+				@entity.prop()
+				order: Order;
+
+				@entity.prop({ type: [Order] })
+				orders: Array<Order>;
+
+				@entity.prop({ type: false, anyOf: [{ type: 'object' }, Order] })
+				ordersAnyOf: object | Order;
+			}
+
+			@route.controller({ basePath: '/api/orders' })
+			class OrderController {
+				@route.get({ path: '/', responses: { 200: [Order] } })
+				findAll(@route.query() order: Order) {
+					return { order };
+				}
+			}
+
+			const openApiModule = new OpenAPIModule({ document: { spec: {} } });
+			const app = new App({ logger: { level: 'error' } });
+			await app.registerController(OrderController).registerModule(new FastifyHttpServer(), openApiModule);
+			await app.init();
+
+			const openAPIDocument = openApiModule.getOpenAPIDocument();
+			expect(openAPIDocument.components.schemas.Order).to.be.deep.equal({
+				$id: 'Order',
+				title: 'Order',
+				type: 'object',
+				properties: {
+					order: {
+						$ref: '#/components/schemas/Order'
+					},
+					orders: {
+						type: 'array',
+						items: {
+							$ref: '#/components/schemas/Order'
+						}
+					},
+					ordersAnyOf: {
+						anyOf: [
+							{
+								type: 'object'
+							},
+							{
+								$ref: '#/components/schemas/Order'
+							}
+						]
+					}
+				},
+				required: []
+			});
+
+			await app.shutdown();
+		});
 	});
 
 	describe('endpoints', () => {

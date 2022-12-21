@@ -45,6 +45,7 @@ export interface AjvValidatorOptions {
 export class AjvValidator<Request = unknown> {
 	private ajvInstances: Partial<AjvInstancesMap> = {};
 	private jsonSchemasMap = new Map<TypeValue, JSONSchema | Partial<JSONSchema>>();
+	private entityDefinitionJSONSchemaCache = new Map<TypeValue, EntityDefinitionJSONSchema>();
 
 	private sourceToSchemaMap: Partial<
 		Record<ParameterConfiguration<Request>['source'], keyof EndpointSchema['properties']>
@@ -221,7 +222,17 @@ export class AjvValidator<Request = unknown> {
 
 			if (args.schema._$ref) {
 				const ref: EntityDefinition = args.schema._$ref;
-				const childEntityDefJsonSchema = this.createJsonSchema(ref.getEntityDefinitionJsonSchema());
+
+				// if the entity definition was previously evaluated, return the $ref
+				if (this.entityDefinitionJSONSchemaCache.has(ref.getType())) {
+					const childEntityDefJsonSchema = this.entityDefinitionJSONSchemaCache.get(ref.getType());
+					return { path: args.pointerPath, value: { $ref: childEntityDefJsonSchema.$id } };
+				}
+
+				const entityDefinitionJsonSchema = ref.getEntityDefinitionJsonSchema();
+				this.entityDefinitionJSONSchemaCache.set(ref.getType(), entityDefinitionJsonSchema);
+
+				const childEntityDefJsonSchema = this.createJsonSchema(entityDefinitionJsonSchema);
 				if (childEntityDefJsonSchema.$id) {
 					if (!this.jsonSchemasMap.has(ref.getType())) {
 						this.jsonSchemasMap.set(ref.getType(), childEntityDefJsonSchema);
