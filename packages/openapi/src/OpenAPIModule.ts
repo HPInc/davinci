@@ -56,6 +56,7 @@ export class OpenAPIModule extends Module {
 	entityRegistry: EntityRegistry;
 	openAPIDoc: PartialDeep<OpenAPIV3.Document>;
 	private jsonSchemasMap = new Map<string, JSONSchema | Partial<JSONSchema>>();
+	private entityDefinitionJSONSchemaCache = new Map<TypeValue, EntityDefinitionJSONSchema>();
 
 	constructor(moduleOptions: OpenAPIModuleOptions) {
 		super();
@@ -376,6 +377,18 @@ export class OpenAPIModule extends Module {
 
 			if (args.schema._$ref) {
 				const ref: EntityDefinition = args.schema._$ref;
+
+				// if the entity definition was previously evaluated, return the $ref
+				if (this.entityDefinitionJSONSchemaCache.has(ref.getType())) {
+					const childEntityDefJsonSchema = this.entityDefinitionJSONSchemaCache.get(ref.getType());
+					return {
+						path: args.pointerPath,
+						value: { $ref: `#/components/schemas/${childEntityDefJsonSchema.$id}` }
+					};
+				}
+
+				const entityDefinitionJsonSchema = ref.getEntityDefinitionJsonSchema();
+				this.entityDefinitionJSONSchemaCache.set(ref.getType(), entityDefinitionJsonSchema);
 				const childEntityDefJsonSchema = this.createJsonSchema(ref.getEntityDefinitionJsonSchema());
 				if (childEntityDefJsonSchema.$id) {
 					if (!this.jsonSchemasMap.has(childEntityDefJsonSchema.$id)) {

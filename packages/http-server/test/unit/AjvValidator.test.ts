@@ -348,6 +348,154 @@ describe('AjvValidator', () => {
 				required: ['lastname']
 			});
 		});
+
+		it('should support recursive schemas', async () => {
+			const entityRegistry = new EntityRegistry();
+			const ajvValidator = new AjvValidator({}, entityRegistry);
+
+			@entity()
+			class Recursive {
+				@entity.prop()
+				recursive: Recursive;
+			}
+
+			const parametersConfig: ParameterConfiguration<any>[] = [
+				{
+					name: 'data',
+					source: 'body',
+					type: Recursive,
+					options: { in: 'body', required: true },
+					value: { firstname: 'John' }
+				}
+			];
+
+			const schema = await ajvValidator.createSchema(parametersConfig);
+			const ajvInstance = ajvValidator.getAjvInstances().body;
+			const { schema: recursiveSchema } = ajvInstance.getSchema('Recursive');
+
+			expect(schema).to.be.deep.equal({
+				type: 'object',
+				properties: {
+					body: {
+						$ref: 'Recursive'
+					}
+				},
+				required: ['body']
+			});
+			expect(recursiveSchema).to.be.deep.equal({
+				$id: 'Recursive',
+				title: 'Recursive',
+				type: 'object',
+				properties: {
+					recursive: {
+						$ref: 'Recursive'
+					}
+				},
+				required: []
+			});
+		});
+
+		it('should support recursive array schemas', async () => {
+			const entityRegistry = new EntityRegistry();
+			const ajvValidator = new AjvValidator({}, entityRegistry);
+
+			@entity()
+			class Recursive {
+				@entity.prop({ type: [Recursive] })
+				recursiveArray: Array<Recursive>;
+			}
+
+			const parametersConfig: ParameterConfiguration<any>[] = [
+				{
+					name: 'data',
+					source: 'body',
+					type: Recursive,
+					options: { in: 'body', required: true },
+					value: { firstname: 'John' }
+				}
+			];
+
+			const schema = await ajvValidator.createSchema(parametersConfig);
+			const ajvInstance = ajvValidator.getAjvInstances().body;
+			const { schema: recursiveSchema } = ajvInstance.getSchema('Recursive');
+
+			expect(schema).to.be.deep.equal({
+				type: 'object',
+				properties: {
+					body: {
+						$ref: 'Recursive'
+					}
+				},
+				required: ['body']
+			});
+			expect(recursiveSchema).to.be.deep.equal({
+				$id: 'Recursive',
+				title: 'Recursive',
+				type: 'object',
+				properties: {
+					recursiveArray: {
+						items: {
+							$ref: 'Recursive'
+						},
+						type: 'array'
+					}
+				},
+				required: []
+			});
+		});
+
+		it('should support recursive schemas, specified in oneOf, allOf or anyOf keywords', async () => {
+			const entityRegistry = new EntityRegistry();
+			const ajvValidator = new AjvValidator({}, entityRegistry);
+
+			@entity()
+			class Recursive {
+				@entity.prop({ type: false, anyOf: [{ type: 'string' }, Recursive] })
+				recursive: string | Recursive;
+			}
+
+			const parametersConfig: ParameterConfiguration<any>[] = [
+				{
+					name: 'data',
+					source: 'body',
+					type: Recursive,
+					options: { in: 'body', required: true },
+					value: { firstname: 'John' }
+				}
+			];
+
+			const schema = await ajvValidator.createSchema(parametersConfig);
+			const ajvInstance = ajvValidator.getAjvInstances().body;
+			const { schema: recursiveSchema } = ajvInstance.getSchema('Recursive');
+
+			expect(schema).to.be.deep.equal({
+				type: 'object',
+				properties: {
+					body: {
+						$ref: 'Recursive'
+					}
+				},
+				required: ['body']
+			});
+			expect(recursiveSchema).to.be.deep.equal({
+				$id: 'Recursive',
+				title: 'Recursive',
+				type: 'object',
+				properties: {
+					recursive: {
+						anyOf: [
+							{
+								type: 'string'
+							},
+							{
+								$ref: 'Recursive'
+							}
+						]
+					}
+				},
+				required: []
+			});
+		});
 	});
 
 	describe('#createValidatorFunction', () => {

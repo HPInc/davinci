@@ -77,7 +77,7 @@ describe('EntityRegistry', () => {
 		expect(cacheSet.callCount).to.be.equal(1);
 	});
 
-	it('should be able to generate json schema for primitive type contructors', () => {
+	it('should be able to generate json schema for primitive type constructors', () => {
 		const entityRegistry = new EntityRegistry();
 
 		expect(entityRegistry.getEntityDefinitionJsonSchema(String)).to.be.deep.equal({ type: 'string' });
@@ -86,6 +86,81 @@ describe('EntityRegistry', () => {
 		expect(entityRegistry.getEntityDefinitionJsonSchema(Date)).to.be.deep.equal({
 			type: 'string',
 			format: 'date-time'
+		});
+	});
+
+	it('should support recursive types', () => {
+		const entityRegistry = new EntityRegistry();
+
+		@entity()
+		class Populate {
+			@entity.prop()
+			populate: Populate;
+		}
+
+		const jsonSchema = entityRegistry.getEntityDefinitionJsonSchema(Populate);
+		const populateEntityDefinition = entityRegistry.getEntityDefinitionMap().get(Populate);
+
+		expect(jsonSchema).to.containSubset({
+			$id: 'Populate',
+			title: 'Populate',
+			type: 'object',
+			properties: {
+				populate: {
+					_$ref: populateEntityDefinition
+				}
+			}
+		});
+	});
+
+	it('should support recursive array schemas', () => {
+		const entityRegistry = new EntityRegistry();
+
+		@entity()
+		class Populate {
+			@entity.prop({ type: [Populate] })
+			populate: Array<Populate>;
+		}
+
+		const jsonSchema = entityRegistry.getEntityDefinitionJsonSchema(Populate);
+		const populateEntityDefinition = entityRegistry.getEntityDefinitionMap().get(Populate);
+
+		expect(jsonSchema).to.containSubset({
+			$id: 'Populate',
+			title: 'Populate',
+			type: 'object',
+			properties: {
+				populate: {
+					type: 'array',
+					items: {
+						_$ref: populateEntityDefinition
+					}
+				}
+			}
+		});
+	});
+
+	it('should support recursive schemas, specified in oneOf, allOf or anyOf keywords', () => {
+		const entityRegistry = new EntityRegistry();
+
+		@entity()
+		class Populate {
+			@entity.prop({ anyOf: [{ type: 'string' }, Populate] })
+			populate: string | Populate;
+		}
+
+		const jsonSchema = entityRegistry.getEntityDefinitionJsonSchema(Populate);
+		const populateEntityDefinition = entityRegistry.getEntityDefinitionMap().get(Populate);
+
+		expect(jsonSchema).to.containSubset({
+			$id: 'Populate',
+			title: 'Populate',
+			type: 'object',
+			properties: {
+				populate: {
+					_$ref: populateEntityDefinition
+				}
+			}
 		});
 	});
 
