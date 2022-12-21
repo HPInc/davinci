@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.3.0](https://github.com/HPInc/davinci/compare/@davinci/http-server@3.2.2...@davinci/http-server@3.3.0) (2022-12-21)
+
+
+### Features
+
+* **httpInterceptor:** added ability to specify stage: 'preValidation' | 'postValidation' ([#195](https://github.com/HPInc/davinci/issues/195)) ([d61b571](https://github.com/HPInc/davinci/commit/d61b571f7b4dd46397f1b5ecf7e838378cb9a517))
+
+
+
+
+
 ## [3.2.2](https://github.com/HPInc/davinci/compare/@davinci/http-server@3.2.1...@davinci/http-server@3.2.2) (2022-12-21)
 
 **Note:** Version bump only for package @davinci/http-server
