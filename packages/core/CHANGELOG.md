@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.3.0](https://github.com/HPInc/davinci/compare/@davinci/core@2.2.1...@davinci/core@2.3.0) (2022-12-21)
+
+
+### Features
+
+* **entity:** ability to disable type detection by passing false or null ([#194](https://github.com/HPInc/davinci/issues/194)) ([c429cea](https://github.com/HPInc/davinci/commit/c429cea1b28864475c76def0c1e775346a8150ae))
+
+
+
+
+
 ## [2.2.1](https://github.com/HPInc/davinci/compare/@davinci/core@2.2.0...@davinci/core@2.2.1) (2022-12-20)
 
 

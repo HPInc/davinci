@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.1.7](https://github.com/HPInc/davinci/compare/@davinci/example-next-amqp@2.1.6...@davinci/example-next-amqp@2.1.7) (2022-12-21)
+
+**Note:** Version bump only for package @davinci/example-next-amqp
+
+
+
+
+
 ## [2.1.6](https://github.com/HPInc/davinci/compare/@davinci/example-next-amqp@2.1.5...@davinci/example-next-amqp@2.1.6) (2022-12-20)
 
 **Note:** Version bump only for package @davinci/example-next-amqp
