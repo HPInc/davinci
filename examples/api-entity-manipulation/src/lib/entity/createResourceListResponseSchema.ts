@@ -6,10 +6,19 @@
 import { ClassType } from '@davinci/reflector';
 import { entity } from '@davinci/core';
 
-export function createResourceListResponseEntity<T>(entityClass: ClassType<T>) {
+export function createResourceListResponseSchema<T>(entityClass: ClassType<T>) {
 	class ResourceListResponse {
 		@entity.prop({ type: [entityClass] })
 		data: Array<T>;
+
+		@entity.prop()
+		total: number;
+
+		@entity.prop()
+		skip: number;
+
+		@entity.prop()
+		limit: number;
 	}
 
 	return ResourceListResponse;

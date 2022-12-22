@@ -4,47 +4,54 @@
  */
 
 import { entity } from '@davinci/core';
-import { createPartialEntity } from '../../lib/createPartialEntity';
-import { createResourceListResponseEntity } from '../../lib/createResourceListResponseEntity';
+import { mgoose } from '@davinci/mongoose';
+import { createPartialSchema } from '../../lib/entity/createPartialSchema';
+import { createQuerySchema } from '../../lib/entity/createQuerySchema';
 
+@entity()
 class Phone {
+	@mgoose.prop()
 	@entity.prop()
 	isDefault: boolean;
 
+	@mgoose.prop()
 	@entity.prop({ required: true })
 	phone: number;
 }
 
-@entity()
 class Birth {
+	@mgoose.prop()
 	@entity.prop()
 	date: Date;
 
+	@mgoose.prop()
 	@entity.prop()
 	country: string;
 }
 
+@mgoose.schema()
 @entity()
 export class Customer {
-	id?: string;
-
+	@mgoose.prop({ minlength: 2 })
 	@entity.prop({ minLength: 2 })
-	firstname?: string;
+	firstname: string;
 
+	@mgoose.prop({ required: true, minlength: 2 })
 	@entity.prop({ required: true, minLength: 2 })
 	lastname: string;
 
+	@mgoose.prop({ type: [Phone] })
 	@entity.prop({ type: [Phone] })
-	phones?: Phone[];
+	phones: Phone[];
 
+	@mgoose.prop()
 	@entity.prop()
-	birth?: Birth;
+	birth: Birth;
 
-	modifiedCount?: number;
+	@mgoose.prop()
+	modifiedCount: number;
 }
 
-@entity()
-export class CustomerPartial extends createPartialEntity<Customer>(Customer) {}
+export class CustomerPartial extends createPartialSchema<Customer>(Customer) {}
 
-@entity()
-export class CustomerList extends createResourceListResponseEntity<Customer>(Customer) {}
+export class CustomerQuery extends createQuerySchema(Customer, { queryablePaths: ['firstname', 'phones'] }) {}

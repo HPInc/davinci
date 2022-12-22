@@ -5,17 +5,25 @@
 
 import { createApp } from '@davinci/core';
 import { FastifyHttpServer } from '@davinci/http-server-fastify';
+import { MongooseModule } from '@davinci/mongoose';
 import { createAjvValidator } from '@davinci/http-server';
-import { CustomerController } from './api/customer';
 import { OpenAPIModule } from '@davinci/openapi';
+import { CustomerController } from './api/customer';
 
 const app = createApp();
 const contextFactory = ({ request }) => ({ accountId: request.headers['x-accountid'] });
 
 app.registerController(CustomerController).registerModule(
+	new MongooseModule({ connection: { uri: 'mongodb://127.0.0.1:27017/example' } }),
 	new FastifyHttpServer({
 		contextFactory,
-		validationFactory: createAjvValidator({ ajvOptions: { removeAdditional: false } })
+		validationFactory: createAjvValidator({
+			ajvOptions: {
+				allErrors: true,
+				removeAdditional: 'all',
+				coerceTypes: 'array'
+			}
+		})
 	}),
 	new OpenAPIModule({
 		document: {

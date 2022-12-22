@@ -3,44 +3,37 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { httpErrors, route } from '@davinci/http-server';
-import { Customer, CustomerList, CustomerPartial } from './customer.schema';
-
-const customers: Array<Customer> = [{ id: '123', firstname: 'John', lastname: 'Doe' }];
+import { route } from '@davinci/http-server';
+import { Customer, CustomerPartial, CustomerQuery } from './customer.schema';
+import { CustomerModel } from './customer.model';
 
 @route.controller({
 	basePath: '/api/customers'
 })
 export default class CustomerController {
-	@route.get({ path: '/', responses: { 200: CustomerList } })
-	async list(): Promise<CustomerList> {
-		return {
-			data: [{ firstname: 'John', lastname: 'Doe' }]
-		};
+	@route.get({ path: '/' })
+	list(@route.query() query: CustomerQuery) {
+		return query;
+		/*console.log(where);
+		return CustomerModel.find();*/
 	}
 
-	@route.post({ path: '/', responses: { 200: Customer } })
+	@route.post({ path: '/' })
 	async create(@route.body({ required: true }) data: Customer) {
-		return { success: true, data };
+		const customer = await CustomerModel.create(data);
+
+		return { success: true, data: customer };
 	}
 
-	@route.get({ path: '/:id', responses: { 200: Customer } })
+	@route.get({ path: '/:id' })
 	getOne(@route.path() id: string) {
-		const customer = customers.find(c => c.id === id);
-		if (!customer) {
-			throw new httpErrors.NotFound();
-		}
-
-		return customer;
+		return CustomerModel.findById(id);
 	}
 
-	@route.patch({ path: '/:id', responses: { 200: Customer } })
+	@route.patch({ path: '/:id' })
 	async patch(@route.path() id: string, @route.body({ required: true }) data: CustomerPartial) {
-		const customer = customers.find(c => c.id === id);
-		if (!customer) {
-			throw new httpErrors.NotFound();
-		}
+		const customer = await CustomerModel.findOneAndUpdate({ _id: id }, data, { new: true });
 
-		return data;
+		return { success: true, data: customer };
 	}
 }
