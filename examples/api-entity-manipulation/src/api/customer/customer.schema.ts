@@ -50,8 +50,17 @@ export class Customer {
 
 	@mgoose.prop()
 	modifiedCount: number;
+
+	@mgoose.prop()
+	@mgoose.populate({ name: 'logs', opts: { ref: 'Log', foreignField: '_id' } })
+	logIds: Array<string>;
 }
 
+@entity()
 export class CustomerPartial extends createPartialSchema<Customer>(Customer) {}
 
-export class CustomerQuery extends createQuerySchema(Customer, { queryablePaths: ['firstname', 'phones'] }) {}
+@entity()
+export class CustomerQuery extends createQuerySchema(Customer, {
+	queryablePaths: ['firstname', 'phones'],
+	sortablePaths: [{ path: 'lastname', order: [1, -1] }]
+}) {}

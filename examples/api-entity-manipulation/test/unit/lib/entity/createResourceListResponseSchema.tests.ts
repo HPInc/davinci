@@ -14,7 +14,7 @@ describe('createResourceListResponseSchema', () => {
 		entityRegistry = new EntityRegistry();
 	});
 
-	it('should create an entityJsonSchema that represent the response type of the list endpoint', () => {
+	it('should create an entityJsonSchema that represents the response type of the list endpoint', () => {
 		@entity()
 		class Phone {
 			@entity.prop({ required: true })

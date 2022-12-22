@@ -14,7 +14,7 @@ describe('createQuerySchema', () => {
 		entityRegistry = new EntityRegistry();
 	});
 
-	it('should create an entityJsonSchema that represent the response type of the list endpoint', () => {
+	it('should create an entityJsonSchema that represents a query schema', () => {
 		@entity()
 		class Phone {
 			@entity.prop({ required: true })
@@ -60,6 +60,25 @@ describe('createQuerySchema', () => {
 				$where: {
 					_$ref: CustomerWhereEntityDefinition
 				},
+				$select: {
+					anyOf: [
+						{
+							type: 'object',
+							patternProperties: {
+								'.*': {
+									enum: [1, -1],
+									type: 'number'
+								}
+							}
+						},
+						{
+							items: {
+								type: 'string'
+							},
+							type: 'array'
+						}
+					]
+				},
 				$limit: {
 					type: 'number'
 				},
@@ -74,19 +93,13 @@ describe('createQuerySchema', () => {
 			title: 'CustomerWhere',
 			type: 'object',
 			properties: {
-				AND: {
+				$and: {
 					type: 'array',
 					items: {
 						_$ref: CustomerWhereBaseEntityDefinition
 					}
 				},
-				OR: {
-					type: 'array',
-					items: {
-						_$ref: CustomerWhereBaseEntityDefinition
-					}
-				},
-				NOR: {
+				$or: {
 					type: 'array',
 					items: {
 						_$ref: CustomerWhereBaseEntityDefinition
@@ -98,37 +111,37 @@ describe('createQuerySchema', () => {
 							title: 'PrimitiveBaseFilterOperators',
 							type: 'object',
 							properties: {
-								EQ: {
+								$eq: {
 									type: 'string'
 								},
-								NE: {
+								$ne: {
 									type: 'string'
 								},
-								GT: {
+								$gt: {
 									type: 'string'
 								},
-								GTE: {
+								$gte: {
 									type: 'string'
 								},
-								LT: {
+								$lt: {
 									type: 'string'
 								},
-								LTE: {
+								$lte: {
 									type: 'string'
 								},
-								IN: {
+								$in: {
 									type: 'array',
 									items: {
 										type: 'string'
 									}
 								},
-								NIN: {
+								$nin: {
 									type: 'array',
 									items: {
 										type: 'string'
 									}
 								},
-								EXISTS: {
+								$exists: {
 									type: 'boolean'
 								}
 							},
@@ -145,37 +158,37 @@ describe('createQuerySchema', () => {
 							title: 'PrimitiveBaseFilterOperators',
 							type: 'object',
 							properties: {
-								EQ: {
+								$eq: {
 									type: 'string'
 								},
-								NE: {
+								$ne: {
 									type: 'string'
 								},
-								GT: {
+								$gt: {
 									type: 'string'
 								},
-								GTE: {
+								$gte: {
 									type: 'string'
 								},
-								LT: {
+								$lt: {
 									type: 'string'
 								},
-								LTE: {
+								$lte: {
 									type: 'string'
 								},
-								IN: {
+								$in: {
 									type: 'array',
 									items: {
 										type: 'string'
 									}
 								},
-								NIN: {
+								$nin: {
 									type: 'array',
 									items: {
 										type: 'string'
 									}
 								},
-								EXISTS: {
+								$exists: {
 									type: 'boolean'
 								}
 							},
@@ -190,7 +203,7 @@ describe('createQuerySchema', () => {
 					title: 'phone',
 					type: 'object',
 					properties: {
-						EXISTS: {
+						$exists: {
 							type: 'boolean'
 						},
 						number: {
@@ -199,37 +212,37 @@ describe('createQuerySchema', () => {
 									title: 'PrimitiveBaseFilterOperators',
 									type: 'object',
 									properties: {
-										EQ: {
+										$eq: {
 											type: 'string'
 										},
-										NE: {
+										$ne: {
 											type: 'string'
 										},
-										GT: {
+										$gt: {
 											type: 'string'
 										},
-										GTE: {
+										$gte: {
 											type: 'string'
 										},
-										LT: {
+										$lt: {
 											type: 'string'
 										},
-										LTE: {
+										$lte: {
 											type: 'string'
 										},
-										IN: {
+										$in: {
 											type: 'array',
 											items: {
 												type: 'string'
 											}
 										},
-										NIN: {
+										$nin: {
 											type: 'array',
 											items: {
 												type: 'string'
 											}
 										},
-										EXISTS: {
+										$exists: {
 											type: 'boolean'
 										}
 									},
@@ -257,37 +270,37 @@ describe('createQuerySchema', () => {
 							title: 'PrimitiveBaseFilterOperators',
 							type: 'object',
 							properties: {
-								EQ: {
+								$eq: {
 									type: 'string'
 								},
-								NE: {
+								$ne: {
 									type: 'string'
 								},
-								GT: {
+								$gt: {
 									type: 'string'
 								},
-								GTE: {
+								$gte: {
 									type: 'string'
 								},
-								LT: {
+								$lt: {
 									type: 'string'
 								},
-								LTE: {
+								$lte: {
 									type: 'string'
 								},
-								IN: {
+								$in: {
 									type: 'array',
 									items: {
 										type: 'string'
 									}
 								},
-								NIN: {
+								$nin: {
 									type: 'array',
 									items: {
 										type: 'string'
 									}
 								},
-								EXISTS: {
+								$exists: {
 									type: 'boolean'
 								}
 							},
@@ -304,37 +317,37 @@ describe('createQuerySchema', () => {
 							title: 'PrimitiveBaseFilterOperators',
 							type: 'object',
 							properties: {
-								EQ: {
+								$eq: {
 									type: 'string'
 								},
-								NE: {
+								$ne: {
 									type: 'string'
 								},
-								GT: {
+								$gt: {
 									type: 'string'
 								},
-								GTE: {
+								$gte: {
 									type: 'string'
 								},
-								LT: {
+								$lt: {
 									type: 'string'
 								},
-								LTE: {
+								$lte: {
 									type: 'string'
 								},
-								IN: {
+								$in: {
 									type: 'array',
 									items: {
 										type: 'string'
 									}
 								},
-								NIN: {
+								$nin: {
 									type: 'array',
 									items: {
 										type: 'string'
 									}
 								},
-								EXISTS: {
+								$exists: {
 									type: 'boolean'
 								}
 							},
@@ -349,7 +362,7 @@ describe('createQuerySchema', () => {
 					title: 'phone',
 					type: 'object',
 					properties: {
-						EXISTS: {
+						$exists: {
 							type: 'boolean'
 						},
 						number: {
@@ -358,37 +371,37 @@ describe('createQuerySchema', () => {
 									title: 'PrimitiveBaseFilterOperators',
 									type: 'object',
 									properties: {
-										EQ: {
+										$eq: {
 											type: 'string'
 										},
-										NE: {
+										$ne: {
 											type: 'string'
 										},
-										GT: {
+										$gt: {
 											type: 'string'
 										},
-										GTE: {
+										$gte: {
 											type: 'string'
 										},
-										LT: {
+										$lt: {
 											type: 'string'
 										},
-										LTE: {
+										$lte: {
 											type: 'string'
 										},
-										IN: {
+										$in: {
 											type: 'array',
 											items: {
 												type: 'string'
 											}
 										},
-										NIN: {
+										$nin: {
 											type: 'array',
 											items: {
 												type: 'string'
 											}
 										},
-										EXISTS: {
+										$exists: {
 											type: 'boolean'
 										}
 									},

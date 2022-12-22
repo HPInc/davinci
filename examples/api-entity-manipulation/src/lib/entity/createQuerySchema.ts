@@ -10,36 +10,36 @@ import { capitalizeFirstLetter, isPrimitiveType, renameClass } from './entityMan
 const withBaseFilterOperators = (type: TypeValue) => {
 	class PrimitiveBaseFilterOperators {
 		@entity.prop({ type })
-		EQ: any;
+		$eq: any;
 
 		@entity.prop({ type })
-		NE: any;
+		$ne: any;
 
 		@entity.prop({ type })
-		GT: any;
+		$gt: any;
 
 		@entity.prop({ type })
-		GTE: any;
+		$gte: any;
 
 		@entity.prop({ type })
-		LT: any;
+		$lt: any;
 
 		@entity.prop({ type })
-		LTE: any;
+		$lte: any;
 
 		@entity.prop({ type: [type] })
-		IN: any;
+		$in: any;
 
 		@entity.prop({ type: [type] })
-		NIN: any;
+		$nin: any;
 
 		@entity.prop()
-		EXISTS: boolean;
+		$exists: boolean;
 	}
 
 	class ObjectBaseFilterOperators extends (type as ClassType) {
 		@entity.prop()
-		EXISTS: boolean;
+		$exists: boolean;
 	}
 
 	return isPrimitiveType(type) ? PrimitiveBaseFilterOperators : ObjectBaseFilterOperators;
@@ -112,7 +112,7 @@ export function createWhereSchema<T>(theClass: ClassType<T>, queryablePaths: Arr
 	entity()(WhereClass);
 
 	const WithQueryClass = reflect.create({}, { name: `${theClass.name}Where`, extends: WhereClass });
-	const LOGIC_OPERATORS = ['AND', 'OR', 'NOR'];
+	const LOGIC_OPERATORS = ['$and', '$or'];
 	LOGIC_OPERATORS.forEach(op => entity.prop({ type: [WhereClass] })(WithQueryClass.prototype, op));
 	entity()(WithQueryClass);
 
@@ -120,24 +120,50 @@ export function createWhereSchema<T>(theClass: ClassType<T>, queryablePaths: Arr
 }
 
 interface CreateQueryEntityOptions {
-	queryablePaths: Array<string>;
+	queryablePaths?: Array<string>;
+	populatePaths?: Array<{ path: string; options: CreateQueryEntityOptions }>;
+	sortablePaths?: Array<{ path: string; order: Array<1 | -1> }>;
 	limitMax?: number;
 	skipMax?: number;
 }
 
 export function createQuerySchema(theClass: ClassType, options: CreateQueryEntityOptions) {
-	const defaultOptions: CreateQueryEntityOptions = { queryablePaths: [] };
-	const { queryablePaths, limitMax, skipMax } = { ...defaultOptions, ...options };
+	const defaultOptions: CreateQueryEntityOptions = { queryablePaths: [], sortablePaths: [] };
+	const { queryablePaths, sortablePaths, limitMax, skipMax } = { ...defaultOptions, ...options };
 
 	class Query {
 		@entity.prop({ type: createWhereSchema(theClass, queryablePaths) })
 		$where: object;
+
+		@entity.prop({
+			type: false,
+			anyOf: [
+				{ type: 'object', patternProperties: { '.*': { type: 'number', enum: [1, -1] } } },
+				{ type: 'array', items: { type: 'string' } }
+			]
+		})
+		$select: Record<string, 1 | -1> | Array<string>;
+
+		$sort: Record<string, 1 | -1> | Array<string>;
 
 		@entity.prop({ ...(limitMax ? { maximum: limitMax } : {}) })
 		$limit: number;
 
 		@entity.prop({ ...(skipMax ? { maximum: skipMax } : {}) })
 		$skip: number;
+	}
+
+	if (sortablePaths.length) {
+		entity.prop({
+			type: 'object',
+			properties: sortablePaths.reduce(
+				(acc, field) => ({
+					...acc,
+					[field.path]: { type: 'number', enum: field.order }
+				}),
+				{}
+			)
+		})(Query.prototype, '$sort');
 	}
 
 	return Query;
