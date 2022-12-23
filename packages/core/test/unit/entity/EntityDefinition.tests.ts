@@ -104,7 +104,7 @@ describe('EntityDefinition', () => {
 		
 		@entity()
 		class Phone {
-			@entity.prop({ enum: PHONE_TYPE })
+			@entity.prop({ default: PHONE_TYPE.OTHER, enum: PHONE_TYPE })
 			type: PHONE_TYPE;
 
 			@entity.prop({ enum: PHONE_PREFIX })
