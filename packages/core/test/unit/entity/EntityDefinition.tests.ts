@@ -85,6 +85,57 @@ describe('EntityDefinition', () => {
 			.to.be.instanceof(EntityDefinition);
 	});
 
+	it('should reflect a class with enum and generate a json schema', () => {
+		enum PHONE_TYPE {
+			PERSONAL = 'personal',
+			WORK = 'work',
+			OTHER = 'other',
+		}
+
+		enum PHONE_PREFIX {
+			one = 1,
+			three = 3
+		}
+
+		enum PHONE_EXTENSION {
+			central,
+			ext1
+		}
+		
+		@entity()
+		class Phone {
+			@entity.prop({ enum: PHONE_TYPE })
+			type: PHONE_TYPE;
+
+			@entity.prop({ enum: PHONE_PREFIX })
+			prefix: PHONE_PREFIX;
+
+			@entity.prop({ enum: PHONE_EXTENSION })
+			extension: PHONE_EXTENSION;
+		}
+
+		const entityDefinition = new EntityDefinition({ type: Phone });
+
+		expect(entityDefinition.getEntityDefinitionJsonSchema()).to.containSubset({
+			title: 'Phone',
+			type: 'object',
+			properties: {
+				extension: {
+					type: 'number',
+					enum: [0, 1]
+				},
+				prefix: {
+					type: 'number',
+					enum: [1, 3]
+				},
+				type: {
+					type: 'string',
+					enum: ['personal', 'work', 'other']
+				}
+			}
+		});
+	});
+
 	it('should reflect a class and generate a json schema using the entity definition cache', () => {
 		@entity()
 		class Birth {

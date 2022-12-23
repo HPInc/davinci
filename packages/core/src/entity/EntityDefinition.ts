@@ -134,6 +134,17 @@ export class EntityDefinition {
 						const explicitType = entityPropDecorator.options?.type;
 						const type = explicitType ?? prop.type;
 
+						const enm = entityPropDecorator.options?.enum;
+						if (enm && typeof enm === 'object') {
+							if (type.name === 'Number') {
+								entityPropDecorator.options.enum = Object.values(enm)
+									.filter(v => typeof v === 'number');
+							} else if (type.name === 'String') {
+								entityPropDecorator.options.enum = Object.values(enm)
+									.filter(v => typeof v === 'string');
+							}
+						}
+
 						const isArray = Array.isArray(type);
 
 						// traverse the json of the json schema that is explicitly passed in the decorator
