@@ -189,6 +189,106 @@ describe('EntityDefinition', () => {
 		expect(entityDefinitionsMapCacheGetSpy.called).to.be.equal(true);
 	});
 
+
+	it('should reflect a class and generate a json schema with nested required properties', () => {
+		@entity()
+		class Customer {
+			@entity.prop({ 
+				required: ['firstName', 'lastName'], 
+				properties: {
+					firstName: { type: 'string' },
+					middleName: { type: 'string' },
+					lastName: { type: 'string' },
+					birthday: {
+						type: 'object',
+						properties: {
+							day: { type: 'number' },
+							month: { oneOf: ['number', 'string'] },
+							year: { type: 'number' }
+						},
+						required: ['day', 'month']
+					}
+				}
+			})
+			personalInfo: Record<string, string>;
+
+			@entity.prop({ required: true })
+			id: number;
+
+			@entity.prop({ required: true })
+			country: string;
+
+			@entity.prop({
+				properties: {
+					id: {
+						type: 'number'
+					},
+					firstName: {
+						type: 'string'
+					},
+					lastName: {
+						type: 'string'
+					}
+				},
+				anyOf: [{ required: ['id'] }, { required: ['firstName'] }, { required: ['lastName'] }]
+			})
+			$sort?: Record<'id' | 'firstName' | 'lastName', -1 | 1>;
+		}
+
+		const entityDefinition = new EntityDefinition({ type: Customer });
+
+		expect(entityDefinition.getEntityDefinitionJsonSchema()).to.containSubset({
+			title: 'Customer',
+			type: 'object',
+			required: ['id', 'country'],
+			properties: {
+				id: {
+					type: 'number'
+				},
+				country: {
+					type: 'string'
+				},
+				personalInfo: {
+					type: 'object',
+					properties: {
+						firstName: {
+							type: 'string'
+						},
+						middleName: {
+							type: 'string'
+						},
+						lastName: {
+							type: 'string'
+						},
+						birthday: {
+							type: 'object',
+							properties: {
+								day: {
+									type: 'number'
+								},
+								month: {
+									oneOf: ['number', 'string']
+								},
+								year: {
+									type: 'number'
+								}
+							},
+							required: ['day', 'month']
+						}
+					},
+					required: ['firstName', 'lastName']
+				},
+				$sort: {
+					anyOf: [
+						{ required: ['id'] },
+						{ required: ['firstName'] },
+						{ required: ['lastName'] }
+					]
+				}
+			}
+		});
+	});
+
 	it('should correctly traverse and reflect class types nested in keywords (anyOf, oneOf, allOf)', () => {
 		class HomeAddress {
 			@entity.prop()
