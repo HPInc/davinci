@@ -13,7 +13,6 @@ import {
 	TypeValue
 } from '@davinci/reflector';
 import deepMerge from 'deepmerge';
-import set from 'immutable-set';
 import { EntityDefinitionJSONSchema, EntityOptions, EntityPropReflection, JSONSchema } from './types';
 import { isPlainObject, omit } from '../lib/object-utils';
 import { transformEntityDefinitionSchema } from './json/transformEntityDefinitionSchema';
@@ -137,14 +136,13 @@ export class EntityDefinition {
 
 						const isArray = Array.isArray(type);
 
-						const requiredProps = {};
-
 						// traverse the json of the json schema that is explicitly passed in the decorator
 						// This is useful to traverse and reflect complex classes nested in json schema keywords (like anyOf, allOf, oneOf)
 						// e.g.
 						// @entity.prop({ anyOf: [MyClassOne, MyClassTwo]  })
-						let extractedJsonSchema = transformEntityDefinitionSchema(
-							omit(entityPropDecorator?.options ?? {}, ['type', 'required']),
+						const omitProps = typeof entityPropDecorator?.options?.required === 'boolean' ? ['type', 'required'] : ['type'];
+						const extractedJsonSchema = transformEntityDefinitionSchema(
+							omit(entityPropDecorator?.options ?? {}, omitProps),
 							args => {
 								if (args.pointerPath === '') {
 									return { path: '', value: omit(args.schema, ['properties']) };
@@ -167,26 +165,12 @@ export class EntityDefinition {
 								}
 
 								if (args.parentKeyword === 'properties') {
-									if (args.schema.required) {
-										const parts = args.pointerPathParts.slice(0, -2);
-										parts.push('required');
-										const path = parts.join('.');
-										if (Array.isArray(requiredProps[path])) {
-											requiredProps[path].push(args.keyIndex);
-										} else {
-											requiredProps[path] = [args.keyIndex];
-										}
-									}
-									return { path: args.pointerPath, value: omit(args.schema, ['required']) };
+									return { path: args.pointerPath, value: args.schema };
 								}
 
 								return null;
 							}
 						);
-
-						Object.keys(requiredProps).forEach(k => {
-							extractedJsonSchema = set(extractedJsonSchema, k, requiredProps[k])
-						})
 
 						// passing false or null as the type value, will disable the automatic
 						// detection of the type
@@ -224,7 +208,7 @@ export class EntityDefinition {
 							isMergeableObject: isPlainObject
 						});
 
-						if (entityPropDecorator.options?.required) {
+						if (entityPropDecorator.options?.required && typeof entityPropDecorator.options?.required === 'boolean') {
 							accumulator.required.push(prop.name);
 						}
 

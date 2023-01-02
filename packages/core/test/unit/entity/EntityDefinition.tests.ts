@@ -143,22 +143,45 @@ describe('EntityDefinition', () => {
 		@entity()
 		class Customer {
 			@entity.prop({ 
-				required: true, 
+				required: ['firstName', 'lastName'], 
 				properties: {
-					firstName: { type: 'string', required: true },
+					firstName: { type: 'string' },
 					middleName: { type: 'string' },
-					lastName: { type: 'string', required: true },
+					lastName: { type: 'string' },
 					birthday: {
 						type: 'object',
 						properties: {
-							day: { type: 'number', required: true },
-							month: { oneOf: ['number', 'string'], required: true },
+							day: { type: 'number' },
+							month: { oneOf: ['number', 'string'] },
 							year: { type: 'number' }
-						}
+						},
+						required: ['day', 'month']
 					}
 				}
 			})
 			personalInfo: Record<string, string>;
+
+			@entity.prop({ required: true })
+			id: number;
+
+			@entity.prop({ required: true })
+			country: string;
+
+			@entity.prop({
+				properties: {
+					id: {
+						type: 'number'
+					},
+					firstName: {
+						type: 'string'
+					},
+					lastName: {
+						type: 'string'
+					}
+				},
+				anyOf: [{ required: ['id'] }, { required: ['firstName'] }, { required: ['lastName'] }]
+			})
+			$sort?: Record<'id' | 'firstName' | 'lastName', -1 | 1>;
 		}
 
 		const entityDefinition = new EntityDefinition({ type: Customer });
@@ -166,7 +189,14 @@ describe('EntityDefinition', () => {
 		expect(entityDefinition.getEntityDefinitionJsonSchema()).to.containSubset({
 			title: 'Customer',
 			type: 'object',
+			required: ['id', 'country'],
 			properties: {
+				id: {
+					type: 'number'
+				},
+				country: {
+					type: 'string'
+				},
 				personalInfo: {
 					type: 'object',
 					properties: {
@@ -196,6 +226,13 @@ describe('EntityDefinition', () => {
 						}
 					},
 					required: ['firstName', 'lastName']
+				},
+				$sort: {
+					anyOf: [
+						{ required: ['id'] },
+						{ required: ['firstName'] },
+						{ required: ['lastName'] }
+					]
 				}
 			}
 		});

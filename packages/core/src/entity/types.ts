@@ -18,7 +18,7 @@ export type EntityDefinitionJSONSchema<T = any> = JSONSchema<T> & { _$ref?: Enti
 
 export type EntityPropOptions<T = unknown> = Partial<JSONSchema<T>> & {
 	type?: TypeValue | JSONSchema<T>['type'];
-	required?: boolean;
+	required?: boolean | string[];
 };
 
 export interface EntityPropReflection<T = unknown> {
