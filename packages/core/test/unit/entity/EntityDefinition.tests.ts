@@ -138,6 +138,69 @@ describe('EntityDefinition', () => {
 		expect(entityDefinitionsMapCacheGetSpy.called).to.be.equal(true);
 	});
 
+
+	it('should reflect a class and generate a json schema with nested required properties', () => {
+		@entity()
+		class Customer {
+			@entity.prop({ 
+				required: true, 
+				properties: {
+					firstName: { type: 'string', required: true },
+					middleName: { type: 'string' },
+					lastName: { type: 'string', required: true },
+					birthday: {
+						type: 'object',
+						properties: {
+							day: { type: 'number', required: true },
+							month: { oneOf: ['number', 'string'], required: true },
+							year: { type: 'number' }
+						}
+					}
+				}
+			})
+			personalInfo: Record<string, string>;
+		}
+
+		const entityDefinition = new EntityDefinition({ type: Customer });
+
+		expect(entityDefinition.getEntityDefinitionJsonSchema()).to.containSubset({
+			title: 'Customer',
+			type: 'object',
+			properties: {
+				personalInfo: {
+					type: 'object',
+					properties: {
+						firstName: {
+							type: 'string'
+						},
+						middleName: {
+							type: 'string'
+						},
+						lastName: {
+							type: 'string'
+						},
+						birthday: {
+							type: 'object',
+							properties: {
+								day: {
+									type: 'number'
+								},
+								month: {
+									oneOf: ['number', 'string']
+								},
+								year: {
+									type: 'number'
+								}
+							},
+							required: ['day', 'month']
+						}
+					},
+					required: ['firstName', 'lastName']
+				}
+			}
+		});
+	});
+
 	it('should correctly traverse and reflect class types nested in keywords (anyOf, oneOf, allOf)', () => {
 		class HomeAddress {
 			@entity.prop()

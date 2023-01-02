@@ -1,7 +1,7 @@
 /*
- * © Copyright 2022 HP Development Company, L.P.
- * SPDX-License-Identifier: MIT
- */
+* © Copyright 2022 HP Development Company, L.P.
+* SPDX-License-Identifier: MIT
+*/
 
 import {
 	ClassReflection,
@@ -13,6 +13,7 @@ import {
 	TypeValue
 } from '@davinci/reflector';
 import deepMerge from 'deepmerge';
+import set from 'immutable-set';
 import { EntityDefinitionJSONSchema, EntityOptions, EntityPropReflection, JSONSchema } from './types';
 import { isPlainObject, omit } from '../lib/object-utils';
 import { transformEntityDefinitionSchema } from './json/transformEntityDefinitionSchema';
@@ -136,11 +137,13 @@ export class EntityDefinition {
 
 						const isArray = Array.isArray(type);
 
+						const requiredProps = {};
+
 						// traverse the json of the json schema that is explicitly passed in the decorator
 						// This is useful to traverse and reflect complex classes nested in json schema keywords (like anyOf, allOf, oneOf)
 						// e.g.
 						// @entity.prop({ anyOf: [MyClassOne, MyClassTwo]  })
-						const extractedJsonSchema = transformEntityDefinitionSchema(
+						let extractedJsonSchema = transformEntityDefinitionSchema(
 							omit(entityPropDecorator?.options ?? {}, ['type', 'required']),
 							args => {
 								if (args.pointerPath === '') {
@@ -164,12 +167,26 @@ export class EntityDefinition {
 								}
 
 								if (args.parentKeyword === 'properties') {
-									return { path: args.pointerPath, value: args.schema };
+									if (args.schema.required) {
+										const parts = args.pointerPathParts.slice(0, -2);
+										parts.push('required');
+										const path = parts.join('.');
+										if (Array.isArray(requiredProps[path])) {
+											requiredProps[path].push(args.keyIndex);
+										} else {
+											requiredProps[path] = [args.keyIndex];
+										}
+									}
+									return { path: args.pointerPath, value: omit(args.schema, ['required']) };
 								}
 
 								return null;
 							}
 						);
+
+						Object.keys(requiredProps).forEach(k => {
+							extractedJsonSchema = set(extractedJsonSchema, k, requiredProps[k])
+						})
 
 						// passing false or null as the type value, will disable the automatic
 						// detection of the type
