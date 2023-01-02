@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.6.0](https://github.com/HPInc/davinci/compare/@davinci/core@2.5.0...@davinci/core@2.6.0) (2023-01-02)
+
+
+### Features
+
+* allow required boolean or array of props ([3c30eb1](https://github.com/HPInc/davinci/commit/3c30eb1976882e24be04c2aca006d7661bf62cd4))
+* support nested required properties in objects ([eff5afa](https://github.com/HPInc/davinci/commit/eff5afa7e5233c0e96c8164e54436ea84c40b340))
+
+
+
+
+
 # [2.5.0](https://github.com/HPInc/davinci/compare/@davinci/core@2.4.0...@davinci/core@2.5.0) (2022-12-21)
 
 

@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.1.9](https://github.com/HPInc/davinci/compare/@davinci/messaging-amqp@2.1.8...@davinci/messaging-amqp@2.1.9) (2023-01-02)
+
+**Note:** Version bump only for package @davinci/messaging-amqp
+
+
+
+
+
 ## [2.1.8](https://github.com/HPInc/davinci/compare/@davinci/messaging-amqp@2.1.7...@davinci/messaging-amqp@2.1.8) (2022-12-21)
 
 **Note:** Version bump only for package @davinci/messaging-amqp
