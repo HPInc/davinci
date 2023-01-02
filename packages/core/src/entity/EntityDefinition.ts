@@ -1,7 +1,7 @@
 /*
- * © Copyright 2022 HP Development Company, L.P.
- * SPDX-License-Identifier: MIT
- */
+* © Copyright 2022 HP Development Company, L.P.
+* SPDX-License-Identifier: MIT
+*/
 
 import {
 	ClassReflection,
@@ -140,8 +140,9 @@ export class EntityDefinition {
 						// This is useful to traverse and reflect complex classes nested in json schema keywords (like anyOf, allOf, oneOf)
 						// e.g.
 						// @entity.prop({ anyOf: [MyClassOne, MyClassTwo]  })
+						const omitProps = typeof entityPropDecorator?.options?.required === 'boolean' ? ['type', 'required'] : ['type'];
 						const extractedJsonSchema = transformEntityDefinitionSchema(
-							omit(entityPropDecorator?.options ?? {}, ['type', 'required']),
+							omit(entityPropDecorator?.options ?? {}, omitProps),
 							args => {
 								if (args.pointerPath === '') {
 									return { path: '', value: omit(args.schema, ['properties']) };
@@ -207,7 +208,7 @@ export class EntityDefinition {
 							isMergeableObject: isPlainObject
 						});
 
-						if (entityPropDecorator.options?.required) {
+						if (entityPropDecorator.options?.required && typeof entityPropDecorator.options?.required === 'boolean') {
 							accumulator.required.push(prop.name);
 						}
 
