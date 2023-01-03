@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.7.0](https://github.com/HPInc/davinci/compare/@davinci/core@2.6.0...@davinci/core@2.7.0) (2023-01-03)
+
+
+### Bug Fixes
+
+* move enum transform logic to transformEntityDefinitionSchema ([92de639](https://github.com/HPInc/davinci/commit/92de639153b87730d694cec808261301613deab5))
+
+
+### Features
+
+* allow to pass ts enums as property types and as values for the entity.prop enum option ([8f4e484](https://github.com/HPInc/davinci/commit/8f4e484ead621f8b4e0d578ea5e752c15a9eeb63))
+* enums work nested and with complex types ([c3caba6](https://github.com/HPInc/davinci/commit/c3caba68d077f610677288f86352b934af99e036))
+
+
+
+
+
 # [2.6.0](https://github.com/HPInc/davinci/compare/@davinci/core@2.5.0...@davinci/core@2.6.0) (2023-01-02)
 
 

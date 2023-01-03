@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.1.15](https://github.com/HPInc/davinci/compare/@davinci/http-server-fastify@2.1.14...@davinci/http-server-fastify@2.1.15) (2023-01-03)
+
+**Note:** Version bump only for package @davinci/http-server-fastify
+
+
+
+
+
 ## [2.1.14](https://github.com/HPInc/davinci/compare/@davinci/http-server-fastify@2.1.13...@davinci/http-server-fastify@2.1.14) (2023-01-02)
 
 **Note:** Version bump only for package @davinci/http-server-fastify
