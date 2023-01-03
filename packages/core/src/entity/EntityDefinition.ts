@@ -146,10 +146,11 @@ export class EntityDefinition {
 							args => {
 								const enm = args.schema.enum;
 								if (enm && typeof enm === 'object') {
-									if (type.name === 'Number') {
+									if (args.schema.type === 'number' || type.name === 'Number') {
 										args.schema.enum = Object.values(enm)
 											.filter(v => typeof v === 'number');
-									} else if (type.name === 'String') {
+									} else {
+										args.schema.type = 'string';
 										args.schema.enum = Object.values(enm)
 											.filter(v => typeof v === 'string');
 									}
