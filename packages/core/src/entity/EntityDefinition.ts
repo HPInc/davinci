@@ -1,7 +1,7 @@
 /*
-* © Copyright 2022 HP Development Company, L.P.
-* SPDX-License-Identifier: MIT
-*/
+ * © Copyright 2022 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
 
 import {
 	ClassReflection,
@@ -140,24 +140,29 @@ export class EntityDefinition {
 						// This is useful to traverse and reflect complex classes nested in json schema keywords (like anyOf, allOf, oneOf)
 						// e.g.
 						// @entity.prop({ anyOf: [MyClassOne, MyClassTwo]  })
-						const omitProps = typeof entityPropDecorator?.options?.required === 'boolean' ? ['type', 'required'] : ['type'];
+						const omitProps =
+							typeof entityPropDecorator?.options?.required === 'boolean'
+								? ['type', 'required']
+								: ['type'];
 						const extractedJsonSchema = transformEntityDefinitionSchema(
 							omit(entityPropDecorator?.options ?? {}, omitProps),
 							args => {
-								const enm = args.schema.enum;
-								if (enm && typeof enm === 'object') {
-									if (args.schema.type === 'number' || type.name === 'Number') {
-										args.schema.enum = Object.values(enm)
-											.filter(v => typeof v === 'number');
-									} else {
-										args.schema.type = 'string';
-										args.schema.enum = Object.values(enm)
-											.filter(v => typeof v === 'string');
-									}
+								let additionalSchemaProps: Partial<JSONSchema>;
+								if (args.schema.enum && typeof args.schema.enum === 'object') {
+									const enmType =
+										args.schema.type === 'number' || type.name === 'Number' ? 'number' : 'string';
+									additionalSchemaProps = {};
+									additionalSchemaProps.type = enmType;
+									additionalSchemaProps.enum = Object.values(args.schema.enum).filter(
+										v => typeof v === enmType
+									) as Array<string | number>;
 								}
 
 								if (args.pointerPath === '') {
-									return { path: '', value: omit(args.schema, ['properties']) };
+									return {
+										path: '',
+										value: omit({ ...args.schema, ...additionalSchemaProps }, ['properties'])
+									};
 								}
 
 								if (typeof args.schema === 'function') {
@@ -176,8 +181,11 @@ export class EntityDefinition {
 									};
 								}
 
-								if (args.parentKeyword === 'properties') {
-									return { path: args.pointerPath, value: args.schema };
+								if (additionalSchemaProps || args.parentKeyword === 'properties') {
+									return {
+										path: args.pointerPath,
+										value: { ...args.schema, ...additionalSchemaProps }
+									};
 								}
 
 								return null;
@@ -220,7 +228,10 @@ export class EntityDefinition {
 							isMergeableObject: isPlainObject
 						});
 
-						if (entityPropDecorator.options?.required && typeof entityPropDecorator.options?.required === 'boolean') {
+						if (
+							entityPropDecorator.options?.required &&
+							typeof entityPropDecorator.options?.required === 'boolean'
+						) {
 							accumulator.required.push(prop.name);
 						}
 

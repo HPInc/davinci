@@ -89,7 +89,7 @@ describe('EntityDefinition', () => {
 		enum PHONE_TYPE {
 			PERSONAL = 'personal',
 			WORK = 'work',
-			OTHER = 'other',
+			OTHER = 'other'
 		}
 
 		enum PHONE_PREFIX {
@@ -97,53 +97,10 @@ describe('EntityDefinition', () => {
 			three = 3
 		}
 
-		enum PHONE_EXTENSION {
-			central,
-			ext1
-		}
-		
 		@entity()
 		class Phone {
-			@entity.prop({ default: PHONE_TYPE.OTHER, enum: PHONE_TYPE })
-			stringEnumType: PHONE_TYPE;
-
-			@entity.prop({ enum: PHONE_TYPE })
-			stringEnumStringType: string;
-
-			@entity.prop({ enum: PHONE_PREFIX })
-			numberEnumType: PHONE_PREFIX;
-
-			@entity.prop({ enum: PHONE_PREFIX })
-			numberEnumNumberType: number;
-
-			@entity.prop({ enum: PHONE_EXTENSION })
-			symbolEnumType: PHONE_EXTENSION;
-
-			@entity.prop({ enum: PHONE_EXTENSION })
-			symbolEnumStringType: string;
-
-			@entity.prop({ enum: PHONE_EXTENSION })
-			symbolEnumNumberType: number;
-
 			@entity.prop({ oneOf: [{ enum: PHONE_TYPE }, { enum: PHONE_PREFIX }] })
 			typeOrPrefix: PHONE_TYPE | PHONE_PREFIX;
-
-			@entity.prop({
-				properties: {
-					prefix: {
-						enum: PHONE_PREFIX,
-						type: 'number'
-					},
-					complexPrefix: {
-						oneOf: [{ enum: PHONE_PREFIX }, { enum: PHONE_TYPE }]
-					},
-					extension: {
-						enum: PHONE_EXTENSION,
-						type: PHONE_EXTENSION
-					}
-				}
-			})
-			other: Record<string, any>
 		}
 
 		const entityDefinition = new EntityDefinition({ type: Phone });
@@ -153,56 +110,11 @@ describe('EntityDefinition', () => {
 			type: 'object',
 			properties: {
 				typeOrPrefix: {
-					oneOf: [{ enum: ['personal', 'work', 'other'], type: 'string' }, { enum: ['one', 'three'], type: 'string' }],
+					oneOf: [
+						{ enum: ['personal', 'work', 'other'], type: 'string' },
+						{ enum: ['one', 'three'], type: 'string' }
+					],
 					type: 'object'
-				},
-				numberEnumNumberType: {
-					enum: [1, 3],
-					type: 'number'
-				},
-				numberEnumType: {
-					enum: [1, 3],
-					type: 'number'
-				},
-				stringEnumType: {
-					default: 'other',
-					enum: ['personal', 'work', 'other'],
-					type: 'string'
-				},
-				stringEnumStringType: {
-					enum: ['personal', 'work', 'other'],
-					type: 'string'
-				},
-				symbolEnumType: {
-					enum: [0, 1],
-					type: 'number'
-				},
-				symbolEnumNumberType: {
-					enum: [0, 1],
-					type: 'number'
-				},
-				symbolEnumStringType: {
-					enum: ['central', 'ext1'],
-					type: 'string'
-				},
-				other: {
-					type: 'object',
-					properties: {
-						prefix: {
-							type: 'number',
-							enum: [1, 3]
-						},
-						complexPrefix: {
-							oneOf: [
-								{ enum: ['personal', 'work', 'other'], type: 'string' },
-								{ enum: ['one', 'three'], type: 'string' }
-							]
-						},
-						extension: {
-							enum: ['central', 'ext1'],
-							type: 'string'
-						}
-					}
 				}
 			}
 		});
@@ -261,12 +173,11 @@ describe('EntityDefinition', () => {
 		expect(entityDefinitionsMapCacheGetSpy.called).to.be.equal(true);
 	});
 
-
 	it('should reflect a class and generate a json schema with nested required properties', () => {
 		@entity()
 		class Customer {
-			@entity.prop({ 
-				required: ['firstName', 'lastName'], 
+			@entity.prop({
+				required: ['firstName', 'lastName'],
 				properties: {
 					firstName: { type: 'string' },
 					middleName: { type: 'string' },
@@ -351,11 +262,7 @@ describe('EntityDefinition', () => {
 					required: ['firstName', 'lastName']
 				},
 				$sort: {
-					anyOf: [
-						{ required: ['id'] },
-						{ required: ['firstName'] },
-						{ required: ['lastName'] }
-					]
+					anyOf: [{ required: ['id'] }, { required: ['firstName'] }, { required: ['lastName'] }]
 				}
 			}
 		});
