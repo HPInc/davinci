@@ -85,6 +85,41 @@ describe('EntityDefinition', () => {
 			.to.be.instanceof(EntityDefinition);
 	});
 
+	it('should reflect a class with enum and generate a json schema', () => {
+		enum PHONE_TYPE {
+			PERSONAL = 'personal',
+			WORK = 'work',
+			OTHER = 'other'
+		}
+
+		enum PHONE_PREFIX {
+			one = 1,
+			three = 3
+		}
+
+		@entity()
+		class Phone {
+			@entity.prop({ oneOf: [{ enum: PHONE_TYPE }, { enum: PHONE_PREFIX }] })
+			typeOrPrefix: PHONE_TYPE | PHONE_PREFIX;
+		}
+
+		const entityDefinition = new EntityDefinition({ type: Phone });
+
+		expect(entityDefinition.getEntityDefinitionJsonSchema()).to.containSubset({
+			title: 'Phone',
+			type: 'object',
+			properties: {
+				typeOrPrefix: {
+					oneOf: [
+						{ enum: ['personal', 'work', 'other'], type: 'string' },
+						{ enum: ['one', 'three'], type: 'string' }
+					],
+					type: 'object'
+				}
+			}
+		});
+	});
+
 	it('should reflect a class and generate a json schema using the entity definition cache', () => {
 		@entity()
 		class Birth {
@@ -138,12 +173,11 @@ describe('EntityDefinition', () => {
 		expect(entityDefinitionsMapCacheGetSpy.called).to.be.equal(true);
 	});
 
-
 	it('should reflect a class and generate a json schema with nested required properties', () => {
 		@entity()
 		class Customer {
-			@entity.prop({ 
-				required: ['firstName', 'lastName'], 
+			@entity.prop({
+				required: ['firstName', 'lastName'],
 				properties: {
 					firstName: { type: 'string' },
 					middleName: { type: 'string' },
@@ -228,11 +262,7 @@ describe('EntityDefinition', () => {
 					required: ['firstName', 'lastName']
 				},
 				$sort: {
-					anyOf: [
-						{ required: ['id'] },
-						{ required: ['firstName'] },
-						{ required: ['lastName'] }
-					]
+					anyOf: [{ required: ['id'] }, { required: ['firstName'] }, { required: ['lastName'] }]
 				}
 			}
 		});

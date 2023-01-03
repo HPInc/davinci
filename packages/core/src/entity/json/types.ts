@@ -140,7 +140,10 @@ export type UncheckedJSONSchemaType<T, IsPartial extends boolean> = (
 	$defs?: Record<string, UncheckedJSONSchemaType<Known, true>>;
 	definitions?: Record<string, UncheckedJSONSchemaType<Known, true>>;
 	default?: unknown;
+	enum?: Enum | (string | number)[];
 };
+
+type Enum = Record<string, (string | number)>;
 
 export type JSONSchemaType<T> = StrictNullChecksWrapper<'JSONSchemaType', UncheckedJSONSchemaType<T, false>>;
 
