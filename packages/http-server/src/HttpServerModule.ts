@@ -100,60 +100,76 @@ export abstract class HttpServerModule<
 			);
 
 		await mapSeries(controllersReflection, ({ controllerInstance, reflection: controllerReflection }) => {
-			const controllerDecoratorMetadata: ControllerDecoratorMetadata = controllerReflection.decorators.find(
-				d => d.module === 'http-server' && d.type === 'controller'
-			);
-			const basePath =
-				controllerDecoratorMetadata?.options?.basePath ?? controllerDecoratorMetadata?.options?.basepath ?? '/';
+			const controllerDecoratorMetadatas: Array<ControllerDecoratorMetadata> =
+				controllerReflection.decorators.filter(d => d.module === 'http-server' && d.type === 'controller');
 
-			return mapSeries(controllerReflection.methods, async methodReflection => {
-				const methodDecoratorMetadatas: Array<MethodDecoratorMetadata> = methodReflection.decorators.filter(
-					d => d[DecoratorId] === 'http-server.method'
-				);
-				const methodName = methodReflection.name;
+			// if the controller is not decorated, a default decoration will be assigned to it
+			if (controllerDecoratorMetadatas.length === 0) {
+				controllerDecoratorMetadatas.push({
+					module: 'http-server',
+					type: 'controller',
+					options: { basePath: '/' }
+				});
+			}
 
-				if (!methodDecoratorMetadatas.length) return null;
+			return mapSeries(controllerDecoratorMetadatas, controllerDecoratorMetadata => {
+				const basePath =
+					controllerDecoratorMetadata?.options?.basePath ??
+					controllerDecoratorMetadata?.options?.basepath ??
+					'/';
 
-				return mapSeries(methodDecoratorMetadatas, async methodDecoratorMetadata => {
-					const {
-						verb,
-						options: { path }
-					} = methodDecoratorMetadata;
+				return mapSeries(controllerReflection.methods, async methodReflection => {
+					const methodDecoratorMetadatas: Array<MethodDecoratorMetadata> = methodReflection.decorators.filter(
+						d => d[DecoratorId] === 'http-server.method'
+					);
+					const methodName = methodReflection.name;
 
-					let fullPath = pathUtils.join(basePath, path);
-					if (fullPath.length > 1 && fullPath[fullPath.length - 1] === '/') {
-						fullPath = fullPath.slice(0, -1);
-					}
+					if (!methodDecoratorMetadatas.length) return null;
 
-					const parametersConfig = await this.createParametersConfigurations({
-						controllerReflection,
-						methodReflection
+					return mapSeries(methodDecoratorMetadatas, async methodDecoratorMetadata => {
+						const {
+							verb,
+							options: { path }
+						} = methodDecoratorMetadata;
+
+						let fullPath = pathUtils.join(basePath, path);
+						if (fullPath.length > 1 && fullPath[fullPath.length - 1] === '/') {
+							fullPath = fullPath.slice(0, -1);
+						}
+
+						const parametersConfig = await this.createParametersConfigurations({
+							controllerReflection,
+							methodReflection
+						});
+
+						const responseStatusCodes = Object.keys(methodDecoratorMetadata.options?.responses ?? {})
+							.reduce((acc, statusCodeString) => {
+								const statusCode = Number(statusCodeString);
+								if (!Number.isNaN(statusCode)) {
+									acc.push(statusCode);
+								}
+								return acc;
+							}, [])
+							.sort();
+
+						const route: Route<SMG['Request']> = {
+							path: fullPath,
+							verb,
+							parametersConfig,
+							methodDecoratorMetadata,
+							methodReflection,
+							controllerDecoratorMetadata,
+							controllerReflection,
+							responseStatusCodes
+						};
+
+						this.routes.push(route);
+
+						return this[verb](
+							fullPath,
+							await this.createRequestHandler(controllerInstance, methodName, route)
+						);
 					});
-
-					const responseStatusCodes = Object.keys(methodDecoratorMetadata.options?.responses ?? {})
-						.reduce((acc, statusCodeString) => {
-							const statusCode = Number(statusCodeString);
-							if (!Number.isNaN(statusCode)) {
-								acc.push(statusCode);
-							}
-							return acc;
-						}, [])
-						.sort();
-
-					const route: Route<SMG['Request']> = {
-						path: fullPath,
-						verb,
-						parametersConfig,
-						methodDecoratorMetadata,
-						methodReflection,
-						controllerDecoratorMetadata,
-						controllerReflection,
-						responseStatusCodes
-					};
-
-					this.routes.push(route);
-
-					return this[verb](fullPath, await this.createRequestHandler(controllerInstance, methodName, route));
 				});
 			});
 		});
