@@ -58,6 +58,19 @@ export default class Customer {
 }
 ```
 
+### Complex populate
+In complex types (e.g. when using oneOf, anyOf...), you should disable default type inference by passing `type: false`
+```ts
+@entity.prop({ type: false, oneOf: [
+	String,
+	PopulateQuery,
+	{ type: 'array', items: { type: 'string' }},
+	{ type: 'array', items: PopulateQuery }
+] })
+$populate?: PopulateQuery | string | (PopulateQuery | string)[];
+
+```
+
 ## Create the Model
 
 Using the `generateModel` function of the `@davinci/mongoose` package,

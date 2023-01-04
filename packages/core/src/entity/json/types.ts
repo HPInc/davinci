@@ -141,6 +141,7 @@ export type UncheckedJSONSchemaType<T, IsPartial extends boolean> = (
 	definitions?: Record<string, UncheckedJSONSchemaType<Known, true>>;
 	default?: unknown;
 	enum?: Enum | (string | number)[];
+	description?: string;
 };
 
 type Enum = Record<string, (string | number)>;
