@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.7.1](https://github.com/HPInc/davinci/compare/@davinci/core@2.7.0...@davinci/core@2.7.1) (2023-01-04)
+
+
+### Bug Fixes
+
+* add entity prop description for intellisense ([e4ec5e7](https://github.com/HPInc/davinci/commit/e4ec5e71b166a51690ec0900ae434617b1c3287c))
+
+
+
+
+
 # [2.7.0](https://github.com/HPInc/davinci/compare/@davinci/core@2.6.0...@davinci/core@2.7.0) (2023-01-03)
 
 

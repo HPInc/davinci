@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/example-next-amqp",
-	"version": "2.1.11",
+	"version": "2.1.12",
 	"private": true,
 	"description": "",
 	"main": "index.js",
@@ -12,9 +12,9 @@
 	"author": "HP",
 	"license": "MIT",
 	"dependencies": {
-		"@davinci/core": "^2.7.0",
+		"@davinci/core": "^2.7.1",
 		"@davinci/messaging": "^2.1.1",
-		"@davinci/messaging-amqp": "^2.1.10",
+		"@davinci/messaging-amqp": "^2.1.11",
 		"@davinci/reflector": "^2.1.1",
 		"amqp-connection-manager": "^4.1.9",
 		"amqplib": "^0.10.3",
