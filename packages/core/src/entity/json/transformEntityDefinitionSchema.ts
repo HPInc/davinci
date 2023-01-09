@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+// @ts-ignore
 import set from 'immutable-set';
 import { EntityDefinitionJSONSchema, TransformEntityDefinitionSchemaCallback } from '../types';
 import { JSONSchemaTraverser } from './JSONSchemaTraverser';
@@ -13,11 +14,11 @@ import { JSONSchemaTraverser } from './JSONSchemaTraverser';
  * @param entityDefinitionSchema
  * @param callback
  */
-export function transformEntityDefinitionSchema(
+export function transformEntityDefinitionSchema<T extends object = {}>(
 	entityDefinitionSchema: Partial<EntityDefinitionJSONSchema>,
 	callback: TransformEntityDefinitionSchemaCallback
 ) {
-	let obj = {};
+	let obj: T;
 	JSONSchemaTraverser.traverse(
 		entityDefinitionSchema,
 		({ schema, jsonPtr, rootSchema, parentJsonPtr, parentKeyword, parentSchema, keyIndex }) => {
@@ -41,7 +42,7 @@ export function transformEntityDefinitionSchema(
 
 			if (result && typeof result.path !== 'undefined' && result.path !== null) {
 				if (result.path === '') {
-					obj = result.value;
+					obj = result.value as T;
 				} else {
 					obj = set(obj, result.path, result.value, { withArrays: true });
 				}
@@ -50,5 +51,6 @@ export function transformEntityDefinitionSchema(
 		{ allKeys: true }
 	);
 
+	// @ts-ignore
 	return obj;
 }

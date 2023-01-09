@@ -74,7 +74,7 @@ export class JSONSchemaTraverser {
 		minProperties: true
 	};
 
-	public static traverse(schema: SchemaObject, cb: Callback, opts?: Options) {
+	public static traverse(schema: SchemaObject, cb: Callback, opts: Options = {}) {
 		this.recursiveTraverse(opts, cb, schema, '', schema);
 	}
 

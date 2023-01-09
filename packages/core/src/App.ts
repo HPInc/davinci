@@ -64,7 +64,7 @@ export interface AppOptions {
 
 export class App extends Module {
 	logger: Logger;
-	private options?: AppOptions;
+	private options: AppOptions = {};
 	private modules: Module[] = [];
 	private controllers: ClassType[];
 	private modulesDic: Record<string, Module> = {};
@@ -80,8 +80,10 @@ export class App extends Module {
 		if (this.options.shutdown?.enabled) {
 			this.enableShutdownSignals();
 		}
-		this.logger = pino({ name: this.options.logger.name });
-		this.logger.level = this.options.logger?.level;
+		this.logger = pino({ name: this.options.logger?.name });
+		if (this.options.logger?.level) {
+			this.logger.level = this.options.logger?.level;
+		}
 	}
 
 	public getModuleId(): string {
@@ -95,8 +97,8 @@ export class App extends Module {
 	public async registerModule(module: Module): Promise<this>;
 	public async registerModule(modules: Module[]): Promise<this>;
 	public async registerModule(...modules: Module[]): Promise<this>;
-	public async registerModule(...args) {
-		const modules: Module[] = coerceArray(args.length > 1 ? args : args[0]);
+	public async registerModule(...args: Array<unknown>) {
+		const modules = coerceArray(args.length > 1 ? args : args[0]) as Module[];
 
 		modules.forEach(mod => {
 			const moduleIds = coerceArray(mod.getModuleId());
@@ -188,7 +190,7 @@ export class App extends Module {
 		this.logger.debug('App shutdown. Executing onDestroy hooks');
 		this.setStatus('destroying');
 
-		const wrapIntoPromise = async fn => fn();
+		const wrapIntoPromise = async (fn: Function) => fn();
 
 		try {
 			await this.onDestroy?.(this);

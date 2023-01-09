@@ -33,7 +33,9 @@ export class EntityRegistry {
 		}
 
 		if (this.entityDefinitionMap.has(typeValue)) {
-			return this.entityDefinitionMap.get(typeValue).getEntityDefinitionJsonSchema();
+			return this.entityDefinitionMap
+				.get(typeValue)
+				?.getEntityDefinitionJsonSchema() as EntityDefinitionJSONSchema;
 		}
 
 		const entityDefinition = new EntityDefinition({

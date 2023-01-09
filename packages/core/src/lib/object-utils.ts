@@ -3,28 +3,31 @@
  * SPDX-License-Identifier: MIT
  */
 
-export function mapObject<T extends object>(obj: T, iteratee: (value: T[keyof T], key: keyof T) => unknown): T;
-export function mapObject(obj: object, iteratee: (value, key: string) => unknown) {
-	return Object.keys(obj).reduce((acc, key) => {
+export function mapObject<T extends object, TResult>(
+	obj: T,
+	iteratee: (value: T[keyof T], key: keyof T) => TResult
+): { [P in keyof T]: TResult } {
+	const keys = Object.keys(obj) as Array<keyof T>;
+
+	return keys.reduce((acc, key) => {
 		const value = obj[key];
 		acc[key] = iteratee(value, key);
-
 		return acc;
-	}, {});
+	}, {} as { [P in keyof T]: TResult });
 }
 
-export function omit<T extends object>(obj: T, keys: (keyof T)[]): Partial<T>;
-export function omit(obj: object, keys: string[]) {
+export function omit<T extends object>(obj: T, keys: (keyof T)[]): Partial<T> {
 	if (!keys.length) return obj;
 	if (typeof obj !== 'object' || obj === null) return obj;
+	const objKeys = Object.keys(obj) as Array<keyof T>;
 
-	return Object.keys(obj).reduce((acc, key) => {
+	return objKeys.reduce((acc, key) => {
 		if (keys.indexOf(key) === -1) {
 			acc[key] = obj[key];
 		}
 
 		return acc;
-	}, {});
+	}, {} as Partial<T>);
 }
 
 /*!
@@ -34,15 +37,16 @@ export function omit(obj: object, keys: string[]) {
  * Released under the MIT License.
  */
 
-function isObject(o) {
+function isObject(o: unknown) {
 	return Object.prototype.toString.call(o) === '[object Object]';
 }
 
-export function isPlainObject(o) {
+export function isPlainObject(o: unknown) {
 	if (isObject(o) === false) return false;
+	const obj = o as object;
 
 	// If it has modified constructor
-	const ctor = o.constructor;
+	const ctor = obj.constructor;
 	if (ctor === undefined) return true;
 
 	// If it has modified prototype

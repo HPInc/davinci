@@ -54,5 +54,5 @@ export type InterceptorNext<
 export interface InterceptorDecoratorMeta<I extends Interceptor = Interceptor> {
 	[DecoratorId]: 'interceptor';
 	handler: I;
-	meta?: Parameters<I>[1]['meta'];
+	meta?: Parameters<I>[1] extends { meta: unknown } ? Parameters<I>[1]['meta'] : unknown;
 }
