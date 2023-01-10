@@ -32,7 +32,7 @@ export type InterceptorBag<IBD extends InterceptorBagDetails, AdditionalProps = 
 export type Interceptor<IBD extends InterceptorBagDetails = InterceptorBagDetails, AdditionalProps = {}> = (
 	// eslint-disable-next-line no-use-before-define
 	next: InterceptorNext<IBD, AdditionalProps>,
-	interceptorBag?: InterceptorBag<IBD, AdditionalProps>
+	interceptorBag: InterceptorBag<IBD, AdditionalProps>
 ) => any;
 
 /**

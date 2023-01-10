@@ -23,7 +23,7 @@ export function executeInterceptorsStack<
 	AdditionalProps = {}
 >(
 	interceptors: Interceptor<IBD, AdditionalProps>[],
-	interceptorBag?: InterceptorBag<IBD, AdditionalProps>
+	interceptorBag: InterceptorBag<IBD, AdditionalProps>
 ): ReturnType<InterceptorNext<IBD, AdditionalProps>> {
 	return interceptors.reverse().reduce(
 		(wrapperFunction: InterceptorNext<IBD, AdditionalProps>, interceptor) => {

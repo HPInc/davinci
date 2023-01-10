@@ -14,7 +14,7 @@ describe('object-utils', () => {
 				b: 2
 			};
 
-			const result = mapObject<Record<string, number>>(input, (value, key) => {
+			const result = mapObject(input, (value, key) => {
 				return `${key}${value}`;
 			});
 

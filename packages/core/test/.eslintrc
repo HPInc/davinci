@@ -1,11 +1,18 @@
-// test-specific eslint
 {
-    "rules": {
-        // we can disable the rule of not requiring dev dependencies
-        "import/no-extraneous-dependencies": [ 2, { "devDependencies": true } ]
-    },
-    "env": {
-        // let's add our mocha globals in to our environment
-        "mocha": true
-    }
+	"extends": ["../.eslintrc"],
+	"rules": {
+		"import/no-extraneous-dependencies": "off",
+		"max-classes-per-file": "off",
+		"no-unused-expressions": "off",
+		"no-shadow": "off",
+		"@typescript-eslint/no-empty-function": "off",
+		"@typescript-eslint/no-var-requires": "off"
+	},
+	"env": {
+		// let's add our mocha globals in to our environment
+		"mocha": true
+	},
+	"parserOptions": {
+		"project": "./tsconfig.json"
+	}
 }

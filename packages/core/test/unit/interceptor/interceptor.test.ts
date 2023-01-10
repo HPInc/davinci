@@ -61,7 +61,7 @@ describe('interceptors', () => {
 			return { ...result, interceptor3Success: true };
 		};
 
-		const result = await executeInterceptorsStack([interceptor1, interceptor2, interceptor3]);
+		const result = await executeInterceptorsStack([interceptor1, interceptor2, interceptor3], {} as any);
 
 		expect(result).to.be.deep.equal({
 			interceptor1Success: true,
@@ -120,9 +120,9 @@ describe('interceptors', () => {
 			throw new Error('Interceptor 3 error');
 		};
 
-		await expect(executeInterceptorsStack([interceptor1, interceptor2, interceptor3])).to.be.rejectedWith(
-			'Interceptor 1 error + Interceptor 2 error + Interceptor 3 error'
-		);
+		await expect(
+			executeInterceptorsStack([interceptor1, interceptor2, interceptor3], {} as any)
+		).to.be.rejectedWith('Interceptor 1 error + Interceptor 2 error + Interceptor 3 error');
 	});
 
 	it('should decorate correctly', () => {

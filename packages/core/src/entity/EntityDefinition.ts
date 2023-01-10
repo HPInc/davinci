@@ -132,9 +132,8 @@ export class EntityDefinition {
 
 				const entityProps = this.filterEntityPropDecorators(reflection);
 				const { properties, required } =
-					entityProps.reduce<Partial<Pick<JSONSchema, 'properties' | 'required'>>>((acc, prop) => {
+					entityProps.reduce<Partial<Pick<JSONSchema, 'properties' | 'required'>> | null>((acc, prop) => {
 						const accumulator = acc ?? { properties: {}, required: [] };
-
 						const entityPropDecorator = this.findEntityPropDecorator(prop);
 						const explicitType = entityPropDecorator.options?.type;
 						const type = explicitType ?? prop.type;
@@ -244,7 +243,7 @@ export class EntityDefinition {
 						}
 
 						return accumulator;
-					}, {}) ?? {};
+					}, null) ?? {};
 
 				const jsonSchema: Partial<JSONSchema> = {
 					title: entityDecorator?.options?.name ?? key ?? typeOrClass.name,
