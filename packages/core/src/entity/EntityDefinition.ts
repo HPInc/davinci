@@ -32,7 +32,7 @@ interface EntityDefinitionOptions {
  */
 export class EntityDefinition {
 	private name?: string;
-	private readonly type?: TypeValue;
+	private readonly type: TypeValue | undefined;
 	private entityDefinitionJsonSchema?: EntityDefinitionJSONSchema;
 	private entityDefinitionsMapCache: Map<TypeValue, EntityDefinition>;
 
@@ -40,7 +40,10 @@ export class EntityDefinition {
 		if (!options.type && !options.jsonSchema) {
 			throw new Error('type or entityDefinitionJsonSchema must be passed');
 		}
-		this.type = options.type;
+		if (options.type) {
+			this.type = options.type;
+		}
+		// @ts-ignore
 		this.name = options.name ?? (this.type as ClassType)?.name;
 		this.entityDefinitionsMapCache = options.entityDefinitionsMapCache ?? new Map<TypeValue, EntityDefinition>();
 		if (!options.reflect) {

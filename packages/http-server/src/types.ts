@@ -61,16 +61,17 @@ export interface ContextFactoryArguments<Request> {
 
 export type ContextFactory<Context, Request = any> = (args: ContextFactoryArguments<Request>) => Context;
 
-export type ValidationFunction = (data: unknown) => typeof data;
+export type HttpServerInterceptorStage = 'preValidation' | 'postValidation';
 
-export type ValidationFactory = (route: Route<any>) => ValidationFunction | Promise<ValidationFunction>;
+export interface HttpServerInterceptorMeta {
+	stage?: HttpServerInterceptorStage;
+}
 
 export type HttpInterceptorBag = InterceptorBagDetails & {
 	Request?: unknown;
 	Response?: unknown;
+	Meta?: HttpServerInterceptorMeta;
 };
-
-export type HttpServerInterceptorStage = 'preValidation' | 'postValidation';
 
 export type HttpServerInterceptor<Bag extends HttpInterceptorBag = HttpInterceptorBag> = Interceptor<
 	Bag,
@@ -78,11 +79,22 @@ export type HttpServerInterceptor<Bag extends HttpInterceptorBag = HttpIntercept
 		request?: Bag['Request'];
 		response?: Bag['Response'];
 		route?: Route<Bag['Request']>;
-		meta?: {
-			stage?: HttpServerInterceptorStage;
-		};
+		meta?: HttpServerInterceptorMeta;
 	}
 >;
+
+export type EndpointSchema = JSONSchema<any> & {
+	properties: {
+		body?: JSONSchema<any>;
+		params?: JSONSchema<any>;
+		querystring?: JSONSchema<any>;
+		headers?: JSONSchema<any>;
+	};
+};
+
+export type ValidationFunction = (data: Record<keyof EndpointSchema['properties'], unknown>) => unknown;
+
+export type ValidationFactory = (route: Route<any>) => ValidationFunction | Promise<ValidationFunction>;
 
 export interface HttpServerModuleOptions {
 	port?: number | string;
@@ -100,15 +112,6 @@ export interface HttpServerModuleOptions {
 		level?: Level | 'silent';
 	};
 }
-
-export type EndpointSchema = JSONSchema<any> & {
-	properties: {
-		body?: JSONSchema<any>;
-		params?: JSONSchema<any>;
-		querystring?: JSONSchema<any>;
-		headers?: JSONSchema<any>;
-	};
-};
 
 export interface StaticServeOptions {
 	dotfiles?: 'allow' | 'deny' | 'ignore';

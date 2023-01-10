@@ -8,7 +8,6 @@ import { DecoratorId } from '@davinci/reflector';
 export interface InterceptorBagDetails {
 	Context?: unknown;
 	State?: unknown;
-	Meta?: unknown;
 }
 
 /**
@@ -17,12 +16,11 @@ export interface InterceptorBagDetails {
  * @typeParam Context - The type of the context that will be injected
  * @typeParam State - The type of the optional state that can be used to propagate state between interceptors
  */
-export type InterceptorBag<IBD extends InterceptorBagDetails = InterceptorBagDetails, AdditionalProps = {}> = {
+export type InterceptorBag<IBD extends InterceptorBagDetails, AdditionalProps = {}> = {
 	module: string;
 	handlerArgs: unknown[];
 	context?: IBD['Context'];
 	state?: IBD['State'];
-	meta?: IBD['Meta'];
 } & AdditionalProps;
 
 /**
@@ -51,8 +49,9 @@ export type InterceptorNext<
 /**
  * Interceptor decorator metadata
  */
-export interface InterceptorDecoratorMeta<I extends Interceptor = Interceptor> {
+export interface InterceptorDecoratorMeta<Handler extends Interceptor = Interceptor, Meta = unknown> {
 	[DecoratorId]: 'interceptor';
-	handler: I;
-	meta?: Parameters<I>[1] extends { meta: unknown } ? Parameters<I>[1]['meta'] : unknown;
+	handler: Handler;
+	meta?: Meta;
+	// meta?: Parameters<I>[1] extends { meta: any } ? Parameters<I>[1]['meta'] : unknown;
 }

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { ClassType, TypeValue } from '@davinci/reflector';
+import { ClassType, DecoratorId, TypeValue } from '@davinci/reflector';
 import type { OpenAPIV3 } from 'openapi-types';
 
 export type Verb = 'get' | 'post' | 'put' | 'patch' | 'head' | 'delete' | 'options';
@@ -58,6 +58,7 @@ export interface ParameterDecoratorOptions extends ParameterDecoratorBaseOptions
 }
 
 export interface ParameterDecoratorMetadata {
+	[DecoratorId]: string;
 	module: string;
 	type: string;
 	options: ParameterDecoratorOptions;

@@ -6,9 +6,9 @@
 import { ClassReflection, DecoratorId, MethodReflection } from '@davinci/reflector';
 import { Interceptor, InterceptorBag, InterceptorBagDetails, InterceptorDecoratorMeta, InterceptorNext } from './types';
 
-export function getInterceptorsDecorators<I extends Interceptor = Interceptor>(
+export function getInterceptorsDecorators<I extends Interceptor = Interceptor, Meta = unknown>(
 	reflection: MethodReflection | ClassReflection
-): Array<InterceptorDecoratorMeta<I>> {
+): Array<InterceptorDecoratorMeta<I, Meta>> {
 	return reflection.decorators.filter(decorator => decorator[DecoratorId] === 'interceptor');
 }
 

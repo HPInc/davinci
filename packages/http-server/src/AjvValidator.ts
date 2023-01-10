@@ -13,9 +13,10 @@ import {
 	omit,
 	transformEntityDefinitionSchema
 } from '@davinci/core';
-import Ajv, { DefinedError, Options, Plugin } from 'ajv';
+import Ajv, { ErrorObject, Options, Plugin } from 'ajv';
 import addFormats from 'ajv-formats';
 import { TypeValue } from '@davinci/reflector';
+import { ValidateFunction } from 'ajv/dist/types';
 import { EndpointSchema, ParameterConfiguration, Route, ValidationFactory, ValidationFunction } from './types';
 import { BadRequest } from './httpErrors';
 
@@ -47,16 +48,14 @@ export class AjvValidator<Request = unknown> {
 	private jsonSchemasMap = new Map<TypeValue, JSONSchema | Partial<JSONSchema>>();
 	private entityDefinitionJSONSchemaCache = new Map<TypeValue, EntityDefinitionJSONSchema>();
 
-	private sourceToSchemaMap: Partial<
-		Record<ParameterConfiguration<Request>['source'], keyof EndpointSchema['properties']>
-	> = {
+	private sourceToSchemaMap: Record<'path' | 'query' | 'header' | 'body', keyof EndpointSchema['properties']> = {
 		path: 'params',
 		query: 'querystring',
 		header: 'headers',
 		body: 'body'
 	};
 
-	constructor(private options: AjvValidatorOptions, private entityRegistry?: EntityRegistry) {
+	constructor(private options?: AjvValidatorOptions, private entityRegistry?: EntityRegistry) {
 		this.initializeInstances();
 		this.registerPlugins();
 	}
@@ -65,25 +64,28 @@ export class AjvValidator<Request = unknown> {
 		const { parametersConfig } = route;
 		const endpointSchema = await this.createSchema(parametersConfig);
 
-		const validateFns = sources.reduce((acc, source) => {
+		const validateFns = sources.reduce<Array<{ source: Source; validateFn: ValidateFunction }>>((acc, source) => {
 			const schema = endpointSchema.properties[this.sourceToSchemaMap[source]];
+
 			if (schema) {
-				const validateFn = this.ajvInstances[source].compile(schema);
-				acc.push({
-					source,
-					validateFn
-				});
+				const validateFn = this.ajvInstances[source]?.compile(schema);
+				if (validateFn) {
+					acc.push({
+						source,
+						validateFn
+					});
+				}
 			}
 
 			return acc;
 		}, []);
 
-		return async (data: unknown) => {
-			const errors = [];
+		return async data => {
+			const errors: Array<ErrorObject> = [];
 			validateFns.forEach(({ source, validateFn }) => {
 				const dataPath = data?.[this.sourceToSchemaMap[source]];
 				if (!validateFn(dataPath)) {
-					errors.push(...validateFn.errors.map(error => this.formatAjvError(source, error)));
+					errors.push(...(validateFn.errors?.map(error => this.formatAjvError(source, error)) ?? []));
 				}
 			});
 
@@ -112,29 +114,36 @@ export class AjvValidator<Request = unknown> {
 
 			const enabledValidation = !parameterConfig.options?.validation?.disabled;
 
-			const entityJsonSchema = this.entityRegistry.getEntityDefinitionJsonSchema(parameterConfig.type);
-			const entityDefinition = this.entityRegistry.getEntityDefinitionMap().get(parameterConfig.type);
+			const parameterConfigType = parameterConfig.type as TypeValue;
 
-			const jsonSchema = this.jsonSchemasMap.get(parameterConfig.type) ?? this.createJsonSchema(entityJsonSchema);
-			if (entityDefinition && !this.jsonSchemasMap.has(entityDefinition.getType()) && jsonSchema.$id) {
-				this.jsonSchemasMap.set(entityDefinition.getType(), jsonSchema);
+			const entityJsonSchema = this.entityRegistry?.getEntityDefinitionJsonSchema(
+				parameterConfigType
+			) as EntityDefinitionJSONSchema;
+			const entityDefinition = this.entityRegistry?.getEntityDefinitionMap().get(parameterConfigType);
+
+			const jsonSchema = this.jsonSchemasMap.get(parameterConfigType) ?? this.createJsonSchema(entityJsonSchema);
+			if (
+				entityDefinition &&
+				!this.jsonSchemasMap.has(entityDefinition.getType() as TypeValue) &&
+				jsonSchema.$id
+			) {
+				this.jsonSchemasMap.set(entityDefinition.getType() as TypeValue, jsonSchema);
 				this.addSchemaToAjvInstances(jsonSchema);
 			}
 
 			if (['path', 'query', 'header'].includes(parameterConfig.source)) {
 				const schemaProp = this.sourceToSchemaMap[parameterConfig.source];
 
-				endpointSchema.properties[schemaProp] = endpointSchema.properties[schemaProp] ?? {
+				// eslint-disable-next-line no-multi-assign
+				const schema = (endpointSchema.properties[schemaProp] = endpointSchema.properties[schemaProp] ?? {
 					type: 'object',
 					properties: {},
-					required: undefined
-				};
-				endpointSchema.properties[schemaProp].properties[parameterConfig.name] = enabledValidation
-					? jsonSchema
-					: true;
-				endpointSchema.properties[schemaProp].required = endpointSchema.properties[schemaProp].required ?? [];
+					required: []
+				});
+				schema.properties[parameterConfig.name] = enabledValidation ? jsonSchema : true;
+				schema.required = schema.required ?? [];
 				if (enabledValidation && parameterConfig.options?.required) {
-					endpointSchema.properties[schemaProp].required.push(parameterConfig.name);
+					schema.required.push(parameterConfig.name);
 				}
 			}
 
@@ -160,7 +169,7 @@ export class AjvValidator<Request = unknown> {
 		return this.options;
 	}
 
-	private formatAjvError(source: Source, error: DefinedError) {
+	private formatAjvError(source: Source, error: ErrorObject) {
 		const rootPath = this.sourceToSchemaMap[source];
 		error.instancePath = error.instancePath.replace(/(^\/)|(^$)/, `/${rootPath}$1`);
 		error.schemaPath = error.schemaPath.replace(/^#\/properties\//, `#/${rootPath}/properties/`);
@@ -170,9 +179,10 @@ export class AjvValidator<Request = unknown> {
 
 	private initializeInstances() {
 		sources.forEach(source => {
+			const sourceOptions = (<Partial<AjvOptionsMap>>this.options?.ajvOptions)?.[source];
 			const ajv = new Ajv({
 				...defaultAjvOptions,
-				...(this.options?.ajvOptions?.[source] || this.options?.ajvOptions)
+				...(sourceOptions ?? this.options?.ajvOptions)
 			});
 			this.ajvInstances[source] = addFormats(ajv);
 		});
@@ -187,16 +197,19 @@ export class AjvValidator<Request = unknown> {
 		if (!plugins) return;
 
 		sources.forEach(source => {
+			const ajvInstance = this.ajvInstances[source];
+			if (!ajvInstance) return;
+
 			if (this.isPluginsMap(plugins)) {
 				// eslint-disable-next-line no-unused-expressions
 				plugins[source]?.forEach(p => {
 					const [plugin, opts] = p;
-					plugin(this.ajvInstances[source], opts);
+					plugin(ajvInstance, opts);
 				});
 			} else if (Array.isArray(plugins)) {
 				plugins.forEach(p => {
 					const [plugin, opts] = p;
-					plugin(this.ajvInstances[source], opts);
+					plugin(ajvInstance, opts);
 				});
 			}
 		});
@@ -207,7 +220,9 @@ export class AjvValidator<Request = unknown> {
 
 		sources.forEach(source => {
 			const ajv = this.ajvInstances[source];
-			if (!completedAjvInstances.has(ajv) && !ajv.getSchema(schema.$id)) {
+			if (!ajv) return;
+
+			if (!completedAjvInstances.has(ajv) && !ajv.getSchema(schema.$id ?? '')) {
 				ajv.addSchema(schema);
 				completedAjvInstances.add(ajv);
 			}
@@ -224,18 +239,19 @@ export class AjvValidator<Request = unknown> {
 				const ref: EntityDefinition = args.schema._$ref;
 
 				// if the entity definition was previously evaluated, return the $ref
-				if (this.entityDefinitionJSONSchemaCache.has(ref.getType())) {
-					const childEntityDefJsonSchema = this.entityDefinitionJSONSchemaCache.get(ref.getType());
-					return { path: args.pointerPath, value: { $ref: childEntityDefJsonSchema.$id } };
+				const refType = ref.getType() as TypeValue;
+				if (this.entityDefinitionJSONSchemaCache.has(refType)) {
+					const childEntityDefJsonSchema = this.entityDefinitionJSONSchemaCache.get(refType);
+					return { path: args.pointerPath, value: { $ref: childEntityDefJsonSchema?.$id } };
 				}
 
 				const entityDefinitionJsonSchema = ref.getEntityDefinitionJsonSchema();
-				this.entityDefinitionJSONSchemaCache.set(ref.getType(), entityDefinitionJsonSchema);
+				this.entityDefinitionJSONSchemaCache.set(refType, entityDefinitionJsonSchema);
 
 				const childEntityDefJsonSchema = this.createJsonSchema(entityDefinitionJsonSchema);
 				if (childEntityDefJsonSchema.$id) {
-					if (!this.jsonSchemasMap.has(ref.getType())) {
-						this.jsonSchemasMap.set(ref.getType(), childEntityDefJsonSchema);
+					if (!this.jsonSchemasMap.has(refType)) {
+						this.jsonSchemasMap.set(refType, childEntityDefJsonSchema);
 						this.addSchemaToAjvInstances(childEntityDefJsonSchema);
 					}
 					return { path: args.pointerPath, value: { $ref: childEntityDefJsonSchema.$id } };

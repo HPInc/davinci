@@ -9,7 +9,6 @@ import {
 	executeInterceptorsStack,
 	getInterceptorsDecorators,
 	Interceptor,
-	InterceptorDecoratorMeta,
 	InterceptorNext,
 	mapParallel,
 	mapSeries,
@@ -22,6 +21,7 @@ import {
 	ContextFactory,
 	ContextFactoryArguments,
 	HttpServerInterceptor,
+	HttpServerInterceptorMeta,
 	HttpServerModuleOptions,
 	ParameterConfiguration,
 	ParameterSource,
@@ -33,25 +33,28 @@ import {
 } from './types';
 import { ControllerDecoratorMetadata, MethodDecoratorMetadata, ParameterDecoratorMetadata } from './decorators';
 import { createAjvValidator } from './AjvValidator';
+import { HttpError } from './httpErrors';
 
 interface HttpServerModuleGenerics<ModuleOptions> {
 	Request?: unknown;
 	Response?: unknown;
 	Server?: unknown;
+	Instance?: unknown;
 	ModuleOptions?: ModuleOptions;
 }
 
 export abstract class HttpServerModule<
 	SMG extends HttpServerModuleGenerics<HttpServerModuleOptions> = HttpServerModuleGenerics<HttpServerModuleOptions>
 > extends Module {
-	app: App;
+	app?: App;
+	instance?: SMG['Instance'];
 	validationFactory?: ValidationFactory;
 	contextFactory?: ContextFactory<unknown>;
-	globalInterceptors: Array<Omit<InterceptorDecoratorMeta<HttpServerInterceptor>, typeof DecoratorId>> = [];
+	globalInterceptors: Array<{ handler: HttpServerInterceptor; meta: HttpServerInterceptorMeta }> = [];
 	entityRegistry = di.container.resolve(EntityRegistry);
 	routes: Route<SMG['Request']>[] = [];
 	logger = pino({ name: 'http-server' });
-	protected httpServer: SMG['Server'];
+	protected httpServer?: SMG['Server'];
 
 	constructor(protected moduleOptions?: SMG['ModuleOptions']) {
 		super();
@@ -77,11 +80,12 @@ export abstract class HttpServerModule<
 	}
 
 	public setGlobalInterceptors(interceptors: HttpServerModuleOptions['globalInterceptors']) {
-		this.globalInterceptors = interceptors.map(i => {
-			return typeof i === 'function'
-				? { handler: i, meta: { stage: 'postValidation' } }
-				: { handler: i.handler, meta: { stage: i.stage } };
-		});
+		this.globalInterceptors =
+			interceptors?.map(i => {
+				return typeof i === 'function'
+					? { handler: i, meta: { stage: 'postValidation' } }
+					: { handler: i.handler, meta: { stage: i.stage } };
+			}) ?? [];
 	}
 
 	public setContextFactory<Context>(contextFactory: ContextFactory<Context, SMG['Request']>): this {
@@ -91,13 +95,14 @@ export abstract class HttpServerModule<
 	}
 
 	public async createRoutes(): Promise<Route<SMG['Request']>[]> {
-		const controllersReflection = this.app
-			.getControllersWithReflection()
-			.filter(
-				({ reflection }) =>
-					reflection.decorators.some(d => d.module === 'http-server') ||
-					reflection.methods.some(m => m.decorators.some(d => d.module === 'http-server'))
-			);
+		const controllersReflection =
+			this.app
+				?.getControllersWithReflection()
+				.filter(
+					({ reflection }) =>
+						reflection.decorators.some(d => d.module === 'http-server') ||
+						reflection.methods.some(m => m.decorators.some(d => d.module === 'http-server'))
+				) ?? [];
 
 		await mapSeries(controllersReflection, ({ controllerInstance, reflection: controllerReflection }) => {
 			const controllerDecoratorMetadata: ControllerDecoratorMetadata = controllerReflection.decorators.find(
@@ -131,7 +136,7 @@ export abstract class HttpServerModule<
 					});
 
 					const responseStatusCodes = Object.keys(methodDecoratorMetadata.options?.responses ?? {})
-						.reduce((acc, statusCodeString) => {
+						.reduce<Array<number>>((acc, statusCodeString) => {
 							const statusCode = Number(statusCodeString);
 							if (!Number.isNaN(statusCode)) {
 								acc.push(statusCode);
@@ -172,9 +177,9 @@ export abstract class HttpServerModule<
 
 		const interceptors = [
 			...this.globalInterceptors,
-			...getInterceptorsDecorators<HttpServerInterceptor>(controllerReflection),
-			...getInterceptorsDecorators<HttpServerInterceptor>(methodReflection)
-		].reduce(
+			...getInterceptorsDecorators<HttpServerInterceptor, HttpServerInterceptorMeta>(controllerReflection),
+			...getInterceptorsDecorators<HttpServerInterceptor, HttpServerInterceptorMeta>(methodReflection)
+		].reduce<{ preValidation: Array<HttpServerInterceptor>; postValidation: Array<HttpServerInterceptor> }>(
 			(acc, interceptor) => {
 				const stage = interceptor.meta?.stage ?? 'postValidation';
 				acc[stage].push(interceptor.handler);
@@ -184,7 +189,7 @@ export abstract class HttpServerModule<
 			{ preValidation: [], postValidation: [] }
 		);
 
-		const validatorFunction: ValidationFunction | null = await this.validationFactory?.(route);
+		const validatorFunction: ValidationFunction | undefined = await this.validationFactory?.(route);
 
 		// using a named function here for better instrumentation and reporting
 		return async function davinciHttpRequestHandler(request: SMG['Request'], response: SMG['Response']) {
@@ -274,7 +279,7 @@ export abstract class HttpServerModule<
 						...interceptors.preValidation,
 						validationInterceptor,
 						...interceptors.postValidation,
-						(_next, context) => controller[methodName](...context.handlerArgs)
+						(_next, context) => controller[methodName](...(context?.handlerArgs ?? []))
 					],
 					interceptorsBag
 				);
@@ -285,11 +290,19 @@ export abstract class HttpServerModule<
 
 				return httpServerModule.reply(response, result);
 			} catch (err) {
+				const error = err as Error;
+				let httpErrorFields: Partial<ReturnType<typeof HttpError.prototype.toJSON>> = {};
+				let statusCode = 500;
+
+				if (error instanceof HttpError) {
+					httpErrorFields = error.toJSON();
+					statusCode = httpErrorFields.statusCode ?? statusCode;
+				}
 				// default error handler, can be overridden by a dedicated interceptor
 				return httpServerModule.reply(
 					response,
-					{ error: true, message: err.message, ...err?.toJSON?.(), stack: err.stack },
-					err?.statusCode ?? 500
+					{ error: true, message: error.message, ...httpErrorFields, stack: error.stack },
+					statusCode
 				);
 			}
 		};
@@ -300,32 +313,32 @@ export abstract class HttpServerModule<
 	}
 
 	// abstract get(handler: Function);
-	abstract get(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>);
+	abstract get(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>): SMG['Instance'];
 
 	// abstract post(handler: RequestHandler<SMG['Request]>, SMG['Response]);
-	abstract post(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>);
+	abstract post(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>): SMG['Instance'];
 
 	// abstract head(handler: RequestHandler<SMG['Request]>, SMG['Response]);
-	abstract head(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>);
+	abstract head(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>): SMG['Instance'];
 
 	// abstract delete(handler: RequestHandler<SMG['Request]>, SMG['Response]);
-	abstract delete(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>);
+	abstract delete(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>): SMG['Instance'];
 
 	// abstract put(handler: RequestHandler<SMG['Request]>, SMG['Response]);
-	abstract put(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>);
+	abstract put(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>): SMG['Instance'];
 
 	// public createNotFoundHandler() {}
 
 	// abstract patch(handler: RequestHandler<SMG['Request]>, SMG['Response]);
-	abstract patch(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>);
+	abstract patch(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>): SMG['Instance'];
 
 	// abstract all(handler: RequestHandler<SMG['Request]>, SMG['Response]);
-	abstract all(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>);
+	abstract all(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>): SMG['Instance'];
 
 	// abstract options(handler: RequestHandler<SMG['Request]>, SMG['Response]);
-	abstract options(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>);
+	abstract options(path: unknown, handler: RequestHandler<SMG['Request'], SMG['Response']>): SMG['Instance'];
 
-	abstract static(path: string, options?: StaticServeOptions);
+	abstract static(path: string, options?: StaticServeOptions): SMG['Instance'];
 
 	abstract listen(): unknown | Promise<unknown>;
 
@@ -335,44 +348,44 @@ export abstract class HttpServerModule<
 
 	abstract getInstance(): unknown;
 
-	abstract reply(response, body: unknown, statusCode?: number);
+	abstract reply(response: SMG['Response'], body: unknown, statusCode?: number): unknown;
 
-	abstract close();
+	abstract close(): void | Promise<void>;
 
-	abstract getRequestHostname(request: SMG['Request']);
+	abstract getRequestHostname(request: SMG['Request']): string;
 
-	abstract getRequestMethod(request: SMG['Request']);
+	abstract getRequestMethod(request: SMG['Request']): string;
 
-	abstract getRequestUrl(request: SMG['Request']);
+	abstract getRequestUrl(request: SMG['Request']): string;
 
 	abstract getRequestParameter(args: {
 		source: ParameterSource;
 		name?: string;
 		request: SMG['Request'];
 		response: SMG['Response'];
-	});
+	}): unknown;
 
-	abstract getRequestHeaders(request: SMG['Request']);
+	abstract getRequestHeaders(request: SMG['Request']): unknown;
 
-	abstract getRequestBody(request: SMG['Request']);
+	abstract getRequestBody(request: SMG['Request']): unknown;
 
-	abstract getRequestQuerystring(request: SMG['Request']);
+	abstract getRequestQuerystring(request: SMG['Request']): unknown;
 
-	abstract status(response, statusCode: number);
+	abstract status(response: SMG['Response'], statusCode: number): unknown;
 
-	abstract redirect(response, statusCode: number, url: string);
+	abstract redirect(response: SMG['Response'], statusCode: number, url: string): unknown;
 
-	abstract setErrorHandler(handler: Function, prefix?: string);
+	abstract setErrorHandler(handler: Function, prefix?: string): unknown;
 
-	abstract setNotFoundHandler(handler: Function, prefix?: string);
+	abstract setNotFoundHandler(handler: Function, prefix?: string): unknown;
 
-	abstract setHeader(response, name: string, value: string);
+	abstract setHeader(response: SMG['Response'], name: string, value: string): unknown;
 
 	async createValidationInterceptor({
 		validatorFunction,
 		parametersConfig
 	}: {
-		validatorFunction;
+		validatorFunction?: ValidationFunction;
 		parametersConfig: ParameterConfiguration<SMG['Request']>[];
 	}): Promise<Interceptor> {
 		return async function validationInterceptor(next: InterceptorNext) {
