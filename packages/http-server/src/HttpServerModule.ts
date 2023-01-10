@@ -350,7 +350,7 @@ export abstract class HttpServerModule<
 
 	abstract reply(response: SMG['Response'], body: unknown, statusCode?: number): unknown;
 
-	abstract close(): void | Promise<void>;
+	abstract close(): unknown | Promise<unknown>;
 
 	abstract getRequestHostname(request: SMG['Request']): string;
 

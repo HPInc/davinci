@@ -12,17 +12,25 @@ export interface ValidationOptions {
 	disabled?: boolean;
 }
 
+export type MethodResponseItemContent = Omit<OpenAPIV3.ResponseObject, 'content'> & {
+	content: ClassType | Array<ClassType>;
+};
+
+export type MethodResponseItemContentMedia = Omit<OpenAPIV3.ResponseObject, 'content'> & {
+	content: { [media: string]: ClassType | Array<ClassType> };
+};
+
+export type MethodResponseItemContentMediaSchema = Omit<OpenAPIV3.ResponseObject, 'content'> & {
+	content: {
+		[media: string]: Omit<OpenAPIV3.MediaTypeObject, 'schema'> & { schema?: ClassType | Array<ClassType> };
+	};
+};
+
 export type MethodResponseItem =
 	| OpenAPIV3.ResponseObject
-	| (Omit<OpenAPIV3.ResponseObject, 'content'> & { content: ClassType | Array<ClassType> })
-	| (Omit<OpenAPIV3.ResponseObject, 'content'> & {
-			content: { [media: string]: ClassType | Array<ClassType> };
-	  })
-	| (Omit<OpenAPIV3.ResponseObject, 'content'> & {
-			content: {
-				[media: string]: Omit<OpenAPIV3.MediaTypeObject, 'schema'> & { schema?: ClassType | Array<ClassType> };
-			};
-	  })
+	| MethodResponseItemContent
+	| MethodResponseItemContentMedia
+	| MethodResponseItemContentMediaSchema
 	| ClassType
 	| Array<ClassType>;
 

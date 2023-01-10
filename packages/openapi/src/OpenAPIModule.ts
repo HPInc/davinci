@@ -14,7 +14,7 @@ import {
 	omit,
 	transformEntityDefinitionSchema
 } from '@davinci/core';
-import type { HttpServerModule, MethodResponses, Route } from '@davinci/http-server';
+import type { HttpServerModule, MethodResponseItemContentMedia, MethodResponses, Route } from '@davinci/http-server';
 import http, { Server } from 'http';
 import pino, { Level } from 'pino';
 import { OpenAPIV3 } from 'openapi-types';
@@ -48,12 +48,12 @@ export interface OpenAPIModuleOptions {
 }
 
 export class OpenAPIModule extends Module {
-	app: App;
+	app?: App;
 	moduleOptions: OpenAPIModuleOptions;
 	logger = pino({ name: 'openAPI-module' });
-	httpServerModule: HttpServerModule<{ Server: Server }>;
-	httpServer: Server;
-	entityRegistry: EntityRegistry;
+	httpServerModule?: HttpServerModule<{ Server: Server }>;
+	httpServer?: Server;
+	entityRegistry?: EntityRegistry;
 	openAPIDoc: PartialDeep<OpenAPIV3.Document>;
 	private jsonSchemasMap = new Map<string, JSONSchema | Partial<JSONSchema>>();
 	private entityDefinitionJSONSchemaCache = new Map<TypeValue, EntityDefinitionJSONSchema>();
@@ -127,7 +127,7 @@ export class OpenAPIModule extends Module {
 			controllerDecoratorMetadata,
 			controllerReflection
 		} = route;
-		if (methodDecoratorMetadata.options?.hidden) return;
+		if (methodDecoratorMetadata?.options?.hidden) return;
 
 		// transform path parameters, e.g. :id to {id}
 		const path = origPath.replace(/:([\w-]+)/g, '{$1}');
@@ -145,8 +145,8 @@ export class OpenAPIModule extends Module {
 
 		// operationId handling
 		let operationId: string;
-		if (methodDecoratorMetadata.options?.operationId) {
-			operationId = methodDecoratorMetadata.options?.operationId;
+		if (methodDecoratorMetadata?.options?.operationId) {
+			operationId = methodDecoratorMetadata?.options?.operationId;
 		} else if (this.moduleOptions?.document?.automaticOperationIds) {
 			operationId = this.moduleOptions?.document?.operationIdFormatter?.({
 				...route,
@@ -156,9 +156,9 @@ export class OpenAPIModule extends Module {
 		}
 
 		this.openAPIDoc.paths[path][verb] = {
-			...(methodDecoratorMetadata.options?.summary && { summary: methodDecoratorMetadata.options?.summary }),
-			...(methodDecoratorMetadata.options?.description && {
-				description: methodDecoratorMetadata.options?.description
+			...(methodDecoratorMetadata?.options?.summary && { summary: methodDecoratorMetadata?.options?.summary }),
+			...(methodDecoratorMetadata?.options?.description && {
+				description: methodDecoratorMetadata?.options?.description
 			}),
 			...this.openAPIDoc.paths[path][verb],
 			...(tags ? { tags } : {}),
@@ -220,7 +220,7 @@ export class OpenAPIModule extends Module {
 				? this.moduleOptions?.defaults?.responses(route)
 				: this.moduleOptions?.defaults?.responses;
 
-		const responses = { ...defaultResponses, ...methodDecoratorMetadata.options?.responses };
+		const responses = { ...defaultResponses, ...methodDecoratorMetadata?.options?.responses };
 		const defaultResponseContentType = this.moduleOptions?.defaults?.responseContentType ?? 'application/json';
 
 		mapObject(responses, (response, statusCode) => {
@@ -260,77 +260,71 @@ export class OpenAPIModule extends Module {
 					}
 				};
 			} else if (typeof response.content === 'object') {
-				mapObject(
-					response.content,
-					(mediaTypeObject: OpenAPIV3.MediaTypeObject | ClassType | Array<ClassType>, contentType) => {
-						// Case: ClassType passed at response content type level
-						// example:
-						// { responses: { 200: { content: { 'application/json': Customer }}}} OR
-						// { responses: { 200: { content: { 'application/json': [Customer] }}}}
-						if (Array.isArray(mediaTypeObject) || typeof mediaTypeObject === 'function') {
-							const singleItem = Array.isArray(mediaTypeObject) ? mediaTypeObject[0] : mediaTypeObject;
-							const jsonSchema = this.getAndSetJsonSchema(singleItem);
+				mapObject(response.content, (mediaTypeObject, contentType) => {
+					// Case: ClassType passed at response content type level
+					// example:
+					// { responses: { 200: { content: { 'application/json': Customer }}}} OR
+					// { responses: { 200: { content: { 'application/json': [Customer] }}}}
+					if (Array.isArray(mediaTypeObject) || typeof mediaTypeObject === 'function') {
+						const singleItem = Array.isArray(mediaTypeObject) ? mediaTypeObject[0] : mediaTypeObject;
+						const jsonSchema = this.getAndSetJsonSchema(singleItem);
 
-							formattedResponse = {
-								...response,
-								content: {
-									...formattedResponse?.content,
-									[contentType]: {
-										schema: this.generateArrayOrSingleDefinition(
-											jsonSchema,
-											Array.isArray(mediaTypeObject)
-										)
-									}
+						formattedResponse = {
+							...response,
+							content: {
+								...formattedResponse?.content,
+								[contentType]: {
+									schema: this.generateArrayOrSingleDefinition(
+										jsonSchema,
+										Array.isArray(mediaTypeObject)
+									)
 								}
-							};
-						}
-						// Case: ClassType passed at response content type schema level
-						// example:
-						// { responses: { 200: { content: { 'application/json': { schema: Customer }}}}} OR
-						// { responses: { 200: { content: { 'application/json': { schema: [Customer] }}}}}
-						else if (
-							Array.isArray(mediaTypeObject.schema) ||
-							typeof mediaTypeObject.schema === 'function'
-						) {
-							const singleItem = Array.isArray(mediaTypeObject.schema)
-								? mediaTypeObject.schema[0]
-								: mediaTypeObject.schema;
-							const jsonSchema = this.getAndSetJsonSchema(singleItem);
-
-							const description = jsonSchema.description ?? jsonSchema.title ?? '';
-							formattedResponse = {
-								description,
-								...response,
-								content: {
-									...formattedResponse?.content,
-									[contentType]: {
-										...response?.content?.[contentType],
-										schema: this.generateArrayOrSingleDefinition(
-											jsonSchema,
-											Array.isArray(mediaTypeObject.schema)
-										)
-									}
-								}
-							};
-						}
-						// Case: explicit object definition
-						// example:
-						// { responses: { 200: { content: { 'application/json': { schema: { type: 'object' }}}}}} OR
-						// { responses: { 200: { content: { 'application/json': { schema: { type: 'array', items: { type: 'object' }}}}}}}
-						else if (typeof mediaTypeObject.schema === 'object') {
-							formattedResponse = {
-								...response,
-								content: {
-									...formattedResponse?.content,
-									[contentType]: {
-										...response?.content?.[contentType],
-										schema: mediaTypeObject.schema
-									}
-								}
-							};
-						}
+							}
+						};
 					}
-				);
+					// Case: ClassType passed at response content type schema level
+					// example:
+					// { responses: { 200: { content: { 'application/json': { schema: Customer }}}}} OR
+					// { responses: { 200: { content: { 'application/json': { schema: [Customer] }}}}}
+					else if (Array.isArray(mediaTypeObject.schema) || typeof mediaTypeObject.schema === 'function') {
+						const singleItem = Array.isArray(mediaTypeObject.schema)
+							? mediaTypeObject.schema[0]
+							: mediaTypeObject.schema;
+						const jsonSchema = this.getAndSetJsonSchema(singleItem);
+
+						const description = jsonSchema.description ?? jsonSchema.title ?? '';
+						formattedResponse = {
+							description,
+							...response,
+							content: {
+								...formattedResponse?.content,
+								[contentType]: {
+									...(response as MethodResponseItemContentMedia).content?.[contentType],
+									schema: this.generateArrayOrSingleDefinition(
+										jsonSchema,
+										Array.isArray(mediaTypeObject.schema)
+									)
+								}
+							}
+						};
+					}
+					// Case: explicit object definition
+					// example:
+					// { responses: { 200: { content: { 'application/json': { schema: { type: 'object' }}}}}} OR
+					// { responses: { 200: { content: { 'application/json': { schema: { type: 'array', items: { type: 'object' }}}}}}}
+					else if (typeof mediaTypeObject.schema === 'object') {
+						formattedResponse = {
+							...response,
+							content: {
+								...formattedResponse?.content,
+								[contentType]: {
+									...(response as MethodResponseItemContentMedia).content?.[contentType],
+									schema: mediaTypeObject.schema
+								}
+							}
+						};
+					}
+				});
 			}
 
 			this.openAPIDoc.paths[path][verb].responses = {
@@ -413,7 +407,7 @@ export class OpenAPIModule extends Module {
 	}
 
 	// DRY function to generate single item or array definition objects
-	private generateArrayOrSingleDefinition(jsonSchema: Partial<JSONSchema>, isArray): OpenAPIV3.SchemaObject {
+	private generateArrayOrSingleDefinition(jsonSchema: Partial<JSONSchema>, isArray: boolean): OpenAPIV3.SchemaObject {
 		const singleJsonSchema = (
 			jsonSchema.$id ? { $ref: `#/components/schemas/${jsonSchema.$id}` } : jsonSchema
 		) as OpenAPIV3.SchemaObject;

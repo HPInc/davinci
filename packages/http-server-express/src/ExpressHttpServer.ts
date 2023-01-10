@@ -15,6 +15,7 @@ import https, { Server as HttpsServer, ServerOptions } from 'https';
 import type { App } from '@davinci/core';
 import type { OptionsJson, OptionsUrlencoded } from 'body-parser';
 import cors, { CorsOptions } from 'cors';
+import { RequestHandlerParams } from 'express-serve-static-core';
 
 type Server = HttpServer | HttpsServer;
 
@@ -34,21 +35,21 @@ export class ExpressHttpServer extends HttpServerModule<{
 	Server: Server;
 	ModuleOptions: ExpressHttpServerModuleOptions;
 }> {
+	app?: App;
 	instance: Express;
-	app: App;
 
 	constructor(options?: ExpressHttpServerModuleOptions) {
 		const { instance, ...moduleOptions } = options ?? {};
 		super(moduleOptions);
 		this.instance = instance ?? express();
-		if (this.moduleOptions.logger?.level) {
-			this.logger.level = this.moduleOptions.logger?.level;
+		if (this.moduleOptions?.logger?.level) {
+			this.logger.level = this.moduleOptions?.logger?.level;
 		}
 	}
 
-	async onRegister(app) {
+	async onRegister(app: App) {
 		this.app = app;
-		const level = this.moduleOptions.logger?.level ?? app.getOptions().logger?.level;
+		const level = this.moduleOptions?.logger?.level ?? app.getOptions().logger?.level;
 		if (level) {
 			this.logger.level = level;
 		}
@@ -76,9 +77,8 @@ export class ExpressHttpServer extends HttpServerModule<{
 	}
 
 	initHttpServer() {
-		const isHttpsEnabled = super.moduleOptions?.https;
-		const server = isHttpsEnabled
-			? https.createServer(super.moduleOptions.https, this.getInstance())
+		const server = super.moduleOptions?.https
+			? https.createServer(super.moduleOptions?.https, this.getInstance())
 			: http.createServer(this.getInstance());
 
 		super.setHttpServer(server);
@@ -95,9 +95,9 @@ export class ExpressHttpServer extends HttpServerModule<{
 		return typeof body === 'object' ? response.json(body) : response.send(String(body));
 	}
 
-	public use: Express['use'] = (...args) => {
+	public use(...args: Array<RequestHandlerParams>) {
 		return this.instance.use(...args);
-	};
+	}
 
 	public get(path: string, handler: RequestHandler<Request, Response>) {
 		return this.instance.get(path, handler);
@@ -214,13 +214,13 @@ export class ExpressHttpServer extends HttpServerModule<{
 	}) {
 		switch (source) {
 			case 'path':
-				return request.params[name];
+				return request.params[name as string];
 
 			case 'header':
-				return request.header(name);
+				return request.header(name as string);
 
 			case 'query':
-				return request.query[name];
+				return request.query[name as string];
 
 			case 'body':
 				return request.body;

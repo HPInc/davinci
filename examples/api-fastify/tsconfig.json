@@ -3,6 +3,9 @@
 	"compilerOptions": {
 		"outDir": "./build",
 		"rootDir": ".",
+		"strictFunctionTypes": false,
+		"noImplicitAny": false,
+		"strictPropertyInitialization": false,
 		"resolveJsonModule": true
 	},
 	"include": ["src/**/*"]

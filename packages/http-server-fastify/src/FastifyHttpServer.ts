@@ -38,23 +38,29 @@ export class FastifyHttpServer extends HttpServerModule<{
 	Request: FastifyRequest;
 	Response: FastifyReply;
 	Server: Server;
+	Instance: FastifyInstance;
 	ModuleOptions: FastifyHttpServerModuleOptions;
 }> {
+	app?: App;
 	instance: FastifyInstance;
-	app: App;
 
 	constructor(options?: FastifyHttpServerModuleOptions) {
 		const { instance, ...moduleOptions } = options ?? {};
 		super(moduleOptions);
-		this.instance = instance;
-		if (this.moduleOptions.logger?.level) {
+		this.instance =
+			instance ??
+			fastify({
+				querystringParser: str => qs.parse(str, { parseArrays: true })
+			});
+
+		if (this.moduleOptions?.logger?.level) {
 			this.logger.level = this.moduleOptions.logger?.level;
 		}
 	}
 
 	async onRegister(app: App) {
 		this.app = app;
-		const level = this.moduleOptions.logger?.level ?? app.getOptions().logger?.level;
+		const level = this.moduleOptions?.logger?.level ?? app.getOptions().logger?.level;
 		if (level) {
 			this.logger.level = level;
 		}
@@ -209,18 +215,22 @@ export class FastifyHttpServer extends HttpServerModule<{
 	}: {
 		source: ParameterSource;
 		name?: string;
-		request: FastifyRequest;
+		request: FastifyRequest<{
+			Params: Record<string, any>;
+			Headers: Record<string, any>;
+			Querystring: Record<string, any>;
+		}>;
 		response: FastifyReply;
 	}) {
 		switch (source) {
 			case 'path':
-				return request.params[name];
+				return request?.params[name as string];
 
 			case 'header':
-				return request.headers[name];
+				return request?.headers[name as string];
 
 			case 'query':
-				return request.query[name];
+				return request?.query[name as string];
 
 			case 'body':
 				return request.body;
