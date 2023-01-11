@@ -119,7 +119,7 @@ const createHandlerArgs = <Context = unknown, ResultType = unknown>(
 		thisObj: Document | Query<ResultType, ResultType & Document>;
 		result?: any;
 		rest?: unknown[];
-		context?: Context;
+		context: Context;
 	}
 ):
 	| PreArgs<ResultType>
@@ -171,7 +171,7 @@ const createHandlerArgs = <Context = unknown, ResultType = unknown>(
 		hookName,
 		context,
 		davinciContext: context,
-		doc: rest[1] as Document
+		doc: rest?.[1] as Document
 	});
 
 	const argsSwitch = {
@@ -286,60 +286,9 @@ const createHandlerArgs = <Context = unknown, ResultType = unknown>(
 		}
 	};
 
+	// @ts-ignore
 	return argsSwitch?.[hookName]?.[stage]?.[operation]?.();
 };
-
-/**
- * Factory function that generates (before|after)(Read|Write|Delete) utilities
- * @param hooksList
- * @param stage
- */
-const createRegisterHooks =
-	(hooksList, stage: Stage) =>
-	<T>(mongooseSchema: T, handler): void => {
-		const isReadHook = hooksList === READ_HOOKS;
-		const isWriteHook = hooksList === WRITE_HOOKS;
-		const isDeleteHook = hooksList === DELETE_HOOKS;
-
-		const hasContextInOptions = (hook: Hook): boolean =>
-			isReadHook || isDeleteHook || ['findOneAndUpdate', 'update', 'updateMany', 'updateOne'].includes(hook);
-		const hasContextInSaveOptions = (hook: Hook): boolean =>
-			isWriteHook && !['findOneAndUpdate', 'update', 'updateMany', 'updateOne'].includes(hook);
-
-		hooksList.forEach(hook =>
-			mongooseSchema[stage](hook, async function hookHandlerWrapper(result, ...rest) {
-				let context;
-				if (hasContextInOptions(hook)) {
-					context = this.options?.davinciContext;
-					if (this.options?.skipHooks) {
-						return;
-					}
-				}
-				if (hasContextInSaveOptions(hook)) {
-					// eslint-disable-next-line no-underscore-dangle
-					context = this.$__.saveOptions?.davinciContext;
-					// eslint-disable-next-line no-underscore-dangle
-					if (this.$__.saveOptions?.skipHooks) {
-						return;
-					}
-				}
-
-				const args = createHandlerArgs<T, T & Document>(stage, hook, {
-					isReadHook,
-					isWriteHook,
-					isDeleteHook,
-					thisObj: this,
-					result,
-					context,
-					rest
-				});
-
-				if (args) {
-					await handler(args);
-				}
-			})
-		);
-	};
 
 export type Handler<Context = unknown, ModelSchema = unknown> = {
 	beforeRead: (args: PreArgs<Context, ModelSchema>) => unknown | Promise<unknown>;
@@ -362,44 +311,100 @@ export type Handler<Context = unknown, ModelSchema = unknown> = {
 	) => unknown | Promise<unknown>;
 };
 
+/**
+ * Factory function that generates (before|after)(Read|Write|Delete) utilities
+ */
+const createRegisterHooks = <T extends Schema, Context, ModelSchema>(
+	hooksList: typeof READ_HOOKS | typeof WRITE_HOOKS | typeof DELETE_HOOKS,
+	stage: Stage,
+	mongooseSchema: T,
+	handler: Handler<Context, ModelSchema>[keyof Handler<Context, ModelSchema>]
+): void => {
+	const isReadHook = hooksList === READ_HOOKS;
+	const isWriteHook = hooksList === WRITE_HOOKS;
+	const isDeleteHook = hooksList === DELETE_HOOKS;
+
+	const hasContextInOptions = (hook: Hook): boolean =>
+		isReadHook || isDeleteHook || ['findOneAndUpdate', 'update', 'updateMany', 'updateOne'].includes(hook);
+	const hasContextInSaveOptions = (hook: Hook): boolean =>
+		isWriteHook && !['findOneAndUpdate', 'update', 'updateMany', 'updateOne'].includes(hook);
+
+	hooksList.forEach(hook =>
+		// @ts-ignore
+		mongooseSchema[stage](hook, async function hookHandlerWrapper(result, ...rest) {
+			let context;
+			if (hasContextInOptions(hook)) {
+				context = this.options?.davinciContext;
+				if (this.options?.skipHooks) {
+					return;
+				}
+			}
+			if (hasContextInSaveOptions(hook)) {
+				// eslint-disable-next-line no-underscore-dangle
+				context = this.$__.saveOptions?.davinciContext;
+				// eslint-disable-next-line no-underscore-dangle
+				if (this.$__.saveOptions?.skipHooks) {
+					return;
+				}
+			}
+
+			const args = createHandlerArgs<T, T & Document>(stage, hook, {
+				isReadHook,
+				isWriteHook,
+				isDeleteHook,
+				thisObj: this,
+				result,
+				context,
+				rest
+			});
+
+			if (args) {
+				// @ts-ignore
+				await handler(args);
+			}
+		})
+	);
+};
+
 export function beforeRead<Context = unknown, ModelSchema = unknown>(
 	schema: Schema,
 	handler: Handler<Context, ModelSchema>['beforeRead']
 ): void {
-	return createRegisterHooks(READ_HOOKS, 'pre')(schema, handler);
+	return createRegisterHooks(READ_HOOKS, 'pre', schema, handler);
 }
 
 export function afterRead<Context = unknown, ModelSchema = unknown>(
 	schema: Schema,
 	handler: Handler<Context, ModelSchema>['afterRead']
 ): void {
-	return createRegisterHooks(READ_HOOKS, 'post')(schema, handler);
+	return createRegisterHooks(READ_HOOKS, 'post', schema, handler);
 }
 
 export function beforeWrite<Context = unknown, ModelSchema = unknown>(
 	schema: Schema,
 	handler: Handler<Context, ModelSchema>['beforeWrite']
 ): void {
-	return createRegisterHooks(WRITE_HOOKS, 'pre')(schema, handler);
+	return createRegisterHooks(WRITE_HOOKS, 'pre', schema, handler);
 }
 
 export function afterWrite<Context = unknown, ModelSchema = unknown>(
 	schema: Schema,
 	handler: Handler<Context, ModelSchema>['afterWrite']
 ): void {
-	return createRegisterHooks(WRITE_HOOKS, 'post')(schema, handler);
+	// @ts-ignore
+	return createRegisterHooks(WRITE_HOOKS, 'post', schema, handler);
 }
 
 export function beforeDelete<Context = unknown, ModelSchema = unknown>(
 	schema: Schema,
 	handler: Handler<Context, ModelSchema>['beforeDelete']
 ): void {
-	return createRegisterHooks(DELETE_HOOKS, 'pre')(schema, handler);
+	return createRegisterHooks(DELETE_HOOKS, 'pre', schema, handler);
 }
 
 export function afterDelete<Context = unknown, ModelSchema = unknown>(
 	schema: Schema,
 	handler: Handler<Context, ModelSchema>['afterDelete']
 ): void {
-	return createRegisterHooks(DELETE_HOOKS, 'post')(schema, handler);
+	return createRegisterHooks(DELETE_HOOKS, 'post', schema, handler);
 }

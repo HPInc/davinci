@@ -184,7 +184,7 @@ describe('generateModel', () => {
 
 		it('should add the indexes', () => {
 			@mgoose.index({ firstname: 1, lastname: 1 })
-			@mgoose.index({ lastname: 1, unique: true })
+			@mgoose.index({ lastname: 1 }, { unique: true })
 			@mgoose.schema()
 			class Customer {
 				@mgoose.prop({ index: true })
@@ -206,11 +206,11 @@ describe('generateModel', () => {
 				],
 				[
 					{
-						lastname: 1,
-						unique: true
+						lastname: 1
 					},
 					{
-						background: true
+						background: true,
+						unique: true
 					}
 				],
 				[

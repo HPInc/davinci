@@ -20,7 +20,7 @@ export interface MongooseModuleOptions {
 }
 
 export class MongooseModule extends Module {
-	app: App;
+	app?: App;
 	logger: Logger;
 	options: MongooseModuleOptions;
 

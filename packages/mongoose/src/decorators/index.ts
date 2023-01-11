@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { IndexOptions, SchemaOptions, VirtualTypeOptions } from 'mongoose';
+import { IndexDefinition, IndexOptions, SchemaOptions, VirtualType, VirtualTypeOptions } from 'mongoose';
 import { decorate, DecoratorId } from '@davinci/reflector';
 import { IPropDecoratorOptions } from './types';
 
@@ -22,18 +22,22 @@ export function prop(options?: IPropDecoratorOptions): PropertyDecorator {
 	);
 }
 
+export interface IndexDecoratorMetadata {
+	[DecoratorId]?: 'mongoose.index';
+	fields: IndexDefinition;
+	options?: IndexOptions;
+}
+
 /**
  * Gives the ability to add compound indexes to a schema.
  * It decorates classes
- * @param name
- * @param options
  */
 // eslint-disable-next-line no-shadow
-export function index(name, options?: IndexOptions): ClassDecorator {
+export function index(fields: IndexDefinition, options?: IndexOptions): ClassDecorator {
 	return decorate(
-		{
+		<IndexDecoratorMetadata>{
 			[DecoratorId]: 'mongoose.index',
-			name,
+			fields,
 			options
 		},
 		['Class'],
@@ -58,6 +62,12 @@ export function method(): MethodDecorator {
 
 export type IVirtualArgs = VirtualTypeOptions;
 
+export interface PopulateDecoratorMetadata {
+	[DecoratorId]?: 'mongoose.populate';
+	name: string;
+	options: IVirtualArgs;
+}
+
 /**
  * Decorator that annotates a field as localField
  * for a virtual property
@@ -72,7 +82,7 @@ export type IVirtualArgs = VirtualTypeOptions;
  */
 export function populate({ name, opts }: { name: string; opts: IVirtualArgs }): PropertyDecorator {
 	return decorate(
-		{
+		<PopulateDecoratorMetadata>{
 			[DecoratorId]: 'mongoose.populate',
 			name,
 			options: opts
@@ -82,13 +92,23 @@ export function populate({ name, opts }: { name: string; opts: IVirtualArgs }): 
 	);
 }
 
+export interface VirtualDecoratorMetadata<T = unknown> {
+	[DecoratorId]?: 'mongoose.virtual';
+	handler: (this: T, value: any, virtualType: VirtualType<T>, doc: T) => any;
+	options: IVirtualArgs;
+}
+
 /**
  * Decorator that annotates a method marking it as virtual.
  * The annotated method will be used as the `getter` of the virtual
  */
 export function virtual(options?: IVirtualArgs): MethodDecorator & PropertyDecorator {
-	return (...args: [target: object, key: string]): void => {
+	return (...args: [target: Record<string, any>, key: string | symbol]): void => {
 		const [target, key] = args;
+		if (typeof key !== 'string') {
+			throw new Error('key is not a string, is a symbol');
+		}
+
 		const handler = target[key];
 		if (options?.ref && typeof handler === 'function') {
 			throw new Error(
@@ -97,7 +117,7 @@ export function virtual(options?: IVirtualArgs): MethodDecorator & PropertyDecor
 		}
 
 		return decorate(
-			{
+			<VirtualDecoratorMetadata>{
 				[DecoratorId]: 'mongoose.virtual',
 				handler,
 				options
