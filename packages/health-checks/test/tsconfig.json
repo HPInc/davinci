@@ -1,10 +1,12 @@
 {
-	"extends": "../../tsconfig.json",
+	"extends": "../tsconfig.json",
+	"include": ["**/*"],
 	"compilerOptions": {
-		"rootDir": "./src",
-		"outDir": "./build"
+		"rootDir": "../",
+		"strictPropertyInitialization": false,
+		"strict": false,
+		"noImplicitAny": false
 	},
-	"include": ["src/**/*", "test/**/*"],
 	"ts-node": {
 		"compilerOptions": {
 			"strictPropertyInitialization": false,
