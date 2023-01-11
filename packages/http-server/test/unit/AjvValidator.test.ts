@@ -5,9 +5,9 @@
 
 import { entity, EntityRegistry } from '@davinci/core';
 import { createSandbox } from 'sinon';
+import Ajv, { Options } from 'ajv';
 import { expect } from '../support/chai';
 import { AjvValidator, AjvValidatorOptions, createAjvValidator, ParameterConfiguration, Route } from '../../src';
-import Ajv, { Options } from 'ajv';
 
 const toPromise = async (fn: Function) => fn();
 
@@ -788,6 +788,7 @@ describe('AjvValidator', () => {
 			};
 
 			const validator = await ajvValidatorFactory(route);
+			// @ts-ignore
 			const error = await toPromise(() => validator(data)).catch(err => err);
 
 			expect(validator).to.be.a('function');
