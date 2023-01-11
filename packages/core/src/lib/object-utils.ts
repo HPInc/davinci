@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-export function mapObject<T extends object, TResult>(
+export function mapObject<T extends object, TResult = unknown>(
 	obj: T,
 	iteratee: (value: T[keyof T], key: keyof T) => TResult
 ): { [P in keyof T]: TResult } {
@@ -16,9 +16,9 @@ export function mapObject<T extends object, TResult>(
 	}, {} as { [P in keyof T]: TResult });
 }
 
-export function omit<T extends object | null | undefined>(obj: T, keys: (keyof T)[]): Partial<T> {
-	if (!keys.length) return obj;
+export function omit<T extends object>(obj: T | null | undefined, keys: (keyof T)[]): Partial<T> | null | undefined {
 	if (typeof obj !== 'object' || typeof obj === 'undefined' || obj === null) return obj;
+	if (!keys.length) return obj;
 	const objKeys = Object.keys(obj) as Array<keyof T>;
 
 	return objKeys.reduce((acc, key) => {
