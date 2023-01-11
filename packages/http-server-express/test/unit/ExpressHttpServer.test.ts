@@ -7,9 +7,9 @@ import { route } from '@davinci/http-server';
 import axios from 'axios';
 import { createSandbox } from 'sinon';
 import { reflect } from '@davinci/reflector';
+import express from 'express';
 import { expect } from '../support/chai';
 import { ExpressHttpServer } from '../../src';
-import express from 'express';
 
 const sinon = createSandbox();
 

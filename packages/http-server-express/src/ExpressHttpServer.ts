@@ -9,13 +9,12 @@ import {
 	RequestHandler,
 	StaticServeOptions
 } from '@davinci/http-server';
-import express, { Express, Request, Response } from 'express';
+import express, { Application, Express, Request, Response } from 'express';
 import http, { Server as HttpServer } from 'http';
 import https, { Server as HttpsServer, ServerOptions } from 'https';
 import type { App } from '@davinci/core';
 import type { OptionsJson, OptionsUrlencoded } from 'body-parser';
 import cors, { CorsOptions } from 'cors';
-import { RequestHandlerParams } from 'express-serve-static-core';
 
 type Server = HttpServer | HttpsServer;
 
@@ -95,9 +94,10 @@ export class ExpressHttpServer extends HttpServerModule<{
 		return typeof body === 'object' ? response.json(body) : response.send(String(body));
 	}
 
-	public use(...args: Array<RequestHandlerParams>) {
+	// @ts-ignore
+	public use: Application['use'] = (...args) => {
 		return this.instance.use(...args);
-	}
+	};
 
 	public get(path: string, handler: RequestHandler<Request, Response>) {
 		return this.instance.get(path, handler);

@@ -29,7 +29,7 @@ export interface AmqpSubscribeOptions {
 	/**
 	 * @defaultValue `topic`
 	 */
-	exchangeType?: 'direct' | 'topic' | 'headers' | 'fanout' | 'match' | string;
+	exchangeType: 'direct' | 'topic' | 'headers' | 'fanout' | 'match' | string;
 	exchangeOptions?: amqplib.Options.AssertExchange;
 	queueOptions?: amqplib.Options.AssertQueue;
 }
@@ -40,7 +40,7 @@ export interface AmqpSubscriptionSettings extends AmqpSubscribeOptions {
 
 export interface Subscription {
 	channel?: ChannelWrapper;
-	settings?: AmqpSubscriptionSettings;
+	settings: AmqpSubscriptionSettings;
 	consumerTag?: string;
 	setup?: SetupFunc;
 }

@@ -16,7 +16,10 @@ export function mapObject<T extends object, TResult = unknown>(
 	}, {} as { [P in keyof T]: TResult });
 }
 
-export function omit<T extends object>(obj: T | null | undefined, keys: (keyof T)[]): Partial<T> | null | undefined {
+export function omit(obj: undefined, keys: Array<string>): undefined;
+export function omit(obj: null, keys: Array<string>): null;
+export function omit<T extends object>(obj: T, keys: Array<keyof T>): Partial<T>;
+export function omit<T extends object>(obj: T | null | undefined, keys: Array<keyof T>): Partial<T> | null | undefined {
 	if (typeof obj !== 'object' || typeof obj === 'undefined' || obj === null) return obj;
 	if (!keys.length) return obj;
 	const objKeys = Object.keys(obj) as Array<keyof T>;
