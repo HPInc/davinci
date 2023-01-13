@@ -376,7 +376,7 @@ export class AmqpModule extends Module {
 	}: {
 		subscription: Subscription;
 		parameters: any[];
-	}): InterceptorBag<{}, { channel: ChannelWrapper; subscription: Subscription }> {
+	}): InterceptorBag<{ Additional: { channel: ChannelWrapper; subscription: Subscription } }> {
 		return {
 			module: 'messaging-amqp',
 			handlerArgs: parameters,

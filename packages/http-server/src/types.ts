@@ -4,7 +4,7 @@
  */
 
 import { ClassReflection, MethodReflection, TypeValue } from '@davinci/reflector';
-import { Interceptor, InterceptorBagDetails, InterceptorDecoratorMeta, JSONSchema } from '@davinci/core';
+import { Interceptor, InterceptorBagGenerics, InterceptorDecoratorMeta, JSONSchema } from '@davinci/core';
 import { Level } from 'pino';
 import { ControllerDecoratorMetadata, MethodDecoratorMetadata, ParameterDecoratorOptions, Verb } from './decorators';
 
@@ -67,21 +67,22 @@ export interface HttpServerInterceptorMeta {
 	stage?: HttpServerInterceptorStage;
 }
 
-export type HttpInterceptorBag = InterceptorBagDetails & {
+export type HttpInterceptorBag = InterceptorBagGenerics & {
 	Request?: unknown;
 	Response?: unknown;
 	Meta?: HttpServerInterceptorMeta;
 };
 
-export type HttpServerInterceptor<Bag extends HttpInterceptorBag = HttpInterceptorBag> = Interceptor<
-	Bag,
-	{
+export type HttpServerInterceptor<Bag extends HttpInterceptorBag = HttpInterceptorBag> = Interceptor<{
+	Context: Bag['Context'];
+	State: Bag['State'];
+	Meta: HttpServerInterceptorMeta;
+	Additional: {
 		request?: Bag['Request'];
 		response?: Bag['Response'];
 		route?: Route<Bag['Request']>;
-		meta?: HttpServerInterceptorMeta;
-	}
->;
+	};
+}>;
 
 export type EndpointSchema = JSONSchema<any> & {
 	properties: {
