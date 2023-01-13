@@ -1,12 +1,30 @@
 {
-	"extends": "../../tsconfig.json",
 	"compilerOptions": {
-		"outDir": "./build",
-		"rootDir": ".",
-		"strictFunctionTypes": false,
-		"noImplicitAny": false,
+		"target": "es2019",
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"allowSyntheticDefaultImports": true,
+		"allowJs": false,
+		"strict": true,
+		"alwaysStrict": true,
+		"sourceMap": true,
+		"forceConsistentCasingInFileNames": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitReturns": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noImplicitAny": true,
+		"noImplicitThis": false,
 		"strictPropertyInitialization": false,
-		"resolveJsonModule": true
+		"experimentalDecorators": true,
+		"importHelpers": true,
+		"declaration": true,
+		"watch": false,
+		"emitDecoratorMetadata": true,
+		"esModuleInterop": true,
+		"removeComments": false,
+		"skipLibCheck": true,
+		"lib": ["ES2019", "DOM"]
 	},
 	"include": ["src/**/*"]
 }

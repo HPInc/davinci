@@ -32,7 +32,7 @@ type Source = typeof sources[number];
 type AjvInstancesMap = Record<Source, Ajv>;
 type AjvOptionsMap = Record<Source, Options>;
 
-type AjvPluginOptions = unknown;
+type AjvPluginOptions = any;
 type AjvPlugin = Plugin<AjvPluginOptions>;
 type AjvPlugins = Array<[AjvPlugin, AjvPluginOptions?]>;
 type AjvPluginsMap = Record<Source, AjvPlugins>;

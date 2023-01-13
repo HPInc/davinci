@@ -29,7 +29,7 @@ export interface AmqpSubscribeOptions {
 	/**
 	 * @defaultValue `topic`
 	 */
-	exchangeType: 'direct' | 'topic' | 'headers' | 'fanout' | 'match' | string;
+	exchangeType?: 'direct' | 'topic' | 'headers' | 'fanout' | 'match' | string;
 	exchangeOptions?: amqplib.Options.AssertExchange;
 	queueOptions?: amqplib.Options.AssertQueue;
 }

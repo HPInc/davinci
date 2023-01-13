@@ -35,7 +35,7 @@ export class ChannelManager {
 			await Promise.all([
 				channel.assertExchange(
 					subscription.settings.exchange,
-					subscription.settings.exchangeType,
+					subscription.settings.exchangeType ?? 'topic',
 					subscription.settings.exchangeOptions
 				),
 				channel.assertQueue(subscription.settings.queue, subscription.settings.queueOptions),
