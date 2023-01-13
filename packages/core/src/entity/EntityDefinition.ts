@@ -43,7 +43,7 @@ export class EntityDefinition {
 		if (options.type) {
 			this.type = options.type;
 		}
-		// @ts-ignore
+
 		this.name = options.name ?? (this.type as ClassType)?.name;
 		this.entityDefinitionsMapCache = options.entityDefinitionsMapCache ?? new Map<TypeValue, EntityDefinition>();
 		if (!options.reflect) {
