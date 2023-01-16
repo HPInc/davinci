@@ -79,6 +79,18 @@ describe('FastifyHttpServer', () => {
 		});
 	});
 
+	describe('instantiation', () => {
+		it('should allow to pass fastify instance in module options', async () => {
+			const instance = sinon.stub();
+			
+			// @ts-ignore
+			const fastifyHttpServer = new FastifyHttpServer({ port: 3000, instance });
+			await app.registerModule(fastifyHttpServer);
+
+			expect(fastifyHttpServer.instance).to.deep.equal(instance);
+		});
+	});
+
 	describe('#createRequestHandler', () => {
 		it('should create a request handler for a controller method that succeed', async () => {
 			const fastifyHttpServer = new FastifyHttpServer();
