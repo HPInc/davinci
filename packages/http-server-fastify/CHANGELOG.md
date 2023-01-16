@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.2.0](https://github.com/HPInc/davinci/compare/@davinci/http-server-fastify@2.1.16...@davinci/http-server-fastify@2.2.0) (2023-01-16)
+
+
+### Bug Fixes
+
+* create first fastify instance onRegister and createRoutes for openapi ([214deab](https://github.com/HPInc/davinci/commit/214deab120c91f3a8cd01b07888dcd64798ca0c9))
+* enable to re-init fastify ([c4217b5](https://github.com/HPInc/davinci/commit/c4217b5a750095b52283be9a4cb31bb6db944767))
+
+
+### Features
+
+* rerun onRegister if module status is error or destroyed ([f0bb874](https://github.com/HPInc/davinci/commit/f0bb8743dbbfb4ab1650635eb1df4b7e3d1bb18f))
+
+
+
+
+
 ## [2.1.16](https://github.com/HPInc/davinci/compare/@davinci/http-server-fastify@2.1.15...@davinci/http-server-fastify@2.1.16) (2023-01-04)
 
 **Note:** Version bump only for package @davinci/http-server-fastify
