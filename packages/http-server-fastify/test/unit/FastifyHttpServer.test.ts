@@ -33,6 +33,8 @@ describe('FastifyHttpServer', () => {
 			const fastifyHttpServer = new FastifyHttpServer({ port: 3000 });
 			app.registerModule(fastifyHttpServer);
 
+			const onRegister = sinon.spy(fastifyHttpServer, 'onRegister');
+
 			await app.init();
 			await app.shutdown();
 			await app.init();
@@ -43,6 +45,7 @@ describe('FastifyHttpServer', () => {
 				.catch(error => ({ error }));
 
 			expect(error.response).to.have.property('status').equal(404);
+			expect(onRegister.callCount).to.equal(2);
 		});
 
 		it('should initialize a listening server', async () => {

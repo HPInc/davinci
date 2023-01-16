@@ -65,13 +65,6 @@ export class FastifyHttpServer extends HttpServerModule<{
 	}
 
 	async onInit() {
-		if (!this.instance) {
-			this.initHttpServer();
-			await this.registerMiddlewares();
-			await this.registerPlugins();
-			await super.createRoutes();
-		}
-
 		return this.listen();
 	}
 
