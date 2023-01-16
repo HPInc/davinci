@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.2.2](https://github.com/HPInc/davinci/compare/@davinci/http-server-fastify@2.2.1...@davinci/http-server-fastify@2.2.2) (2023-01-16)
+
+
+### Bug Fixes
+
+* don't remove instance from moduleOptions ([b736078](https://github.com/HPInc/davinci/commit/b73607862be2c14f357f2a04220e4587b8f50a18))
+* use fastify options instance on re-init ([be6463f](https://github.com/HPInc/davinci/commit/be6463f1d32d68289b641d770011b3c6edb33fd5))
+
+
+
+
+
 ## [2.2.1](https://github.com/HPInc/davinci/compare/@davinci/http-server-fastify@2.2.0...@davinci/http-server-fastify@2.2.1) (2023-01-16)
 
 
