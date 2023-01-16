@@ -160,11 +160,22 @@ export class App extends Module {
 	}
 
 	public async init() {
-		if (this.getStatus() === 'registering') {
+		const appStatus = this.getStatus();
+
+		if (appStatus === 'registering') {
 			await new Promise(resolve => {
 				this.eventBus.once('registered', () => resolve(null));
 			});
 		}
+
+		if (appStatus === 'error' || appStatus === 'destroyed') {
+			this.logger.debug(`Automatically executing the onRegister hooks as the App status is: ${appStatus}`);
+			const modulesCopy = [...this.modules];
+			this.modules = [];
+			this.modulesDic = {};
+			await this.registerModule(modulesCopy);
+		}
+
 		this.logger.debug('App initialization. Executing onInit hooks');
 		this.setStatus('initializing');
 
