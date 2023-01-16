@@ -174,7 +174,10 @@ export class App extends Module {
 				if (module.getStatus() === 'destroyed' || module.getStatus() === 'error') {
 					module.setStatus('registering');
 					await module.onRegister?.(this);
+					module.setStatus('registered');
 				}
+			});
+			await mapSeries(this.modules, async module => {
 				module.setStatus('initializing');
 				await module.onInit?.(this);
 				module.setStatus('initialized');
