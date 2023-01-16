@@ -29,6 +29,22 @@ describe('FastifyHttpServer', () => {
 	});
 
 	describe('lifecycle', () => {
+		it('should be able to recycle the app', async () => {
+			const fastifyHttpServer = new FastifyHttpServer({ port: 3000 });
+			app.registerModule(fastifyHttpServer);
+
+			await app.init();
+			await app.shutdown();
+			await app.init();
+
+			const { error } = await axios
+				.get('http://127.0.0.1:3000')
+				.then(response => ({ error: null, response }))
+				.catch(error => ({ error }));
+
+			expect(error.response).to.have.property('status').equal(404);
+		});
+
 		it('should initialize a listening server', async () => {
 			const fastifyHttpServer = new FastifyHttpServer({ port: 3000 });
 			app.registerModule(fastifyHttpServer);
