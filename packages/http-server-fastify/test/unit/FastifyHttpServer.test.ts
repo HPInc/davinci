@@ -29,7 +29,7 @@ describe('FastifyHttpServer', () => {
 	});
 
 	describe('lifecycle', () => {
-		it('should be able to recycle the app', async () => {
+		it('should be reinit the module after destroy', async () => {
 			const fastifyHttpServer = new FastifyHttpServer({ port: 3000 });
 			app.registerModule(fastifyHttpServer);
 
