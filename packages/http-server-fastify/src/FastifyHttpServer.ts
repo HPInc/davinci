@@ -61,7 +61,6 @@ export class FastifyHttpServer extends HttpServerModule<{
 		this.initHttpServer();
 		await this.registerMiddlewares();
 		await this.registerPlugins();
-
 		await super.createRoutes();
 	}
 
@@ -71,6 +70,8 @@ export class FastifyHttpServer extends HttpServerModule<{
 
 	async onDestroy() {
 		await this.close();
+		this.instance = null;
+		this.setHttpServer(null);
 		this.logger.info('Server stopped');
 	}
 
@@ -88,7 +89,6 @@ export class FastifyHttpServer extends HttpServerModule<{
 
 	initHttpServer() {
 		this.instance =
-			this.instance ??
 			fastify({
 				querystringParser: str => qs.parse(str, { parseArrays: true })
 			});
