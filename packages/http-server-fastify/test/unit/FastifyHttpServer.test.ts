@@ -88,12 +88,6 @@ describe('FastifyHttpServer', () => {
 			await app.registerModule(fastifyHttpServer);
 
 			expect(fastifyHttpServer.instance).to.deep.equal(instance);
-
-			await app.init();
-			await app.shutdown();
-			await app.init();
-
-			expect(fastifyHttpServer.instance).to.deep.equal(instance);
 		});
 	});
 

@@ -44,9 +44,7 @@ export class FastifyHttpServer extends HttpServerModule<{
 	app: App;
 
 	constructor(options?: FastifyHttpServerModuleOptions) {
-		const { instance, ...moduleOptions } = options ?? {};
-		super(moduleOptions);
-		this.instance = instance;
+		super(options ?? {});
 		if (this.moduleOptions.logger?.level) {
 			this.logger.level = this.moduleOptions.logger?.level;
 		}
