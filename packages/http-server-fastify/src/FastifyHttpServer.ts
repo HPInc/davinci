@@ -58,14 +58,20 @@ export class FastifyHttpServer extends HttpServerModule<{
 		if (level) {
 			this.logger.level = level;
 		}
-	}
-
-	async onInit() {
 		this.initHttpServer();
 		await this.registerMiddlewares();
 		await this.registerPlugins();
 		await super.createRoutes();
-		
+	}
+
+	async onInit() {
+		if (!this.instance) {
+			this.initHttpServer();
+			await this.registerMiddlewares();
+			await this.registerPlugins();
+			await super.createRoutes();
+		}
+
 		return this.listen();
 	}
 
