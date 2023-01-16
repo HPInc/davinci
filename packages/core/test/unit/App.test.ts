@@ -293,6 +293,37 @@ describe('App', () => {
 		expect(myModule.app).to.be.equal(app);
 	});
 
+	it("should execute the modules' onRegister hook if module status 'destroyed'", async () => {
+		const app = createApp();
+		class MyModule extends Module {
+			app: App;
+			getModuleId() {
+				return 'myModule'
+			}
+
+			onRegister() {
+				this.app = app;
+			}
+
+			onInit(app: App) {
+				this.app = app;
+			}
+		}
+		const myModule = new MyModule();
+
+		const onRegister = sinon.spy(myModule, 'onRegister');
+		const onInit = sinon.spy(myModule, 'onInit');
+
+		await app.registerModule(myModule);
+
+		await app.init();
+		await app.shutdown();
+		await app.init();
+
+		expect(onRegister.callCount).to.be.equal(2);
+		expect(onInit.callCount).to.be.equal(2);
+	});
+
 	it('should track lifecycle changes via the status property #1', async () => {
 		class MyModule extends Module {
 			getModuleId() {
