@@ -88,7 +88,7 @@ export class FastifyHttpServer extends HttpServerModule<{
 	}
 
 	initHttpServer() {
-		this.instance =
+		this.instance = this.instance ??
 			fastify({
 				querystringParser: str => qs.parse(str, { parseArrays: true })
 			});
