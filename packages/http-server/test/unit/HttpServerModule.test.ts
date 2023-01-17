@@ -16,6 +16,7 @@ import {
 } from '@davinci/core';
 import * as http from 'http';
 import { reflect } from '@davinci/reflector';
+import { createSandbox } from 'sinon';
 import {
 	HttpServerInterceptor,
 	HttpServerModule,
@@ -25,7 +26,7 @@ import {
 } from '../../src';
 import { expect } from '../support/chai';
 
-const sinon = require('sinon').createSandbox();
+const sinon = createSandbox();
 
 describe('HttpServerModule', () => {
 	let app: App;
@@ -279,6 +280,51 @@ describe('HttpServerModule', () => {
 			});
 		});
 
+		it('should be able to programmatically show/hide the error stack in case of failure', async () => {
+			const runHandler = async (moduleOptions?: HttpServerModuleOptions) => {
+				@route.controller({ basePath: '/api/customers' })
+				class CustomerController {
+					@route.get({ path: '/all' })
+					find(@route.body() body: string, @route.query() where: string) {
+						throw new Error(`Bad request with arguments: ${body}, ${where}`);
+					}
+				}
+				const dummyHttpServer = new DummyHttpServer(moduleOptions);
+				const controllerReflection = reflect(CustomerController);
+				const methodReflection = controllerReflection.methods[0];
+				const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+					path: '/all',
+					verb: 'get',
+					controllerReflection,
+					methodReflection,
+					parametersConfig: dummyHttpServer.createParametersConfigurations({
+						controllerReflection,
+						methodReflection
+					})
+				});
+				const reqMock = { body: 'body', query: { where: 'where' } };
+				const resMock = {};
+				return requestHandler(reqMock, resMock);
+			};
+
+			const result1 = await runHandler({ errorHandling: { exposeStack: true } });
+			expect(result1[1]).to.have.property('stack');
+
+			const result2 = await runHandler({ errorHandling: { exposeStack: false } });
+			expect(result2[1]).to.not.have.property('stack');
+
+			// by default, it should be enabled
+			const result3 = await runHandler();
+			expect(result3[1]).to.have.property('stack');
+
+			// it should be hidden if process.env.NODE_ENV === 'production'
+			const origNodeEnv = process.env.NODE_ENV;
+			process.env.NODE_ENV = 'production';
+			const result4 = await runHandler();
+			expect(result4[1]).to.not.have.property('stack');
+			process.env.NODE_ENV = origNodeEnv;
+		});
+
 		it('should create a request handler that process interceptors', async () => {
 			const interceptor1 = sinon.stub().callsFake(next => next());
 			const interceptor2 = sinon.stub().callsFake(next => next());
@@ -422,7 +468,7 @@ describe('HttpServerModule', () => {
 			const methodInterceptorPost = sinon.stub().callsFake(createHandler('methodInterceptorPost'));
 			sinon
 				.stub(DummyHttpServer.prototype, 'createValidationInterceptor')
-				.callsFake(() => createHandler('validationInterceptor'));
+				.callsFake(() => createHandler('validationInterceptor') as any);
 
 			@interceptor<HttpServerInterceptor>(ctrlInterceptorPre, { stage: 'preValidation' })
 			@interceptor<HttpServerInterceptor>(ctrlInterceptorPost, { stage: 'postValidation' })

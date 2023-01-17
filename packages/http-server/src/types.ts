@@ -88,7 +88,10 @@ export interface HttpServerModuleOptions {
 	port?: number | string;
 	contextFactory?: ContextFactory<unknown>;
 	validationFactory?: ValidationFactory;
-	errorsHandling?: {
+	errorHandling?: {
+		/**
+		 * enabled by default. False if process.env.NODE_ENV === 'production'
+		 */
 		exposeStack?: boolean;
 	};
 	querystringJsonParsing?: boolean;
