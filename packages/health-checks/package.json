@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/health-checks",
-	"version": "2.1.20",
+	"version": "2.1.21",
 	"description": "Framework for rapid and consistent API development",
 	"main": "build-cjs/index.js",
 	"module": "build-esm/index.js",
@@ -29,7 +29,7 @@
 		"pino": "^8.7.0"
 	},
 	"devDependencies": {
-		"@davinci/http-server-fastify": "^2.2.3",
+		"@davinci/http-server-fastify": "^2.3.0",
 		"@godaddy/terminus": "^4.11.2",
 		"pino": "^8.7.0"
 	},

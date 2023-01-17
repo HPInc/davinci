@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.3.0](https://github.com/HPInc/davinci/compare/@davinci/http-server-express@2.2.15...@davinci/http-server-express@2.3.0) (2023-01-17)
+
+
+### Features
+
+* allow to pass express instance or factory ([b2dff76](https://github.com/HPInc/davinci/commit/b2dff767083dd118ec17a39fdb5179d64a0ce6c5))
+
+
+
+
+
 ## [2.2.15](https://github.com/HPInc/davinci/compare/@davinci/http-server-express@2.2.14...@davinci/http-server-express@2.2.15) (2023-01-17)
 
 **Note:** Version bump only for package @davinci/http-server-express
