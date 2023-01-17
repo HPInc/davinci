@@ -83,7 +83,6 @@ describe('FastifyHttpServer', () => {
 	describe('instantiation', () => {
 		it('should allow to pass fastify instance factory in module options', async () => {
 			const instance = fastify();
-			// @ts-ignore
 			const fastifyHttpServer = new FastifyHttpServer({ port: 3000, instance: () => instance });
 			await app.registerModule(fastifyHttpServer);
 
@@ -92,7 +91,6 @@ describe('FastifyHttpServer', () => {
 
 		it('should allow to pass fastify instance in module options', async () => {
 			const instance = fastify();
-			// @ts-ignore
 			const fastifyHttpServer = new FastifyHttpServer({ port: 3000, instance });
 			await app.registerModule(fastifyHttpServer);
 
@@ -100,7 +98,6 @@ describe('FastifyHttpServer', () => {
 		});
 
 		it('should create default fastify instance', async () => {
-			// @ts-ignore
 			const fastifyHttpServer = new FastifyHttpServer({ port: 3000 });
 			await app.registerModule(fastifyHttpServer);
 
