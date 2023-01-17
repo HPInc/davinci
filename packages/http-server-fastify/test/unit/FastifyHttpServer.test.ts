@@ -1,7 +1,7 @@
 /*
- * © Copyright 2022 HP Development Company, L.P.
- * SPDX-License-Identifier: MIT
- */
+* © Copyright 2022 HP Development Company, L.P.
+* SPDX-License-Identifier: MIT
+*/
 import { App } from '@davinci/core';
 import { route } from '@davinci/http-server';
 import axios from 'axios';
@@ -10,6 +10,7 @@ import { reflect } from '@davinci/reflector';
 import { expect } from '../support/chai';
 import { FastifyHttpServer } from '../../src';
 import fastifyStatic from '@fastify/static';
+import fastify from 'fastify';
 
 const sinon = createSandbox();
 
@@ -80,14 +81,27 @@ describe('FastifyHttpServer', () => {
 	});
 
 	describe('instantiation', () => {
+		it('should allow to pass fastify instance factory in module options', async () => {
+			const instance = fastify();
+			const fastifyHttpServer = new FastifyHttpServer({ port: 3000, instance: () => instance });
+			await app.registerModule(fastifyHttpServer);
+
+			expect(fastifyHttpServer.instance).to.deep.equal(instance);
+		});
+
 		it('should allow to pass fastify instance in module options', async () => {
-			const instance = sinon.stub();
-			
-			// @ts-ignore
+			const instance = fastify();
 			const fastifyHttpServer = new FastifyHttpServer({ port: 3000, instance });
 			await app.registerModule(fastifyHttpServer);
 
 			expect(fastifyHttpServer.instance).to.deep.equal(instance);
+		});
+
+		it('should create default fastify instance', async () => {
+			const fastifyHttpServer = new FastifyHttpServer({ port: 3000 });
+			await app.registerModule(fastifyHttpServer);
+
+			expect(fastifyHttpServer.instance.server).to.exist;
 		});
 	});
 
