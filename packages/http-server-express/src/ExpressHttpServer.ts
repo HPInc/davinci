@@ -19,7 +19,7 @@ import cors, { CorsOptions } from 'cors';
 type Server = HttpServer | HttpsServer;
 
 export interface ExpressHttpServerModuleOptions extends HttpServerModuleOptions {
-	instance?: Express;
+	instance?: Express | (() => Express);
 	https?: ServerOptions;
 	middlewares?: {
 		json?: OptionsJson;
@@ -38,9 +38,7 @@ export class ExpressHttpServer extends HttpServerModule<{
 	app: App;
 
 	constructor(options?: ExpressHttpServerModuleOptions) {
-		const { instance, ...moduleOptions } = options ?? {};
-		super(moduleOptions);
-		this.instance = instance ?? express();
+		super(options ?? {});
 		if (this.moduleOptions.logger?.level) {
 			this.logger.level = this.moduleOptions.logger?.level;
 		}
@@ -52,10 +50,10 @@ export class ExpressHttpServer extends HttpServerModule<{
 		if (level) {
 			this.logger.level = level;
 		}
+		this.initHttpServer();
 		this.registerMiddlewares();
 		await super.createRoutes();
 		// this.registerErrorHandlers();
-		this.initHttpServer();
 	}
 
 	async onInit() {
@@ -76,6 +74,13 @@ export class ExpressHttpServer extends HttpServerModule<{
 	}
 
 	initHttpServer() {
+		const { instance } = this.moduleOptions;
+		if (instance && typeof instance === 'function' && !(instance as Express).listen) {
+			this.instance = (instance as Function)();
+		} else {
+			this.instance = (instance as Express) ?? express();
+		}
+
 		const isHttpsEnabled = super.moduleOptions?.https;
 		const server = isHttpsEnabled
 			? https.createServer(super.moduleOptions.https, this.getInstance())

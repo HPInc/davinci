@@ -60,6 +60,34 @@ describe('ExpressHttpServer', () => {
 		});
 	});
 
+	describe('instantiation', () => {
+		it('should allow to pass express instance factory in module options', async () => {
+			const instance = express();
+			// @ts-ignore
+			const expressHttpServer = new ExpressHttpServer({ port: 3000, instance: () => instance });
+			await app.registerModule(expressHttpServer);
+
+			expect(expressHttpServer.instance).to.deep.equal(instance);
+		});
+
+		it('should allow to pass fastify instance in module options', async () => {
+			const instance = express();
+			// @ts-ignore
+			const expressHttpServer = new ExpressHttpServer({ port: 3000, instance });
+			await app.registerModule(expressHttpServer);
+
+			expect(expressHttpServer.instance).to.deep.equal(instance);
+		});
+
+		it('should create default fastify instance', async () => {
+			// @ts-ignore
+			const expressHttpServer = new ExpressHttpServer({ port: 3000 });
+			await app.registerModule(expressHttpServer);
+
+			expect(expressHttpServer.instance).to.exist;
+		});
+	});
+
 	describe('#createRequestHandler', () => {
 		it('should create a request handler for a controller method that succeed', async () => {
 			const expressHttpServer = new ExpressHttpServer();
@@ -217,6 +245,7 @@ describe('ExpressHttpServer', () => {
 	describe('propagation', () => {
 		it('should propagate the calls to the underlying express instance', async () => {
 			const expressHttpServer = new ExpressHttpServer({ logger: { level: 'silent' } });
+			expressHttpServer.initHttpServer();
 			const expressApp = expressHttpServer.getInstance();
 			const expressMocks = {
 				listen: sinon.stub(expressApp, 'listen'),
