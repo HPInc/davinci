@@ -80,14 +80,14 @@ describe('FastifyHttpServer', () => {
 	});
 
 	describe('instantiation', () => {
-		it('should allow to pass fastify instance in module options', async () => {
-			const instance = sinon.stub();
+		it('should allow to pass fastify instance factory in module options', async () => {
+			const stub = sinon.stub();
 			
 			// @ts-ignore
-			const fastifyHttpServer = new FastifyHttpServer({ port: 3000, instance });
+			const fastifyHttpServer = new FastifyHttpServer({ port: 3000, instanceFactory: () => stub });
 			await app.registerModule(fastifyHttpServer);
 
-			expect(fastifyHttpServer.instance).to.deep.equal(instance);
+			expect(fastifyHttpServer.instance).to.deep.equal(stub);
 		});
 	});
 
