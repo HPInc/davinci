@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.5.0](https://github.com/HPInc/davinci/compare/@davinci/http-server@3.4.4...@davinci/http-server@3.5.0) (2023-01-17)
+
+
+### Features
+
+* **httpServer:** implemented exposeStack flag ([#207](https://github.com/HPInc/davinci/issues/207)) ([1677552](https://github.com/HPInc/davinci/commit/1677552e10bb260a9fc24f44e865728c1d269c5f))
+
+
+
+
+
 ## [3.4.4](https://github.com/HPInc/davinci/compare/@davinci/http-server@3.4.3...@davinci/http-server@3.4.4) (2023-01-16)
 
 **Note:** Version bump only for package @davinci/http-server
