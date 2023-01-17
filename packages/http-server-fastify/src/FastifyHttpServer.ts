@@ -27,7 +27,7 @@ import qs from 'qs';
 type Server = HttpServer | HttpsServer;
 
 export interface FastifyHttpServerModuleOptions extends HttpServerModuleOptions {
-	instanceFactory?: () => FastifyInstance;
+	instance?: FastifyInstance | (() => FastifyInstance);
 	cors?: FastifyCorsOptions;
 	plugins?: [FastifyPluginCallback, FastifyPluginOptions?][];
 }
@@ -74,15 +74,20 @@ export class FastifyHttpServer extends HttpServerModule<{
 		if (this.moduleOptions.cors) this.instance.register(fastifyCors, this.moduleOptions.cors);
 		const promises =
 			this.moduleOptions?.plugins?.map(([plugin, options]) => this.instance.register(plugin, options)) ?? [];
-			
+
 		return Promise.all(promises);
 	}
 
 	initHttpServer() {
-		this.instance = this.moduleOptions.instanceFactory ? this.moduleOptions.instanceFactory() :
+		const { instance } = this.moduleOptions;
+		if (instance && typeof instance === 'function') {
+			this.instance = instance();
+		} else {
+			this.instance = instance as FastifyInstance ?? 
 			fastify({
 				querystringParser: str => qs.parse(str, { parseArrays: true })
 			});
+		}
 		super.setHttpServer(this.instance.server);
 	}
 
