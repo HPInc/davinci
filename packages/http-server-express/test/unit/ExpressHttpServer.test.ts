@@ -63,7 +63,6 @@ describe('ExpressHttpServer', () => {
 	describe('instantiation', () => {
 		it('should allow to pass express instance factory in module options', async () => {
 			const instance = express();
-			// @ts-ignore
 			const expressHttpServer = new ExpressHttpServer({ port: 3000, instance: () => instance });
 			await app.registerModule(expressHttpServer);
 
@@ -72,7 +71,6 @@ describe('ExpressHttpServer', () => {
 
 		it('should allow to pass fastify instance in module options', async () => {
 			const instance = express();
-			// @ts-ignore
 			const expressHttpServer = new ExpressHttpServer({ port: 3000, instance });
 			await app.registerModule(expressHttpServer);
 
@@ -80,7 +78,6 @@ describe('ExpressHttpServer', () => {
 		});
 
 		it('should create default fastify instance', async () => {
-			// @ts-ignore
 			const expressHttpServer = new ExpressHttpServer({ port: 3000 });
 			await app.registerModule(expressHttpServer);
 
