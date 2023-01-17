@@ -13,7 +13,8 @@ import {
 	InterceptorNext,
 	mapParallel,
 	mapSeries,
-	Module
+	Module,
+	omit
 } from '@davinci/core';
 import pathUtils from 'path';
 import pino from 'pino';
@@ -50,6 +51,7 @@ export abstract class HttpServerModule<
 	globalInterceptors: Array<Omit<InterceptorDecoratorMeta<HttpServerInterceptor>, typeof DecoratorId>> = [];
 	entityRegistry = di.container.resolve(EntityRegistry);
 	routes: Route<SMG['Request']>[] = [];
+	exposeErrorStack: boolean;
 	logger = pino({ name: 'http-server' });
 	protected httpServer: SMG['Server'];
 
@@ -58,6 +60,7 @@ export abstract class HttpServerModule<
 		this.contextFactory = moduleOptions?.contextFactory;
 		this.validationFactory = moduleOptions?.validationFactory ?? createAjvValidator();
 		this.setGlobalInterceptors(moduleOptions?.globalInterceptors ?? []);
+		this.exposeErrorStack = moduleOptions?.errorHandling?.exposeStack ?? process.env.NODE_ENV !== 'production';
 	}
 
 	getModuleId() {
@@ -286,9 +289,22 @@ export abstract class HttpServerModule<
 				return httpServerModule.reply(response, result);
 			} catch (err) {
 				// default error handler, can be overridden by a dedicated interceptor
+
+				const errorJson = omit(
+					{
+						stack: err.stack,
+						...err?.toJSON?.()
+					},
+					httpServerModule.exposeErrorStack ? [] : ['stack']
+				);
+
 				return httpServerModule.reply(
 					response,
-					{ error: true, message: err.message, ...err?.toJSON?.(), stack: err.stack },
+					{
+						error: true,
+						message: err.message,
+						...errorJson
+					},
 					err?.statusCode ?? 500
 				);
 			}
