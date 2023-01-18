@@ -13,23 +13,23 @@ coverage:
         flags:
           - http-server-express
       http-server-fastify:
-          flags:
-              - http-server-fastify
+        flags:
+          - http-server-fastify
       openapi:
-          flags:
-              - openapi
+        flags:
+          - openapi
       health-checks:
-          flags:
-              - health-checks
+        flags:
+          - health-checks
       mongoose:
-          flags:
-              - mongoose
+        flags:
+          - mongoose
       messaging-amqp:
-          flags:
-              - messaging-amqp
+        flags:
+          - messaging-amqp
       reflector:
-          flags:
-              - reflector
+         flags:
+          - reflector
 
 comment:
   layout: "reach, diff, flags, files"
