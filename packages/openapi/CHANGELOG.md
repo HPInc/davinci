@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.3.9](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.3.8...@davinci/openapi@2.3.9) (2023-01-18)
+
+
+### Bug Fixes
+
+* stricter typescript rules ([#202](https://github.com/HPInc/davinci/issues/202)) ([863b68e](https://github.com/HPInc/davinci/commit/863b68e9702aecc6e5fd2b1e488d961a911c5478)), closes [#2](https://github.com/HPInc/davinci/issues/2)
+
+
+
+
+
 ## [2.3.8](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.3.7...@davinci/openapi@2.3.8) (2023-01-17)
 
 **Note:** Version bump only for package @davinci/openapi

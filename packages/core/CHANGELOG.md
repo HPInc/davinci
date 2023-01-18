@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.8.1](https://github.com/HPInc/davinci/compare/@davinci/core@2.8.0...@davinci/core@2.8.1) (2023-01-18)
+
+
+### Bug Fixes
+
+* stricter typescript rules ([#202](https://github.com/HPInc/davinci/issues/202)) ([863b68e](https://github.com/HPInc/davinci/commit/863b68e9702aecc6e5fd2b1e488d961a911c5478)), closes [#2](https://github.com/HPInc/davinci/issues/2)
+
+
+
+
+
 # [2.8.0](https://github.com/HPInc/davinci/compare/@davinci/core@2.7.1...@davinci/core@2.8.0) (2023-01-16)
 
 

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.1.24](https://github.com/HPInc/davinci/compare/@davinci/example-next-api-express@2.1.23...@davinci/example-next-api-express@2.1.24) (2023-01-18)
+
+
+### Bug Fixes
+
+* stricter typescript rules ([#202](https://github.com/HPInc/davinci/issues/202)) ([863b68e](https://github.com/HPInc/davinci/commit/863b68e9702aecc6e5fd2b1e488d961a911c5478)), closes [#2](https://github.com/HPInc/davinci/issues/2)
+
+
+
+
+
 ## [2.1.23](https://github.com/HPInc/davinci/compare/@davinci/example-next-api-express@2.1.22...@davinci/example-next-api-express@2.1.23) (2023-01-17)
 
 **Note:** Version bump only for package @davinci/example-next-api-express
