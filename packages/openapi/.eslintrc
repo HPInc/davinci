@@ -1,3 +1,101 @@
 {
-	"extends": ["../../.eslintrc"]
+	"extends": [
+		"airbnb-base",
+		"eslint:recommended",
+		"plugin:@typescript-eslint/eslint-recommended",
+		"plugin:@typescript-eslint/recommended",
+		"prettier",
+		"prettier/@typescript-eslint"
+	],
+	"plugins": ["@typescript-eslint"],
+	"parser": "@typescript-eslint/parser",
+	"parserOptions": {
+		"project": "./tsconfig.json",
+		"ecmaVersion": 2018,
+		"sourceType": "module"
+	},
+	"env": {
+		"es6": true,
+		"node": true,
+		"mocha": true
+	},
+	"rules": {
+		// only apply parens to arrow functions when there are multiple args
+		"arrow-parens": [2, "as-needed"],
+
+		// never have trailing commas
+		"comma-dangle": [2, "never"],
+
+		// always indent with one tab, including switch statements
+		"indent": [1, "tab", { "SwitchCase": 1 }],
+
+		// do not error on linebreak style
+		"linebreak-style": 0,
+
+		// warn for any line over 120 chars
+		"max-len": [1, 120],
+
+		// class constructors must start with a capital letter, allows Router and Object ID without 'new'
+		"new-cap": [2, { "capIsNewExceptions": ["Router", "ObjectId"] }],
+
+		// don't allow modification of any input parameters
+		"no-param-reassign": [2, { "props": false }],
+
+		// allow the ++ operator
+		"no-plusplus": 0,
+
+		// disallow underscore dangle with the exceptions '_id' & '__v'
+		"no-underscore-dangle": [2, { "allow": ["_id", "__v", "_$ref"] }],
+
+		// allow tabs!
+		"no-tabs": 0,
+
+		// allow objects to be defined on a single line
+		"object-curly-newline": 0,
+
+		// use object shorthand wherever possible
+		"object-shorthand": ["error", "always"],
+
+		// allow indentation regardless of blank lines above and below
+		"padded-blocks": 0,
+
+		// ensure properties are either consistently in / without qutoes as needed
+		"quote-props": [2, "consistent-as-needed"],
+
+		"@typescript-eslint/interface-name-prefix": 0,
+
+		// discourage the use of @ts-ignore to hide TypeScript warnings/errors
+		"@typescript-eslint/ban-ts-comment": [1, { "ts-ignore": true }],
+
+		"@typescript-eslint/explicit-module-boundary-types": "off",
+
+		// disable banning of specific types used in the codebase
+		"@typescript-eslint/ban-types": [
+			2,
+			{
+				"types": {
+					"Function": false,
+					"object": false,
+					"{}": false
+				}
+			}
+		],
+
+		"import/prefer-default-export": 0,
+
+		"prefer-destructuring": "warn",
+
+		"lines-between-class-members": "off",
+
+		"class-methods-use-this": "off",
+
+		"no-useless-constructor": "warn"
+	},
+	"settings": {
+		"import/resolver": {
+			"node": {
+				"extensions": [".js", ".jsx", ".ts", ".tsx"]
+			}
+		}
+	}
 }

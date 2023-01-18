@@ -32,7 +32,10 @@ export type EntityOptions = {
 
 export type TransformEntityDefinitionSchemaCallback = (
 	args: CallbackArgs & { pointerPath: string; pointerPathParts: string[] }
-) => {
-	path: string;
-	value: unknown;
-};
+) =>
+	| {
+			path: string;
+			value: unknown;
+	  }
+	| null
+	| undefined;

@@ -6,7 +6,7 @@
 import { Level, Logger, pino } from 'pino';
 import createDeepmerge from '@fastify/deepmerge';
 import { di } from '@davinci/core';
-import amqplib, { Channel, Message } from 'amqplib';
+import amqplib, { Channel, Message, Replies } from 'amqplib';
 import { AmqpConnectionManager, ChannelWrapper } from 'amqp-connection-manager';
 import stringify from 'fast-json-stable-stringify';
 import { AmqpSubscriptionSettings, Subscription } from './types';
@@ -23,11 +23,11 @@ export interface ChannelManagerOptions {
 
 @di.singleton()
 export class ChannelManager {
-	private logger: Logger;
-	private options: ChannelManagerOptions;
-	private connection: AmqpConnectionManager;
+	private logger?: Logger;
+	private options?: ChannelManagerOptions;
+	private connection?: AmqpConnectionManager;
 	private channelsMap: Map<string, ChannelWrapper> = new Map();
-	private defaultChannel: ChannelWrapper;
+	private defaultChannel?: ChannelWrapper;
 
 	public async subscribe(subscription: Subscription, handler: (msg: amqplib.ConsumeMessage | null) => void) {
 		const { key: channelKey, channelWrapper } = await this.createChannel(subscription.settings);
@@ -35,7 +35,7 @@ export class ChannelManager {
 			await Promise.all([
 				channel.assertExchange(
 					subscription.settings.exchange,
-					subscription.settings.exchangeType,
+					subscription.settings.exchangeType ?? 'topic',
 					subscription.settings.exchangeOptions
 				),
 				channel.assertQueue(subscription.settings.queue, subscription.settings.queueOptions),
@@ -44,7 +44,7 @@ export class ChannelManager {
 				channel.bindQueue(
 					subscription.settings.queue,
 					subscription.settings.exchange,
-					subscription.settings.topic
+					subscription.settings.topic ?? ''
 				),
 				channel.consume(subscription.settings.queue, handler, {}).then(result => {
 					subscription.consumerTag = result.consumerTag;
@@ -73,7 +73,8 @@ export class ChannelManager {
 	) {
 		// use channel from subscription, or the default channel
 		const channelWrapper = subscription?.channel ?? (await this.getDefaultChannel());
-		const exchangeType = subscription?.settings?.exchangeType ?? this.options?.defaultChannelSettings?.exchangeType;
+		const exchangeType =
+			subscription?.settings?.exchangeType ?? this.options?.defaultChannelSettings?.exchangeType ?? 'topic';
 		const exchangeOptions =
 			subscription?.settings?.exchangeOptions ?? this.options?.defaultChannelSettings?.exchangeOptions;
 
@@ -82,22 +83,26 @@ export class ChannelManager {
 		return channelWrapper.publish(exchange, topic || '', msg, messageOptions);
 	}
 
-	public unsubscribe(subscription: Subscription) {
-		return subscription.channel.removeSetup(subscription.setup, async (channel: amqplib.ConfirmChannel) => {
+	public async unsubscribe(subscription: Subscription): Promise<Replies.Empty | null | void> {
+		if (!subscription.setup) return null;
+
+		return subscription.channel?.removeSetup(subscription.setup, async (channel: amqplib.ConfirmChannel) => {
+			if (!subscription.consumerTag) return null;
+
 			return channel.cancel(subscription.consumerTag);
 		});
 	}
 
 	public ackMessage(msg: Message, subscription: Subscription) {
-		return subscription.channel.ack(msg);
+		return subscription.channel?.ack(msg);
 	}
 
 	public nackMessage(msg: Message, subscription: Subscription, requeue = true) {
-		return subscription.channel.nack(msg, null, requeue);
+		return subscription.channel?.nack(msg, false, requeue);
 	}
 
 	public closeChannel(subscription: Subscription) {
-		return subscription.channel.close();
+		return subscription.channel?.close();
 	}
 
 	public getChannels() {
@@ -113,7 +118,9 @@ export class ChannelManager {
 	public setOptions(options: ChannelManagerOptions) {
 		this.options = deepmerge({ logger: { name: 'ChannelManager', level: 'info' } }, options);
 		this.logger = pino({ name: this.options.logger?.name });
-		this.logger.level = this.options.logger?.level;
+		if (this.options.logger?.level) {
+			this.logger.level = this.options.logger?.level;
+		}
 
 		return this;
 	}
@@ -130,13 +137,13 @@ export class ChannelManager {
 
 		// a channel with the same settings exists, reusing it
 		if (this.channelsMap.has(channelKey)) {
-			channelWrapper = this.channelsMap.get(channelKey);
+			channelWrapper = this.channelsMap.get(channelKey) as ChannelWrapper;
 		} else {
-			channelWrapper = this.connection.createChannel({
+			channelWrapper = this.connection?.createChannel({
 				name: settings?.name,
 				json: settings?.json,
 				...settings?.channelOptions
-			});
+			}) as ChannelWrapper;
 		}
 		// eslint-disable-next-line require-atomic-updates
 		this.channelsMap.set(channelKey, channelWrapper);

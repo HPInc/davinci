@@ -32,17 +32,20 @@ interface EntityDefinitionOptions {
  */
 export class EntityDefinition {
 	private name?: string;
-	private readonly type?: TypeValue;
-	private readonly entityDefinitionJsonSchema?: EntityDefinitionJSONSchema;
-	private entityDefinitionsMapCache = new Map<TypeValue, EntityDefinition>();
+	private readonly type: TypeValue | undefined;
+	private entityDefinitionJsonSchema?: EntityDefinitionJSONSchema;
+	private entityDefinitionsMapCache: Map<TypeValue, EntityDefinition>;
 
 	constructor(options: EntityDefinitionOptions) {
 		if (!options.type && !options.jsonSchema) {
 			throw new Error('type or entityDefinitionJsonSchema must be passed');
 		}
-		this.type = options.type;
+		if (options.type) {
+			this.type = options.type;
+		}
+
 		this.name = options.name ?? (this.type as ClassType)?.name;
-		this.entityDefinitionsMapCache = options.entityDefinitionsMapCache;
+		this.entityDefinitionsMapCache = options.entityDefinitionsMapCache ?? new Map<TypeValue, EntityDefinition>();
 		if (!options.reflect) {
 			this.entityDefinitionJsonSchema = this.reflect();
 		}
@@ -53,6 +56,8 @@ export class EntityDefinition {
 	}
 
 	public getEntityDefinitionJsonSchema() {
+		this.entityDefinitionJsonSchema = this.entityDefinitionJsonSchema ?? this.reflect();
+
 		return this.entityDefinitionJsonSchema;
 	}
 
@@ -67,7 +72,7 @@ export class EntityDefinition {
 		const makeSchema = (
 			typeOrClass: TypeValue | StringConstructor | NumberConstructor | BooleanConstructor | Date,
 			key?: string
-		) => {
+		): Partial<JSONSchema> | null => {
 			// it's a primitive type, simple case
 			if (typeOrClass === String || typeOrClass === Number || typeOrClass === Boolean || typeOrClass === Date) {
 				const type = typeOrClass as
@@ -127,9 +132,8 @@ export class EntityDefinition {
 
 				const entityProps = this.filterEntityPropDecorators(reflection);
 				const { properties, required } =
-					entityProps.reduce<Partial<Pick<JSONSchema, 'properties' | 'required'>>>((acc, prop) => {
+					entityProps.reduce<Partial<Pick<JSONSchema, 'properties' | 'required'>> | null>((acc, prop) => {
 						const accumulator = acc ?? { properties: {}, required: [] };
-
 						const entityPropDecorator = this.findEntityPropDecorator(prop);
 						const explicitType = entityPropDecorator.options?.type;
 						const type = explicitType ?? prop.type;
@@ -147,7 +151,9 @@ export class EntityDefinition {
 						const extractedJsonSchema = transformEntityDefinitionSchema(
 							omit(entityPropDecorator?.options ?? {}, omitProps),
 							args => {
-								let additionalSchemaProps: Partial<JSONSchema>;
+								let additionalSchemaProps: Partial<JSONSchema> = {};
+								let hasAdditionalSchemaProps = false;
+
 								if (args.schema.enum && typeof args.schema.enum === 'object') {
 									const enmType =
 										args.schema.type === 'number' || type.name === 'Number' ? 'number' : 'string';
@@ -156,6 +162,7 @@ export class EntityDefinition {
 									additionalSchemaProps.enum = Object.values(args.schema.enum).filter(
 										v => typeof v === enmType
 									) as Array<string | number>;
+									hasAdditionalSchemaProps = true;
 								}
 
 								if (args.pointerPath === '') {
@@ -181,7 +188,7 @@ export class EntityDefinition {
 									};
 								}
 
-								if (additionalSchemaProps || args.parentKeyword === 'properties') {
+								if (hasAdditionalSchemaProps || args.parentKeyword === 'properties') {
 									return {
 										path: args.pointerPath,
 										value: { ...args.schema, ...additionalSchemaProps }
@@ -224,7 +231,7 @@ export class EntityDefinition {
 							generatedJsonSchema = makeSchema(entityPropDecorator.options?.type ?? prop.type, prop.name);
 						}
 
-						accumulator.properties[prop.name] = deepMerge(extractedJsonSchema, generatedJsonSchema, {
+						accumulator.properties[prop.name] = deepMerge(extractedJsonSchema, generatedJsonSchema ?? {}, {
 							isMergeableObject: isPlainObject
 						});
 
@@ -261,7 +268,11 @@ export class EntityDefinition {
 			return null;
 		};
 
-		return makeSchema(this.type);
+		if (!this.type) {
+			throw new Error('type not set');
+		}
+
+		return makeSchema(this.type) as EntityDefinitionJSONSchema;
 	}
 
 	private findEntityDecorator(reflection: ClassReflection): Maybe<{ [DecoratorId]: string; options: EntityOptions }> {

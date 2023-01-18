@@ -6,7 +6,10 @@
 import { decorate, DecoratorId } from '@davinci/reflector';
 import { Interceptor, InterceptorDecoratorMeta } from './types';
 
-export function interceptor<I extends Interceptor = Interceptor>(handler: I, meta?: Parameters<I>[1]['meta']) {
+export function interceptor<I extends Interceptor = Interceptor>(
+	handler: I,
+	meta?: Parameters<I>[1] extends { meta: unknown } ? Parameters<I>[1]['meta'] : unknown
+) {
 	const options: InterceptorDecoratorMeta = {
 		[DecoratorId]: 'interceptor',
 		handler

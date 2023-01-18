@@ -4,7 +4,7 @@
  */
 
 import { ClassReflection, MethodReflection, TypeValue } from '@davinci/reflector';
-import { Interceptor, InterceptorBagDetails, InterceptorDecoratorMeta, JSONSchema } from '@davinci/core';
+import { Interceptor, InterceptorBagGenerics, InterceptorDecoratorMeta, JSONSchema } from '@davinci/core';
 import { Level } from 'pino';
 import { ControllerDecoratorMetadata, MethodDecoratorMetadata, ParameterDecoratorOptions, Verb } from './decorators';
 
@@ -61,28 +61,41 @@ export interface ContextFactoryArguments<Request> {
 
 export type ContextFactory<Context, Request = any> = (args: ContextFactoryArguments<Request>) => Context;
 
-export type ValidationFunction = (data: unknown) => typeof data;
-
-export type ValidationFactory = (route: Route<any>) => ValidationFunction | Promise<ValidationFunction>;
-
-export type HttpInterceptorBag = InterceptorBagDetails & {
-	Request?: unknown;
-	Response?: unknown;
-};
-
 export type HttpServerInterceptorStage = 'preValidation' | 'postValidation';
 
-export type HttpServerInterceptor<Bag extends HttpInterceptorBag = HttpInterceptorBag> = Interceptor<
-	Bag,
-	{
+export interface HttpServerInterceptorMeta {
+	stage?: HttpServerInterceptorStage;
+}
+
+export type HttpInterceptorBag = InterceptorBagGenerics & {
+	Request?: unknown;
+	Response?: unknown;
+	Meta?: HttpServerInterceptorMeta;
+};
+
+export type HttpServerInterceptor<Bag extends HttpInterceptorBag = HttpInterceptorBag> = Interceptor<{
+	Context: Bag['Context'];
+	State: Bag['State'];
+	Meta: HttpServerInterceptorMeta;
+	Additional: {
 		request?: Bag['Request'];
 		response?: Bag['Response'];
 		route?: Route<Bag['Request']>;
-		meta?: {
-			stage?: HttpServerInterceptorStage;
-		};
-	}
->;
+	};
+}>;
+
+export type EndpointSchema = JSONSchema<any> & {
+	properties: {
+		body?: JSONSchema<any>;
+		params?: JSONSchema<any>;
+		querystring?: JSONSchema<any>;
+		headers?: JSONSchema<any>;
+	};
+};
+
+export type ValidationFunction = (data: Record<keyof EndpointSchema['properties'], unknown>) => unknown;
+
+export type ValidationFactory = (route: Route<any>) => ValidationFunction | Promise<ValidationFunction>;
 
 export interface HttpServerModuleOptions {
 	port?: number | string;
@@ -103,15 +116,6 @@ export interface HttpServerModuleOptions {
 		level?: Level | 'silent';
 	};
 }
-
-export type EndpointSchema = JSONSchema<any> & {
-	properties: {
-		body?: JSONSchema<any>;
-		params?: JSONSchema<any>;
-		querystring?: JSONSchema<any>;
-		headers?: JSONSchema<any>;
-	};
-};
 
 export interface StaticServeOptions {
 	dotfiles?: 'allow' | 'deny' | 'ignore';

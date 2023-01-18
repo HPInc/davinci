@@ -58,7 +58,9 @@ describe('HttpServerModule', () => {
 			return args;
 		}
 		close() {}
-		getRequestHostname() {}
+		getRequestHostname() {
+			return '';
+		}
 		getRequestParameter(args) {
 			const { source, name, request, response } = args;
 			switch (source) {
@@ -85,7 +87,9 @@ describe('HttpServerModule', () => {
 			}
 			return source;
 		}
-		getRequestMethod() {}
+		getRequestMethod() {
+			return '';
+		}
 		getRequestHeaders(request) {
 			return request.headers;
 		}
@@ -180,10 +184,10 @@ describe('HttpServerModule', () => {
 						options: {
 							path: '/all',
 							responses: {
-								'200': {
+								200: {
 									description: ''
 								},
-								'400': {
+								400: {
 									description: ''
 								},
 								default: {
@@ -856,10 +860,10 @@ describe('HttpServerModule', () => {
 				parametersConfig
 			});
 
-			//act
-			await executeInterceptorsStack([validationInterceptor]);
+			// act
+			await executeInterceptorsStack([validationInterceptor], {} as any);
 
-			//assert
+			// assert
 			expect(validatorFunction.called).to.be.true;
 			expect(validatorFunction.getCall(0).args[0]).to.be.deep.equal({
 				params: {

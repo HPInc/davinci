@@ -13,11 +13,11 @@ import { JSONSchemaTraverser } from './JSONSchemaTraverser';
  * @param entityDefinitionSchema
  * @param callback
  */
-export function transformEntityDefinitionSchema(
+export function transformEntityDefinitionSchema<T extends object = {}>(
 	entityDefinitionSchema: Partial<EntityDefinitionJSONSchema>,
 	callback: TransformEntityDefinitionSchemaCallback
 ) {
-	let obj = {};
+	let obj = {} as T;
 	JSONSchemaTraverser.traverse(
 		entityDefinitionSchema,
 		({ schema, jsonPtr, rootSchema, parentJsonPtr, parentKeyword, parentSchema, keyIndex }) => {
@@ -41,7 +41,7 @@ export function transformEntityDefinitionSchema(
 
 			if (result && typeof result.path !== 'undefined' && result.path !== null) {
 				if (result.path === '') {
-					obj = result.value;
+					obj = result.value as T;
 				} else {
 					obj = set(obj, result.path, result.value, { withArrays: true });
 				}

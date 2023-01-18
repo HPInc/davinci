@@ -67,6 +67,7 @@ describe('AmqpModule', function () {
 					name: 'mySubscription',
 					amqp: {
 						exchange: 'testExchange',
+						exchangeType: 'topic',
 						topic: 'testTopic',
 						queue: 'testQueue',
 						queueOptions: { autoDelete: true }
@@ -104,6 +105,7 @@ describe('AmqpModule', function () {
 					name: 'mySubscription',
 					amqp: {
 						exchange: 'testExchange',
+						exchangeType: 'topic',
 						queue: 'testQueue',
 						queueOptions: { autoDelete: true }
 					}
@@ -139,6 +141,7 @@ describe('AmqpModule', function () {
 					name: 'mySubscription',
 					amqp: {
 						exchange: 'testExchange',
+						exchangeType: 'topic',
 						queue: 'testQueue',
 						queueOptions: { autoDelete: true }
 					}
@@ -170,6 +173,7 @@ describe('AmqpModule', function () {
 					name: 'mySubscription',
 					amqp: {
 						exchange: 'testExchange',
+						exchangeType: 'topic',
 						queue: 'testQueue',
 						queueOptions: { autoDelete: true }
 					}
@@ -200,6 +204,7 @@ describe('AmqpModule', function () {
 					name: 'mySubscription',
 					amqp: {
 						exchange: 'testExchange',
+						exchangeType: 'topic',
 						queue: 'testQueue',
 						queueOptions: { autoDelete: true },
 						prefetch: 50
@@ -237,6 +242,7 @@ describe('AmqpModule', function () {
 					name: 'mySubscription1',
 					amqp: {
 						exchange: 'testExchange',
+						exchangeType: 'topic',
 						queue: 'testQueue',
 						queueOptions: { autoDelete: true }
 					}
@@ -247,6 +253,7 @@ describe('AmqpModule', function () {
 					name: 'mySubscription2',
 					amqp: {
 						exchange: 'testExchange',
+						exchangeType: 'topic',
 						queue: 'testQueue',
 						queueOptions: { autoDelete: true }
 					}
@@ -265,6 +272,7 @@ describe('AmqpModule', function () {
 					name: 'mySubscription1',
 					amqp: {
 						exchange: 'testExchange',
+						exchangeType: 'topic',
 						queue: 'testQueue',
 						queueOptions: { autoDelete: true },
 						prefetch: 1,
@@ -277,6 +285,7 @@ describe('AmqpModule', function () {
 					name: 'mySubscription2',
 					amqp: {
 						exchange: 'testExchange',
+						exchangeType: 'topic',
 						queue: 'testQueue',
 						queueOptions: { autoDelete: true },
 						prefetch: 1,
@@ -297,6 +306,7 @@ describe('AmqpModule', function () {
 					name: 'mySubscription1',
 					amqp: {
 						exchange: 'testExchange',
+						exchangeType: 'topic',
 						queue: 'testQueue',
 						queueOptions: { autoDelete: true },
 						prefetch: 10
@@ -308,6 +318,7 @@ describe('AmqpModule', function () {
 					name: 'mySubscription2',
 					amqp: {
 						exchange: 'testExchange',
+						exchangeType: 'topic',
 						queue: 'testQueue',
 						queueOptions: { autoDelete: true },
 						prefetch: 1
@@ -327,6 +338,7 @@ describe('AmqpModule', function () {
 					name: 'mySubscription1',
 					amqp: {
 						exchange: 'testExchange',
+						exchangeType: 'topic',
 						queue: 'testQueue',
 						queueOptions: { autoDelete: true },
 						channelOptions: {
@@ -340,6 +352,7 @@ describe('AmqpModule', function () {
 					name: 'mySubscription2',
 					amqp: {
 						exchange: 'testExchange',
+						exchangeType: 'topic',
 						queue: 'testQueue',
 						queueOptions: { autoDelete: true },
 						channelOptions: {
@@ -366,6 +379,7 @@ describe('AmqpModule', function () {
 					name: 'mySubscription1',
 					amqp: {
 						exchange: 'testExchange1',
+						exchangeType: 'topic',
 						topic: 'testTopic',
 						queue: 'testQueue',
 						queueOptions: { autoDelete: true }
@@ -380,6 +394,7 @@ describe('AmqpModule', function () {
 					name: 'mySubscription2',
 					amqp: {
 						exchange: 'testExchange2',
+						exchangeType: 'topic',
 						topic: 'testTopic',
 						queue: 'testQueue',
 						queueOptions: { autoDelete: true }
@@ -418,6 +433,7 @@ describe('AmqpModule', function () {
 					name: 'mySubscription',
 					amqp: {
 						exchange: 'testExchange',
+						exchangeType: 'topic',
 						topic: 'testTopic',
 						queue: 'testQueue',
 						queueOptions: { autoDelete: true }
@@ -453,6 +469,7 @@ describe('AmqpModule', function () {
 					name: 'mySubscription',
 					amqp: {
 						exchange: 'testExchange',
+						exchangeType: 'topic',
 						topic: 'testTopic',
 						queue: 'testQueue-wait',
 						queueOptions: { autoDelete: true }
@@ -495,6 +512,7 @@ describe('AmqpModule', function () {
 					name: 'mySubscription',
 					amqp: {
 						exchange: 'testExchange',
+						exchangeType: 'topic',
 						topic: 'testTopic',
 						queue: 'testQueue-nack',
 						queueOptions: { autoDelete: true }

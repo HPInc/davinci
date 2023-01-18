@@ -8,11 +8,15 @@ import { FastifyHttpServer } from '@davinci/http-server-fastify';
 import { HealthChecksModule } from '@davinci/health-checks';
 import { OpenAPIModule } from '@davinci/openapi';
 import addErrors from 'ajv-errors';
-import { createAjvValidator } from '@davinci/http-server';
+import { ContextFactory, createAjvValidator } from '@davinci/http-server';
 import { CustomerController } from './api/customer';
+import { Context } from './types';
+import { FastifyRequest } from 'fastify';
 
 const app = createApp();
-const contextFactory = ({ request }) => ({ accountId: request.headers['x-accountid'] });
+const contextFactory: ContextFactory<Context, FastifyRequest> = ({ request }) => ({
+	accountId: request.headers['x-accountid'] as string
+});
 
 app.registerController(CustomerController).registerModule(
 	new FastifyHttpServer({

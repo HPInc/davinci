@@ -15,10 +15,6 @@ import { Context } from '../../types';
 	basePath: '/api/customers'
 })
 export default class CustomerController {
-	@interceptor<{ Context: Context }>((next, { handlerArgs, context, state, module }) => {
-		console.log(handlerArgs, context, state, module);
-		return next();
-	})
 	@route.get({ path: '/hello', summary: 'That is a hello method' })
 	hello(
 		@route.query({ required: true }) firstname: string,

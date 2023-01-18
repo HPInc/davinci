@@ -5,10 +5,11 @@
 
 import { DecoratorId } from '@davinci/reflector';
 
-export interface InterceptorBagDetails {
-	Context?: unknown;
-	State?: unknown;
-	Meta?: unknown;
+export interface InterceptorBagGenerics {
+	Context?: any;
+	State?: any;
+	Meta?: any;
+	Additional?: any;
 }
 
 /**
@@ -17,13 +18,13 @@ export interface InterceptorBagDetails {
  * @typeParam Context - The type of the context that will be injected
  * @typeParam State - The type of the optional state that can be used to propagate state between interceptors
  */
-export type InterceptorBag<IBD extends InterceptorBagDetails = InterceptorBagDetails, AdditionalProps = {}> = {
+export type InterceptorBag<IBD extends InterceptorBagGenerics> = {
 	module: string;
 	handlerArgs: unknown[];
 	context?: IBD['Context'];
 	state?: IBD['State'];
 	meta?: IBD['Meta'];
-} & AdditionalProps;
+} & IBD['Additional'];
 
 /**
  * Interceptor function
@@ -31,10 +32,10 @@ export type InterceptorBag<IBD extends InterceptorBagDetails = InterceptorBagDet
  * @typeParam Context - The type of the context that will be injected
  * @typeParam State - The type of the optional state that can be used to propagate state between interceptors
  */
-export type Interceptor<IBD extends InterceptorBagDetails = InterceptorBagDetails, AdditionalProps = {}> = (
+export type Interceptor<IBD extends InterceptorBagGenerics = InterceptorBagGenerics> = (
 	// eslint-disable-next-line no-use-before-define
-	next: InterceptorNext<IBD, AdditionalProps>,
-	interceptorBag?: InterceptorBag<IBD, AdditionalProps>
+	next: InterceptorNext<IBD>,
+	interceptorBag: InterceptorBag<IBD>
 ) => any;
 
 /**
@@ -43,16 +44,15 @@ export type Interceptor<IBD extends InterceptorBagDetails = InterceptorBagDetail
  * @typeParam Context - The type of the context that will be injected
  * @typeParam State - The type of the optional state that can be used to propagate state between interceptors
  */
-export type InterceptorNext<
-	IBD extends InterceptorBagDetails = InterceptorBagDetails,
-	AdditionalProps = {}
-> = () => ReturnType<Interceptor<IBD, AdditionalProps>>;
+export type InterceptorNext<IBD extends InterceptorBagGenerics = InterceptorBagGenerics> = () => ReturnType<
+	Interceptor<IBD>
+>;
 
 /**
  * Interceptor decorator metadata
  */
-export interface InterceptorDecoratorMeta<I extends Interceptor = Interceptor> {
+export interface InterceptorDecoratorMeta<Handler extends Interceptor = Interceptor, Meta = unknown> {
 	[DecoratorId]: 'interceptor';
-	handler: I;
-	meta?: Parameters<I>[1]['meta'];
+	handler: Handler;
+	meta?: Meta;
 }
