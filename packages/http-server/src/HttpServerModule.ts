@@ -297,14 +297,9 @@ export abstract class HttpServerModule<
 
 				const error = err as Error;
 				let errorJson: Partial<ReturnType<typeof HttpError.prototype.toJSON>> = {
-					stack: error.stack
+					stack: error.stack,
+					...(error as any)?.toJSON?.()
 				};
-				let statusCode = 500;
-
-				if (error instanceof HttpError) {
-					errorJson = error?.toJSON?.();
-					statusCode = errorJson.statusCode ?? statusCode;
-				}
 
 				errorJson = omit(errorJson, httpServerModule.exposeErrorStack ? [] : ['stack']);
 
@@ -315,7 +310,7 @@ export abstract class HttpServerModule<
 						message: error.message,
 						...errorJson
 					},
-					statusCode
+					errorJson.statusCode ?? 500
 				);
 			}
 		};

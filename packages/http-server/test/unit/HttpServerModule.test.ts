@@ -284,6 +284,49 @@ describe('HttpServerModule', () => {
 			});
 		});
 
+		it('should include the error.toJSON() result in the response, in case of failure', async () => {
+			class CustomError extends Error {
+				constructor() {
+					super('Custom exception');
+				}
+
+				toJSON() {
+					return {
+						isACustomError: true
+					};
+				}
+			}
+
+			@route.controller({ basePath: '/api/customers' })
+			class CustomerController {
+				@route.get({ path: '/all' })
+				find() {
+					throw new CustomError();
+				}
+			}
+			const dummyHttpServer = new DummyHttpServer();
+			const controllerReflection = reflect(CustomerController);
+			const methodReflection = controllerReflection.methods[0];
+			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+				path: '/all',
+				verb: 'get',
+				controllerReflection,
+				methodReflection,
+				parametersConfig: dummyHttpServer.createParametersConfigurations({
+					controllerReflection,
+					methodReflection
+				})
+			});
+			const reqMock = {};
+			const resMock = {};
+			const result = await requestHandler(reqMock, resMock);
+
+			expect(result[1]).to.containSubset({
+				message: 'Custom exception',
+				isACustomError: true
+			});
+		});
+
 		it('should be able to programmatically show/hide the error stack in case of failure', async () => {
 			const runHandler = async (moduleOptions?: HttpServerModuleOptions) => {
 				@route.controller({ basePath: '/api/customers' })
