@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.8.0](https://github.com/HPInc/davinci/compare/@davinci/core@2.7.1...@davinci/core@2.8.0) (2023-01-16)
+
+
+### Bug Fixes
+
+* move register modules before init ([2a6b3af](https://github.com/HPInc/davinci/commit/2a6b3af176578e4b78e460171402d39d7b1e2115))
+
+
+### Features
+
+* rerun onRegister if module status is error or destroyed ([f0bb874](https://github.com/HPInc/davinci/commit/f0bb8743dbbfb4ab1650635eb1df4b7e3d1bb18f))
+
+
+
+
+
 ## [2.7.1](https://github.com/HPInc/davinci/compare/@davinci/core@2.7.0...@davinci/core@2.7.1) (2023-01-04)
 
 

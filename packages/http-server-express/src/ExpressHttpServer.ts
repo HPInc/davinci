@@ -19,7 +19,7 @@ import cors, { CorsOptions } from 'cors';
 type Server = HttpServer | HttpsServer;
 
 export interface ExpressHttpServerModuleOptions extends HttpServerModuleOptions {
-	instance?: Express;
+	instance?: Express | (() => Express);
 	https?: ServerOptions;
 	middlewares?: {
 		json?: OptionsJson;
@@ -35,12 +35,10 @@ export class ExpressHttpServer extends HttpServerModule<{
 	ModuleOptions: ExpressHttpServerModuleOptions;
 }> {
 	app?: App;
-	instance: Express;
+	instance?: Express;
 
 	constructor(options?: ExpressHttpServerModuleOptions) {
-		const { instance, ...moduleOptions } = options ?? {};
-		super(moduleOptions);
-		this.instance = instance ?? express();
+		super(options ?? {});
 		if (this.moduleOptions?.logger?.level) {
 			this.logger.level = this.moduleOptions?.logger?.level;
 		}
@@ -52,10 +50,10 @@ export class ExpressHttpServer extends HttpServerModule<{
 		if (level) {
 			this.logger.level = level;
 		}
+		this.initHttpServer();
 		this.registerMiddlewares();
 		await super.createRoutes();
 		// this.registerErrorHandlers();
-		this.initHttpServer();
 	}
 
 	async onInit() {
@@ -68,6 +66,7 @@ export class ExpressHttpServer extends HttpServerModule<{
 	}
 
 	registerMiddlewares() {
+		if (!this.instance) throw new Error('instance not set, aborting');
 		const { json, urlencoded, cors: corsOptions } = this.moduleOptions?.middlewares ?? {};
 
 		this.instance.use(express.json({ ...json }));
@@ -76,6 +75,13 @@ export class ExpressHttpServer extends HttpServerModule<{
 	}
 
 	initHttpServer() {
+		const { instance } = this.moduleOptions ?? {};
+		if (instance && typeof instance === 'function' && !(instance as Express).listen) {
+			this.instance = (instance as Function)();
+		} else {
+			this.instance = (instance as Express) ?? express();
+		}
+
 		const server = super.moduleOptions?.https
 			? https.createServer(super.moduleOptions?.https, this.getInstance())
 			: http.createServer(this.getInstance());
@@ -96,46 +102,68 @@ export class ExpressHttpServer extends HttpServerModule<{
 
 	// @ts-ignore
 	public use: Application['use'] = (...args) => {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.use(...args);
 	};
 
 	public get(path: string, handler: RequestHandler<Request, Response>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.get(path, handler);
 	}
 
 	public post(path: string, handler: RequestHandler<Request, Response>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.post(path, handler);
 	}
 
 	public head(path: string, handler: RequestHandler<Request, Response>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.head(path, handler);
 	}
 
 	public delete(path: string, handler: RequestHandler<Request, Response>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.delete(path, handler);
 	}
 
 	public put(path: string, handler: RequestHandler<Request, Response>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.put(path, handler);
 	}
 
 	public patch(path: string, handler: RequestHandler<Request, Response>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.patch(path, handler);
 	}
 
 	public all(path: string, handler: RequestHandler<Request, Response>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.all(path, handler);
 	}
 
 	public options(path: string, handler: RequestHandler<Request, Response>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.options(path, handler);
 	}
 
 	public static(path: string, options?: StaticServeOptions) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.use(express.static(path, options));
 	}
 
 	listen() {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		const port = this.moduleOptions?.port || 3000;
 		this.setHttpServer(this.instance.listen(port));
 		this.logger.info(`Server listening on port: ${port}`);
@@ -162,10 +190,14 @@ export class ExpressHttpServer extends HttpServerModule<{
 	}
 
 	public setErrorHandler(handler: RequestHandler<Request, Response>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.use(handler);
 	}
 
 	public setNotFoundHandler(handler: RequestHandler<Request, Response>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.use(handler);
 	}
 

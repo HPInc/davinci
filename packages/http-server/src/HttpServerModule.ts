@@ -12,7 +12,8 @@ import {
 	InterceptorNext,
 	mapParallel,
 	mapSeries,
-	Module
+	Module,
+	omit
 } from '@davinci/core';
 import pathUtils from 'path';
 import pino from 'pino';
@@ -53,6 +54,7 @@ export abstract class HttpServerModule<
 	globalInterceptors: Array<{ handler: HttpServerInterceptor; meta: HttpServerInterceptorMeta }> = [];
 	entityRegistry = di.container.resolve(EntityRegistry);
 	routes: Route<SMG['Request']>[] = [];
+	exposeErrorStack: boolean;
 	logger = pino({ name: 'http-server' });
 	protected httpServer?: SMG['Server'];
 
@@ -61,6 +63,7 @@ export abstract class HttpServerModule<
 		this.contextFactory = moduleOptions?.contextFactory;
 		this.validationFactory = moduleOptions?.validationFactory ?? createAjvValidator();
 		this.setGlobalInterceptors(moduleOptions?.globalInterceptors ?? []);
+		this.exposeErrorStack = moduleOptions?.errorHandling?.exposeStack ?? process.env.NODE_ENV !== 'production';
 	}
 
 	getModuleId() {
@@ -75,7 +78,7 @@ export abstract class HttpServerModule<
 		return this.httpServer as SMG['Server'];
 	}
 
-	public setHttpServer(httpServer: SMG['Server']) {
+	public setHttpServer(httpServer: SMG['Server'] | null) {
 		this.httpServer = httpServer;
 	}
 
@@ -290,18 +293,28 @@ export abstract class HttpServerModule<
 
 				return httpServerModule.reply(response, result);
 			} catch (err) {
+				// default error handler, can be overridden by a dedicated interceptor
+
 				const error = err as Error;
-				let httpErrorFields: Partial<ReturnType<typeof HttpError.prototype.toJSON>> = {};
+				let errorJson: Partial<ReturnType<typeof HttpError.prototype.toJSON>> = {
+					stack: error.stack
+				};
 				let statusCode = 500;
 
 				if (error instanceof HttpError) {
-					httpErrorFields = error.toJSON();
-					statusCode = httpErrorFields.statusCode ?? statusCode;
+					errorJson = error?.toJSON?.();
+					statusCode = errorJson.statusCode ?? statusCode;
 				}
-				// default error handler, can be overridden by a dedicated interceptor
+
+				errorJson = omit(errorJson, httpServerModule.exposeErrorStack ? [] : ['stack']);
+
 				return httpServerModule.reply(
 					response,
-					{ error: true, message: error.message, ...httpErrorFields, stack: error.stack },
+					{
+						error: true,
+						message: error.message,
+						...errorJson
+					},
 					statusCode
 				);
 			}

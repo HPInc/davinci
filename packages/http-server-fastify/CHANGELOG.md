@@ -3,6 +3,66 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.3.0](https://github.com/HPInc/davinci/compare/@davinci/http-server-fastify@2.2.3...@davinci/http-server-fastify@2.3.0) (2023-01-17)
+
+
+### Features
+
+* allow to pass fastify instance or factory ([30f85bf](https://github.com/HPInc/davinci/commit/30f85bfb292fa4cc3384840a1e6aee8a9563739d))
+* fastify accepts an instance factory ([d0f920c](https://github.com/HPInc/davinci/commit/d0f920c6d4dd88603ccf73fbc29f8325c2bca0c1))
+
+
+
+
+
+## [2.2.3](https://github.com/HPInc/davinci/compare/@davinci/http-server-fastify@2.2.2...@davinci/http-server-fastify@2.2.3) (2023-01-17)
+
+**Note:** Version bump only for package @davinci/http-server-fastify
+
+
+
+
+
+## [2.2.2](https://github.com/HPInc/davinci/compare/@davinci/http-server-fastify@2.2.1...@davinci/http-server-fastify@2.2.2) (2023-01-16)
+
+
+### Bug Fixes
+
+* don't remove instance from moduleOptions ([b736078](https://github.com/HPInc/davinci/commit/b73607862be2c14f357f2a04220e4587b8f50a18))
+* use fastify options instance on re-init ([be6463f](https://github.com/HPInc/davinci/commit/be6463f1d32d68289b641d770011b3c6edb33fd5))
+
+
+
+
+
+## [2.2.1](https://github.com/HPInc/davinci/compare/@davinci/http-server-fastify@2.2.0...@davinci/http-server-fastify@2.2.1) (2023-01-16)
+
+
+### Bug Fixes
+
+* use fastify instance passed in options ([4a54c9b](https://github.com/HPInc/davinci/commit/4a54c9b28226312d82585cc314a58f00bb3b9849))
+
+
+
+
+
+# [2.2.0](https://github.com/HPInc/davinci/compare/@davinci/http-server-fastify@2.1.16...@davinci/http-server-fastify@2.2.0) (2023-01-16)
+
+
+### Bug Fixes
+
+* create first fastify instance onRegister and createRoutes for openapi ([214deab](https://github.com/HPInc/davinci/commit/214deab120c91f3a8cd01b07888dcd64798ca0c9))
+* enable to re-init fastify ([c4217b5](https://github.com/HPInc/davinci/commit/c4217b5a750095b52283be9a4cb31bb6db944767))
+
+
+### Features
+
+* rerun onRegister if module status is error or destroyed ([f0bb874](https://github.com/HPInc/davinci/commit/f0bb8743dbbfb4ab1650635eb1df4b7e3d1bb18f))
+
+
+
+
+
 ## [2.1.16](https://github.com/HPInc/davinci/compare/@davinci/http-server-fastify@2.1.15...@davinci/http-server-fastify@2.1.16) (2023-01-04)
 
 **Note:** Version bump only for package @davinci/http-server-fastify

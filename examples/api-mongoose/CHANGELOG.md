@@ -3,6 +3,46 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.1.25](https://github.com/HPInc/davinci/compare/@davinci/example-next-api-mongoose@2.1.24...@davinci/example-next-api-mongoose@2.1.25) (2023-01-17)
+
+**Note:** Version bump only for package @davinci/example-next-api-mongoose
+
+
+
+
+
+## [2.1.24](https://github.com/HPInc/davinci/compare/@davinci/example-next-api-mongoose@2.1.23...@davinci/example-next-api-mongoose@2.1.24) (2023-01-17)
+
+**Note:** Version bump only for package @davinci/example-next-api-mongoose
+
+
+
+
+
+## [2.1.23](https://github.com/HPInc/davinci/compare/@davinci/example-next-api-mongoose@2.1.22...@davinci/example-next-api-mongoose@2.1.23) (2023-01-16)
+
+**Note:** Version bump only for package @davinci/example-next-api-mongoose
+
+
+
+
+
+## [2.1.22](https://github.com/HPInc/davinci/compare/@davinci/example-next-api-mongoose@2.1.21...@davinci/example-next-api-mongoose@2.1.22) (2023-01-16)
+
+**Note:** Version bump only for package @davinci/example-next-api-mongoose
+
+
+
+
+
+## [2.1.21](https://github.com/HPInc/davinci/compare/@davinci/example-next-api-mongoose@2.1.20...@davinci/example-next-api-mongoose@2.1.21) (2023-01-16)
+
+**Note:** Version bump only for package @davinci/example-next-api-mongoose
+
+
+
+
+
 ## [2.1.20](https://github.com/HPInc/davinci/compare/@davinci/example-next-api-mongoose@2.1.19...@davinci/example-next-api-mongoose@2.1.20) (2023-01-04)
 
 **Note:** Version bump only for package @davinci/example-next-api-mongoose
