@@ -14,7 +14,7 @@ import { Customer } from './customer.schema';
 // listed in the constructor
 @di.injectable()
 export default class CustomerSubscriber {
-	constructor(private channelManager?: ChannelManager) {}
+	constructor(private channelManager: ChannelManager) {}
 
 	@subscribe({
 		name: 'subscribeCustomerChange',
@@ -26,7 +26,7 @@ export default class CustomerSubscriber {
 	})
 	@interceptor(newrelicInterceptor())
 	async subscribeCustomerChange(
-		@message() msg,
+		@message() msg: unknown,
 		@payload() customer: Customer,
 		@channelParam() channel: ChannelWrapper
 	) {

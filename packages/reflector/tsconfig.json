@@ -4,5 +4,12 @@
 		"rootDir": "./src",
 		"outDir": "./build"
 	},
-	"include": ["./src/**/*"]
+	"include": ["src/**/*", "test/**/*"],
+	"ts-node": {
+		"compilerOptions": {
+			"strictPropertyInitialization": false,
+			"strict": false,
+			"noImplicitAny": false
+		}
+	}
 }

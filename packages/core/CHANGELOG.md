@@ -3,6 +3,128 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.8.1](https://github.com/HPInc/davinci/compare/@davinci/core@2.8.0...@davinci/core@2.8.1) (2023-01-18)
+
+
+### Bug Fixes
+
+* stricter typescript rules ([#202](https://github.com/HPInc/davinci/issues/202)) ([863b68e](https://github.com/HPInc/davinci/commit/863b68e9702aecc6e5fd2b1e488d961a911c5478)), closes [#2](https://github.com/HPInc/davinci/issues/2)
+
+
+
+
+
+# [2.8.0](https://github.com/HPInc/davinci/compare/@davinci/core@2.7.1...@davinci/core@2.8.0) (2023-01-16)
+
+
+### Bug Fixes
+
+* move register modules before init ([2a6b3af](https://github.com/HPInc/davinci/commit/2a6b3af176578e4b78e460171402d39d7b1e2115))
+
+
+### Features
+
+* rerun onRegister if module status is error or destroyed ([f0bb874](https://github.com/HPInc/davinci/commit/f0bb8743dbbfb4ab1650635eb1df4b7e3d1bb18f))
+
+
+
+
+
+## [2.7.1](https://github.com/HPInc/davinci/compare/@davinci/core@2.7.0...@davinci/core@2.7.1) (2023-01-04)
+
+
+### Bug Fixes
+
+* add entity prop description for intellisense ([e4ec5e7](https://github.com/HPInc/davinci/commit/e4ec5e71b166a51690ec0900ae434617b1c3287c))
+
+
+
+
+
+# [2.7.0](https://github.com/HPInc/davinci/compare/@davinci/core@2.6.0...@davinci/core@2.7.0) (2023-01-03)
+
+
+### Bug Fixes
+
+* move enum transform logic to transformEntityDefinitionSchema ([92de639](https://github.com/HPInc/davinci/commit/92de639153b87730d694cec808261301613deab5))
+
+
+### Features
+
+* allow to pass ts enums as property types and as values for the entity.prop enum option ([8f4e484](https://github.com/HPInc/davinci/commit/8f4e484ead621f8b4e0d578ea5e752c15a9eeb63))
+* enums work nested and with complex types ([c3caba6](https://github.com/HPInc/davinci/commit/c3caba68d077f610677288f86352b934af99e036))
+
+
+
+
+
+# [2.6.0](https://github.com/HPInc/davinci/compare/@davinci/core@2.5.0...@davinci/core@2.6.0) (2023-01-02)
+
+
+### Features
+
+* allow required boolean or array of props ([3c30eb1](https://github.com/HPInc/davinci/commit/3c30eb1976882e24be04c2aca006d7661bf62cd4))
+* support nested required properties in objects ([eff5afa](https://github.com/HPInc/davinci/commit/eff5afa7e5233c0e96c8164e54436ea84c40b340))
+
+
+
+
+
+# [2.5.0](https://github.com/HPInc/davinci/compare/@davinci/core@2.4.0...@davinci/core@2.5.0) (2022-12-21)
+
+
+### Features
+
+* **entity:** added support for recursive schemas ([#196](https://github.com/HPInc/davinci/issues/196)) ([ab977ac](https://github.com/HPInc/davinci/commit/ab977ac424fd29a5a1d1b31bb19d290f61639e2c))
+
+
+
+
+
+# [2.4.0](https://github.com/HPInc/davinci/compare/@davinci/core@2.3.0...@davinci/core@2.4.0) (2022-12-21)
+
+
+### Features
+
+* **httpInterceptor:** added ability to specify stage: 'preValidation' | 'postValidation' ([#195](https://github.com/HPInc/davinci/issues/195)) ([d61b571](https://github.com/HPInc/davinci/commit/d61b571f7b4dd46397f1b5ecf7e838378cb9a517))
+
+
+
+
+
+# [2.3.0](https://github.com/HPInc/davinci/compare/@davinci/core@2.2.1...@davinci/core@2.3.0) (2022-12-21)
+
+
+### Features
+
+* **entity:** ability to disable type detection by passing false or null ([#194](https://github.com/HPInc/davinci/issues/194)) ([c429cea](https://github.com/HPInc/davinci/commit/c429cea1b28864475c76def0c1e775346a8150ae))
+
+
+
+
+
+## [2.2.1](https://github.com/HPInc/davinci/compare/@davinci/core@2.2.0...@davinci/core@2.2.1) (2022-12-20)
+
+
+### Bug Fixes
+
+* EntityDefinition now can traverse json schema keywords ([#191](https://github.com/HPInc/davinci/issues/191)) ([ec0ba10](https://github.com/HPInc/davinci/commit/ec0ba1084fe0126e920d324b21bfa42af5639dc3))
+
+
+
+
+
+# [2.2.0](https://github.com/HPInc/davinci/compare/@davinci/core@2.1.2...@davinci/core@2.2.0) (2022-12-16)
+
+
+### Features
+
+* entity definition json walker ([#172](https://github.com/HPInc/davinci/issues/172)) ([da0a80d](https://github.com/HPInc/davinci/commit/da0a80dde0dee79bb3a21407afc0ea70909fd30b))
+
+
+
+
+
 ## [2.1.2](https://github.com/HPInc/davinci/compare/@davinci/core@2.1.1...@davinci/core@2.1.2) (2022-12-09)
 
 **Note:** Version bump only for package @davinci/core

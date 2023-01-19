@@ -14,7 +14,7 @@ export const logInterceptor: HttpServerInterceptor<{
 }> = (next, interceptorBag) => {
 	const { route, context } = interceptorBag;
 	console.log('The route is', route);
-	console.log('The account id is', context.accountId);
+	console.log('The account id is', context?.accountId);
 
 	return next();
 };

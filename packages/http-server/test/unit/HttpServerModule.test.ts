@@ -16,11 +16,18 @@ import {
 } from '@davinci/core';
 import * as http from 'http';
 import { reflect } from '@davinci/reflector';
-import { HttpServerModule, HttpServerModuleOptions, ParameterConfiguration, route } from '../../src';
+import { createSandbox } from 'sinon';
+import {
+	HttpServerInterceptor,
+	HttpServerModule,
+	HttpServerModuleOptions,
+	ParameterConfiguration,
+	route
+} from '../../src';
 import { expect } from '../support/chai';
 import type { InjectOptions } from 'light-my-request';
 
-const sinon = require('sinon').createSandbox();
+const sinon = createSandbox();
 
 describe('HttpServerModule', () => {
 	let app: App;
@@ -52,7 +59,9 @@ describe('HttpServerModule', () => {
 			return args;
 		}
 		close() {}
-		getRequestHostname() {}
+		getRequestHostname() {
+			return '';
+		}
 		getRequestParameter(args) {
 			const { source, name, request, response } = args;
 			switch (source) {
@@ -79,7 +88,9 @@ describe('HttpServerModule', () => {
 			}
 			return source;
 		}
-		getRequestMethod() {}
+		getRequestMethod() {
+			return '';
+		}
 		getRequestHeaders(request) {
 			return request.headers;
 		}
@@ -142,29 +153,27 @@ describe('HttpServerModule', () => {
 				find() {}
 				@route.post({ path: '/create/', responses: { 201: { description: '' } } })
 				create() {}
+				@route.patch({ path: '/:id', responses: { 201: { description: '' } } })
+				@route.put({ path: '/:id', responses: { 201: { description: '' } } })
+				update() {}
 			}
 			class MyDummyHttpServer extends DummyHttpServer {
-				get(...args) {
-					return ['get', ...args];
-				}
+				get() {}
 
-				post(...args) {
-					return ['post', ...args];
-				}
+				post() {}
+
+				patch() {}
+
+				put() {}
 			}
 			const dummyHttpServer = new MyDummyHttpServer();
 			const app = new App();
 			await app.registerController(CustomerController).registerModule(dummyHttpServer);
 			await app.init();
 
-			const [[getRoute, postRoute]] = await dummyHttpServer.createRoutes();
-			expect(getRoute[0]).to.be.equal('get');
-			expect(getRoute[1]).to.be.equal('/api/customers/all');
-			expect(postRoute[0]).to.be.equal('post');
-			expect(postRoute[1]).to.be.equal('/api/customers/create');
+			const routes = await dummyHttpServer.createRoutes();
 
-			const routesDefinition = dummyHttpServer.getRoutes();
-			expect(routesDefinition).to.containSubset([
+			expect(routes).to.containSubset([
 				{
 					path: '/api/customers/all',
 					verb: 'get',
@@ -176,10 +185,10 @@ describe('HttpServerModule', () => {
 						options: {
 							path: '/all',
 							responses: {
-								'200': {
+								200: {
 									description: ''
 								},
-								'400': {
+								400: {
 									description: ''
 								},
 								default: {
@@ -194,19 +203,18 @@ describe('HttpServerModule', () => {
 					path: '/api/customers/create',
 					verb: 'post',
 					parametersConfig: [],
-					methodDecoratorMetadata: {
-						module: 'http-server',
-						type: 'route',
-						verb: 'post',
-						options: {
-							path: '/create/',
-							responses: {
-								'201': {
-									description: ''
-								}
-							}
-						}
-					},
+					responseStatusCodes: [201]
+				},
+				{
+					path: '/api/customers/:id',
+					verb: 'put',
+					parametersConfig: [],
+					responseStatusCodes: [201]
+				},
+				{
+					path: '/api/customers/:id',
+					verb: 'patch',
+					parametersConfig: [],
 					responseStatusCodes: [201]
 				}
 			]);
@@ -275,6 +283,51 @@ describe('HttpServerModule', () => {
 			expect(result[1]).to.containSubset({
 				message: 'Bad request with arguments: body, where'
 			});
+		});
+
+		it('should be able to programmatically show/hide the error stack in case of failure', async () => {
+			const runHandler = async (moduleOptions?: HttpServerModuleOptions) => {
+				@route.controller({ basePath: '/api/customers' })
+				class CustomerController {
+					@route.get({ path: '/all' })
+					find(@route.body() body: string, @route.query() where: string) {
+						throw new Error(`Bad request with arguments: ${body}, ${where}`);
+					}
+				}
+				const dummyHttpServer = new DummyHttpServer(moduleOptions);
+				const controllerReflection = reflect(CustomerController);
+				const methodReflection = controllerReflection.methods[0];
+				const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+					path: '/all',
+					verb: 'get',
+					controllerReflection,
+					methodReflection,
+					parametersConfig: dummyHttpServer.createParametersConfigurations({
+						controllerReflection,
+						methodReflection
+					})
+				});
+				const reqMock = { body: 'body', query: { where: 'where' } };
+				const resMock = {};
+				return requestHandler(reqMock, resMock);
+			};
+
+			const result1 = await runHandler({ errorHandling: { exposeStack: true } });
+			expect(result1[1]).to.have.property('stack');
+
+			const result2 = await runHandler({ errorHandling: { exposeStack: false } });
+			expect(result2[1]).to.not.have.property('stack');
+
+			// by default, it should be enabled
+			const result3 = await runHandler();
+			expect(result3[1]).to.have.property('stack');
+
+			// it should be hidden if process.env.NODE_ENV === 'production'
+			const origNodeEnv = process.env.NODE_ENV;
+			process.env.NODE_ENV = 'production';
+			const result4 = await runHandler();
+			expect(result4[1]).to.not.have.property('stack');
+			process.env.NODE_ENV = origNodeEnv;
 		});
 
 		it('should create a request handler that process interceptors', async () => {
@@ -347,6 +400,123 @@ describe('HttpServerModule', () => {
 			expect(interceptor1.getCall(0).args[1]).containSubset(interceptorArgs);
 			expect(interceptor2.called).to.be.true;
 			expect(interceptor2.getCall(0).args[1]).containSubset(interceptorArgs);
+		});
+
+		it('should create a request handler that process preValidation interceptors', async () => {
+			const ctrlInterceptorPre = sinon.stub().callsFake(next => next());
+			const ctrlInterceptorPost = sinon.stub().callsFake(next => next());
+
+			const methodInterceptorPre = sinon.stub().callsFake(next => next());
+			const methodInterceptorPost = sinon.stub().callsFake(next => next());
+
+			@interceptor<HttpServerInterceptor>(ctrlInterceptorPre, { stage: 'preValidation' })
+			@interceptor<HttpServerInterceptor>(ctrlInterceptorPost, { stage: 'postValidation' })
+			@route.controller({ basePath: '/api/customers' })
+			class CustomerController {
+				@interceptor<HttpServerInterceptor>(methodInterceptorPre, { stage: 'preValidation' })
+				@interceptor<HttpServerInterceptor>(methodInterceptorPost, { stage: 'postValidation' })
+				@route.post({ path: '/all' })
+				find(@route.body({ required: true }) body) {
+					return { body };
+				}
+			}
+			const dummyHttpServer = new DummyHttpServer();
+			const controllerReflection = reflect(CustomerController);
+			const methodReflection = controllerReflection.methods[0];
+			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+				path: '/all',
+				verb: 'get',
+				controllerReflection,
+				methodReflection,
+				parametersConfig: dummyHttpServer.createParametersConfigurations({
+					controllerReflection,
+					methodReflection
+				})
+			});
+			const reqMock = {};
+			const resMock = {};
+			const result = await requestHandler(reqMock, resMock);
+
+			expect(result[1]).to.containSubset({
+				statusCode: 400,
+				name: 'BadRequest',
+				errors: [
+					{
+						instancePath: '/body',
+						schemaPath: '#/type',
+						keyword: 'type',
+						params: {
+							type: 'object'
+						},
+						message: 'must be object'
+					}
+				]
+			});
+			expect(ctrlInterceptorPre.called).to.be.true;
+			expect(ctrlInterceptorPost.called).to.be.false;
+
+			expect(methodInterceptorPre.called).to.be.true;
+			expect(methodInterceptorPost.called).to.be.false;
+		});
+
+		it('should create a request handler tha process interceptors in the correct order', async () => {
+			const callsOrder = [];
+			const createHandler = name => next => {
+				callsOrder.push(name);
+				return next();
+			};
+			const globalInterceptorPre = sinon.stub().callsFake(createHandler('globalInterceptorPre'));
+			const globalInterceptorPost = sinon.stub().callsFake(createHandler('globalInterceptorPost'));
+			const ctrlInterceptorPre = sinon.stub().callsFake(createHandler('ctrlInterceptorPre'));
+			const ctrlInterceptorPost = sinon.stub().callsFake(createHandler('ctrlInterceptorPost'));
+			const methodInterceptorPre = sinon.stub().callsFake(createHandler('methodInterceptorPre'));
+			const methodInterceptorPost = sinon.stub().callsFake(createHandler('methodInterceptorPost'));
+			sinon
+				.stub(DummyHttpServer.prototype, 'createValidationInterceptor')
+				.callsFake(() => createHandler('validationInterceptor') as any);
+
+			@interceptor<HttpServerInterceptor>(ctrlInterceptorPre, { stage: 'preValidation' })
+			@interceptor<HttpServerInterceptor>(ctrlInterceptorPost, { stage: 'postValidation' })
+			@route.controller({ basePath: '/api/customers' })
+			class CustomerController {
+				@interceptor<HttpServerInterceptor>(methodInterceptorPre, { stage: 'preValidation' })
+				@interceptor<HttpServerInterceptor>(methodInterceptorPost, { stage: 'postValidation' })
+				@route.post({ path: '/' })
+				find(@route.body() body) {
+					return { body };
+				}
+			}
+			const dummyHttpServer = new DummyHttpServer({
+				globalInterceptors: [
+					{ handler: globalInterceptorPre, stage: 'preValidation' },
+					{ handler: globalInterceptorPost, stage: 'postValidation' }
+				]
+			});
+			const controllerReflection = reflect(CustomerController);
+			const methodReflection = controllerReflection.methods[0];
+			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+				path: '/',
+				verb: 'post',
+				controllerReflection,
+				methodReflection,
+				parametersConfig: dummyHttpServer.createParametersConfigurations({
+					controllerReflection,
+					methodReflection
+				})
+			});
+			const reqMock = { body: {} };
+			const resMock = {};
+			await requestHandler(reqMock, resMock);
+
+			expect(callsOrder).to.be.deep.equal([
+				'globalInterceptorPre',
+				'ctrlInterceptorPre',
+				'methodInterceptorPre',
+				'validationInterceptor',
+				'globalInterceptorPost',
+				'ctrlInterceptorPost',
+				'methodInterceptorPost'
+			]);
 		});
 
 		it('should be able to pass global interceptors', async () => {
@@ -691,10 +861,10 @@ describe('HttpServerModule', () => {
 				parametersConfig
 			});
 
-			//act
-			await executeInterceptorsStack([validationInterceptor]);
+			// act
+			await executeInterceptorsStack([validationInterceptor], {} as any);
 
-			//assert
+			// assert
 			expect(validatorFunction.called).to.be.true;
 			expect(validatorFunction.getCall(0).args[0]).to.be.deep.equal({
 				params: {

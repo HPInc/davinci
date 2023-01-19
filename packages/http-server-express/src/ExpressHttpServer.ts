@@ -9,7 +9,7 @@ import {
 	RequestHandler,
 	StaticServeOptions
 } from '@davinci/http-server';
-import express, { Express, Request, Response } from 'express';
+import express, { Application, Express, Request, Response } from 'express';
 import http, { Server as HttpServer } from 'http';
 import https, { Server as HttpsServer, ServerOptions } from 'https';
 import type { App } from '@davinci/core';
@@ -17,11 +17,10 @@ import type { OptionsJson, OptionsUrlencoded } from 'body-parser';
 import { inject, InjectOptions } from 'light-my-request';
 import cors, { CorsOptions } from 'cors';
 
-
 type Server = HttpServer | HttpsServer;
 
 export interface ExpressHttpServerModuleOptions extends HttpServerModuleOptions {
-	instance?: Express;
+	instance?: Express | (() => Express);
 	https?: ServerOptions;
 	middlewares?: {
 		json?: OptionsJson;
@@ -36,28 +35,26 @@ export class ExpressHttpServer extends HttpServerModule<{
 	Server: Server;
 	ModuleOptions: ExpressHttpServerModuleOptions;
 }> {
-	instance: Express;
-	app: App;
+	app?: App;
+	instance?: Express;
 
 	constructor(options?: ExpressHttpServerModuleOptions) {
-		const { instance, ...moduleOptions } = options ?? {};
-		super(moduleOptions);
-		this.instance = instance ?? express();
-		if (this.moduleOptions.logger?.level) {
-			this.logger.level = this.moduleOptions.logger?.level;
+		super(options ?? {});
+		if (this.moduleOptions?.logger?.level) {
+			this.logger.level = this.moduleOptions?.logger?.level;
 		}
 	}
 
-	async onRegister(app) {
+	async onRegister(app: App) {
 		this.app = app;
-		const level = this.moduleOptions.logger?.level ?? app.getOptions().logger?.level;
+		const level = this.moduleOptions?.logger?.level ?? app.getOptions()?.logger?.level;
 		if (level) {
 			this.logger.level = level;
 		}
+		this.initHttpServer();
 		this.registerMiddlewares();
 		await super.createRoutes();
 		// this.registerErrorHandlers();
-		this.initHttpServer();
 	}
 
 	async onInit() {
@@ -70,6 +67,7 @@ export class ExpressHttpServer extends HttpServerModule<{
 	}
 
 	registerMiddlewares() {
+		if (!this.instance) throw new Error('instance not set, aborting');
 		const { json, urlencoded, cors: corsOptions } = this.moduleOptions?.middlewares ?? {};
 
 		this.instance.use(express.json({ ...json }));
@@ -78,9 +76,15 @@ export class ExpressHttpServer extends HttpServerModule<{
 	}
 
 	initHttpServer() {
-		const isHttpsEnabled = super.moduleOptions?.https;
-		const server = isHttpsEnabled
-			? https.createServer(super.moduleOptions.https, this.getInstance())
+		const { instance } = this.moduleOptions ?? {};
+		if (instance && typeof instance === 'function' && !(instance as Express).listen) {
+			this.instance = (instance as Function)();
+		} else {
+			this.instance = (instance as Express) ?? express();
+		}
+
+		const server = super.moduleOptions?.https
+			? https.createServer(super.moduleOptions?.https, this.getInstance())
 			: http.createServer(this.getInstance());
 
 		super.setHttpServer(server);
@@ -97,47 +101,70 @@ export class ExpressHttpServer extends HttpServerModule<{
 		return typeof body === 'object' ? response.json(body) : response.send(String(body));
 	}
 
-	public use: Express['use'] = (...args) => {
+	// @ts-ignore
+	public use: Application['use'] = (...args) => {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.use(...args);
 	};
 
 	public get(path: string, handler: RequestHandler<Request, Response>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.get(path, handler);
 	}
 
 	public post(path: string, handler: RequestHandler<Request, Response>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.post(path, handler);
 	}
 
 	public head(path: string, handler: RequestHandler<Request, Response>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.head(path, handler);
 	}
 
 	public delete(path: string, handler: RequestHandler<Request, Response>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.delete(path, handler);
 	}
 
 	public put(path: string, handler: RequestHandler<Request, Response>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.put(path, handler);
 	}
 
 	public patch(path: string, handler: RequestHandler<Request, Response>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.patch(path, handler);
 	}
 
 	public all(path: string, handler: RequestHandler<Request, Response>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.all(path, handler);
 	}
 
 	public options(path: string, handler: RequestHandler<Request, Response>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.options(path, handler);
 	}
 
 	public static(path: string, options?: StaticServeOptions) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.use(express.static(path, options));
 	}
 
 	listen() {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		const port = this.moduleOptions?.port || 3000;
 		this.setHttpServer(this.instance.listen(port));
 		this.logger.info(`Server listening on port: ${port}`);
@@ -164,10 +191,14 @@ export class ExpressHttpServer extends HttpServerModule<{
 	}
 
 	public setErrorHandler(handler: RequestHandler<Request, Response>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.use(handler);
 	}
 
 	public setNotFoundHandler(handler: RequestHandler<Request, Response>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.use(handler);
 	}
 
@@ -216,13 +247,13 @@ export class ExpressHttpServer extends HttpServerModule<{
 	}) {
 		switch (source) {
 			case 'path':
-				return request.params[name];
+				return request.params[name as string];
 
 			case 'header':
-				return request.header(name);
+				return request.header(name as string);
 
 			case 'query':
-				return request.query[name];
+				return request.query[name as string];
 
 			case 'body':
 				return request.body;
@@ -239,6 +270,6 @@ export class ExpressHttpServer extends HttpServerModule<{
 	}
 
 	performHttpInjection(injectOptions: InjectOptions): Promise<unknown> {
-		return inject(this.instance, injectOptions);
+		return inject(this.instance as Express, injectOptions);
 	}
 }

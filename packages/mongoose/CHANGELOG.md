@@ -3,6 +3,111 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.2.13](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.2.12...@davinci/mongoose@2.2.13) (2023-01-18)
+
+
+### Bug Fixes
+
+* stricter typescript rules ([#202](https://github.com/HPInc/davinci/issues/202)) ([863b68e](https://github.com/HPInc/davinci/commit/863b68e9702aecc6e5fd2b1e488d961a911c5478)), closes [#2](https://github.com/HPInc/davinci/issues/2)
+
+
+
+
+
+## [2.2.12](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.2.11...@davinci/mongoose@2.2.12) (2023-01-16)
+
+**Note:** Version bump only for package @davinci/mongoose
+
+
+
+
+
+## [2.2.11](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.2.10...@davinci/mongoose@2.2.11) (2023-01-04)
+
+**Note:** Version bump only for package @davinci/mongoose
+
+
+
+
+
+## [2.2.10](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.2.9...@davinci/mongoose@2.2.10) (2023-01-03)
+
+**Note:** Version bump only for package @davinci/mongoose
+
+
+
+
+
+## [2.2.9](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.2.8...@davinci/mongoose@2.2.9) (2023-01-02)
+
+**Note:** Version bump only for package @davinci/mongoose
+
+
+
+
+
+## [2.2.8](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.2.7...@davinci/mongoose@2.2.8) (2022-12-21)
+
+**Note:** Version bump only for package @davinci/mongoose
+
+
+
+
+
+## [2.2.7](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.2.6...@davinci/mongoose@2.2.7) (2022-12-21)
+
+**Note:** Version bump only for package @davinci/mongoose
+
+
+
+
+
+## [2.2.6](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.2.5...@davinci/mongoose@2.2.6) (2022-12-21)
+
+**Note:** Version bump only for package @davinci/mongoose
+
+
+
+
+
+## [2.2.5](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.2.4...@davinci/mongoose@2.2.5) (2022-12-20)
+
+**Note:** Version bump only for package @davinci/mongoose
+
+
+
+
+
+## [2.2.4](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.2.3...@davinci/mongoose@2.2.4) (2022-12-20)
+
+
+### Bug Fixes
+
+* [@populates](https://github.com/populates)() now correctly set the localField value ([#193](https://github.com/HPInc/davinci/issues/193)) ([ba41dd5](https://github.com/HPInc/davinci/commit/ba41dd5516784a30d96d12939c5b96d7ed934b69))
+
+
+
+
+
+## [2.2.3](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.2.2...@davinci/mongoose@2.2.3) (2022-12-19)
+
+
+### Bug Fixes
+
+* **mongoose:** removed 'type' nesting for schemas in array ([#192](https://github.com/HPInc/davinci/issues/192)) ([1c88852](https://github.com/HPInc/davinci/commit/1c888526e2640265a8ecb06c446ca5b1bd014d27))
+
+
+
+
+
+## [2.2.2](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.2.1...@davinci/mongoose@2.2.2) (2022-12-16)
+
+**Note:** Version bump only for package @davinci/mongoose
+
+
+
+
+
 ## [2.2.1](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.2.0...@davinci/mongoose@2.2.1) (2022-12-09)
 
 **Note:** Version bump only for package @davinci/mongoose

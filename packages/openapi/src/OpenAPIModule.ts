@@ -2,13 +2,24 @@
  * © Copyright 2022 HP Development Company, L.P.
  * SPDX-License-Identifier: MIT
  */
-import { App, EntityRegistry, JSONSchema, mapObject, mapSeries, Module } from '@davinci/core';
-import type { HttpServerModule, MethodResponses, Route } from '@davinci/http-server';
+import {
+	App,
+	EntityDefinition,
+	EntityDefinitionJSONSchema,
+	EntityRegistry,
+	JSONSchema,
+	mapObject,
+	mapSeries,
+	Module,
+	omit,
+	transformEntityDefinitionSchema
+} from '@davinci/core';
+import type { HttpServerModule, MethodResponseItemContentMedia, MethodResponses, Route } from '@davinci/http-server';
 import http, { Server } from 'http';
 import pino, { Level } from 'pino';
 import { OpenAPIV3 } from 'openapi-types';
 import createDeepMerge from '@fastify/deepmerge';
-import { ClassType, PartialDeep } from '@davinci/reflector';
+import { ClassType, PartialDeep, TypeValue } from '@davinci/reflector';
 import { generateSwaggerUiHtml } from './swaggerUi';
 
 const deepMerge = createDeepMerge();
@@ -37,14 +48,15 @@ export interface OpenAPIModuleOptions {
 }
 
 export class OpenAPIModule extends Module {
-	app: App;
+	app?: App;
 	moduleOptions: OpenAPIModuleOptions;
-	jsonSchemasMap = new Map<string, Partial<JSONSchema>>();
 	logger = pino({ name: 'openAPI-module' });
-	httpServerModule: HttpServerModule<{ Server: Server }>;
-	httpServer: Server;
-	entityRegistry: EntityRegistry;
+	httpServerModule?: HttpServerModule<{ Server: Server }>;
+	httpServer?: Server;
+	entityRegistry?: EntityRegistry;
 	openAPIDoc: PartialDeep<OpenAPIV3.Document>;
+	private jsonSchemasMap = new Map<string, JSONSchema | Partial<JSONSchema>>();
+	private entityDefinitionJSONSchemaCache = new Map<TypeValue, EntityDefinitionJSONSchema>();
 
 	constructor(moduleOptions: OpenAPIModuleOptions) {
 		super();
@@ -115,7 +127,7 @@ export class OpenAPIModule extends Module {
 			controllerDecoratorMetadata,
 			controllerReflection
 		} = route;
-		if (methodDecoratorMetadata.options?.hidden) return;
+		if (methodDecoratorMetadata?.options?.hidden) return;
 
 		// transform path parameters, e.g. :id to {id}
 		const path = origPath.replace(/:([\w-]+)/g, '{$1}');
@@ -133,8 +145,8 @@ export class OpenAPIModule extends Module {
 
 		// operationId handling
 		let operationId: string;
-		if (methodDecoratorMetadata.options?.operationId) {
-			operationId = methodDecoratorMetadata.options?.operationId;
+		if (methodDecoratorMetadata?.options?.operationId) {
+			operationId = methodDecoratorMetadata?.options?.operationId;
 		} else if (this.moduleOptions?.document?.automaticOperationIds) {
 			operationId = this.moduleOptions?.document?.operationIdFormatter?.({
 				...route,
@@ -144,9 +156,9 @@ export class OpenAPIModule extends Module {
 		}
 
 		this.openAPIDoc.paths[path][verb] = {
-			...(methodDecoratorMetadata.options?.summary && { summary: methodDecoratorMetadata.options?.summary }),
-			...(methodDecoratorMetadata.options?.description && {
-				description: methodDecoratorMetadata.options?.description
+			...(methodDecoratorMetadata?.options?.summary && { summary: methodDecoratorMetadata?.options?.summary }),
+			...(methodDecoratorMetadata?.options?.description && {
+				description: methodDecoratorMetadata?.options?.description
 			}),
 			...this.openAPIDoc.paths[path][verb],
 			...(tags ? { tags } : {}),
@@ -162,7 +174,7 @@ export class OpenAPIModule extends Module {
 			)
 				return;
 
-			const entityJsonSchema = this.entityRegistry.getJsonSchema(parameterConfig.type);
+			const entityJsonSchema = this.entityRegistry.getEntityDefinitionJsonSchema(parameterConfig.type);
 
 			const jsonSchema =
 				this.jsonSchemasMap.get(entityJsonSchema.title) ?? this.createJsonSchema(entityJsonSchema);
@@ -208,7 +220,7 @@ export class OpenAPIModule extends Module {
 				? this.moduleOptions?.defaults?.responses(route)
 				: this.moduleOptions?.defaults?.responses;
 
-		const responses = { ...defaultResponses, ...methodDecoratorMetadata.options?.responses };
+		const responses = { ...defaultResponses, ...methodDecoratorMetadata?.options?.responses };
 		const defaultResponseContentType = this.moduleOptions?.defaults?.responseContentType ?? 'application/json';
 
 		mapObject(responses, (response, statusCode) => {
@@ -248,77 +260,71 @@ export class OpenAPIModule extends Module {
 					}
 				};
 			} else if (typeof response.content === 'object') {
-				mapObject(
-					response.content,
-					(mediaTypeObject: OpenAPIV3.MediaTypeObject | ClassType | Array<ClassType>, contentType) => {
-						// Case: ClassType passed at response content type level
-						// example:
-						// { responses: { 200: { content: { 'application/json': Customer }}}} OR
-						// { responses: { 200: { content: { 'application/json': [Customer] }}}}
-						if (Array.isArray(mediaTypeObject) || typeof mediaTypeObject === 'function') {
-							const singleItem = Array.isArray(mediaTypeObject) ? mediaTypeObject[0] : mediaTypeObject;
-							const jsonSchema = this.getAndSetJsonSchema(singleItem);
+				mapObject(response.content, (mediaTypeObject, contentType) => {
+					// Case: ClassType passed at response content type level
+					// example:
+					// { responses: { 200: { content: { 'application/json': Customer }}}} OR
+					// { responses: { 200: { content: { 'application/json': [Customer] }}}}
+					if (Array.isArray(mediaTypeObject) || typeof mediaTypeObject === 'function') {
+						const singleItem = Array.isArray(mediaTypeObject) ? mediaTypeObject[0] : mediaTypeObject;
+						const jsonSchema = this.getAndSetJsonSchema(singleItem);
 
-							formattedResponse = {
-								...response,
-								content: {
-									...formattedResponse?.content,
-									[contentType]: {
-										schema: this.generateArrayOrSingleDefinition(
-											jsonSchema,
-											Array.isArray(mediaTypeObject)
-										)
-									}
+						formattedResponse = {
+							...response,
+							content: {
+								...formattedResponse?.content,
+								[contentType]: {
+									schema: this.generateArrayOrSingleDefinition(
+										jsonSchema,
+										Array.isArray(mediaTypeObject)
+									)
 								}
-							};
-						}
-						// Case: ClassType passed at response content type schema level
-						// example:
-						// { responses: { 200: { content: { 'application/json': { schema: Customer }}}}} OR
-						// { responses: { 200: { content: { 'application/json': { schema: [Customer] }}}}}
-						else if (
-							Array.isArray(mediaTypeObject.schema) ||
-							typeof mediaTypeObject.schema === 'function'
-						) {
-							const singleItem = Array.isArray(mediaTypeObject.schema)
-								? mediaTypeObject.schema[0]
-								: mediaTypeObject.schema;
-							const jsonSchema = this.getAndSetJsonSchema(singleItem);
-
-							const description = jsonSchema.description ?? jsonSchema.title ?? '';
-							formattedResponse = {
-								description,
-								...response,
-								content: {
-									...formattedResponse?.content,
-									[contentType]: {
-										...response?.content?.[contentType],
-										schema: this.generateArrayOrSingleDefinition(
-											jsonSchema,
-											Array.isArray(mediaTypeObject.schema)
-										)
-									}
-								}
-							};
-						}
-						// Case: explicit object definition
-						// example:
-						// { responses: { 200: { content: { 'application/json': { schema: { type: 'object' }}}}}} OR
-						// { responses: { 200: { content: { 'application/json': { schema: { type: 'array', items: { type: 'object' }}}}}}}
-						else if (typeof mediaTypeObject.schema === 'object') {
-							formattedResponse = {
-								...response,
-								content: {
-									...formattedResponse?.content,
-									[contentType]: {
-										...response?.content?.[contentType],
-										schema: mediaTypeObject.schema
-									}
-								}
-							};
-						}
+							}
+						};
 					}
-				);
+					// Case: ClassType passed at response content type schema level
+					// example:
+					// { responses: { 200: { content: { 'application/json': { schema: Customer }}}}} OR
+					// { responses: { 200: { content: { 'application/json': { schema: [Customer] }}}}}
+					else if (Array.isArray(mediaTypeObject.schema) || typeof mediaTypeObject.schema === 'function') {
+						const singleItem = Array.isArray(mediaTypeObject.schema)
+							? mediaTypeObject.schema[0]
+							: mediaTypeObject.schema;
+						const jsonSchema = this.getAndSetJsonSchema(singleItem);
+
+						const description = jsonSchema.description ?? jsonSchema.title ?? '';
+						formattedResponse = {
+							description,
+							...response,
+							content: {
+								...formattedResponse?.content,
+								[contentType]: {
+									...(response as MethodResponseItemContentMedia).content?.[contentType],
+									schema: this.generateArrayOrSingleDefinition(
+										jsonSchema,
+										Array.isArray(mediaTypeObject.schema)
+									)
+								}
+							}
+						};
+					}
+					// Case: explicit object definition
+					// example:
+					// { responses: { 200: { content: { 'application/json': { schema: { type: 'object' }}}}}} OR
+					// { responses: { 200: { content: { 'application/json': { schema: { type: 'array', items: { type: 'object' }}}}}}}
+					else if (typeof mediaTypeObject.schema === 'object') {
+						formattedResponse = {
+							...response,
+							content: {
+								...formattedResponse?.content,
+								[contentType]: {
+									...(response as MethodResponseItemContentMedia).content?.[contentType],
+									schema: mediaTypeObject.schema
+								}
+							}
+						};
+					}
+				});
 			}
 
 			this.openAPIDoc.paths[path][verb].responses = {
@@ -357,85 +363,51 @@ export class OpenAPIModule extends Module {
 		return this.openAPIDoc;
 	}
 
-	private createJsonSchema(jsonSchema: Partial<JSONSchema>) {
-		if (typeof jsonSchema === 'object') {
-			return {
-				...(jsonSchema.title ? { $id: jsonSchema.title } : {}),
-				...mapObject<Partial<JSONSchema>>(jsonSchema, (p, key) => {
-					if (key === 'properties' && p) {
-						return mapObject(p, propValue => {
-							if (propValue._$ref) {
-								const refEntityDefinitionJson = this.createJsonSchema(
-									this.jsonSchemasMap.get(propValue._$ref) ?? propValue._$ref?.getJsonSchema()
-								);
+	private createJsonSchema(entityJsonSchema: EntityDefinitionJSONSchema): Partial<JSONSchema> {
+		return transformEntityDefinitionSchema(entityJsonSchema, args => {
+			if (args.pointerPath === '') {
+				return { path: '', value: omit(args.schema, ['properties']) };
+			}
 
-								if (!this.jsonSchemasMap.has(propValue._$ref)) {
-									this.jsonSchemasMap.set(propValue._$ref, refEntityDefinitionJson);
-								}
+			if (args.schema._$ref) {
+				const ref: EntityDefinition = args.schema._$ref;
 
-								if (refEntityDefinitionJson?.$id) {
-									this.openAPIDoc.components.schemas[refEntityDefinitionJson.$id] =
-										refEntityDefinitionJson;
-									return { $ref: `#/components/schemas/${refEntityDefinitionJson.$id}` };
-								}
+				// if the entity definition was previously evaluated, return the $ref
+				if (this.entityDefinitionJSONSchemaCache.has(ref.getType())) {
+					const childEntityDefJsonSchema = this.entityDefinitionJSONSchemaCache.get(ref.getType());
+					return {
+						path: args.pointerPath,
+						value: { $ref: `#/components/schemas/${childEntityDefJsonSchema.$id}` }
+					};
+				}
 
-								return refEntityDefinitionJson;
-							}
-
-							if (propValue.type === 'array' && propValue.items?._$ref) {
-								const $ref = propValue.items?._$ref;
-								const refEntityDefinitionJson = this.createJsonSchema(
-									this.jsonSchemasMap.get($ref) ?? $ref?.getJsonSchema()
-								);
-
-								if (!this.jsonSchemasMap.has($ref)) {
-									this.jsonSchemasMap.set($ref, refEntityDefinitionJson);
-								}
-
-								if (refEntityDefinitionJson?.$id) {
-									this.openAPIDoc.components.schemas[refEntityDefinitionJson.$id] =
-										refEntityDefinitionJson;
-									return {
-										...propValue,
-										items: { $ref: `#/components/schemas/${refEntityDefinitionJson.$id}` }
-									};
-								}
-
-								return refEntityDefinitionJson;
-							}
-
-							return propValue;
-						});
+				const entityDefinitionJsonSchema = ref.getEntityDefinitionJsonSchema();
+				this.entityDefinitionJSONSchemaCache.set(ref.getType(), entityDefinitionJsonSchema);
+				const childEntityDefJsonSchema = this.createJsonSchema(ref.getEntityDefinitionJsonSchema());
+				if (childEntityDefJsonSchema.$id) {
+					if (!this.jsonSchemasMap.has(childEntityDefJsonSchema.$id)) {
+						this.jsonSchemasMap.set(childEntityDefJsonSchema.$id, childEntityDefJsonSchema);
 					}
+					this.openAPIDoc.components.schemas[childEntityDefJsonSchema.$id] = childEntityDefJsonSchema;
 
-					if (key === 'items' && p._$ref) {
-						const $ref = p._$ref;
-						const refEntityDefinitionJson = this.createJsonSchema(
-							this.jsonSchemasMap.get($ref) ?? $ref?.getJsonSchema()
-						);
+					return {
+						path: args.pointerPath,
+						value: { $ref: `#/components/schemas/${childEntityDefJsonSchema.$id}` }
+					};
+				}
+				return { path: args.pointerPath, value: childEntityDefJsonSchema };
+			}
 
-						if (!this.jsonSchemasMap.has($ref)) {
-							this.jsonSchemasMap.set($ref, refEntityDefinitionJson);
-						}
+			if (args.parentKeyword === 'properties') {
+				return { path: args.pointerPath, value: args.schema };
+			}
 
-						if (refEntityDefinitionJson?.$id) {
-							this.openAPIDoc.components.schemas[refEntityDefinitionJson.$id] = refEntityDefinitionJson;
-							return { $ref: `#/components/schemas/${refEntityDefinitionJson.$id}` };
-						}
-
-						return refEntityDefinitionJson;
-					}
-
-					return p;
-				})
-			};
-		}
-
-		return jsonSchema;
+			return null;
+		});
 	}
 
 	// DRY function to generate single item or array definition objects
-	private generateArrayOrSingleDefinition(jsonSchema: Partial<JSONSchema>, isArray): OpenAPIV3.SchemaObject {
+	private generateArrayOrSingleDefinition(jsonSchema: Partial<JSONSchema>, isArray: boolean): OpenAPIV3.SchemaObject {
 		const singleJsonSchema = (
 			jsonSchema.$id ? { $ref: `#/components/schemas/${jsonSchema.$id}` } : jsonSchema
 		) as OpenAPIV3.SchemaObject;
@@ -450,8 +422,8 @@ export class OpenAPIModule extends Module {
 		return singleJsonSchema;
 	}
 
-	private getAndSetJsonSchema(item: ClassType) {
-		const entityJsonSchema = this.entityRegistry.getJsonSchema(item);
+	private getAndSetJsonSchema(item: TypeValue) {
+		const entityJsonSchema = this.entityRegistry.getEntityDefinitionJsonSchema(item);
 		const jsonSchema = this.jsonSchemasMap.get(entityJsonSchema.title) ?? this.createJsonSchema(entityJsonSchema);
 
 		if (!this.jsonSchemasMap.has(entityJsonSchema.title) && jsonSchema.$id) {

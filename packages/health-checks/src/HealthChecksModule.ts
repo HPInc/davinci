@@ -5,7 +5,7 @@
 import { App, mapParallel, Module } from '@davinci/core';
 import type { HttpServerModule } from '@davinci/http-server';
 import http, { Server } from 'http';
-import { createTerminus, TerminusOptions } from '@godaddy/terminus';
+import { createTerminus, HealthCheckMap, TerminusOptions } from '@godaddy/terminus';
 import pino, { Level, Logger } from 'pino';
 import { ClassReflection, ClassType, DecoratorId, MethodReflection, reflect } from '@davinci/reflector';
 import { HealthCheckDecoratorData } from './decorators';
@@ -20,13 +20,13 @@ export interface HealthChecksModuleOptions {
 }
 
 export class HealthChecksModule extends Module {
-	app: App;
+	app?: App;
 	logger: Logger;
-	httpServer: Server;
+	httpServer?: Server;
 
 	constructor(protected moduleOptions?: HealthChecksModuleOptions) {
 		super();
-		this.logger = pino({ name: this.moduleOptions.logger?.name ?? 'health-checks' });
+		this.logger = pino({ name: this.moduleOptions?.logger?.name ?? 'health-checks' });
 	}
 
 	getModuleId() {
@@ -34,7 +34,7 @@ export class HealthChecksModule extends Module {
 	}
 
 	onRegister(app: App) {
-		const level = this.moduleOptions.logger?.level ?? app.getOptions().logger?.level;
+		const level = this.moduleOptions?.logger?.level ?? app.getOptions()?.logger?.level;
 		if (level) {
 			this.logger.level = level;
 		}
@@ -86,16 +86,17 @@ export class HealthChecksModule extends Module {
 			{}
 		);
 
-		const healthCheckTerminusConfiguration = this.moduleOptions?.healthChecks?.reduce<
-			TerminusOptions['healthChecks']
-		>((acc, { name: healthCheckName, endpoint }) => {
-			acc[endpoint] = () => mapParallel(healthChecksFunctionsDict[healthCheckName] ?? [], fn => fn());
+		const healthCheckTerminusConfiguration = this.moduleOptions?.healthChecks?.reduce<HealthCheckMap>(
+			(acc, { name: healthCheckName, endpoint }) => {
+				acc[endpoint] = () => mapParallel(healthChecksFunctionsDict[healthCheckName] ?? [], fn => fn());
 
-			return acc;
-		}, {});
+				return acc;
+			},
+			{}
+		);
 
 		const foundHealthCheckNames = Object.keys(healthChecksFunctionsDict);
-		const configuredHealthCheckNames = this.moduleOptions?.healthChecks?.map(({ name }) => name);
+		const configuredHealthCheckNames = this.moduleOptions?.healthChecks?.map(({ name }) => name) ?? [];
 		foundHealthCheckNames.forEach(name => {
 			if (!configuredHealthCheckNames.includes(name)) {
 				throw new Error(`Health check "${name}" not listed in the configuration. Maybe a misspell?`);

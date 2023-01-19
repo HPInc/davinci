@@ -5,9 +5,9 @@
 
 import { entity, EntityRegistry } from '@davinci/core';
 import { createSandbox } from 'sinon';
+import Ajv, { Options } from 'ajv';
 import { expect } from '../support/chai';
 import { AjvValidator, AjvValidatorOptions, createAjvValidator, ParameterConfiguration, Route } from '../../src';
-import Ajv, { Options } from 'ajv';
 
 const toPromise = async (fn: Function) => fn();
 
@@ -26,6 +26,14 @@ describe('AjvValidator', () => {
 	class Address {
 		@entity.prop()
 		street: string;
+
+		@entity.prop()
+		number: string;
+	}
+
+	class OfficeAddress {
+		@entity.prop()
+		line1: string;
 
 		@entity.prop()
 		number: string;
@@ -59,6 +67,9 @@ describe('AjvValidator', () => {
 
 		@entity.prop()
 		birth: Birth;
+
+		@entity.prop({ anyOf: [Address, OfficeAddress] })
+		address: Address | OfficeAddress;
 	}
 
 	@entity()
@@ -214,6 +225,28 @@ describe('AjvValidator', () => {
 					},
 					birth: {
 						$ref: 'Birth'
+					},
+					address: {
+						title: 'address',
+						type: 'object',
+						anyOf: [
+							{
+								$ref: 'Address'
+							},
+							{
+								title: 'OfficeAddress',
+								type: 'object',
+								properties: {
+									line1: {
+										type: 'string'
+									},
+									number: {
+										type: 'string'
+									}
+								},
+								required: []
+							}
+						]
 					}
 				},
 				required: ['lastname']
@@ -288,9 +321,179 @@ describe('AjvValidator', () => {
 					},
 					creditCard: {
 						type: 'string'
+					},
+					address: {
+						title: 'address',
+						type: 'object',
+						anyOf: [
+							{
+								$ref: 'Address'
+							},
+							{
+								title: 'OfficeAddress',
+								type: 'object',
+								properties: {
+									line1: {
+										type: 'string'
+									},
+									number: {
+										type: 'string'
+									}
+								},
+								required: []
+							}
+						]
 					}
 				},
 				required: ['lastname']
+			});
+		});
+
+		it('should support recursive schemas', async () => {
+			const entityRegistry = new EntityRegistry();
+			const ajvValidator = new AjvValidator({}, entityRegistry);
+
+			@entity()
+			class Recursive {
+				@entity.prop()
+				recursive: Recursive;
+			}
+
+			const parametersConfig: ParameterConfiguration<any>[] = [
+				{
+					name: 'data',
+					source: 'body',
+					type: Recursive,
+					options: { in: 'body', required: true },
+					value: { firstname: 'John' }
+				}
+			];
+
+			const schema = await ajvValidator.createSchema(parametersConfig);
+			const ajvInstance = ajvValidator.getAjvInstances().body;
+			const { schema: recursiveSchema } = ajvInstance.getSchema('Recursive');
+
+			expect(schema).to.be.deep.equal({
+				type: 'object',
+				properties: {
+					body: {
+						$ref: 'Recursive'
+					}
+				},
+				required: ['body']
+			});
+			expect(recursiveSchema).to.be.deep.equal({
+				$id: 'Recursive',
+				title: 'Recursive',
+				type: 'object',
+				properties: {
+					recursive: {
+						$ref: 'Recursive'
+					}
+				},
+				required: []
+			});
+		});
+
+		it('should support recursive array schemas', async () => {
+			const entityRegistry = new EntityRegistry();
+			const ajvValidator = new AjvValidator({}, entityRegistry);
+
+			@entity()
+			class Recursive {
+				@entity.prop({ type: [Recursive] })
+				recursiveArray: Array<Recursive>;
+			}
+
+			const parametersConfig: ParameterConfiguration<any>[] = [
+				{
+					name: 'data',
+					source: 'body',
+					type: Recursive,
+					options: { in: 'body', required: true },
+					value: { firstname: 'John' }
+				}
+			];
+
+			const schema = await ajvValidator.createSchema(parametersConfig);
+			const ajvInstance = ajvValidator.getAjvInstances().body;
+			const { schema: recursiveSchema } = ajvInstance.getSchema('Recursive');
+
+			expect(schema).to.be.deep.equal({
+				type: 'object',
+				properties: {
+					body: {
+						$ref: 'Recursive'
+					}
+				},
+				required: ['body']
+			});
+			expect(recursiveSchema).to.be.deep.equal({
+				$id: 'Recursive',
+				title: 'Recursive',
+				type: 'object',
+				properties: {
+					recursiveArray: {
+						items: {
+							$ref: 'Recursive'
+						},
+						type: 'array'
+					}
+				},
+				required: []
+			});
+		});
+
+		it('should support recursive schemas, specified in oneOf, allOf or anyOf keywords', async () => {
+			const entityRegistry = new EntityRegistry();
+			const ajvValidator = new AjvValidator({}, entityRegistry);
+
+			@entity()
+			class Recursive {
+				@entity.prop({ type: false, anyOf: [{ type: 'string' }, Recursive] })
+				recursive: string | Recursive;
+			}
+
+			const parametersConfig: ParameterConfiguration<any>[] = [
+				{
+					name: 'data',
+					source: 'body',
+					type: Recursive,
+					options: { in: 'body', required: true },
+					value: { firstname: 'John' }
+				}
+			];
+
+			const schema = await ajvValidator.createSchema(parametersConfig);
+			const ajvInstance = ajvValidator.getAjvInstances().body;
+			const { schema: recursiveSchema } = ajvInstance.getSchema('Recursive');
+
+			expect(schema).to.be.deep.equal({
+				type: 'object',
+				properties: {
+					body: {
+						$ref: 'Recursive'
+					}
+				},
+				required: ['body']
+			});
+			expect(recursiveSchema).to.be.deep.equal({
+				$id: 'Recursive',
+				title: 'Recursive',
+				type: 'object',
+				properties: {
+					recursive: {
+						anyOf: [
+							{
+								type: 'string'
+							},
+							{
+								$ref: 'Recursive'
+							}
+						]
+					}
+				},
+				required: []
 			});
 		});
 	});
@@ -585,6 +788,7 @@ describe('AjvValidator', () => {
 			};
 
 			const validator = await ajvValidatorFactory(route);
+			// @ts-ignore
 			const error = await toPromise(() => validator(data)).catch(err => err);
 
 			expect(validator).to.be.a('function');

@@ -8,12 +8,15 @@ import { ExpressHttpServer } from '@davinci/http-server-express';
 import { HealthChecksModule } from '@davinci/health-checks';
 import { OpenAPIModule } from '@davinci/openapi';
 import addErrors from 'ajv-errors';
-import { createAjvValidator } from '@davinci/http-server';
+import { ContextFactory, createAjvValidator } from '@davinci/http-server';
 import { CustomerController } from './api/customer';
+import { Context } from './types';
+import { Request } from 'express';
 
-export const app = createApp();
-const contextFactory = ({ request }) => ({ accountId: request.headers['x-accountid'] });
-
+const app = createApp();
+const contextFactory: ContextFactory<Context, Request> = ({ request }) => ({
+	accountId: request.headers['x-accountid'] as string
+});
 app.registerController(CustomerController).registerModule(
 	new ExpressHttpServer({
 		contextFactory,
@@ -52,3 +55,5 @@ app.registerController(CustomerController).registerModule(
 if (require.main === module) {
 	app.init();
 }
+
+export default app;

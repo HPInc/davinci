@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { ClassType, TypeValue } from '@davinci/reflector';
+import { ClassType, DecoratorId, TypeValue } from '@davinci/reflector';
 import type { OpenAPIV3 } from 'openapi-types';
 
 export type Verb = 'get' | 'post' | 'put' | 'patch' | 'head' | 'delete' | 'options';
@@ -12,17 +12,25 @@ export interface ValidationOptions {
 	disabled?: boolean;
 }
 
+export type MethodResponseItemContent = Omit<OpenAPIV3.ResponseObject, 'content'> & {
+	content: ClassType | Array<ClassType>;
+};
+
+export type MethodResponseItemContentMedia = Omit<OpenAPIV3.ResponseObject, 'content'> & {
+	content: { [media: string]: ClassType | Array<ClassType> };
+};
+
+export type MethodResponseItemContentMediaSchema = Omit<OpenAPIV3.ResponseObject, 'content'> & {
+	content: {
+		[media: string]: Omit<OpenAPIV3.MediaTypeObject, 'schema'> & { schema?: ClassType | Array<ClassType> };
+	};
+};
+
 export type MethodResponseItem =
 	| OpenAPIV3.ResponseObject
-	| (Omit<OpenAPIV3.ResponseObject, 'content'> & { content: ClassType | Array<ClassType> })
-	| (Omit<OpenAPIV3.ResponseObject, 'content'> & {
-			content: { [media: string]: ClassType | Array<ClassType> };
-	  })
-	| (Omit<OpenAPIV3.ResponseObject, 'content'> & {
-			content: {
-				[media: string]: Omit<OpenAPIV3.MediaTypeObject, 'schema'> & { schema?: ClassType | Array<ClassType> };
-			};
-	  })
+	| MethodResponseItemContent
+	| MethodResponseItemContentMedia
+	| MethodResponseItemContentMediaSchema
 	| ClassType
 	| Array<ClassType>;
 
@@ -58,6 +66,7 @@ export interface ParameterDecoratorOptions extends ParameterDecoratorBaseOptions
 }
 
 export interface ParameterDecoratorMetadata {
+	[DecoratorId]: string;
 	module: string;
 	type: string;
 	options: ParameterDecoratorOptions;

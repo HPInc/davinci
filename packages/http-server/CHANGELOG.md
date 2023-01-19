@@ -3,6 +3,124 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.5.1](https://github.com/HPInc/davinci/compare/@davinci/http-server@3.5.0...@davinci/http-server@3.5.1) (2023-01-18)
+
+
+### Bug Fixes
+
+* stricter typescript rules ([#202](https://github.com/HPInc/davinci/issues/202)) ([863b68e](https://github.com/HPInc/davinci/commit/863b68e9702aecc6e5fd2b1e488d961a911c5478)), closes [#2](https://github.com/HPInc/davinci/issues/2)
+
+
+
+
+
+# [3.5.0](https://github.com/HPInc/davinci/compare/@davinci/http-server@3.4.4...@davinci/http-server@3.5.0) (2023-01-17)
+
+
+### Features
+
+* **httpServer:** implemented exposeStack flag ([#207](https://github.com/HPInc/davinci/issues/207)) ([1677552](https://github.com/HPInc/davinci/commit/1677552e10bb260a9fc24f44e865728c1d269c5f))
+
+
+
+
+
+## [3.4.4](https://github.com/HPInc/davinci/compare/@davinci/http-server@3.4.3...@davinci/http-server@3.4.4) (2023-01-16)
+
+**Note:** Version bump only for package @davinci/http-server
+
+
+
+
+
+## [3.4.3](https://github.com/HPInc/davinci/compare/@davinci/http-server@3.4.2...@davinci/http-server@3.4.3) (2023-01-04)
+
+**Note:** Version bump only for package @davinci/http-server
+
+
+
+
+
+## [3.4.2](https://github.com/HPInc/davinci/compare/@davinci/http-server@3.4.1...@davinci/http-server@3.4.2) (2023-01-03)
+
+**Note:** Version bump only for package @davinci/http-server
+
+
+
+
+
+## [3.4.1](https://github.com/HPInc/davinci/compare/@davinci/http-server@3.4.0...@davinci/http-server@3.4.1) (2023-01-02)
+
+**Note:** Version bump only for package @davinci/http-server
+
+
+
+
+
+# [3.4.0](https://github.com/HPInc/davinci/compare/@davinci/http-server@3.3.0...@davinci/http-server@3.4.0) (2022-12-21)
+
+
+### Features
+
+* **entity:** added support for recursive schemas ([#196](https://github.com/HPInc/davinci/issues/196)) ([ab977ac](https://github.com/HPInc/davinci/commit/ab977ac424fd29a5a1d1b31bb19d290f61639e2c))
+
+
+
+
+
+# [3.3.0](https://github.com/HPInc/davinci/compare/@davinci/http-server@3.2.2...@davinci/http-server@3.3.0) (2022-12-21)
+
+
+### Features
+
+* **httpInterceptor:** added ability to specify stage: 'preValidation' | 'postValidation' ([#195](https://github.com/HPInc/davinci/issues/195)) ([d61b571](https://github.com/HPInc/davinci/commit/d61b571f7b4dd46397f1b5ecf7e838378cb9a517))
+
+
+
+
+
+## [3.2.2](https://github.com/HPInc/davinci/compare/@davinci/http-server@3.2.1...@davinci/http-server@3.2.2) (2022-12-21)
+
+**Note:** Version bump only for package @davinci/http-server
+
+
+
+
+
+## [3.2.1](https://github.com/HPInc/davinci/compare/@davinci/http-server@3.2.0...@davinci/http-server@3.2.1) (2022-12-20)
+
+
+### Bug Fixes
+
+* EntityDefinition now can traverse json schema keywords ([#191](https://github.com/HPInc/davinci/issues/191)) ([ec0ba10](https://github.com/HPInc/davinci/commit/ec0ba1084fe0126e920d324b21bfa42af5639dc3))
+
+
+
+
+
+# [3.2.0](https://github.com/HPInc/davinci/compare/@davinci/http-server@3.1.0...@davinci/http-server@3.2.0) (2022-12-16)
+
+
+### Features
+
+* entity definition json walker ([#172](https://github.com/HPInc/davinci/issues/172)) ([da0a80d](https://github.com/HPInc/davinci/commit/da0a80dde0dee79bb3a21407afc0ea70909fd30b))
+
+
+
+
+
+# [3.1.0](https://github.com/HPInc/davinci/compare/@davinci/http-server@3.0.0...@davinci/http-server@3.1.0) (2022-12-15)
+
+
+### Features
+
+* allow multiple http method decorators ([bf843aa](https://github.com/HPInc/davinci/commit/bf843aa30941c1e98af1a41db6556b85bd4c3513))
+* **http-server:** createRoutes method now handle multiple decorations ([80e48bd](https://github.com/HPInc/davinci/commit/80e48bd7f67e435f16bfd6541e9eec309320ea53))
+
+
+
+
+
 # [3.0.0](https://github.com/HPInc/davinci/compare/@davinci/http-server@2.3.1...@davinci/http-server@3.0.0) (2022-12-15)
 
 

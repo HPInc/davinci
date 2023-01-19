@@ -2,6 +2,7 @@
  * © Copyright 2022 HP Development Company, L.P.
  * SPDX-License-Identifier: MIT
  */
+/* eslint no-unused-expressions: 0 */
 
 import {
 	App,
@@ -47,15 +48,15 @@ interface InFlightMessage {
 }
 
 export class AmqpModule extends Module {
-	app: App;
+	app?: App;
 	private logger: Logger;
 	private options: AmqpModuleOptions;
-	private connection: AmqpConnectionManager;
-	private subscriptions: Array<Subscription>;
+	private connection?: AmqpConnectionManager;
+	private subscriptions?: Array<Subscription>;
 	private subscriptionsMap: Map<string, Subscription> = new Map();
 	private bus: EventEmitter;
 	private inFlightMessages: Map<Message, InFlightMessage> = new Map();
-	private channelManager: ChannelManager;
+	private channelManager?: ChannelManager;
 
 	constructor(options: AmqpModuleOptions) {
 		super();
@@ -81,7 +82,7 @@ export class AmqpModule extends Module {
 	onRegister(app: App) {
 		this.app = app;
 
-		const level = this.options.logger?.level ?? app.getOptions().logger?.level;
+		const level = this.options.logger?.level ?? app.getOptions()?.logger?.level;
 		if (level) {
 			this.logger.level = level;
 		}
@@ -99,7 +100,7 @@ export class AmqpModule extends Module {
 
 	async onInit() {
 		this.logger.debug('Initializing module');
-		await this.connection.connect({ timeout: this.options?.connectionTimeout });
+		await this.connection?.connect({ timeout: this.options?.connectionTimeout });
 		this.logger.info('Connection established');
 
 		await this.createSubscriptions();
@@ -110,7 +111,7 @@ export class AmqpModule extends Module {
 			this.logger.debug('Waiting for the in-flight messages to be processed');
 			// stop consuming new messages
 			await mapParallel(this.subscriptions ?? [], subscription => {
-				return this.channelManager.unsubscribe(subscription);
+				return this.channelManager?.unsubscribe(subscription);
 			});
 			// wait until they are processed
 			await new Promise(resolve => {
@@ -120,21 +121,23 @@ export class AmqpModule extends Module {
 		} else if (this.options.gracefulShutdownStrategy === 'nackInFlight') {
 			this.logger.debug('Nacking all the in-flight messages');
 			await mapParallel(Array.from(this.inFlightMessages.values()), inFlightMsg => {
-				this.channelManager.nackMessage(inFlightMsg.message, inFlightMsg.subscription, true);
-				inFlightMsg.processed = true;
+				if (inFlightMsg.message && inFlightMsg.subscription) {
+					this.channelManager?.nackMessage(inFlightMsg.message, inFlightMsg.subscription, true);
+					inFlightMsg.processed = true;
+				}
 			});
 		}
 
-		await mapParallel(this.subscriptions ?? [], subscription =>
-			this.channelManager.closeChannel(subscription).catch(err => {
+		await mapParallel(this.subscriptions ?? [], subscription => {
+			return this.channelManager?.closeChannel(subscription)?.catch(err => {
 				this.logger.info(
 					{ subscriptionName: subscription.settings.name, error: err },
 					'Channel closed with errors'
 				);
-			})
-		);
+			});
+		});
 
-		await this.connection.close();
+		await this.connection?.close();
 		this.logger.info('Connection closed');
 	}
 
@@ -149,7 +152,7 @@ export class AmqpModule extends Module {
 			}
 		>();
 
-		this.app.getControllersWithReflection().forEach(({ controllerInstance, reflection }) => {
+		this.app?.getControllersWithReflection().forEach(({ controllerInstance, reflection }) => {
 			const matches = this.findMatchingMethodAndDecoratorReflections(reflection);
 
 			matches.forEach(({ methodReflection, decorator }) => {
@@ -167,7 +170,7 @@ export class AmqpModule extends Module {
 					// @ts-ignore
 					settings: { name: decorator.options.name, ...decorator.options?.amqp }
 				};
-				this.subscriptions.push(subscription);
+				this.subscriptions?.push(subscription);
 
 				controllerMethodReflectionsMap.set(subscription, controllerMethodAndReflections);
 			});
@@ -188,27 +191,31 @@ export class AmqpModule extends Module {
 		});
 
 		await mapSeries(this.subscriptions ?? [], async subscription => {
-			const { controller, controllerReflection, methodReflection } =
-				controllerMethodReflectionsMap.get(subscription);
+			if (!subscription) return;
+
+			if (!controllerMethodReflectionsMap.has(subscription)) return;
+			const controllerMethodReflections = controllerMethodReflectionsMap.get(subscription);
+
+			if (!controllerMethodReflections) return;
+			const { controller, controllerReflection, methodReflection } = controllerMethodReflections;
 
 			const parametersConfig = this.createParametersConfigurations({
 				controllerReflection,
 				methodReflection
 			});
 
-			await this.channelManager.subscribe(
+			const handler = await this.createMessageHandler({
+				controller,
+				methodName: methodReflection.name,
+				parametersConfig,
 				subscription,
-				await this.createMessageHandler({
-					controller,
-					methodName: methodReflection.name,
-					parametersConfig,
-					subscription,
-					reflections: {
-						methodReflection,
-						controllerReflection
-					}
-				})
-			);
+				reflections: {
+					methodReflection,
+					controllerReflection
+				}
+			});
+
+			await this.channelManager?.subscribe(subscription, handler);
 
 			this.logger.debug(
 				{ subscription: { name: subscription.settings.name } },
@@ -223,8 +230,8 @@ export class AmqpModule extends Module {
 	}: {
 		methodReflection: MethodReflection;
 		controllerReflection: ClassReflection;
-	}): ParameterConfiguration[] {
-		return methodReflection.parameters.reduce((acc, parameterReflection) => {
+	}): Array<ParameterConfiguration | null> {
+		return methodReflection.parameters.reduce<Array<ParameterConfiguration | null>>((acc, parameterReflection) => {
 			const parameterDecoratorMetadata = parameterReflection.decorators.find(
 				d => d[DecoratorId] === 'messaging.parameter'
 			);
@@ -236,13 +243,13 @@ export class AmqpModule extends Module {
 				acc.push({
 					source: options.in,
 					name: parameterReflection.name,
-					options,
+					// options,
 					type: parameterType
 				});
 			} else if (parameterDecoratorMetadata?.[DecoratorId] === 'core.parameter.context') {
 				acc.push({
 					source: 'context',
-					options: parameterDecoratorMetadata.options,
+					// options: parameterDecoratorMetadata.options,
 					reflection: { controllerReflection, methodReflection }
 				});
 			} else {
@@ -263,7 +270,7 @@ export class AmqpModule extends Module {
 		controller: InstanceType<ClassType>;
 		methodName: string;
 		subscription: Subscription;
-		parametersConfig: ParameterConfiguration[];
+		parametersConfig: Array<ParameterConfiguration | null>;
 		reflections: { methodReflection: MethodReflection; controllerReflection: ClassReflection };
 	}) {
 		const interceptors = [
@@ -273,11 +280,13 @@ export class AmqpModule extends Module {
 		// eslint-disable-next-line @typescript-eslint/no-this-alias
 		const amqpModule = this;
 
-		return async function davinciAmqpMessageHandler(msg: amqplib.ConsumeMessage) {
+		return async function davinciAmqpMessageHandler(msg: amqplib.ConsumeMessage | null) {
+			if (!msg) return null;
 			amqpModule.logger.debug({ message: msg }, 'Message received');
 			amqpModule.addInFlightMsg({ message: msg, subscription });
 
 			const parametersValues = await mapParallel(parametersConfig, parameterCfg => {
+				if (!parameterCfg) return null;
 				let value;
 				if (parameterCfg.source === 'message') {
 					value = msg;
@@ -304,7 +313,7 @@ export class AmqpModule extends Module {
 				);
 
 				if (!amqpModule.isInFlightMsgProcessed(msg) && subscription.settings?.autoAck) {
-					amqpModule.channelManager.ackMessage(msg, subscription);
+					amqpModule.channelManager?.ackMessage(msg, subscription);
 					amqpModule.deleteInFlightMsg(msg);
 				}
 
@@ -315,7 +324,7 @@ export class AmqpModule extends Module {
 					typeof autoNack === 'boolean' ? { enabled: autoNack, requeue: false } : autoNack ?? {};
 
 				if (!amqpModule.isInFlightMsgProcessed(msg) && nackEnabled) {
-					amqpModule.channelManager.nackMessage(msg, subscription, requeue);
+					amqpModule.channelManager?.nackMessage(msg, subscription, requeue);
 					amqpModule.deleteInFlightMsg(msg);
 					return null;
 				}
@@ -338,10 +347,12 @@ export class AmqpModule extends Module {
 	}
 
 	getChannels() {
-		return this.channelManager.getChannels();
+		return this.channelManager?.getChannels();
 	}
 
 	private addInFlightMsg(inFlightMessage: InFlightMessage) {
+		if (!inFlightMessage.message) return;
+
 		this.inFlightMessages.set(inFlightMessage.message, inFlightMessage);
 		this.bus.emit('addedInFlightMessage', { totalInFlight: this.inFlightMessages.size });
 	}
@@ -365,11 +376,11 @@ export class AmqpModule extends Module {
 	}: {
 		subscription: Subscription;
 		parameters: any[];
-	}): InterceptorBag<{}, { channel: ChannelWrapper; subscription: Subscription }> {
+	}): InterceptorBag<{ Additional: { channel: ChannelWrapper; subscription: Subscription } }> {
 		return {
 			module: 'messaging-amqp',
 			handlerArgs: parameters,
-			channel: subscription.channel,
+			channel: subscription.channel as ChannelWrapper,
 			subscription,
 			state: {}
 		};

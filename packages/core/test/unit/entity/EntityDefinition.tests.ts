@@ -48,7 +48,7 @@ describe('EntityDefinition', () => {
 
 		const entityDefinition = new EntityDefinition({ type: Customer });
 
-		expect(entityDefinition.getJsonSchema()).to.containSubset({
+		expect(entityDefinition.getEntityDefinitionJsonSchema()).to.containSubset({
 			title: 'Customer',
 			type: 'object',
 			properties: {
@@ -79,10 +79,45 @@ describe('EntityDefinition', () => {
 			},
 			required: ['lastname']
 		});
-		expect(entityDefinition.getJsonSchema().properties)
+		expect(entityDefinition.getEntityDefinitionJsonSchema().properties)
 			.to.haveOwnProperty('birth')
 			.to.haveOwnProperty('_$ref')
 			.to.be.instanceof(EntityDefinition);
+	});
+
+	it('should reflect a class with enum and generate a json schema', () => {
+		enum PHONE_TYPE {
+			PERSONAL = 'personal',
+			WORK = 'work',
+			OTHER = 'other'
+		}
+
+		enum PHONE_PREFIX {
+			one = 1,
+			three = 3
+		}
+
+		@entity()
+		class Phone {
+			@entity.prop({ oneOf: [{ enum: PHONE_TYPE }, { enum: PHONE_PREFIX }] })
+			typeOrPrefix: PHONE_TYPE | PHONE_PREFIX;
+		}
+
+		const entityDefinition = new EntityDefinition({ type: Phone });
+
+		expect(entityDefinition.getEntityDefinitionJsonSchema()).to.containSubset({
+			title: 'Phone',
+			type: 'object',
+			properties: {
+				typeOrPrefix: {
+					oneOf: [
+						{ enum: ['personal', 'work', 'other'], type: 'string' },
+						{ enum: ['one', 'three'], type: 'string' }
+					],
+					type: 'object'
+				}
+			}
+		});
 	});
 
 	it('should reflect a class and generate a json schema using the entity definition cache', () => {
@@ -116,7 +151,7 @@ describe('EntityDefinition', () => {
 			entityDefinitionsMapCache
 		});
 
-		expect(customerEntityDefinition.getJsonSchema()).to.containSubset({
+		expect(customerEntityDefinition.getEntityDefinitionJsonSchema()).to.containSubset({
 			title: 'Customer',
 			type: 'object',
 			properties: {
@@ -129,13 +164,250 @@ describe('EntityDefinition', () => {
 			},
 			required: ['lastname']
 		});
-		expect(customerEntityDefinition.getJsonSchema().properties)
+		expect(customerEntityDefinition.getEntityDefinitionJsonSchema().properties)
 			.to.haveOwnProperty('birth')
 			.to.haveOwnProperty('_$ref')
 			.to.be.instanceof(EntityDefinition);
 
 		// verify cache is being used
 		expect(entityDefinitionsMapCacheGetSpy.called).to.be.equal(true);
+	});
+
+	it('should reflect a class and generate a json schema with nested required properties', () => {
+		@entity()
+		class Customer {
+			@entity.prop({
+				required: ['firstName', 'lastName'],
+				properties: {
+					firstName: { type: 'string' },
+					middleName: { type: 'string' },
+					lastName: { type: 'string' },
+					birthday: {
+						type: 'object',
+						properties: {
+							day: { type: 'number' },
+							month: { oneOf: ['number', 'string'] },
+							year: { type: 'number' }
+						},
+						required: ['day', 'month']
+					}
+				}
+			})
+			personalInfo: Record<string, string>;
+
+			@entity.prop({ required: true })
+			id: number;
+
+			@entity.prop({ required: true })
+			country: string;
+
+			@entity.prop({
+				properties: {
+					id: {
+						type: 'number'
+					},
+					firstName: {
+						type: 'string'
+					},
+					lastName: {
+						type: 'string'
+					}
+				},
+				anyOf: [{ required: ['id'] }, { required: ['firstName'] }, { required: ['lastName'] }]
+			})
+			$sort?: Record<'id' | 'firstName' | 'lastName', -1 | 1>;
+		}
+
+		const entityDefinition = new EntityDefinition({ type: Customer });
+
+		expect(entityDefinition.getEntityDefinitionJsonSchema()).to.containSubset({
+			title: 'Customer',
+			type: 'object',
+			required: ['id', 'country'],
+			properties: {
+				id: {
+					type: 'number'
+				},
+				country: {
+					type: 'string'
+				},
+				personalInfo: {
+					type: 'object',
+					properties: {
+						firstName: {
+							type: 'string'
+						},
+						middleName: {
+							type: 'string'
+						},
+						lastName: {
+							type: 'string'
+						},
+						birthday: {
+							type: 'object',
+							properties: {
+								day: {
+									type: 'number'
+								},
+								month: {
+									oneOf: ['number', 'string']
+								},
+								year: {
+									type: 'number'
+								}
+							},
+							required: ['day', 'month']
+						}
+					},
+					required: ['firstName', 'lastName']
+				},
+				$sort: {
+					anyOf: [{ required: ['id'] }, { required: ['firstName'] }, { required: ['lastName'] }]
+				}
+			}
+		});
+	});
+
+	it('should correctly traverse and reflect class types nested in keywords (anyOf, oneOf, allOf)', () => {
+		class HomeAddress {
+			@entity.prop()
+			line1: string;
+
+			@entity.prop()
+			number: string;
+		}
+
+		@entity()
+		class OfficeAddress {
+			@entity.prop()
+			line1: string;
+
+			@entity.prop()
+			number: string;
+		}
+
+		@entity()
+		class FamilyAddressNested {
+			@entity.prop()
+			line1: string;
+
+			@entity.prop()
+			number: string;
+		}
+
+		@entity()
+		class Customer {
+			@entity.prop({
+				anyOf: [
+					HomeAddress,
+					OfficeAddress,
+					{
+						type: 'object',
+						properties: { nested: FamilyAddressNested, otherProp: { type: 'string' } },
+						required: ['nested']
+					}
+				]
+			})
+			address: HomeAddress | OfficeAddress;
+		}
+
+		const entityDefinition = new EntityDefinition({ type: Customer });
+		const entityDefinitionJsonSchema = entityDefinition.getEntityDefinitionJsonSchema();
+
+		expect(entityDefinitionJsonSchema).to.containSubset({
+			$id: 'Customer',
+			title: 'Customer',
+			type: 'object',
+			properties: {
+				address: {
+					anyOf: [
+						{
+							title: 'HomeAddress',
+							type: 'object',
+							properties: {
+								line1: {
+									type: 'string'
+								},
+								number: {
+									type: 'string'
+								}
+							},
+							required: []
+						},
+						{},
+						{
+							type: 'object',
+							properties: {
+								nested: {},
+								otherProp: {
+									type: 'string'
+								}
+							},
+							required: ['nested']
+						}
+					],
+					title: 'address',
+					type: 'object'
+				}
+			},
+			required: []
+		});
+		expect(entityDefinitionJsonSchema.properties.address.anyOf[1])
+			.to.haveOwnProperty('_$ref')
+			.to.be.instanceof(EntityDefinition);
+		expect(entityDefinitionJsonSchema.properties.address.anyOf[2].properties.nested)
+			.to.haveOwnProperty('_$ref')
+			.to.be.instanceof(EntityDefinition);
+	});
+
+	it('should disable the type detection, if type is set to "false"', () => {
+		@entity()
+		class Customer {
+			@entity.prop({
+				type: false,
+				anyOf: [
+					{
+						type: 'number'
+					},
+					{
+						type: 'string'
+					}
+				]
+			})
+			address: number | string;
+
+			@entity.prop({
+				type: null,
+				anyOf: [
+					{
+						type: 'number'
+					},
+					{
+						type: 'string'
+					}
+				]
+			})
+			number: number | string;
+		}
+
+		const entityDefinition = new EntityDefinition({ type: Customer });
+		const entityDefinitionJsonSchema = entityDefinition.getEntityDefinitionJsonSchema();
+
+		expect(entityDefinitionJsonSchema).to.containSubset({
+			$id: 'Customer',
+			title: 'Customer',
+			properties: {
+				address: {
+					anyOf: [{ type: 'number' }, { type: 'string' }]
+				},
+				number: {
+					anyOf: [{ type: 'number' }, { type: 'string' }]
+				}
+			},
+			required: []
+		});
+		expect(entityDefinitionJsonSchema.properties.address.type).to.be.undefined;
+		expect(entityDefinitionJsonSchema.properties.number.type).to.be.undefined;
 	});
 
 	describe('getName', () => {

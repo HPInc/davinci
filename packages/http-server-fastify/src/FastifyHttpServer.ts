@@ -28,10 +28,8 @@ import qs from 'qs';
 type Server = HttpServer | HttpsServer;
 
 export interface FastifyHttpServerModuleOptions extends HttpServerModuleOptions {
-	instance?: FastifyInstance;
-	middlewares?: {
-		cors?: FastifyCorsOptions;
-	};
+	instance?: FastifyInstance | (() => FastifyInstance);
+	cors?: FastifyCorsOptions;
 	plugins?: [FastifyPluginCallback, FastifyPluginOptions?][];
 }
 
@@ -39,30 +37,27 @@ export class FastifyHttpServer extends HttpServerModule<{
 	Request: FastifyRequest;
 	Response: FastifyReply;
 	Server: Server;
+	Instance: FastifyInstance;
 	ModuleOptions: FastifyHttpServerModuleOptions;
 }> {
-	instance: FastifyInstance;
-	app: App;
+	app?: App;
+	instance?: FastifyInstance;
 
 	constructor(options?: FastifyHttpServerModuleOptions) {
-		const { instance, ...moduleOptions } = options ?? {};
-		super(moduleOptions);
-		this.instance = instance;
-		if (this.moduleOptions.logger?.level) {
-			this.logger.level = this.moduleOptions.logger?.level;
+		super(options ?? {});
+		if (this.moduleOptions?.logger?.level) {
+			this.logger.level = this.moduleOptions?.logger?.level;
 		}
 	}
 
 	async onRegister(app: App) {
 		this.app = app;
-		const level = this.moduleOptions.logger?.level ?? app.getOptions().logger?.level;
+		const level = this.moduleOptions?.logger?.level ?? app.getOptions()?.logger?.level;
 		if (level) {
 			this.logger.level = level;
 		}
 		this.initHttpServer();
-		await this.registerMiddlewares();
 		await this.registerPlugins();
-
 		await super.createRoutes();
 	}
 
@@ -72,27 +67,32 @@ export class FastifyHttpServer extends HttpServerModule<{
 
 	async onDestroy() {
 		await this.close();
+		delete this.instance;
+		this.setHttpServer(null);
 		this.logger.info('Server stopped');
 	}
 
-	async registerMiddlewares() {
-		if (this.moduleOptions?.middlewares?.cors) {
-			await this.instance.register(fastifyCors, this.moduleOptions?.middlewares?.cors);
-		}
-	}
-
 	async registerPlugins() {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
+		if (this.moduleOptions?.cors) this.instance.register(fastifyCors, this.moduleOptions?.cors);
 		const promises =
-			this.moduleOptions?.plugins?.map(([plugin, options]) => this.instance.register(plugin, options)) ?? [];
+			this.moduleOptions?.plugins?.map(([plugin, options]) => this.instance?.register(plugin, options)) ?? [];
+
 		return Promise.all(promises);
 	}
 
 	initHttpServer() {
-		this.instance =
-			this.instance ??
-			fastify({
-				querystringParser: str => qs.parse(str, { parseArrays: true })
-			});
+		const { instance } = this.moduleOptions ?? {};
+		if (instance && typeof instance === 'function') {
+			this.instance = instance();
+		} else {
+			this.instance =
+				(instance as FastifyInstance) ??
+				fastify({
+					querystringParser: str => qs.parse(str, { parseArrays: true })
+				});
+		}
 		super.setHttpServer(this.instance.server);
 	}
 
@@ -105,42 +105,62 @@ export class FastifyHttpServer extends HttpServerModule<{
 	}
 
 	public get(path: string, handler: RequestHandler<FastifyRequest, FastifyReply>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.get(path, handler);
 	}
 
 	public post(path: string, handler: RequestHandler<FastifyRequest, FastifyReply>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.post(path, handler);
 	}
 
 	public head(path: string, handler: RequestHandler<FastifyRequest, FastifyReply>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.head(path, handler);
 	}
 
 	public delete(path: string, handler: RequestHandler<FastifyRequest, FastifyReply>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.delete(path, handler);
 	}
 
 	public put(path: string, handler: RequestHandler<FastifyRequest, FastifyReply>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.put(path, handler);
 	}
 
 	public patch(path: string, handler: RequestHandler<FastifyRequest, FastifyReply>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.patch(path, handler);
 	}
 
 	public all(path: string, handler: RequestHandler<FastifyRequest, FastifyReply>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.all(path, handler);
 	}
 
 	public options(path: string, handler: RequestHandler<FastifyRequest, FastifyReply>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.options(path, handler);
 	}
 
 	public static(path: string, options?: Omit<FastifyStaticOptions, 'root'>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.register(fastifyStatic, { root: path, ...options });
 	}
 
 	async listen() {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		const port = Number(this.moduleOptions?.port) || 3000;
 		await this.instance.listen({ port: Number(port), host: '0.0.0.0' });
 		this.logger.info(`Server listening on port: ${port}`);
@@ -163,10 +183,14 @@ export class FastifyHttpServer extends HttpServerModule<{
 	}
 
 	public setErrorHandler(handler: ErrorRequestHandler<FastifyRequest, FastifyReply>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.setErrorHandler(handler);
 	}
 
 	public setNotFoundHandler(handler: RequestHandler<FastifyRequest, FastifyReply>) {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.setNotFoundHandler(handler);
 	}
 
@@ -175,6 +199,8 @@ export class FastifyHttpServer extends HttpServerModule<{
 	}
 
 	public close() {
+		if (!this.instance) throw new Error('instance not set, aborting');
+
 		return this.instance.close();
 	}
 
@@ -210,18 +236,22 @@ export class FastifyHttpServer extends HttpServerModule<{
 	}: {
 		source: ParameterSource;
 		name?: string;
-		request: FastifyRequest;
+		request: FastifyRequest<{
+			Params: Record<string, any>;
+			Headers: Record<string, any>;
+			Querystring: Record<string, any>;
+		}>;
 		response: FastifyReply;
 	}) {
 		switch (source) {
 			case 'path':
-				return request.params[name];
+				return request?.params[name as string];
 
 			case 'header':
-				return request.headers[name];
+				return request?.headers[name as string];
 
 			case 'query':
-				return request.query[name];
+				return request?.query[name as string];
 
 			case 'body':
 				return request.body;
@@ -238,6 +268,6 @@ export class FastifyHttpServer extends HttpServerModule<{
 	}
 
 	performHttpInjection(injectOptions: InjectOptions) {
-		return this.instance.inject(injectOptions);
+		return (this.instance as FastifyInstance).inject(injectOptions);
 	}
 }

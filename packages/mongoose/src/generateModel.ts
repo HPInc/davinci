@@ -3,11 +3,26 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { model, Model, Schema, SchemaOptions } from 'mongoose';
+import { model, Model, Schema, SchemaDefinition, SchemaOptions } from 'mongoose';
 import { ClassType, DecoratorId, PropertyReflection, reflect, TypeValue } from '@davinci/reflector';
 import { omit } from '@davinci/core';
 import { IPropDecoratorOptions, IPropDecoratorOptionsFactory } from './decorators/types';
-import { IVirtualArgs } from './decorators';
+import {
+	IndexDecoratorMetadata,
+	IVirtualArgs,
+	PopulateDecoratorMetadata,
+	VirtualDecoratorMetadata
+} from './decorators';
+
+type RecursivelyGenerateSchemaReturnType<T> = {
+	schema: Schema<T> | SchemaDefinition;
+	indexes?: Array<IndexDecoratorMetadata>;
+	populatedVirtuals?: Array<PopulateDecoratorMetadata>;
+	virtuals?: Array<VirtualDecoratorMetadata & { name: string }>;
+	methods?: Record<string, (...args: any[]) => any>;
+};
+
+const DEFAULT_SCHEMA_OPTIONS = { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } };
 
 /**
  * Utility function that given a class passed as parameter,
@@ -17,20 +32,22 @@ import { IVirtualArgs } from './decorators';
  */
 export const generateSchema = <T>(
 	schemaType: ClassType,
-	options: SchemaOptions = { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
+	options: SchemaOptions = DEFAULT_SCHEMA_OPTIONS
 ): Schema<T> => {
-	const recursivelyGenerateSchema = (
+	const recursivelyGenerateSchema = <U>(
 		// eslint-disable-next-line no-shadow
 		schemaType: ClassType,
 		// eslint-disable-next-line no-shadow
-		options: SchemaOptions = { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } },
+		options: SchemaOptions | null = DEFAULT_SCHEMA_OPTIONS,
 		forceCreateSchema?: boolean
-	) => {
+	): RecursivelyGenerateSchemaReturnType<U> => {
 		const classReflection = reflect(schemaType);
-		const propsWithMeta: {
-			reflection: PropertyReflection;
-			decorator: { options: IPropDecoratorOptions | IPropDecoratorOptionsFactory };
-		}[] = classReflection.properties.reduce((acc, propReflection) => {
+		const propsWithMeta = classReflection.properties.reduce<
+			Array<{
+				reflection: PropertyReflection;
+				decorator: { options: IPropDecoratorOptions | IPropDecoratorOptionsFactory };
+			}>
+		>((acc, propReflection) => {
 			const propDecorator = propReflection.decorators.find(d => d[DecoratorId] === 'mongoose.prop');
 			if (propDecorator) {
 				acc.push({ reflection: propReflection, decorator: propDecorator });
@@ -39,17 +56,17 @@ export const generateSchema = <T>(
 			return acc;
 		}, []);
 
-		const rootIndexes = [];
-		const rootPopulatedVirtuals = [];
-		const rootVirtuals = [];
-		const rootMethods = {};
+		const rootIndexes: Array<IndexDecoratorMetadata> = [];
+		const rootPopulatedVirtuals: Array<PopulateDecoratorMetadata> = [];
+		const rootVirtuals: Array<VirtualDecoratorMetadata & { name: string }> = [];
+		const rootMethods: Record<string, (...args: any[]) => any> = {};
 
 		// loop over the variable decorated as props
 		const definition = propsWithMeta.reduce((acc, { reflection, decorator: { options: opts } }) => {
 			// eslint-disable-next-line no-shadow
 			const options = typeof opts === 'function' ? opts() : opts;
 
-			let type: TypeValue = options?.type ?? reflection.type;
+			let type: TypeValue | Array<TypeValue> = options?.type ?? reflection.type;
 			if (typeof options?.typeFactory === 'function') {
 				type = options.typeFactory();
 			}
@@ -62,8 +79,7 @@ export const generateSchema = <T>(
 			}
 
 			const isArray = Array.isArray(type);
-			if (isArray && (type as any[]).length > 0) {
-				// eslint-disable-next-line prefer-destructuring
+			if (Array.isArray(type) && (type as any[]).length > 0) {
 				type = type[0];
 			}
 
@@ -95,20 +111,20 @@ export const generateSchema = <T>(
 			}
 
 			const prop = {
-				...omit(options, ['type']),
+				...omit(options ?? {}, ['type']),
 				type
 			};
 
 			return {
 				...acc,
-				[reflection.name]: isArray ? [prop] : prop
+				[reflection.name]: isArray ? [prop.type] : prop
 			};
 		}, {});
 
 		// get schema options
 		const schemaDecoration = classReflection.decorators.find(d => d[DecoratorId] === 'mongoose.schema');
 		const schemaOptions = schemaDecoration?.options;
-		const schema =
+		const schema: Schema<U> =
 			(forceCreateSchema || schemaDecoration) && new Schema(definition, { ...(options ?? schemaOptions) });
 
 		// register methods
@@ -128,46 +144,52 @@ export const generateSchema = <T>(
 
 		const populatedVirtuals = [
 			// properties with @populate decorator
-			...classReflection.properties.reduce((acc, propReflection) => {
+			...classReflection.properties.reduce<Array<PopulateDecoratorMetadata>>((acc, propReflection) => {
 				const populateDecorator = propReflection.decorators.find(d => d[DecoratorId] === 'mongoose.populate');
 				if (populateDecorator) {
 					acc.push({
 						name: populateDecorator.name,
-						options: { localField: populateDecorator.name, ...populateDecorator.options }
+						options: { localField: propReflection.name, ...populateDecorator.options }
 					});
 				}
 
 				return acc;
 			}, []),
 			// properties with @virtual decorator
-			...classReflection.properties.reduce((acc, propReflection) => {
-				const virtualDecorator: { options: IVirtualArgs } = propReflection.decorators.find(
-					d => d[DecoratorId] === 'mongoose.virtual'
-				);
+			...classReflection.properties.reduce<Array<{ name: string; options: IVirtualArgs }>>(
+				(acc, propReflection) => {
+					const virtualDecorator: { options: IVirtualArgs } = propReflection.decorators.find(
+						d => d[DecoratorId] === 'mongoose.virtual'
+					);
+					if (virtualDecorator) {
+						acc.push({
+							name: propReflection.name,
+							options: { localField: propReflection.name, ...virtualDecorator.options }
+						});
+					}
+
+					return acc;
+				},
+				[]
+			)
+		];
+
+		// virtual fields with getter method
+		const virtuals = classReflection.methods.reduce<Array<VirtualDecoratorMetadata & { name: string }>>(
+			(acc, methodReflection) => {
+				const virtualDecorator = methodReflection.decorators.find(d => d[DecoratorId] === 'mongoose.virtual');
 				if (virtualDecorator) {
 					acc.push({
-						name: propReflection.name,
-						options: { localField: propReflection.name, ...virtualDecorator.options }
+						name: methodReflection.name,
+						options: virtualDecorator.options,
+						handler: virtualDecorator.handler
 					});
 				}
 
 				return acc;
-			}, [])
-		];
-
-		// virtual fields with getter method
-		const virtuals = classReflection.methods.reduce((acc, methodReflection) => {
-			const virtualDecorator = methodReflection.decorators.find(d => d[DecoratorId] === 'mongoose.virtual');
-			if (virtualDecorator) {
-				acc.push({
-					name: methodReflection.name,
-					options: virtualDecorator.options,
-					handler: virtualDecorator.handler
-				});
-			}
-
-			return acc;
-		}, []);
+			},
+			[]
+		);
 
 		if (schema) {
 			schema.methods = { ...rootMethods, ...methods };
@@ -180,8 +202,8 @@ export const generateSchema = <T>(
 					virtual.get(handler);
 				}
 			});
-			[...rootIndexes, ...indexes].forEach(({ name, options: o }) => {
-				schema.index(name, o);
+			[...rootIndexes, ...indexes].forEach(({ fields, options: o }) => {
+				schema.index(fields, o);
 			});
 		}
 
@@ -195,9 +217,9 @@ export const generateSchema = <T>(
 		return { schema: schema ?? definition, ...(!schema ? { indexes, populatedVirtuals, virtuals, methods } : {}) };
 	};
 
-	const { schema } = recursivelyGenerateSchema(schemaType, options, true);
+	const { schema } = recursivelyGenerateSchema<T>(schemaType, options, true);
 
-	return schema;
+	return schema as Schema<T>;
 };
 
 /**
@@ -210,7 +232,7 @@ export const generateSchema = <T>(
 export function generateModel<T>(
 	classSchema: ClassType,
 	modelName = classSchema.name,
-	collectionName?,
+	collectionName?: string,
 	options?: SchemaOptions
 ): Model<T> {
 	const schema = generateSchema<T>(classSchema, options);

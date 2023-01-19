@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { entity, EntityDefinition, EntityRegistry } from '../../../src';
-import { expect } from '../../support/chai';
 import sinon from 'sinon';
+import { entity, EntityDefinition, EntityRegistry, omit, transformEntityDefinitionSchema } from '../../../src';
+import { expect } from '../../support/chai';
 
 describe('EntityRegistry', () => {
 	it('should be able to add and create json schema for entities', () => {
@@ -32,7 +32,7 @@ describe('EntityRegistry', () => {
 			birth: Birth;
 		}
 
-		const jsonSchema = entityRegistry.getJsonSchema(Customer);
+		const jsonSchema = entityRegistry.getEntityDefinitionJsonSchema(Customer);
 		const entries = Array.from(entityRegistry.getEntityDefinitionMap().entries());
 
 		expect(jsonSchema).to.containSubset({
@@ -69,20 +69,230 @@ describe('EntityRegistry', () => {
 			lastname: string;
 		}
 
-		entityRegistry.getJsonSchema(Customer);
-		entityRegistry.getJsonSchema(Customer);
-		entityRegistry.getJsonSchema(Customer);
+		entityRegistry.getEntityDefinitionJsonSchema(Customer);
+		entityRegistry.getEntityDefinitionJsonSchema(Customer);
+		entityRegistry.getEntityDefinitionJsonSchema(Customer);
 
 		expect(cacheGet.callCount).to.be.equal(2);
 		expect(cacheSet.callCount).to.be.equal(1);
 	});
 
-	it('should be able to generate json schema for primitive type contructors', () => {
+	it('should be able to generate json schema for primitive type constructors', () => {
 		const entityRegistry = new EntityRegistry();
 
-		expect(entityRegistry.getJsonSchema(String)).to.be.deep.equal({ type: 'string' });
-		expect(entityRegistry.getJsonSchema(Number)).to.be.deep.equal({ type: 'number' });
-		expect(entityRegistry.getJsonSchema(Boolean)).to.be.deep.equal({ type: 'boolean' });
-		expect(entityRegistry.getJsonSchema(Date)).to.be.deep.equal({ type: 'string', format: 'date-time' });
+		expect(entityRegistry.getEntityDefinitionJsonSchema(String)).to.be.deep.equal({ type: 'string' });
+		expect(entityRegistry.getEntityDefinitionJsonSchema(Number)).to.be.deep.equal({ type: 'number' });
+		expect(entityRegistry.getEntityDefinitionJsonSchema(Boolean)).to.be.deep.equal({ type: 'boolean' });
+		expect(entityRegistry.getEntityDefinitionJsonSchema(Date)).to.be.deep.equal({
+			type: 'string',
+			format: 'date-time'
+		});
+	});
+
+	it('should support recursive types', () => {
+		const entityRegistry = new EntityRegistry();
+
+		@entity()
+		class Populate {
+			@entity.prop()
+			populate: Populate;
+		}
+
+		const jsonSchema = entityRegistry.getEntityDefinitionJsonSchema(Populate);
+		const populateEntityDefinition = entityRegistry.getEntityDefinitionMap().get(Populate);
+
+		expect(jsonSchema).to.containSubset({
+			$id: 'Populate',
+			title: 'Populate',
+			type: 'object',
+			properties: {
+				populate: {
+					_$ref: populateEntityDefinition
+				}
+			}
+		});
+	});
+
+	it('should support recursive array schemas', () => {
+		const entityRegistry = new EntityRegistry();
+
+		@entity()
+		class Populate {
+			@entity.prop({ type: [Populate] })
+			populate: Array<Populate>;
+		}
+
+		const jsonSchema = entityRegistry.getEntityDefinitionJsonSchema(Populate);
+		const populateEntityDefinition = entityRegistry.getEntityDefinitionMap().get(Populate);
+
+		expect(jsonSchema).to.containSubset({
+			$id: 'Populate',
+			title: 'Populate',
+			type: 'object',
+			properties: {
+				populate: {
+					type: 'array',
+					items: {
+						_$ref: populateEntityDefinition
+					}
+				}
+			}
+		});
+	});
+
+	it('should support recursive schemas, specified in oneOf, allOf or anyOf keywords', () => {
+		const entityRegistry = new EntityRegistry();
+
+		@entity()
+		class Populate {
+			@entity.prop({ type: false, anyOf: [{ type: 'string' }, Populate] })
+			populate: string | Populate;
+		}
+
+		const jsonSchema = entityRegistry.getEntityDefinitionJsonSchema(Populate);
+		const populateEntityDefinition = entityRegistry.getEntityDefinitionMap().get(Populate);
+
+		expect(jsonSchema).to.be.containSubset({
+			$id: 'Populate',
+			title: 'Populate',
+			type: 'object',
+			properties: {
+				populate: {
+					anyOf: [{ type: 'string' }, { _$ref: populateEntityDefinition }]
+				}
+			}
+		});
+	});
+
+	describe('#entityDefinitionSchemaTransform', () => {
+		it('should traverse and allow transforming json schemas structures', () => {
+			const entityRegistry = new EntityRegistry();
+
+			@entity()
+			class Birth {
+				@entity.prop()
+				date: Date;
+
+				@entity.prop()
+				country: string;
+			}
+
+			class Line1 {
+				@entity.prop()
+				one: string;
+
+				@entity.prop()
+				two: string;
+			}
+
+			@entity()
+			class HomeAddress {
+				@entity.prop()
+				line1: Line1;
+
+				@entity.prop()
+				number: string;
+			}
+
+			class OfficeAddress {
+				@entity.prop()
+				line1: Line1;
+
+				@entity.prop()
+				number: string;
+			}
+
+			@entity()
+			class Customer {
+				@entity.prop()
+				firstname: string;
+
+				@entity.prop({ required: true })
+				lastname: string;
+
+				@entity.prop()
+				birth: Birth;
+
+				@entity.prop({ anyOf: [HomeAddress, OfficeAddress] })
+				address: HomeAddress | OfficeAddress;
+			}
+
+			const entityJsonSchema = entityRegistry.getEntityDefinitionJsonSchema(Customer);
+
+			let result = transformEntityDefinitionSchema(entityJsonSchema, args => {
+				if (args.pointerPath === '') {
+					return { path: '', value: omit(args.schema, ['properties']) };
+				} else if (args.schema._$ref) {
+					const ref: EntityDefinition = args.schema._$ref;
+					const childEntityJsonSchema = ref.getEntityDefinitionJsonSchema();
+					if (childEntityJsonSchema.$id) {
+						return { path: args.pointerPath, value: { $ref: `#/${childEntityJsonSchema.$id}` } };
+					} else {
+						return { path: args.pointerPath, value: childEntityJsonSchema };
+					}
+				} else if (typeof args.schema === 'function') {
+					const childEntityJsonSchema = entityRegistry.getEntityDefinitionJsonSchema(args.schema);
+					if (childEntityJsonSchema.$id) {
+						return { path: args.pointerPath, value: { $ref: `#/${childEntityJsonSchema.$id}` } };
+					} else {
+						return { path: args.pointerPath, value: childEntityJsonSchema };
+					}
+				} else if (args.parentKeyword === 'properties') {
+					return { path: args.pointerPath, value: args.schema };
+				}
+
+				return null;
+			});
+
+			expect(result).to.containSubset({
+				title: 'Customer',
+				type: 'object',
+				required: ['lastname'],
+				$id: 'Customer',
+				properties: {
+					firstname: {
+						type: 'string'
+					},
+					lastname: {
+						type: 'string'
+					},
+					birth: {
+						$ref: '#/Birth'
+					},
+					address: {
+						anyOf: [
+							{
+								$ref: '#/HomeAddress'
+							},
+							{
+								title: 'OfficeAddress',
+								type: 'object',
+								properties: {
+									line1: {
+										title: 'line1',
+										type: 'object',
+										properties: {
+											one: {
+												type: 'string'
+											},
+											two: {
+												type: 'string'
+											}
+										},
+										required: []
+									},
+									number: {
+										type: 'string'
+									}
+								},
+								required: []
+							}
+						],
+						title: 'address',
+						type: 'object'
+					}
+				}
+			});
+		});
 	});
 });

@@ -4,7 +4,7 @@
  */
 
 import { ClassReflection, MethodReflection, TypeValue } from '@davinci/reflector';
-import { Interceptor, InterceptorBagDetails, JSONSchema } from '@davinci/core';
+import { Interceptor, InterceptorBagGenerics, InterceptorDecoratorMeta, JSONSchema } from '@davinci/core';
 import { Level } from 'pino';
 import { ControllerDecoratorMetadata, MethodDecoratorMetadata, ParameterDecoratorOptions, Verb } from './decorators';
 
@@ -61,34 +61,28 @@ export interface ContextFactoryArguments<Request> {
 
 export type ContextFactory<Context, Request = any> = (args: ContextFactoryArguments<Request>) => Context;
 
-export type ValidationFunction = (data: unknown) => typeof data;
+export type HttpServerInterceptorStage = 'preValidation' | 'postValidation';
 
-export type ValidationFactory = (route: Route<any>) => ValidationFunction | Promise<ValidationFunction>;
+export interface HttpServerInterceptorMeta {
+	stage?: HttpServerInterceptorStage;
+}
 
-export type HttpInterceptorBag = InterceptorBagDetails & {
+export type HttpInterceptorBag = InterceptorBagGenerics & {
 	Request?: unknown;
 	Response?: unknown;
+	Meta?: HttpServerInterceptorMeta;
 };
 
-export type HttpServerInterceptor<Bag extends HttpInterceptorBag = HttpInterceptorBag> = Interceptor<
-	Bag,
-	{ request?: Bag['Request']; response?: Bag['Response']; route?: Route<Bag['Request']> }
->;
-
-export interface HttpServerModuleOptions {
-	port?: number | string;
-	contextFactory?: ContextFactory<unknown>;
-	validationFactory?: ValidationFactory;
-	errorsHandling?: {
-		exposeStack?: boolean;
+export type HttpServerInterceptor<Bag extends HttpInterceptorBag = HttpInterceptorBag> = Interceptor<{
+	Context: Bag['Context'];
+	State: Bag['State'];
+	Meta: HttpServerInterceptorMeta;
+	Additional: {
+		request?: Bag['Request'];
+		response?: Bag['Response'];
+		route?: Route<Bag['Request']>;
 	};
-	querystringJsonParsing?: boolean;
-	globalInterceptors?: Array<HttpServerInterceptor>;
-	logger?: {
-		name?: string;
-		level?: Level | 'silent';
-	};
-}
+}>;
 
 export type EndpointSchema = JSONSchema<any> & {
 	properties: {
@@ -98,6 +92,30 @@ export type EndpointSchema = JSONSchema<any> & {
 		headers?: JSONSchema<any>;
 	};
 };
+
+export type ValidationFunction = (data: Record<keyof EndpointSchema['properties'], unknown>) => unknown;
+
+export type ValidationFactory = (route: Route<any>) => ValidationFunction | Promise<ValidationFunction>;
+
+export interface HttpServerModuleOptions {
+	port?: number | string;
+	contextFactory?: ContextFactory<unknown>;
+	validationFactory?: ValidationFactory;
+	errorHandling?: {
+		/**
+		 * enabled by default. False if process.env.NODE_ENV === 'production'
+		 */
+		exposeStack?: boolean;
+	};
+	querystringJsonParsing?: boolean;
+	globalInterceptors?: Array<
+		HttpServerInterceptor | { handler: InterceptorDecoratorMeta['handler']; stage: HttpServerInterceptorStage }
+	>;
+	logger?: {
+		name?: string;
+		level?: Level | 'silent';
+	};
+}
 
 export interface StaticServeOptions {
 	dotfiles?: 'allow' | 'deny' | 'ignore';

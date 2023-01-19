@@ -3,10 +3,20 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { di, EntityRegistry, JSONSchema, mapObject, mapSeries } from '@davinci/core';
-import Ajv, { DefinedError, Options, Plugin } from 'ajv';
+import {
+	di,
+	EntityDefinition,
+	EntityDefinitionJSONSchema,
+	EntityRegistry,
+	JSONSchema,
+	mapSeries,
+	omit,
+	transformEntityDefinitionSchema
+} from '@davinci/core';
+import Ajv, { ErrorObject, Options, Plugin } from 'ajv';
 import addFormats from 'ajv-formats';
 import { TypeValue } from '@davinci/reflector';
+import { ValidateFunction } from 'ajv/dist/types';
 import { EndpointSchema, ParameterConfiguration, Route, ValidationFactory, ValidationFunction } from './types';
 import { BadRequest } from './httpErrors';
 
@@ -22,7 +32,7 @@ type Source = typeof sources[number];
 type AjvInstancesMap = Record<Source, Ajv>;
 type AjvOptionsMap = Record<Source, Options>;
 
-type AjvPluginOptions = unknown;
+type AjvPluginOptions = any;
 type AjvPlugin = Plugin<AjvPluginOptions>;
 type AjvPlugins = Array<[AjvPlugin, AjvPluginOptions?]>;
 type AjvPluginsMap = Record<Source, AjvPlugins>;
@@ -34,19 +44,18 @@ export interface AjvValidatorOptions {
 
 @di.autoInjectable()
 export class AjvValidator<Request = unknown> {
-	private ajvInstances?: Partial<AjvInstancesMap> = {};
-	private jsonSchemasMap = new Map<TypeValue, JSONSchema>();
+	private ajvInstances: Partial<AjvInstancesMap> = {};
+	private jsonSchemasMap = new Map<TypeValue, JSONSchema | Partial<JSONSchema>>();
+	private entityDefinitionJSONSchemaCache = new Map<TypeValue, EntityDefinitionJSONSchema>();
 
-	private sourceToSchemaMap: Partial<
-		Record<ParameterConfiguration<Request>['source'], keyof EndpointSchema['properties']>
-	> = {
+	private sourceToSchemaMap: Record<'path' | 'query' | 'header' | 'body', keyof EndpointSchema['properties']> = {
 		path: 'params',
 		query: 'querystring',
 		header: 'headers',
 		body: 'body'
 	};
 
-	constructor(private options: AjvValidatorOptions, private entityRegistry?: EntityRegistry) {
+	constructor(private options?: AjvValidatorOptions, private entityRegistry?: EntityRegistry) {
 		this.initializeInstances();
 		this.registerPlugins();
 	}
@@ -55,25 +64,28 @@ export class AjvValidator<Request = unknown> {
 		const { parametersConfig } = route;
 		const endpointSchema = await this.createSchema(parametersConfig);
 
-		const validateFns = sources.reduce((acc, source) => {
+		const validateFns = sources.reduce<Array<{ source: Source; validateFn: ValidateFunction }>>((acc, source) => {
 			const schema = endpointSchema.properties[this.sourceToSchemaMap[source]];
+
 			if (schema) {
-				const validateFn = this.ajvInstances[source].compile(schema);
-				acc.push({
-					source,
-					validateFn
-				});
+				const validateFn = this.ajvInstances[source]?.compile(schema);
+				if (validateFn) {
+					acc.push({
+						source,
+						validateFn
+					});
+				}
 			}
 
 			return acc;
 		}, []);
 
-		return async (data: unknown) => {
-			const errors = [];
+		return async data => {
+			const errors: Array<ErrorObject> = [];
 			validateFns.forEach(({ source, validateFn }) => {
 				const dataPath = data?.[this.sourceToSchemaMap[source]];
 				if (!validateFn(dataPath)) {
-					errors.push(...validateFn.errors.map(error => this.formatAjvError(source, error)));
+					errors.push(...(validateFn.errors?.map(error => this.formatAjvError(source, error)) ?? []));
 				}
 			});
 
@@ -102,34 +114,42 @@ export class AjvValidator<Request = unknown> {
 
 			const enabledValidation = !parameterConfig.options?.validation?.disabled;
 
-			const entityJsonSchema = this.entityRegistry.getJsonSchema(parameterConfig.type);
-			const entityDefinition = this.entityRegistry.getEntityDefinitionMap().get(parameterConfig.type);
+			const parameterConfigType = parameterConfig.type as TypeValue;
 
-			const jsonSchema = this.jsonSchemasMap.get(parameterConfig.type) ?? this.createJsonSchema(entityJsonSchema);
-			if (!this.jsonSchemasMap.has(entityDefinition) && jsonSchema.$id) {
-				this.jsonSchemasMap.set(entityDefinition, jsonSchema);
+			const entityJsonSchema = this.entityRegistry?.getEntityDefinitionJsonSchema(
+				parameterConfigType
+			) as EntityDefinitionJSONSchema;
+			const entityDefinition = this.entityRegistry?.getEntityDefinitionMap().get(parameterConfigType);
+
+			const jsonSchema = this.jsonSchemasMap.get(parameterConfigType) ?? this.createJsonSchema(entityJsonSchema);
+			if (
+				entityDefinition &&
+				!this.jsonSchemasMap.has(entityDefinition.getType() as TypeValue) &&
+				jsonSchema.$id
+			) {
+				this.jsonSchemasMap.set(entityDefinition.getType() as TypeValue, jsonSchema);
 				this.addSchemaToAjvInstances(jsonSchema);
 			}
 
 			if (['path', 'query', 'header'].includes(parameterConfig.source)) {
 				const schemaProp = this.sourceToSchemaMap[parameterConfig.source];
 
-				endpointSchema.properties[schemaProp] = endpointSchema.properties[schemaProp] ?? {
+				// eslint-disable-next-line no-multi-assign
+				const schema = (endpointSchema.properties[schemaProp] = endpointSchema.properties[schemaProp] ?? {
 					type: 'object',
 					properties: {},
-					required: undefined
-				};
-				endpointSchema.properties[schemaProp].properties[parameterConfig.name] = enabledValidation
-					? jsonSchema
-					: true;
-				endpointSchema.properties[schemaProp].required = endpointSchema.properties[schemaProp].required ?? [];
+					required: []
+				});
+				schema.properties[parameterConfig.name] = enabledValidation ? jsonSchema : true;
+				schema.required = schema.required ?? [];
 				if (enabledValidation && parameterConfig.options?.required) {
-					endpointSchema.properties[schemaProp].required.push(parameterConfig.name);
+					schema.required.push(parameterConfig.name);
 				}
 			}
 
 			if (parameterConfig.source === 'body') {
 				const jsonSchemaDef = jsonSchema?.$id ? { $ref: jsonSchema.$id } : jsonSchema;
+				// @ts-ignore
 				endpointSchema.properties.body = enabledValidation ? jsonSchemaDef : true;
 				endpointSchema.required = endpointSchema.required ?? [];
 				if (enabledValidation && parameterConfig.options?.required) {
@@ -149,7 +169,7 @@ export class AjvValidator<Request = unknown> {
 		return this.options;
 	}
 
-	private formatAjvError(source: Source, error: DefinedError) {
+	private formatAjvError(source: Source, error: ErrorObject) {
 		const rootPath = this.sourceToSchemaMap[source];
 		error.instancePath = error.instancePath.replace(/(^\/)|(^$)/, `/${rootPath}$1`);
 		error.schemaPath = error.schemaPath.replace(/^#\/properties\//, `#/${rootPath}/properties/`);
@@ -159,9 +179,10 @@ export class AjvValidator<Request = unknown> {
 
 	private initializeInstances() {
 		sources.forEach(source => {
+			const sourceOptions = (<Partial<AjvOptionsMap>>this.options?.ajvOptions)?.[source];
 			const ajv = new Ajv({
 				...defaultAjvOptions,
-				...(this.options?.ajvOptions?.[source] || this.options?.ajvOptions)
+				...(sourceOptions ?? this.options?.ajvOptions)
 			});
 			this.ajvInstances[source] = addFormats(ajv);
 		});
@@ -176,16 +197,19 @@ export class AjvValidator<Request = unknown> {
 		if (!plugins) return;
 
 		sources.forEach(source => {
+			const ajvInstance = this.ajvInstances[source];
+			if (!ajvInstance) return;
+
 			if (this.isPluginsMap(plugins)) {
 				// eslint-disable-next-line no-unused-expressions
 				plugins[source]?.forEach(p => {
 					const [plugin, opts] = p;
-					plugin(this.ajvInstances[source], opts);
+					plugin(ajvInstance, opts);
 				});
 			} else if (Array.isArray(plugins)) {
 				plugins.forEach(p => {
 					const [plugin, opts] = p;
-					plugin(this.ajvInstances[source], opts);
+					plugin(ajvInstance, opts);
 				});
 			}
 		});
@@ -196,67 +220,51 @@ export class AjvValidator<Request = unknown> {
 
 		sources.forEach(source => {
 			const ajv = this.ajvInstances[source];
-			if (!completedAjvInstances.has(ajv) && !ajv.getSchema(schema.$id)) {
+			if (!ajv) return;
+
+			if (!completedAjvInstances.has(ajv) && !ajv.getSchema(schema.$id ?? '')) {
 				ajv.addSchema(schema);
 				completedAjvInstances.add(ajv);
 			}
 		});
 	}
 
-	private createJsonSchema(jsonSchema: Partial<JSONSchema>) {
-		return {
-			...(jsonSchema.title ? { $id: jsonSchema.title } : {}),
-			...mapObject<Partial<JSONSchema>>(jsonSchema, (p, key) => {
-				if (key === 'properties' && p) {
-					return mapObject(p, propValue => {
-						if (propValue._$ref) {
-							const refEntityDefinitionJson = this.createJsonSchema(
-								this.jsonSchemasMap.get(propValue._$ref) ?? propValue._$ref?.getJsonSchema()
-							);
+	private createJsonSchema(entityJsonSchema: EntityDefinitionJSONSchema): Partial<JSONSchema> {
+		return transformEntityDefinitionSchema(entityJsonSchema, args => {
+			if (args.pointerPath === '') {
+				return { path: '', value: omit(args.schema, ['properties']) };
+			}
 
-							if (!this.jsonSchemasMap.has(propValue._$ref)) {
-								this.jsonSchemasMap.set(propValue._$ref, refEntityDefinitionJson);
-								this.addSchemaToAjvInstances(refEntityDefinitionJson);
-							}
+			if (args.schema._$ref) {
+				const ref: EntityDefinition = args.schema._$ref;
 
-							return { $ref: refEntityDefinitionJson.$id };
-						}
-
-						if (propValue.type === 'array' && propValue.items?._$ref) {
-							const $ref = propValue.items?._$ref;
-							const refEntityDefinitionJson = this.createJsonSchema(
-								this.jsonSchemasMap.get($ref) ?? $ref?.getJsonSchema()
-							);
-
-							if (!this.jsonSchemasMap.has($ref)) {
-								this.jsonSchemasMap.set($ref, refEntityDefinitionJson);
-								this.addSchemaToAjvInstances(refEntityDefinitionJson);
-							}
-
-							return { ...propValue, items: { $ref: refEntityDefinitionJson.$id } };
-						}
-
-						return propValue;
-					});
+				// if the entity definition was previously evaluated, return the $ref
+				const refType = ref.getType() as TypeValue;
+				if (this.entityDefinitionJSONSchemaCache.has(refType)) {
+					const childEntityDefJsonSchema = this.entityDefinitionJSONSchemaCache.get(refType);
+					return { path: args.pointerPath, value: { $ref: childEntityDefJsonSchema?.$id } };
 				}
 
-				if (key === 'items' && p._$ref) {
-					const $ref = p._$ref;
-					const refEntityDefinitionJson = this.createJsonSchema(
-						this.jsonSchemasMap.get($ref) ?? $ref?.getJsonSchema()
-					);
+				const entityDefinitionJsonSchema = ref.getEntityDefinitionJsonSchema();
+				this.entityDefinitionJSONSchemaCache.set(refType, entityDefinitionJsonSchema);
 
-					if (!this.jsonSchemasMap.has($ref)) {
-						this.jsonSchemasMap.set($ref, refEntityDefinitionJson);
-						this.addSchemaToAjvInstances(refEntityDefinitionJson);
+				const childEntityDefJsonSchema = this.createJsonSchema(entityDefinitionJsonSchema);
+				if (childEntityDefJsonSchema.$id) {
+					if (!this.jsonSchemasMap.has(refType)) {
+						this.jsonSchemasMap.set(refType, childEntityDefJsonSchema);
+						this.addSchemaToAjvInstances(childEntityDefJsonSchema);
 					}
-
-					return { $ref: refEntityDefinitionJson.$id };
+					return { path: args.pointerPath, value: { $ref: childEntityDefJsonSchema.$id } };
 				}
+				return { path: args.pointerPath, value: childEntityDefJsonSchema };
+			}
 
-				return p;
-			})
-		};
+			if (args.parentKeyword === 'properties') {
+				return { path: args.pointerPath, value: args.schema };
+			}
+
+			return null;
+		});
 	}
 }
 

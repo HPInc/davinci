@@ -3,6 +3,138 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.3.9](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.3.8...@davinci/openapi@2.3.9) (2023-01-18)
+
+
+### Bug Fixes
+
+* stricter typescript rules ([#202](https://github.com/HPInc/davinci/issues/202)) ([863b68e](https://github.com/HPInc/davinci/commit/863b68e9702aecc6e5fd2b1e488d961a911c5478)), closes [#2](https://github.com/HPInc/davinci/issues/2)
+
+
+
+
+
+## [2.3.8](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.3.7...@davinci/openapi@2.3.8) (2023-01-17)
+
+**Note:** Version bump only for package @davinci/openapi
+
+
+
+
+
+## [2.3.7](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.3.6...@davinci/openapi@2.3.7) (2023-01-17)
+
+**Note:** Version bump only for package @davinci/openapi
+
+
+
+
+
+## [2.3.6](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.3.5...@davinci/openapi@2.3.6) (2023-01-16)
+
+**Note:** Version bump only for package @davinci/openapi
+
+
+
+
+
+## [2.3.5](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.3.4...@davinci/openapi@2.3.5) (2023-01-16)
+
+**Note:** Version bump only for package @davinci/openapi
+
+
+
+
+
+## [2.3.4](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.3.3...@davinci/openapi@2.3.4) (2023-01-16)
+
+**Note:** Version bump only for package @davinci/openapi
+
+
+
+
+
+## [2.3.3](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.3.2...@davinci/openapi@2.3.3) (2023-01-04)
+
+**Note:** Version bump only for package @davinci/openapi
+
+
+
+
+
+## [2.3.2](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.3.1...@davinci/openapi@2.3.2) (2023-01-03)
+
+**Note:** Version bump only for package @davinci/openapi
+
+
+
+
+
+## [2.3.1](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.3.0...@davinci/openapi@2.3.1) (2023-01-02)
+
+**Note:** Version bump only for package @davinci/openapi
+
+
+
+
+
+# [2.3.0](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.2.3...@davinci/openapi@2.3.0) (2022-12-21)
+
+
+### Features
+
+* **entity:** added support for recursive schemas ([#196](https://github.com/HPInc/davinci/issues/196)) ([ab977ac](https://github.com/HPInc/davinci/commit/ab977ac424fd29a5a1d1b31bb19d290f61639e2c))
+
+
+
+
+
+## [2.2.3](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.2.2...@davinci/openapi@2.2.3) (2022-12-21)
+
+**Note:** Version bump only for package @davinci/openapi
+
+
+
+
+
+## [2.2.2](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.2.1...@davinci/openapi@2.2.2) (2022-12-21)
+
+**Note:** Version bump only for package @davinci/openapi
+
+
+
+
+
+## [2.2.1](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.2.0...@davinci/openapi@2.2.1) (2022-12-20)
+
+
+### Bug Fixes
+
+* EntityDefinition now can traverse json schema keywords ([#191](https://github.com/HPInc/davinci/issues/191)) ([ec0ba10](https://github.com/HPInc/davinci/commit/ec0ba1084fe0126e920d324b21bfa42af5639dc3))
+
+
+
+
+
+# [2.2.0](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.1.10...@davinci/openapi@2.2.0) (2022-12-16)
+
+
+### Features
+
+* entity definition json walker ([#172](https://github.com/HPInc/davinci/issues/172)) ([da0a80d](https://github.com/HPInc/davinci/commit/da0a80dde0dee79bb3a21407afc0ea70909fd30b))
+
+
+
+
+
+## [2.1.10](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.1.9...@davinci/openapi@2.1.10) (2022-12-15)
+
+**Note:** Version bump only for package @davinci/openapi
+
+
+
+
+
 ## [2.1.9](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.1.8...@davinci/openapi@2.1.9) (2022-12-15)
 
 **Note:** Version bump only for package @davinci/openapi

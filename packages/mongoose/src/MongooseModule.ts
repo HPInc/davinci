@@ -20,7 +20,7 @@ export interface MongooseModuleOptions {
 }
 
 export class MongooseModule extends Module {
-	app: App;
+	app?: App;
 	logger: Logger;
 	options: MongooseModuleOptions;
 
@@ -38,7 +38,7 @@ export class MongooseModule extends Module {
 	}
 
 	onRegister(app: App) {
-		const level = this.options.logger?.level ?? app.getOptions().logger?.level;
+		const level = this.options.logger?.level ?? app.getOptions()?.logger?.level;
 		if (level) {
 			this.logger.level = level;
 		}

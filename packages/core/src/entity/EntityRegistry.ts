@@ -5,17 +5,20 @@
 
 import { TypeValue } from '@davinci/reflector';
 import { EntityDefinition } from './EntityDefinition';
-import { JSONSchema } from './types';
+import { EntityDefinitionJSONSchema } from './types';
 import { di } from '../di';
 
 const primitiveTypes = [String, Number, Boolean, Date] as unknown[];
 
+/**
+ * The EntityRegistry class stores all of the EntityDefinition objects and provides a way
+ * to cache and retrieve the EntityDefinitionJSONSchema objects.
+ */
 @di.singleton()
 export class EntityRegistry {
-	// entityDefinitions = new Set<EntityDefinition[]>();
-	entityDefinitionMap = new Map<TypeValue, EntityDefinition>();
+	private entityDefinitionMap = new Map<TypeValue, EntityDefinition>();
 
-	public getJsonSchema(typeValue: TypeValue): Partial<JSONSchema> {
+	public getEntityDefinitionJsonSchema(typeValue: TypeValue): EntityDefinitionJSONSchema {
 		const isPrimitiveType = primitiveTypes.includes(typeValue);
 		if (isPrimitiveType) {
 			const type = typeValue as StringConstructor | NumberConstructor | BooleanConstructor | DateConstructor;
@@ -25,12 +28,14 @@ export class EntityRegistry {
 					return { type: 'string', format: 'date-time' };
 				}
 
-				return { type: type.name.toLowerCase() };
+				return { type: type.name.toLowerCase() } as EntityDefinitionJSONSchema;
 			}
 		}
 
 		if (this.entityDefinitionMap.has(typeValue)) {
-			return this.entityDefinitionMap.get(typeValue).getJsonSchema();
+			return this.entityDefinitionMap
+				.get(typeValue)
+				?.getEntityDefinitionJsonSchema() as EntityDefinitionJSONSchema;
 		}
 
 		const entityDefinition = new EntityDefinition({
@@ -40,10 +45,10 @@ export class EntityRegistry {
 
 		this.entityDefinitionMap.set(typeValue, entityDefinition);
 
-		return entityDefinition.getJsonSchema();
+		return entityDefinition.getEntityDefinitionJsonSchema();
 	}
 
-	getEntityDefinitionMap() {
+	public getEntityDefinitionMap() {
 		return this.entityDefinitionMap;
 	}
 }

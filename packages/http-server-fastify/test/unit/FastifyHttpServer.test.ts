@@ -1,7 +1,7 @@
 /*
- * © Copyright 2022 HP Development Company, L.P.
- * SPDX-License-Identifier: MIT
- */
+* © Copyright 2022 HP Development Company, L.P.
+* SPDX-License-Identifier: MIT
+*/
 import { App } from '@davinci/core';
 import { route } from '@davinci/http-server';
 import axios from 'axios';
@@ -10,6 +10,7 @@ import { reflect } from '@davinci/reflector';
 import { expect } from '../support/chai';
 import { FastifyHttpServer } from '../../src';
 import fastifyStatic from '@fastify/static';
+import fastify from 'fastify';
 
 const sinon = createSandbox();
 
@@ -29,6 +30,25 @@ describe('FastifyHttpServer', () => {
 	});
 
 	describe('lifecycle', () => {
+		it('should be reinit the module after destroy', async () => {
+			const fastifyHttpServer = new FastifyHttpServer({ port: 3000 });
+			app.registerModule(fastifyHttpServer);
+
+			const onRegister = sinon.spy(fastifyHttpServer, 'onRegister');
+
+			await app.init();
+			await app.shutdown();
+			await app.init();
+
+			const { error } = await axios
+				.get('http://127.0.0.1:3000')
+				.then(response => ({ error: null, response }))
+				.catch(error => ({ error }));
+
+			expect(error.response).to.have.property('status').equal(404);
+			expect(onRegister.callCount).to.equal(2);
+		});
+
 		it('should initialize a listening server', async () => {
 			const fastifyHttpServer = new FastifyHttpServer({ port: 3000 });
 			app.registerModule(fastifyHttpServer);
@@ -57,6 +77,31 @@ describe('FastifyHttpServer', () => {
 
 			expect(error.response).to.be.undefined;
 			expect(error.code).be.equal('ECONNREFUSED');
+		});
+	});
+
+	describe('instantiation', () => {
+		it('should allow to pass fastify instance factory in module options', async () => {
+			const instance = fastify();
+			const fastifyHttpServer = new FastifyHttpServer({ port: 3000, instance: () => instance });
+			await app.registerModule(fastifyHttpServer);
+
+			expect(fastifyHttpServer.instance).to.deep.equal(instance);
+		});
+
+		it('should allow to pass fastify instance in module options', async () => {
+			const instance = fastify();
+			const fastifyHttpServer = new FastifyHttpServer({ port: 3000, instance });
+			await app.registerModule(fastifyHttpServer);
+
+			expect(fastifyHttpServer.instance).to.deep.equal(instance);
+		});
+
+		it('should create default fastify instance', async () => {
+			const fastifyHttpServer = new FastifyHttpServer({ port: 3000 });
+			await app.registerModule(fastifyHttpServer);
+
+			expect(fastifyHttpServer.instance.server).to.exist;
 		});
 	});
 

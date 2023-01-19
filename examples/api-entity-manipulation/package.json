@@ -1,0 +1,27 @@
+{
+	"name": "@davinci/example-api-entity-manipulation",
+	"version": "2.1.25",
+	"private": true,
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"build": "tsc -p ./tsconfig.release.json",
+		"dev": "DEBUG=* ts-node src/index.ts"
+	},
+	"keywords": [],
+	"author": "HP",
+	"license": "MIT",
+	"dependencies": {
+		"@davinci/core": "^2.8.1",
+		"@davinci/http-server": "^3.5.1",
+		"@davinci/http-server-fastify": "^2.3.1",
+		"@davinci/openapi": "^2.3.9",
+		"@davinci/reflector": "^2.1.2",
+		"fastify": "^4.10.2"
+	},
+	"devDependencies": {
+		"ts-node": "^10.0.0",
+		"tslib": "^2.3.0",
+		"typescript": "^4.3.5"
+	}
+}

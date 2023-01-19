@@ -24,6 +24,23 @@ describe('OpenAPIModule', () => {
 		number: number;
 	}
 
+	class HomeAddress {
+		@entity.prop()
+		line1: string;
+
+		@entity.prop()
+		number: string;
+	}
+
+	@entity()
+	class OfficeAddress {
+		@entity.prop()
+		line1: string;
+
+		@entity.prop()
+		number: string;
+	}
+
 	@entity({ name: 'MyCustomer' })
 	class Customer {
 		@entity.prop({ required: true, minLength: 2 })
@@ -37,6 +54,9 @@ describe('OpenAPIModule', () => {
 
 		@entity.prop({ type: [Phone] })
 		phones: Phone[];
+
+		@entity.prop({ anyOf: [HomeAddress, OfficeAddress] })
+		address: HomeAddress | OfficeAddress;
 	}
 
 	@entity()
@@ -215,15 +235,29 @@ describe('OpenAPIModule', () => {
 				components: {
 					schemas: {
 						Phone: {
-							$id: 'Phone',
 							title: 'Phone',
 							type: 'object',
+							required: [],
+							$id: 'Phone',
 							properties: {
 								isDefault: {
 									type: 'boolean'
 								},
 								number: {
 									type: 'number'
+								}
+							}
+						},
+						OfficeAddress: {
+							$id: 'OfficeAddress',
+							title: 'OfficeAddress',
+							type: 'object',
+							properties: {
+								line1: {
+									type: 'string'
+								},
+								number: {
+									type: 'string'
 								}
 							},
 							required: []
@@ -249,6 +283,28 @@ describe('OpenAPIModule', () => {
 									items: {
 										$ref: '#/components/schemas/Phone'
 									}
+								},
+								address: {
+									anyOf: [
+										{
+											title: 'HomeAddress',
+											type: 'object',
+											properties: {
+												line1: {
+													type: 'string'
+												},
+												number: {
+													type: 'string'
+												}
+											},
+											required: []
+										},
+										{
+											$ref: '#/components/schemas/OfficeAddress'
+										}
+									],
+									title: 'address',
+									type: 'object'
 								}
 							},
 							required: ['firstname', 'lastname']
@@ -274,6 +330,28 @@ describe('OpenAPIModule', () => {
 									items: {
 										$ref: '#/components/schemas/Phone'
 									}
+								},
+								address: {
+									anyOf: [
+										{
+											title: 'HomeAddress',
+											type: 'object',
+											properties: {
+												line1: {
+													type: 'string'
+												},
+												number: {
+													type: 'string'
+												}
+											},
+											required: []
+										},
+										{
+											$ref: '#/components/schemas/OfficeAddress'
+										}
+									],
+									title: 'address',
+									type: 'object'
 								}
 							},
 							required: ['firstname', 'lastname']
@@ -962,6 +1040,64 @@ describe('OpenAPIModule', () => {
 
 			const openAPIDocument = openApiModule.getOpenAPIDocument();
 			expect(openAPIDocument.paths?.['/api/orders']['get']).to.be.ok;
+
+			await app.shutdown();
+		});
+
+		it('should support recursive types', async () => {
+			@entity()
+			class Order {
+				@entity.prop()
+				order: Order;
+
+				@entity.prop({ type: [Order] })
+				orders: Array<Order>;
+
+				@entity.prop({ type: false, anyOf: [{ type: 'object' }, Order] })
+				ordersAnyOf: object | Order;
+			}
+
+			@route.controller({ basePath: '/api/orders' })
+			class OrderController {
+				@route.get({ path: '/', responses: { 200: [Order] } })
+				findAll(@route.query() order: Order) {
+					return { order };
+				}
+			}
+
+			const openApiModule = new OpenAPIModule({ document: { spec: {} } });
+			const app = new App({ logger: { level: 'error' } });
+			await app.registerController(OrderController).registerModule(new FastifyHttpServer(), openApiModule);
+			await app.init();
+
+			const openAPIDocument = openApiModule.getOpenAPIDocument();
+			expect(openAPIDocument.components.schemas.Order).to.be.deep.equal({
+				$id: 'Order',
+				title: 'Order',
+				type: 'object',
+				properties: {
+					order: {
+						$ref: '#/components/schemas/Order'
+					},
+					orders: {
+						type: 'array',
+						items: {
+							$ref: '#/components/schemas/Order'
+						}
+					},
+					ordersAnyOf: {
+						anyOf: [
+							{
+								type: 'object'
+							},
+							{
+								$ref: '#/components/schemas/Order'
+							}
+						]
+					}
+				},
+				required: []
+			});
 
 			await app.shutdown();
 		});
