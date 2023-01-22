@@ -31,8 +31,11 @@ export default class CustomerController {
 	}
 
 	@route.get({ path: '/' })
-	getAll(@route.query() query: Customer) {
-		return { query };
+	getAll(@route.query() where: Customer): { customers: Array<Customer>; where: Customer } {
+		return {
+			customers: [{ firstname: 'Mike', lastname: 'Bibby' }],
+			where
+		};
 	}
 
 	// this health check function is on the controller just for

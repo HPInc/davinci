@@ -14,8 +14,8 @@ describe('Customer integration tests', () => {
 		it('should return a list of customers', async () => {
 			const result = await app.commands.injectHttpRequest({
 				method: 'get',
-				path: '/api/customers/hello',
-				query: { age: '11', 'customer[firstname]': 'John', 'customer[lastname]': 'Doe' },
+				path: '/api/customers',
+				query: { 'where[firstname]': 'John', 'where[lastname]': 'Doe' },
 				headers: {
 					'x-accountid': '12345'
 				}
@@ -24,15 +24,15 @@ describe('Customer integration tests', () => {
 
 			expect(result.statusCode).to.be.equal(200);
 			expect(payload).to.be.deep.equal({
-				success: true,
-				age: '11',
-				customer: {
+				customers: [
+					{
+						firstname: 'Mike',
+						lastname: 'Bibby'
+					}
+				],
+				where: {
 					firstname: 'John',
 					lastname: 'Doe'
-				},
-				accountId: '12345',
-				ctx: {
-					accountId: '12345'
 				}
 			});
 		});
