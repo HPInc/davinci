@@ -149,12 +149,7 @@ describe('OpenAPIModule', () => {
 									name: 'query',
 									in: 'query',
 									schema: {
-										type: 'object',
-										properties: {
-											query: {
-												$ref: '#/components/schemas/CustomerSearch'
-											}
-										}
+										$ref: '#/components/schemas/CustomerSearch'
 									}
 								},
 								{
@@ -378,7 +373,7 @@ describe('OpenAPIModule', () => {
 			const openAPIDocument = openApiModule.getOpenAPIDocument();
 
 			expect(openAPIDocument.paths['/api/customers'].post.responses).to.be.deep.equal({
-				'200': {
+				200: {
 					description: 'MyCustomer',
 					content: {
 						'application/json': {
@@ -388,7 +383,7 @@ describe('OpenAPIModule', () => {
 						}
 					}
 				},
-				'201': {
+				201: {
 					description: 'MyCustomer',
 					content: {
 						'application/json': {
@@ -420,7 +415,7 @@ describe('OpenAPIModule', () => {
 			const openAPIDocument = openApiModule.getOpenAPIDocument();
 
 			expect(openAPIDocument.paths['/api/customers'].post.responses).to.be.deep.equal({
-				'200': {
+				200: {
 					description: 'Returns the newly created customer',
 					content: {
 						'application/json': {
@@ -437,7 +432,7 @@ describe('OpenAPIModule', () => {
 						}
 					}
 				},
-				'201': {
+				201: {
 					description: 'Returns the newly created customer',
 					content: {
 						'application/json': {
@@ -473,7 +468,7 @@ describe('OpenAPIModule', () => {
 			const openAPIDocument = openApiModule.getOpenAPIDocument();
 
 			expect(openAPIDocument.paths['/api/customers'].post.responses).to.be.deep.equal({
-				'200': {
+				200: {
 					description: 'Returns the newly created customer',
 					content: {
 						'text/xml': {
@@ -490,7 +485,7 @@ describe('OpenAPIModule', () => {
 						}
 					}
 				},
-				'201': {
+				201: {
 					description: 'Returns the newly created customer',
 					content: {
 						'text/xml': {
@@ -541,7 +536,7 @@ describe('OpenAPIModule', () => {
 			const openAPIDocument = openApiModule.getOpenAPIDocument();
 
 			expect(openAPIDocument.paths['/api/customers'].post.responses).to.be.deep.equal({
-				'200': {
+				200: {
 					description: 'Returns the newly created customer',
 					content: {
 						'text/xml': {
@@ -559,7 +554,7 @@ describe('OpenAPIModule', () => {
 						}
 					}
 				},
-				'201': {
+				201: {
 					description: 'Returns the newly created customer',
 					content: {
 						'text/xml': {
@@ -630,7 +625,7 @@ describe('OpenAPIModule', () => {
 			const openAPIDocument = openApiModule.getOpenAPIDocument();
 
 			expect(openAPIDocument.paths['/api/customers'].post.responses).to.be.deep.equal({
-				'200': {
+				200: {
 					description: 'Returns the newly created customer',
 					content: {
 						'text/xml': {
@@ -656,7 +651,7 @@ describe('OpenAPIModule', () => {
 						}
 					}
 				},
-				'201': {
+				201: {
 					description: 'Returns the newly created customer',
 					content: {
 						'text/xml': {
@@ -693,7 +688,7 @@ describe('OpenAPIModule', () => {
 			const openAPIDocument = openApiModule.getOpenAPIDocument();
 
 			expect(openAPIDocument.paths['/api/customers'].post.responses).to.be.deep.equal({
-				'200': {
+				200: {
 					description: '',
 					content: {
 						'application/json': {
@@ -703,7 +698,7 @@ describe('OpenAPIModule', () => {
 						}
 					}
 				},
-				'201': {
+				201: {
 					description: '',
 					content: {
 						'application/json': {
@@ -738,7 +733,7 @@ describe('OpenAPIModule', () => {
 			const openAPIDocument = openApiModule.getOpenAPIDocument();
 
 			expect(openAPIDocument.paths['/api/customers'].post.responses).to.be.deep.equal({
-				'400': {
+				400: {
 					description: '',
 					content: {
 						'application/json': {
@@ -748,7 +743,7 @@ describe('OpenAPIModule', () => {
 						}
 					}
 				},
-				'500': {
+				500: {
 					description: 'Server error',
 					content: {
 						'application/json': {
@@ -912,7 +907,7 @@ describe('OpenAPIModule', () => {
 			const openAPIDocument = openApiModule.getOpenAPIDocument();
 
 			expect(openAPIDocument.paths['/api/customers'].post.responses).to.be.deep.equal({
-				'200': {
+				200: {
 					description: 'MyCustomer',
 					content: {
 						'text/xml': {
@@ -922,7 +917,7 @@ describe('OpenAPIModule', () => {
 						}
 					}
 				},
-				'201': {
+				201: {
 					description: 'MyCustomer',
 					content: {
 						'text/xml': {
@@ -935,7 +930,7 @@ describe('OpenAPIModule', () => {
 						}
 					}
 				},
-				'202': {
+				202: {
 					description: '',
 					content: {
 						'application/json': {

@@ -191,10 +191,7 @@ export class OpenAPIModule extends Module {
 					in: parameterConfig.source,
 					schema: jsonSchema?.$id
 						? {
-								type: 'object',
-								properties: {
-									[parameterConfig.name]: { $ref: `#/components/schemas/${jsonSchema.$id}` }
-								}
+								$ref: `#/components/schemas/${jsonSchema.$id}`
 						  }
 						: jsonSchema,
 					...(parameterConfig.options?.required && { required: parameterConfig.options?.required })
