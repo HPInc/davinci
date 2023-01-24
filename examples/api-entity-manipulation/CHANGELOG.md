@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.1.26](https://github.com/HPInc/davinci/compare/@davinci/example-api-entity-manipulation@2.1.25...@davinci/example-api-entity-manipulation@2.1.26) (2023-01-24)
+
+**Note:** Version bump only for package @davinci/example-api-entity-manipulation
+
+
+
+
+
 ## [2.1.25](https://github.com/HPInc/davinci/compare/@davinci/example-api-entity-manipulation@2.1.24...@davinci/example-api-entity-manipulation@2.1.25) (2023-01-18)
 
 

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.3.10](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.3.9...@davinci/openapi@2.3.10) (2023-01-24)
+
+
+### Bug Fixes
+
+* **openapi:** unneeded nesting in querystring parameters ([#208](https://github.com/HPInc/davinci/issues/208)) ([43bbc96](https://github.com/HPInc/davinci/commit/43bbc96098b593e082224fde61862665421b9a10))
+
+
+
+
+
 ## [2.3.9](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.3.8...@davinci/openapi@2.3.9) (2023-01-18)
 
 
