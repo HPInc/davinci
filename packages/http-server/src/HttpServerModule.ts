@@ -493,20 +493,19 @@ export abstract class HttpServerModule<
 	public performHttpInjection?(injectOptions: InjectOptions): Promise<unknown>;
 
 	protected addInjectFunction() {
-		Object.defineProperty(this.app?.commands, 'injectHttpRequest', {
-			configurable: true,
-			value: async (req: InjectOptions, preferredHttpModule = 'http') => {
-				if (!this.performHttpInjection) {
-					throw new Error('injectHttpRequest is not supported by the underlying http server implementation');
-				}
+		if (!this.app) throw new Error('app not available on the module instance');
 
-				const httpModule = await this.app?.getModuleById<HttpServerModule>(preferredHttpModule);
-				if (!httpModule) {
-					throw new Error(`Module ${preferredHttpModule} not found`);
-				}
-
-				return httpModule?.performHttpInjection?.(req);
+		this.app.addLocalVariable('injectHttpRequest', async (req: InjectOptions, preferredHttpModule = 'http') => {
+			if (!this.performHttpInjection) {
+				throw new Error('injectHttpRequest is not supported by the underlying http framework');
 			}
+
+			const httpModule = await this.app?.getModuleById<HttpServerModule>(preferredHttpModule);
+			if (!httpModule) {
+				throw new Error(`Module ${preferredHttpModule} not found`);
+			}
+
+			return httpModule?.performHttpInjection?.(req);
 		});
 	}
 

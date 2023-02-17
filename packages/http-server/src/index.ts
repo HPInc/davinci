@@ -12,7 +12,7 @@ export * from './AjvValidator';
 export * from './types';
 
 declare module '@davinci/core' {
-	interface Commands {
+	interface LocalVars {
 		injectHttpRequest: (injectOptions: InjectOptions, preferredHttpModule?: string) => Chain;
 	}
 }

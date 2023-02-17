@@ -1,16 +1,16 @@
 /*
-* © Copyright 2022 HP Development Company, L.P.
-* SPDX-License-Identifier: MIT
-*/
+ * © Copyright 2022 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
 import { App } from '@davinci/core';
 import { route } from '@davinci/http-server';
 import axios from 'axios';
 import { createSandbox } from 'sinon';
 import { reflect } from '@davinci/reflector';
-import { expect } from '../support/chai';
-import { FastifyHttpServer } from '../../src';
 import fastifyStatic from '@fastify/static';
 import fastify from 'fastify';
+import { expect } from '../support/chai';
+import { FastifyHttpServer } from '../../src';
 
 const sinon = createSandbox();
 
@@ -321,7 +321,7 @@ describe('FastifyHttpServer', () => {
 			app.registerModule(fastityHttpServer);
 			await app.init();
 
-			const result1 = await app.commands.injectHttpRequest({
+			const result1 = await app.locals.injectHttpRequest({
 				method: 'get',
 				path: '/customers',
 				query: { filter: 'active' }
@@ -335,7 +335,7 @@ describe('FastifyHttpServer', () => {
 				payload: '{"method":"get","filter":"active"}'
 			});
 
-			const result2 = await app.commands.injectHttpRequest({
+			const result2 = await app.locals.injectHttpRequest({
 				method: 'patch',
 				path: '/customers/123',
 				payload: { firstname: 'John' }

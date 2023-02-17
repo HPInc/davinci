@@ -12,7 +12,7 @@ describe('Customer integration tests', () => {
 
 	describe('GET /api/customers', () => {
 		it('should return a list of customers', async () => {
-			const result = await app.commands.injectHttpRequest({
+			const result = await app.locals.injectHttpRequest({
 				method: 'get',
 				path: '/api/customers',
 				query: { 'where[firstname]': 'John', 'where[lastname]': 'Doe' },
@@ -40,7 +40,7 @@ describe('Customer integration tests', () => {
 
 	describe('POST /api/customers', () => {
 		it('should create a customer', async () => {
-			const result = await app.commands.injectHttpRequest({
+			const result = await app.locals.injectHttpRequest({
 				method: 'post',
 				path: '/api/customers',
 				payload: {

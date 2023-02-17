@@ -38,8 +38,8 @@ export type Signals =
 	| 'SIGINFO';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface Commands {}
+export interface LocalVars {}
 
-export interface CommandsExecutor {
-	commands: Commands;
+export interface LocalVarsContainer {
+	locals: LocalVars;
 }

@@ -10,7 +10,7 @@ import { Module, ModuleStatus } from './Module';
 import { mapSeries } from './lib/async-utils';
 import { coerceArray } from './lib/array-utils';
 import { di } from './di';
-import { Commands, CommandsExecutor, Signals } from './types';
+import { LocalVars, LocalVarsContainer, Signals } from './types';
 
 export interface AppOptions {
 	controllers?: ClassType[];
@@ -24,9 +24,9 @@ export interface AppOptions {
 	};
 }
 
-export class App extends Module implements CommandsExecutor {
+export class App extends Module implements LocalVarsContainer {
 	logger: Logger;
-	public commands: Commands = {};
+	public locals: LocalVars = {};
 	private options?: AppOptions = {};
 	private modules: Module[] = [];
 	private controllers: ClassType[];
@@ -239,6 +239,13 @@ export class App extends Module implements CommandsExecutor {
 		});
 
 		return this;
+	}
+
+	public addLocalVariable<T>(name: string, value: T) {
+		Object.defineProperty(this.locals, name, {
+			configurable: true,
+			value
+		});
 	}
 }
 

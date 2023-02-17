@@ -17,6 +17,7 @@ import {
 import * as http from 'http';
 import { reflect } from '@davinci/reflector';
 import { createSandbox } from 'sinon';
+import type { InjectOptions } from 'light-my-request';
 import {
 	HttpServerInterceptor,
 	HttpServerModule,
@@ -25,7 +26,6 @@ import {
 	route
 } from '../../src';
 import { expect } from '../support/chai';
-import type { InjectOptions } from 'light-my-request';
 
 const sinon = createSandbox();
 
@@ -993,7 +993,7 @@ describe('HttpServerModule', () => {
 			await app.registerModule(dummyHttpServer);
 			await app.init();
 
-			const result1 = await app.commands.injectHttpRequest({
+			const result1 = await app.locals.injectHttpRequest({
 				path: '/api/customers',
 				method: 'get',
 				headers: { authorization: 'token' },
@@ -1013,7 +1013,7 @@ describe('HttpServerModule', () => {
 				}
 			});
 
-			const result2 = await app.commands.injectHttpRequest({
+			const result2 = await app.locals.injectHttpRequest({
 				path: '/api/customers/123',
 				method: 'patch',
 				headers: { authorization: 'token' },
@@ -1047,10 +1047,10 @@ describe('HttpServerModule', () => {
 			await app.init();
 
 			await expect(
-				app.commands.injectHttpRequest({ path: '/api/customers', method: 'get' })
+				app.locals.injectHttpRequest({ path: '/api/customers', method: 'get' })
 			).to.eventually.be.rejectedWith(
 				Error,
-				'injectHttpRequest is not supported by the underlying http server implementation'
+				'injectHttpRequest is not supported by the underlying http framework'
 			);
 		});
 
@@ -1086,7 +1086,7 @@ describe('HttpServerModule', () => {
 			await app.registerModule([dummyHttpServer1, dummyHttpServer2]);
 			await app.init();
 
-			await app.commands.injectHttpRequest(
+			await app.locals.injectHttpRequest(
 				{
 					path: '/api/customers',
 					method: 'get',

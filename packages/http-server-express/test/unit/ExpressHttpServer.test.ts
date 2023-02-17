@@ -305,7 +305,7 @@ describe('ExpressHttpServer', () => {
 			app.registerModule(expressHttpServer);
 			await app.init();
 
-			const result1 = await app.commands.injectHttpRequest({
+			const result1 = await app.locals.injectHttpRequest({
 				method: 'get',
 				path: '/customers',
 				query: { filter: 'active' }
@@ -319,7 +319,7 @@ describe('ExpressHttpServer', () => {
 				payload: '{"method":"get","filter":"active"}'
 			});
 
-			const result2 = await app.commands.injectHttpRequest({
+			const result2 = await app.locals.injectHttpRequest({
 				method: 'patch',
 				path: '/customers/123',
 				payload: { firstname: 'John' }
