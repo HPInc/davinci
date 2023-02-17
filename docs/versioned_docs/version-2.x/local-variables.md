@@ -47,3 +47,11 @@ class MyModule extends Module {
 }
 
 ```
+
+### 3. Accessing the variables
+The variables previously defined can now be accessed via the `app.locals` object:
+
+```ts
+app.locals.myCustomVariable // 100
+app.locals.recordMetric('callDuration', 1000)
+```
