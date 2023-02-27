@@ -14,6 +14,7 @@ import http, { Server as HttpServer } from 'http';
 import https, { Server as HttpsServer, ServerOptions } from 'https';
 import type { App } from '@davinci/core';
 import type { OptionsJson, OptionsUrlencoded } from 'body-parser';
+import { inject, InjectOptions } from 'light-my-request';
 import cors, { CorsOptions } from 'cors';
 
 type Server = HttpServer | HttpsServer;
@@ -46,7 +47,7 @@ export class ExpressHttpServer extends HttpServerModule<{
 
 	async onRegister(app: App) {
 		this.app = app;
-		const level = this.moduleOptions?.logger?.level ?? app.getOptions().logger?.level;
+		const level = this.moduleOptions?.logger?.level ?? app.getOptions()?.logger?.level;
 		if (level) {
 			this.logger.level = level;
 		}
@@ -266,5 +267,9 @@ export class ExpressHttpServer extends HttpServerModule<{
 			default:
 				return undefined;
 		}
+	}
+
+	performHttpInjection(injectOptions: InjectOptions): Promise<unknown> {
+		return inject(this.instance as Express, injectOptions);
 	}
 }

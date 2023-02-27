@@ -6,7 +6,8 @@
 	"main": "index.js",
 	"scripts": {
 		"build": "tsc -p ./tsconfig.release.json",
-		"dev": "DEBUG=* ts-node src/index.ts"
+		"dev": "DEBUG=* ts-node src/index.ts",
+		"test": "mocha"
 	},
 	"keywords": [],
 	"author": "HP",

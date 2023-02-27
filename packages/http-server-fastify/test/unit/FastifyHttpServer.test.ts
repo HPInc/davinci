@@ -1,16 +1,16 @@
 /*
-* © Copyright 2022 HP Development Company, L.P.
-* SPDX-License-Identifier: MIT
-*/
+ * © Copyright 2022 HP Development Company, L.P.
+ * SPDX-License-Identifier: MIT
+ */
 import { App } from '@davinci/core';
 import { route } from '@davinci/http-server';
 import axios from 'axios';
 import { createSandbox } from 'sinon';
 import { reflect } from '@davinci/reflector';
-import { expect } from '../support/chai';
-import { FastifyHttpServer } from '../../src';
 import fastifyStatic from '@fastify/static';
 import fastify from 'fastify';
+import { expect } from '../support/chai';
+import { FastifyHttpServer } from '../../src';
 
 const sinon = createSandbox();
 
@@ -299,6 +299,55 @@ describe('FastifyHttpServer', () => {
 			// @ts-ignore
 			fastifyHttpServer.setHeader(responseMock, 'x-my-header', '123');
 			expect(responseMock.header.firstCall.args).to.be.deep.equal(['x-my-header', '123']);
+		});
+	});
+
+	describe('#performHttpInject', () => {
+		it('should perform the request injection', async () => {
+			class MyController {
+				@route.get({ path: '/customers' })
+				getAll(@route.query() filter: string) {
+					return { method: 'get', filter };
+				}
+
+				@route.patch({ path: '/customers/:customerId' })
+				update(@route.path() customerId: string, @route.body() data: object) {
+					return { method: 'patch', customerId, data };
+				}
+			}
+
+			const fastityHttpServer = new FastifyHttpServer();
+			app.registerController(MyController);
+			app.registerModule(fastityHttpServer);
+			await app.init();
+
+			const result1 = await app.locals.injectHttpRequest({
+				method: 'get',
+				path: '/customers',
+				query: { filter: 'active' }
+			});
+
+			expect(result1).to.containSubset({
+				headers: {
+					'content-type': 'application/json; charset=utf-8'
+				},
+				statusCode: 200,
+				payload: '{"method":"get","filter":"active"}'
+			});
+
+			const result2 = await app.locals.injectHttpRequest({
+				method: 'patch',
+				path: '/customers/123',
+				payload: { firstname: 'John' }
+			});
+
+			expect(result2).to.containSubset({
+				headers: {
+					'content-type': 'application/json; charset=utf-8'
+				},
+				statusCode: 200,
+				payload: '{"method":"patch","customerId":"123","data":{"firstname":"John"}}'
+			});
 		});
 	});
 });

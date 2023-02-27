@@ -25,6 +25,7 @@
 			]
 		},
 		"interceptors",
+		"local-variables",
 		"migration-from-v1"
 	]
 }

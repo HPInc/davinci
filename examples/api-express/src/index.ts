@@ -13,7 +13,7 @@ import { CustomerController } from './api/customer';
 import { Context } from './types';
 import { Request } from 'express';
 
-const app = createApp();
+export const app = createApp();
 const contextFactory: ContextFactory<Context, Request> = ({ request }) => ({
 	accountId: request.headers['x-accountid'] as string
 });
@@ -55,5 +55,3 @@ app.registerController(CustomerController).registerModule(
 if (require.main === module) {
 	app.init();
 }
-
-export default app;

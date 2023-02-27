@@ -8,6 +8,7 @@ export * from './Module';
 export * from './interceptor';
 export * from './context';
 export * from './di';
+export * from './types';
 
 export * from './entity/EntityDefinition';
 export * from './entity/EntityRegistry';

@@ -10,45 +10,7 @@ import { Module, ModuleStatus } from './Module';
 import { mapSeries } from './lib/async-utils';
 import { coerceArray } from './lib/array-utils';
 import { di } from './di';
-
-type Signals =
-	| 'SIGABRT'
-	| 'SIGALRM'
-	| 'SIGBUS'
-	| 'SIGCHLD'
-	| 'SIGCONT'
-	| 'SIGFPE'
-	| 'SIGHUP'
-	| 'SIGILL'
-	| 'SIGINT'
-	| 'SIGIO'
-	| 'SIGIOT'
-	| 'SIGKILL'
-	| 'SIGPIPE'
-	| 'SIGPOLL'
-	| 'SIGPROF'
-	| 'SIGPWR'
-	| 'SIGQUIT'
-	| 'SIGSEGV'
-	| 'SIGSTKFLT'
-	| 'SIGSTOP'
-	| 'SIGSYS'
-	| 'SIGTERM'
-	| 'SIGTRAP'
-	| 'SIGTSTP'
-	| 'SIGTTIN'
-	| 'SIGTTOU'
-	| 'SIGUNUSED'
-	| 'SIGURG'
-	| 'SIGUSR1'
-	| 'SIGUSR2'
-	| 'SIGVTALRM'
-	| 'SIGWINCH'
-	| 'SIGXCPU'
-	| 'SIGXFSZ'
-	| 'SIGBREAK'
-	| 'SIGLOST'
-	| 'SIGINFO';
+import { LocalVars, LocalVarsContainer, Signals } from './types';
 
 export interface AppOptions {
 	controllers?: ClassType[];
@@ -62,9 +24,10 @@ export interface AppOptions {
 	};
 }
 
-export class App extends Module {
+export class App extends Module implements LocalVarsContainer {
 	logger: Logger;
-	private options: AppOptions = {};
+	public locals: LocalVars = {};
+	private options?: AppOptions = {};
 	private modules: Module[] = [];
 	private controllers: ClassType[];
 	private modulesDic: Record<string, Module> = {};
@@ -226,25 +189,9 @@ export class App extends Module {
 	}
 
 	public async getModuleById<M extends Module = Module>(moduleId: string, waitForStatus?: ModuleStatus): Promise<M> {
-		const WEIGHTED_STATUSES = [
-			'unloaded',
-			'registering',
-			'registered',
-			'initializing',
-			'initialized',
-			'destroying',
-			'destroyed',
-			'error'
-		];
 		const module = this.modulesDic[moduleId];
 		if (waitForStatus) {
-			if (WEIGHTED_STATUSES.indexOf(module.getStatus()) >= WEIGHTED_STATUSES.indexOf(waitForStatus)) {
-				return module as M;
-			}
-
-			return new Promise(resolve => {
-				module.eventBus.once(waitForStatus, () => resolve(module as M));
-			});
+			return (await module.waitForStatus(waitForStatus)) as M;
 		}
 
 		return module as M;
@@ -270,7 +217,7 @@ export class App extends Module {
 	}
 
 	public enableShutdownSignals() {
-		const signals = this.options.shutdown?.signals ?? [];
+		const signals = this.options?.shutdown?.signals ?? [];
 		const onSignal = async (signal: Signals) => {
 			if (['destroying', 'destroyed'].includes(this.getStatus())) {
 				this.logger.debug('App is already shutting down. Ignoring signal');
@@ -292,6 +239,13 @@ export class App extends Module {
 		});
 
 		return this;
+	}
+
+	public addLocalVariable<T>(name: string, value: T) {
+		Object.defineProperty(this.locals, name, {
+			configurable: true,
+			value
+		});
 	}
 }
 

@@ -15,7 +15,8 @@ import {
 	FastifyPluginCallback,
 	FastifyPluginOptions,
 	FastifyReply,
-	FastifyRequest
+	FastifyRequest,
+	InjectOptions
 } from 'fastify';
 import { Server as HttpServer } from 'http';
 import { Server as HttpsServer } from 'https';
@@ -51,7 +52,7 @@ export class FastifyHttpServer extends HttpServerModule<{
 
 	async onRegister(app: App) {
 		this.app = app;
-		const level = this.moduleOptions?.logger?.level ?? app.getOptions().logger?.level;
+		const level = this.moduleOptions?.logger?.level ?? app.getOptions()?.logger?.level;
 		if (level) {
 			this.logger.level = level;
 		}
@@ -264,5 +265,9 @@ export class FastifyHttpServer extends HttpServerModule<{
 			default:
 				return undefined;
 		}
+	}
+
+	performHttpInjection(injectOptions: InjectOptions) {
+		return (this.instance as FastifyInstance).inject(injectOptions);
 	}
 }
