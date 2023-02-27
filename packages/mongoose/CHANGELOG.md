@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.3.0](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.2.13...@davinci/mongoose@2.3.0) (2023-02-27)
+
+
+### Features
+
+*  app locals + http server inject request ([#186](https://github.com/HPInc/davinci/issues/186)) ([9a1d5b5](https://github.com/HPInc/davinci/commit/9a1d5b59e159bf3cec4b7c5b14d7b5cde3a7f476))
+
+
+
+
+
 ## [2.2.13](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.2.12...@davinci/mongoose@2.2.13) (2023-01-18)
 
 
