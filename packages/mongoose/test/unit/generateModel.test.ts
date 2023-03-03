@@ -436,6 +436,22 @@ describe('generateModel', () => {
 			expect(schema.path('items').schema.options.timestamps).not.be.true;
 		});
 
+		it('should merge default and custom schema options', () => {
+			@mgoose.schema({ timestamps: true })
+			class Order {
+				@mgoose.prop({ index: true })
+				firstname: string;
+			}
+
+			const schema = mgoose.generateSchema(Order, { timestamps: false });
+			// @ts-ignore
+			expect(schema.options.timestamps).be.false;
+			// @ts-ignore
+			expect(schema.options.toJSON.virtuals).be.true;
+			// @ts-ignore
+			expect(schema.options.toObject.virtuals).be.true;
+		});
+
 		it('should allow passing the schema options using the decorator', () => {
 			@mgoose.schema({ timestamps: false, id: false, _id: false })
 			class Item {
