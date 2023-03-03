@@ -32,13 +32,13 @@ const DEFAULT_SCHEMA_OPTIONS = { timestamps: true, toJSON: { virtuals: true }, t
  */
 export const generateSchema = <T>(
 	schemaType: ClassType,
-	options: SchemaOptions = DEFAULT_SCHEMA_OPTIONS
+	options?: SchemaOptions
 ): Schema<T> => {
 	const recursivelyGenerateSchema = <U>(
 		// eslint-disable-next-line no-shadow
 		schemaType: ClassType,
 		// eslint-disable-next-line no-shadow
-		options: SchemaOptions | null = DEFAULT_SCHEMA_OPTIONS,
+		options?: SchemaOptions,
 		forceCreateSchema?: boolean
 	): RecursivelyGenerateSchemaReturnType<U> => {
 		const classReflection = reflect(schemaType);
@@ -101,7 +101,7 @@ export const generateSchema = <T>(
 						populatedVirtuals = [],
 						virtuals = [],
 						methods = {}
-					} = recursivelyGenerateSchema(classType, null);
+					} = recursivelyGenerateSchema(classType);
 					type = schema;
 					rootIndexes.push(...indexes);
 					rootPopulatedVirtuals.push(...populatedVirtuals);
@@ -125,7 +125,8 @@ export const generateSchema = <T>(
 		const schemaDecoration = classReflection.decorators.find(d => d[DecoratorId] === 'mongoose.schema');
 		const schemaOptions = schemaDecoration?.options;
 		const schema: Schema<U> =
-			(forceCreateSchema || schemaDecoration) && new Schema(definition, { ...(options ?? schemaOptions) });
+			(forceCreateSchema || schemaDecoration) &&
+				new Schema(definition, { ...({ ...DEFAULT_SCHEMA_OPTIONS, ...options } ?? schemaOptions) });
 
 		// register methods
 		const methods = classReflection.methods.reduce((acc, methodReflection) => {
