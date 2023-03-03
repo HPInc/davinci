@@ -6,6 +6,7 @@
 import { model, Model, Schema, SchemaDefinition, SchemaOptions } from 'mongoose';
 import { ClassType, DecoratorId, PropertyReflection, reflect, TypeValue } from '@davinci/reflector';
 import { omit } from '@davinci/core';
+import deepmerge from 'deepmerge';
 import { IPropDecoratorOptions, IPropDecoratorOptionsFactory } from './decorators/types';
 import {
 	IndexDecoratorMetadata,
@@ -41,7 +42,7 @@ export const generateSchema = <T>(
 		options?: SchemaOptions,
 		forceCreateSchema?: boolean
 	): RecursivelyGenerateSchemaReturnType<U> => {
-		const mergedOptions = options ? { ...DEFAULT_SCHEMA_OPTIONS, ...options } : null;
+		const mergedOptions = options ? deepmerge(DEFAULT_SCHEMA_OPTIONS, options) : null;
 		const classReflection = reflect(schemaType);
 		const propsWithMeta = classReflection.properties.reduce<
 			Array<{
