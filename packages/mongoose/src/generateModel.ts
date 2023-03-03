@@ -41,6 +41,7 @@ export const generateSchema = <T>(
 		options?: SchemaOptions,
 		forceCreateSchema?: boolean
 	): RecursivelyGenerateSchemaReturnType<U> => {
+		const mergedOptions = options ? { ...DEFAULT_SCHEMA_OPTIONS, ...options } : null;
 		const classReflection = reflect(schemaType);
 		const propsWithMeta = classReflection.properties.reduce<
 			Array<{
@@ -126,7 +127,7 @@ export const generateSchema = <T>(
 		const schemaOptions = schemaDecoration?.options;
 		const schema: Schema<U> =
 			(forceCreateSchema || schemaDecoration) &&
-				new Schema(definition, { ...({ ...DEFAULT_SCHEMA_OPTIONS, ...options } ?? schemaOptions) });
+				new Schema(definition, { ...(mergedOptions ?? schemaOptions) });
 
 		// register methods
 		const methods = classReflection.methods.reduce((acc, methodReflection) => {
