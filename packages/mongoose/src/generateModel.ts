@@ -42,7 +42,7 @@ export const generateSchema = <T>(
 		options?: SchemaOptions,
 		forceCreateSchema?: boolean
 	): RecursivelyGenerateSchemaReturnType<U> => {
-		const mergedOptions = options ? deepmerge(DEFAULT_SCHEMA_OPTIONS, options) : null;
+		const mergedOptions = options ? deepmerge(DEFAULT_SCHEMA_OPTIONS, options) : DEFAULT_SCHEMA_OPTIONS;
 		const classReflection = reflect(schemaType);
 		const propsWithMeta = classReflection.properties.reduce<
 			Array<{
