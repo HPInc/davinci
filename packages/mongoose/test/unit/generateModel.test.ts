@@ -436,6 +436,29 @@ describe('generateModel', () => {
 			expect(schema.path('items').schema.options.timestamps).not.be.true;
 		});
 
+		it('should use default options if no custom options', () => {
+			@mgoose.schema()
+			class Item {
+				@mgoose.virtual()
+				categories() {}
+			}
+
+			@mgoose.schema()
+			class Order {
+				@mgoose.prop({ index: true })
+				firstname: string;
+
+				@mgoose.prop({ type: [Item] })
+				items: Item[];
+			}
+
+			const schema = mgoose.generateSchema(Order);
+			// @ts-ignore
+			expect(schema.options.timestamps).be.true;
+			// @ts-ignore
+			expect(schema.path('items').schema.options.timestamps).not.be.true;
+		});
+
 		it('should merge default and custom schema options', () => {
 			@mgoose.schema({ timestamps: true })
 			class Order {

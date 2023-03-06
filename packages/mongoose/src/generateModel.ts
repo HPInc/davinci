@@ -33,16 +33,16 @@ const DEFAULT_SCHEMA_OPTIONS = { timestamps: true, toJSON: { virtuals: true }, t
  */
 export const generateSchema = <T>(
 	schemaType: ClassType,
-	options?: SchemaOptions
+	options: SchemaOptions = DEFAULT_SCHEMA_OPTIONS
 ): Schema<T> => {
 	const recursivelyGenerateSchema = <U>(
 		// eslint-disable-next-line no-shadow
 		schemaType: ClassType,
 		// eslint-disable-next-line no-shadow
-		options?: SchemaOptions,
+		options: SchemaOptions | null = DEFAULT_SCHEMA_OPTIONS,
 		forceCreateSchema?: boolean
 	): RecursivelyGenerateSchemaReturnType<U> => {
-		const mergedOptions = options ? deepmerge(DEFAULT_SCHEMA_OPTIONS, options) : DEFAULT_SCHEMA_OPTIONS;
+		const mergedOptions = options ? deepmerge(DEFAULT_SCHEMA_OPTIONS, options) : null;
 		const classReflection = reflect(schemaType);
 		const propsWithMeta = classReflection.properties.reduce<
 			Array<{
@@ -103,7 +103,7 @@ export const generateSchema = <T>(
 						populatedVirtuals = [],
 						virtuals = [],
 						methods = {}
-					} = recursivelyGenerateSchema(classType);
+					} = recursivelyGenerateSchema(classType, null);
 					type = schema;
 					rootIndexes.push(...indexes);
 					rootPopulatedVirtuals.push(...populatedVirtuals);
