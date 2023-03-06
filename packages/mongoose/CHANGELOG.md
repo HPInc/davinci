@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.4.0](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.3.0...@davinci/mongoose@2.4.0) (2023-03-06)
+
+
+### Bug Fixes
+
+* refactor to avoid passing opts to subschemas ([367666b](https://github.com/HPInc/davinci/commit/367666b81915f9cc5253df053e894e9c38118e17))
+* use deepmerge ([21c1ea2](https://github.com/HPInc/davinci/commit/21c1ea2356ab264699be566e2a28b863a58783a4))
+* use default if no options ([1d4d019](https://github.com/HPInc/davinci/commit/1d4d0199ca9fc74755493978631b2261994c80c2))
+* use defaults if no options ([34119d6](https://github.com/HPInc/davinci/commit/34119d60e8e411eb996b9a552f4e49ace3823a9b))
+
+
+### Features
+
+* merge generateSchema custom and default options ([f387963](https://github.com/HPInc/davinci/commit/f387963d6af05ce56252cb14f564203ece41f300))
+
+
+
+
+
 # [2.3.0](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.2.13...@davinci/mongoose@2.3.0) (2023-02-27)
 
 
