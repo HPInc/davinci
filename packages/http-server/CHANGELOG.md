@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.6.1](https://github.com/HPInc/davinci/compare/@davinci/http-server@3.6.0...@davinci/http-server@3.6.1) (2023-03-09)
+
+
+### Bug Fixes
+
+* allow to have async contextFactory ([6ad03c1](https://github.com/HPInc/davinci/commit/6ad03c1d8ff93e033964540cbc43d07ccf753890))
+
+
+
+
+
 # [3.6.0](https://github.com/HPInc/davinci/compare/@davinci/http-server@3.5.1...@davinci/http-server@3.6.0) (2023-02-27)
 
 

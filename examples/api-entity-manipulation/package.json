@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/example-api-entity-manipulation",
-	"version": "2.1.27",
+	"version": "2.1.28",
 	"private": true,
 	"description": "",
 	"main": "index.js",
@@ -13,9 +13,9 @@
 	"license": "MIT",
 	"dependencies": {
 		"@davinci/core": "^2.9.0",
-		"@davinci/http-server": "^3.6.0",
-		"@davinci/http-server-fastify": "^2.4.0",
-		"@davinci/openapi": "^2.4.0",
+		"@davinci/http-server": "^3.6.1",
+		"@davinci/http-server-fastify": "^2.4.1",
+		"@davinci/openapi": "^2.4.1",
 		"@davinci/reflector": "^2.2.0",
 		"fastify": "^4.10.2"
 	},
