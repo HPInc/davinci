@@ -59,7 +59,8 @@ export interface ContextFactoryArguments<Request> {
 	reflection: { controllerReflection: ClassReflection; methodReflection: MethodReflection };
 }
 
-export type ContextFactory<Context, Request = any> = (args: ContextFactoryArguments<Request>) => Context;
+export type ContextFactory<Context, Request = any> =
+	(args: ContextFactoryArguments<Request>) => Promise<Context> | Context;
 
 export type HttpServerInterceptorStage = 'preValidation' | 'postValidation';
 
