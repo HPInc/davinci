@@ -43,6 +43,7 @@ export interface MethodDecoratorOptions {
 	summary?: string;
 	description?: string;
 	responses?: MethodResponses;
+	hidden?: boolean;
 }
 
 export interface MethodDecoratorMetadata {
