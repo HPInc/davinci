@@ -1,0 +1,158 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/customers/hello": {
+      "get": {
+        "summary": "That is a hello method",
+        "tags": [
+          "Customer"
+        ],
+        "operationId": "customerHello",
+        "parameters": [
+          {
+            "name": "age",
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "customer",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Customer"
+            }
+          },
+          {
+            "name": "x-accountid",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/customers": {
+      "post": {
+        "tags": [
+          "Customer"
+        ],
+        "operationId": "customerCreate",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Customer"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Object",
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Customer"
+        ],
+        "operationId": "customerGetAll",
+        "parameters": [
+          {
+            "name": "where",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Customer"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "info": {
+    "version": "1.0.0",
+    "title": "Customer API",
+    "description": "My nice Customer API"
+  },
+  "components": {
+    "schemas": {
+      "Birth": {
+        "title": "Birth",
+        "type": "object",
+        "required": [],
+        "$id": "Birth",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "country": {
+            "type": "string"
+          }
+        }
+      },
+      "Customer": {
+        "title": "Customer",
+        "type": "object",
+        "required": [
+          "lastname"
+        ],
+        "$id": "Customer",
+        "properties": {
+          "firstname": {
+            "minLength": 2,
+            "type": "string"
+          },
+          "lastname": {
+            "minLength": 2,
+            "type": "string"
+          },
+          "phones": {
+            "type": "array",
+            "items": {
+              "title": "phones",
+              "type": "object",
+              "properties": {
+                "isDefault": {
+                  "type": "boolean"
+                },
+                "phone": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "phone"
+              ]
+            }
+          },
+          "birth": {
+            "$ref": "#/components/schemas/Birth"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ]
+}
