@@ -9,12 +9,20 @@ import { FastifyHttpServer } from '@davinci/http-server-fastify';
 import { deepmerge as createDeepMerge } from '@fastify/deepmerge';
 import axios from 'axios';
 import { PartialDeep } from '@davinci/reflector';
+import { createSandbox } from 'sinon';
+import { promises as fs } from 'fs';
 import { OpenAPIModule, OpenAPIModuleOptions } from '../../src';
 import { expect } from '../support/chai';
+
+const sinon = createSandbox();
 
 const deepMerge = createDeepMerge({ all: true });
 
 describe('OpenAPIModule', () => {
+	afterEach(() => {
+		sinon.restore();
+	});
+
 	@entity()
 	class Phone {
 		@entity.prop()
@@ -1124,6 +1132,22 @@ describe('OpenAPIModule', () => {
 			const { data } = await axios.get('http://127.0.0.1:3000/swagger-ui');
 
 			expect(data).to.match(/<html.+>(.|\n)+<\/html>/);
+		});
+	});
+
+	describe('output', () => {
+		it('should write the spec to the local filesystem at path specified', async () => {
+			const writeFileStub = sinon.stub(fs, 'writeFile');
+			await initApp({
+				document: {
+					output: { path: 'path/to/local/folder', stringifyOptions: { space: 2 } },
+					spec: { info: { title: '', version: '' } }
+				}
+			});
+
+			expect(writeFileStub.called).to.be.true;
+			expect(writeFileStub.args[0][0]).to.be.equal('path/to/local/folder');
+			expect(writeFileStub.args[0][1]).to.contain('"openapi": "3.0.0"');
 		});
 	});
 });

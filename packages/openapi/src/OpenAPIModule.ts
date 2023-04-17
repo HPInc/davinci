@@ -20,6 +20,7 @@ import pino, { Level } from 'pino';
 import { OpenAPIV3 } from 'openapi-types';
 import createDeepMerge from '@fastify/deepmerge';
 import { ClassType, PartialDeep, TypeValue } from '@davinci/reflector';
+import { promises as fs } from 'fs';
 import { generateSwaggerUiHtml } from './swaggerUi';
 
 const deepMerge = createDeepMerge();
@@ -30,8 +31,20 @@ export interface OpenAPIModuleOptions {
 		path?: string;
 		spec: Partial<OpenAPIV3.Document>;
 		automaticOperationIds?: boolean;
-		operationIdFormatter?: (route: Route<any> & { controllerName: string; methodName: string }) => string;
+		operationIdFormatter?: <Request = unknown>(
+			route: Route<Request> & { controllerName: string; methodName: string }
+		) => string;
 		automaticPathTags?: boolean;
+		output?: {
+			/**
+			 * The path on the local file system where the OpenAPI document will be written to.
+			 */
+			path?: string;
+			stringifyOptions?: {
+				replacer?: (this: any, key: string, value: any) => any;
+				space?: string | number;
+			};
+		};
 	};
 	explorer?: {
 		enabled?: boolean;
@@ -115,6 +128,18 @@ export class OpenAPIModule extends Module {
 		await mapSeries(routes, route => this.createPathAndSchema(route));
 
 		await this.registerOpenapiRoutes();
+
+		const outputPath = this.moduleOptions.document?.output?.path;
+		if (this.moduleOptions.document?.output?.path) {
+			const stringifyOptions = this.moduleOptions.document?.output.stringifyOptions;
+			const stringifiedDocument = JSON.stringify(
+				this.openAPIDoc,
+				stringifyOptions?.replacer,
+				stringifyOptions?.space
+			);
+			await fs.writeFile(outputPath, stringifiedDocument);
+			this.logger.debug(`The OpenAPI document has been written to the local file system at path: ${outputPath}`);
+		}
 	}
 
 	async createPathAndSchema(route: Route<unknown>): Promise<void> {
