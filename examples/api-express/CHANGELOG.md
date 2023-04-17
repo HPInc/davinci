@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.3.0](https://github.com/HPInc/davinci/compare/@davinci/example-next-api-express@2.2.1...@davinci/example-next-api-express@2.3.0) (2023-04-17)
+
+
+### Features
+
+* **openapi:** added the ability to write the OpenAPI spec to a file in the local filesystem ([#226](https://github.com/HPInc/davinci/issues/226)) ([add8132](https://github.com/HPInc/davinci/commit/add8132216ccbaa164d89ac6f492b166fe1bb048))
+
+
+
+
+
 ## [2.2.1](https://github.com/HPInc/davinci/compare/@davinci/example-next-api-express@2.2.0...@davinci/example-next-api-express@2.2.1) (2023-03-09)
 
 **Note:** Version bump only for package @davinci/example-next-api-express

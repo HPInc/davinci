@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/example-next-api-fastify",
-	"version": "2.2.1",
+	"version": "2.2.2",
 	"private": true,
 	"description": "",
 	"main": "index.js",
@@ -17,7 +17,7 @@
 		"@davinci/health-checks": "^2.2.1",
 		"@davinci/http-server": "^3.6.1",
 		"@davinci/http-server-fastify": "^2.4.1",
-		"@davinci/openapi": "^2.4.1",
+		"@davinci/openapi": "^2.5.0",
 		"ajv": "^8.11.2",
 		"ajv-errors": "^3.0.0",
 		"ajv-formats": "^2.1.1",
