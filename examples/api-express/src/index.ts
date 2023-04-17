@@ -47,6 +47,12 @@ app.registerController(CustomerController).registerModule(
 						bearerAuth: []
 					}
 				]
+			},
+			output: {
+				path: './openapi.json',
+				stringifyOptions: {
+					space: 2
+				}
 			}
 		}
 	})

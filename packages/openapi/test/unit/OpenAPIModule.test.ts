@@ -1140,13 +1140,13 @@ describe('OpenAPIModule', () => {
 			const writeFileStub = sinon.stub(fs, 'writeFile');
 			await initApp({
 				document: {
-					output: { path: 'path/to/local/folder', stringifyOptions: { space: 2 } },
+					output: { path: 'path/to/local/file.json', stringifyOptions: { space: 2 } },
 					spec: { info: { title: '', version: '' } }
 				}
 			});
 
 			expect(writeFileStub.called).to.be.true;
-			expect(writeFileStub.args[0][0]).to.be.equal('path/to/local/folder');
+			expect(writeFileStub.args[0][0]).to.match(/path\/to\/local\/file\.json$/);
 			expect(writeFileStub.args[0][1]).to.contain('"openapi": "3.0.0"');
 		});
 	});

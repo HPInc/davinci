@@ -21,6 +21,8 @@ import { OpenAPIV3 } from 'openapi-types';
 import createDeepMerge from '@fastify/deepmerge';
 import { ClassType, PartialDeep, TypeValue } from '@davinci/reflector';
 import { promises as fs } from 'fs';
+import { join as joinPaths } from 'path';
+import * as process from 'process';
 import { generateSwaggerUiHtml } from './swaggerUi';
 
 const deepMerge = createDeepMerge();
@@ -129,7 +131,7 @@ export class OpenAPIModule extends Module {
 
 		await this.registerOpenapiRoutes();
 
-		const outputPath = this.moduleOptions.document?.output?.path;
+		const relativeOutputPath = this.moduleOptions.document?.output?.path;
 		if (this.moduleOptions.document?.output?.path) {
 			const stringifyOptions = this.moduleOptions.document?.output.stringifyOptions;
 			const stringifiedDocument = JSON.stringify(
@@ -137,6 +139,7 @@ export class OpenAPIModule extends Module {
 				stringifyOptions?.replacer,
 				stringifyOptions?.space
 			);
+			const outputPath = joinPaths(process.cwd(), relativeOutputPath);
 			await fs.writeFile(outputPath, stringifiedDocument);
 			this.logger.debug(`The OpenAPI document has been written to the local file system at path: ${outputPath}`);
 		}
