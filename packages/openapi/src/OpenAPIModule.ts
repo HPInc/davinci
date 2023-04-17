@@ -132,7 +132,7 @@ export class OpenAPIModule extends Module {
 		await this.registerOpenapiRoutes();
 
 		const relativeOutputPath = this.moduleOptions.document?.output?.path;
-		if (this.moduleOptions.document?.output?.path) {
+		if (relativeOutputPath) {
 			const stringifyOptions = this.moduleOptions.document?.output.stringifyOptions;
 			const stringifiedDocument = JSON.stringify(
 				this.openAPIDoc,
