@@ -138,6 +138,26 @@
           },
           "birth": {
             "$ref": "#/components/schemas/Birth"
+          },
+          "orders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Order"
+            }
+          }
+        }
+      },
+      "Order": {
+        "title": "Order",
+        "type": "object",
+        "required": [],
+        "$id": "Order",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "customer": {
+            "$ref": "#/components/schemas/Customer"
           }
         }
       }

@@ -6,6 +6,8 @@
 import sinon from 'sinon';
 import { entity, EntityDefinition, EntityRegistry, omit, transformEntityDefinitionSchema } from '../../../src';
 import { expect } from '../../support/chai';
+import { Author } from '../../support/data/AuthorSchema';
+import { Book } from '../../support/data/BookSchema';
 
 describe('EntityRegistry', () => {
 	it('should be able to add and create json schema for entities', () => {
@@ -164,6 +166,44 @@ describe('EntityRegistry', () => {
 		});
 	});
 
+	it('should support circular schemas', () => {
+		const entityRegistry = new EntityRegistry();
+		const authorJsonSchema = entityRegistry.getEntityDefinitionJsonSchema(Author);
+		const bookJsonSchema = entityRegistry.getEntityDefinitionJsonSchema(Book);
+		const authorEntityDefinition = entityRegistry.getEntityDefinitionMap().get(Author);
+		const bookEntityDefinition = entityRegistry.getEntityDefinitionMap().get(Book);
+
+		expect(authorJsonSchema).to.be.containSubset({
+			$id: 'Author',
+			title: 'Author',
+			type: 'object',
+			properties: {
+				name: {
+					type: 'string'
+				},
+				books: {
+					type: 'array',
+					items: {
+						_$ref: bookEntityDefinition
+					}
+				}
+			}
+		});
+		expect(bookJsonSchema).to.be.containSubset({
+			$id: 'Book',
+			title: 'Book',
+			type: 'object',
+			properties: {
+				title: {
+					type: 'string'
+				},
+				author: {
+					_$ref: authorEntityDefinition
+				}
+			}
+		});
+	});
+
 	describe('#entityDefinitionSchemaTransform', () => {
 		it('should traverse and allow transforming json schemas structures', () => {
 			const entityRegistry = new EntityRegistry();
@@ -219,25 +259,26 @@ describe('EntityRegistry', () => {
 
 			const entityJsonSchema = entityRegistry.getEntityDefinitionJsonSchema(Customer);
 
-			let result = transformEntityDefinitionSchema(entityJsonSchema, args => {
+			const result = transformEntityDefinitionSchema(entityJsonSchema, args => {
 				if (args.pointerPath === '') {
 					return { path: '', value: omit(args.schema, ['properties']) };
-				} else if (args.schema._$ref) {
+				}
+				if (args.schema._$ref) {
 					const ref: EntityDefinition = args.schema._$ref;
 					const childEntityJsonSchema = ref.getEntityDefinitionJsonSchema();
 					if (childEntityJsonSchema.$id) {
 						return { path: args.pointerPath, value: { $ref: `#/${childEntityJsonSchema.$id}` } };
-					} else {
-						return { path: args.pointerPath, value: childEntityJsonSchema };
 					}
-				} else if (typeof args.schema === 'function') {
+					return { path: args.pointerPath, value: childEntityJsonSchema };
+				}
+				if (typeof args.schema === 'function') {
 					const childEntityJsonSchema = entityRegistry.getEntityDefinitionJsonSchema(args.schema);
 					if (childEntityJsonSchema.$id) {
 						return { path: args.pointerPath, value: { $ref: `#/${childEntityJsonSchema.$id}` } };
-					} else {
-						return { path: args.pointerPath, value: childEntityJsonSchema };
 					}
-				} else if (args.parentKeyword === 'properties') {
+					return { path: args.pointerPath, value: childEntityJsonSchema };
+				}
+				if (args.parentKeyword === 'properties') {
 					return { path: args.pointerPath, value: args.schema };
 				}
 
