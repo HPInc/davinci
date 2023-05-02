@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.10.0](https://github.com/HPInc/davinci/compare/@davinci/core@2.9.0...@davinci/core@2.10.0) (2023-05-02)
+
+
+### Features
+
+* **typeFactory:** allow for schemas with circular dependencies ([#227](https://github.com/HPInc/davinci/issues/227)) ([b58bc24](https://github.com/HPInc/davinci/commit/b58bc24c21a95d89e8eddebf764c709a9ce5fa60))
+
+
+
+
+
 # [2.9.0](https://github.com/HPInc/davinci/compare/@davinci/core@2.8.1...@davinci/core@2.9.0) (2023-02-27)
 
 

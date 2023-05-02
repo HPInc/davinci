@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.3.0](https://github.com/HPInc/davinci/compare/@davinci/example-next-api-fastify@2.2.2...@davinci/example-next-api-fastify@2.3.0) (2023-05-02)
+
+
+### Features
+
+* **typeFactory:** allow for schemas with circular dependencies ([#227](https://github.com/HPInc/davinci/issues/227)) ([b58bc24](https://github.com/HPInc/davinci/commit/b58bc24c21a95d89e8eddebf764c709a9ce5fa60))
+
+
+
+
+
 ## [2.2.2](https://github.com/HPInc/davinci/compare/@davinci/example-next-api-fastify@2.2.1...@davinci/example-next-api-fastify@2.2.2) (2023-04-17)
 
 **Note:** Version bump only for package @davinci/example-next-api-fastify
