@@ -1,5 +1,8 @@
 import { app } from '../../src';
 import { expect } from '../support/chai';
+import { EntityRegistry } from '@davinci/core';
+import { Customer } from '../../src/api/customer/customer.schema';
+import { Book } from '../../src/api/customer/order.schema';
 
 describe('Customer integration tests', () => {
 	before(async () => {
@@ -62,5 +65,12 @@ describe('Customer integration tests', () => {
 				}
 			});
 		});
+	});
+
+	it('should', () => {
+		const entityRegistry = new EntityRegistry();
+		const customerJsonSchema = entityRegistry.getEntityDefinitionJsonSchema(Customer);
+		const bookJsonSchema = entityRegistry.getEntityDefinitionJsonSchema(Book);
+		console.log(customerJsonSchema, bookJsonSchema, Book);
 	});
 });

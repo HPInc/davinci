@@ -4,6 +4,7 @@
  */
 
 import { entity } from '@davinci/core';
+import { Order } from './order.schema';
 
 class Phone {
 	@entity.prop()
@@ -35,4 +36,7 @@ export class Customer {
 
 	@entity.prop()
 	birth?: Birth;
+
+	@entity.prop({ typeFactory: () => [Order] })
+	orders?: Array<Order>;
 }

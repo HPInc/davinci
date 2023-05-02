@@ -46,7 +46,7 @@ export class EntityDefinition {
 
 		this.name = options.name ?? (this.type as ClassType)?.name;
 		this.entityDefinitionsMapCache = options.entityDefinitionsMapCache ?? new Map<TypeValue, EntityDefinition>();
-		if (!options.reflect) {
+		if (options.reflect !== false) {
 			this.entityDefinitionJsonSchema = this.reflect();
 		}
 	}
@@ -135,7 +135,8 @@ export class EntityDefinition {
 					entityProps.reduce<Partial<Pick<JSONSchema, 'properties' | 'required'>> | null>((acc, prop) => {
 						const accumulator = acc ?? { properties: {}, required: [] };
 						const entityPropDecorator = this.findEntityPropDecorator(prop);
-						const explicitType = entityPropDecorator.options?.type;
+						const lazyType = entityPropDecorator.options?.typeFactory?.();
+						const explicitType = lazyType ?? entityPropDecorator.options?.type;
 						const type = explicitType ?? prop.type;
 
 						const isArray = Array.isArray(type);
@@ -146,8 +147,8 @@ export class EntityDefinition {
 						// @entity.prop({ anyOf: [MyClassOne, MyClassTwo]  })
 						const omitProps =
 							typeof entityPropDecorator?.options?.required === 'boolean'
-								? ['type', 'required']
-								: ['type'];
+								? ['type', 'typeFactory', 'required']
+								: ['type', 'typeFactory'];
 						const extractedJsonSchema = transformEntityDefinitionSchema(
 							omit(entityPropDecorator?.options ?? {}, omitProps),
 							args => {
@@ -218,7 +219,8 @@ export class EntityDefinition {
 							!hasFalseOrNullType &&
 							hasExplicitType &&
 							!Array.isArray(explicitType) &&
-							typeof entityPropDecorator.options?.type !== 'function';
+							typeof entityPropDecorator.options?.type !== 'function' &&
+							!lazyType;
 
 						let generatedJsonSchema;
 						if (hasFalseOrNullType) {
@@ -228,7 +230,7 @@ export class EntityDefinition {
 						} else if (hasConstType) {
 							generatedJsonSchema = { type: entityPropDecorator.options?.type };
 						} else {
-							generatedJsonSchema = makeSchema(entityPropDecorator.options?.type ?? prop.type, prop.name);
+							generatedJsonSchema = makeSchema(type, prop.name);
 						}
 
 						accumulator.properties[prop.name] = deepMerge(extractedJsonSchema, generatedJsonSchema ?? {}, {
