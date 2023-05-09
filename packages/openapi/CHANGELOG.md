@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.5.2](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.5.1...@davinci/openapi@2.5.2) (2023-05-09)
+
+**Note:** Version bump only for package @davinci/openapi
+
+
+
+
+
 ## [2.5.1](https://github.com/HPInc/davinci/compare/@davinci/openapi@2.5.0...@davinci/openapi@2.5.1) (2023-05-02)
 
 **Note:** Version bump only for package @davinci/openapi

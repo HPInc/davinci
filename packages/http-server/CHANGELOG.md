@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.6.3](https://github.com/HPInc/davinci/compare/@davinci/http-server@3.6.2...@davinci/http-server@3.6.3) (2023-05-09)
+
+**Note:** Version bump only for package @davinci/http-server
+
+
+
+
+
 ## [3.6.2](https://github.com/HPInc/davinci/compare/@davinci/http-server@3.6.1...@davinci/http-server@3.6.2) (2023-05-02)
 
 **Note:** Version bump only for package @davinci/http-server

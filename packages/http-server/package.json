@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/http-server",
-	"version": "3.6.2",
+	"version": "3.6.3",
 	"description": "Framework for rapid and consistent API development",
 	"main": "build-cjs/index.js",
 	"module": "build-esm/index.js",
@@ -20,7 +20,7 @@
 	"author": "HP",
 	"license": "MIT",
 	"dependencies": {
-		"@davinci/core": "^2.10.0",
+		"@davinci/core": "^2.10.1",
 		"@davinci/reflector": "^2.2.0"
 	},
 	"peerDependencies": {

@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.10.1](https://github.com/HPInc/davinci/compare/@davinci/core@2.10.0...@davinci/core@2.10.1) (2023-05-09)
+
+
+### Bug Fixes
+
+* do not filter null if nullable ([b01d88e](https://github.com/HPInc/davinci/commit/b01d88e3aa644292b99a620847adf3b0c881fa51))
+* tests ([38e1c6b](https://github.com/HPInc/davinci/commit/38e1c6bf2d2edc54718ec3a97911b42eed2cfdf0))
+
+
+
+
+
 # [2.10.0](https://github.com/HPInc/davinci/compare/@davinci/core@2.9.0...@davinci/core@2.10.0) (2023-05-02)
 
 
