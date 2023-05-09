@@ -120,6 +120,80 @@ describe('EntityDefinition', () => {
 		});
 	});
 
+	it('should reflect a class with nullable enum and generate a json schema', () => {
+		enum PHONE_TYPE {
+			PERSONAL = 'personal',
+			WORK = 'work',
+			OTHER = 'other',
+			null = null
+		}
+
+		enum PHONE_PREFIX {
+			one = 1,
+			three = 3,
+			null = null
+		}
+
+		@entity()
+		class Phone {
+			@entity.prop({ oneOf: [{ enum: PHONE_TYPE }, { enum: PHONE_PREFIX }], nullable: true })
+			typeOrPrefix: PHONE_TYPE | PHONE_PREFIX;
+		}
+
+		const entityDefinition = new EntityDefinition({ type: Phone });
+
+		expect(entityDefinition.getEntityDefinitionJsonSchema()).to.containSubset({
+			title: 'Phone',
+			type: 'object',
+			properties: {
+				typeOrPrefix: {
+					oneOf: [
+						{ enum: ['personal', 'work', 'other', 'null'], type: 'string' },
+						{ enum: ['one', 'three', 'null'], type: 'string' }
+					],
+					type: 'object'
+				}
+			}
+		});
+	});
+
+	it('should reflect a class with non nullable enum and generate a json schema', () => {
+		enum PHONE_TYPE {
+			PERSONAL = 'personal',
+			WORK = 'work',
+			OTHER = 'other',
+			null = null
+		}
+
+		enum PHONE_PREFIX {
+			one = 1,
+			three = 3,
+			null = null
+		}
+
+		@entity()
+		class Phone {
+			@entity.prop({ oneOf: [{ enum: PHONE_TYPE }, { enum: PHONE_PREFIX }] })
+			typeOrPrefix: PHONE_TYPE | PHONE_PREFIX;
+		}
+
+		const entityDefinition = new EntityDefinition({ type: Phone });
+
+		expect(entityDefinition.getEntityDefinitionJsonSchema()).to.containSubset({
+			title: 'Phone',
+			type: 'object',
+			properties: {
+				typeOrPrefix: {
+					oneOf: [
+						{ enum: ['personal', 'work', 'other'], type: 'string' },
+						{ enum: ['one', 'three'], type: 'string' }
+					],
+					type: 'object'
+				}
+			}
+		});
+	});
+
 	it('should reflect a class and generate a json schema using the entity definition cache', () => {
 		@entity()
 		class Birth {
