@@ -120,6 +120,48 @@ describe('EntityDefinition', () => {
 		});
 	});
 
+	it('should reflect a class with nullable enum and generate a json schema', () => {
+		@entity()
+		class Person {
+			@entity.prop({ enum: ['a', 'b', null], nullable: true })
+			name: Object;
+		}
+
+		const entityDefinition = new EntityDefinition({ type: Person });
+
+		expect(entityDefinition.getEntityDefinitionJsonSchema()).to.containSubset({
+			title: 'Person',
+			type: 'object',
+			properties: {
+				name: {
+					enum: ['a', 'b', null], nullable: true, type: 'object'
+				}
+			}
+		});
+	});
+
+	it('should reflect a class with non nullable enum and generate a json schema', () => {
+		@entity()
+		class Person {
+			@entity.prop({ enum: ['a', 'b', null] })
+			name: Object;
+		}
+
+		const entityDefinition = new EntityDefinition({ type: Person });
+
+		const entitySchema = entityDefinition.getEntityDefinitionJsonSchema();
+		expect(entitySchema.properties.name.enum).to.not.contain(null);
+		expect(entitySchema).to.containSubset({
+			title: 'Person',
+			type: 'object',
+			properties: {
+				name: {
+					enum: ['a', 'b'], type: 'object'
+				}
+			}
+		});
+	});
+
 	it('should reflect a class and generate a json schema using the entity definition cache', () => {
 		@entity()
 		class Birth {

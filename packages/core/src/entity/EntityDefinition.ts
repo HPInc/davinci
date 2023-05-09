@@ -161,7 +161,7 @@ export class EntityDefinition {
 									additionalSchemaProps = {};
 									additionalSchemaProps.type = enmType;
 									additionalSchemaProps.enum = Object.values(args.schema.enum).filter(
-										v => typeof v === enmType
+										v => typeof v === enmType || (v === null && args.schema.nullable)
 									) as Array<string | number>;
 									hasAdditionalSchemaProps = true;
 								}
