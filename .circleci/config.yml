@@ -5,10 +5,10 @@ jobs:
     parameters:
       mongo-version:
         type: string
-      node-version:
+      docker-image:
         type: string
     docker:
-      - image: circleci/node:<< parameters.node-version >>
+      - image: << parameters.docker-image >>
       - image: circleci/mongo:<< parameters.mongo-version >>
       - image: rabbitmq:3.9-alpine
     steps:
@@ -40,7 +40,7 @@ jobs:
           condition:
             and:
               - equal: [ "4.4", << parameters.mongo-version >> ]
-              - equal: [ "14", << parameters.node-version >> ]
+              - equal: [ "circleci/node:14", << parameters.docker-image >> ]
           steps:
             - run:
                 name: upload coverage report
@@ -94,7 +94,7 @@ workflows:
           matrix:
             parameters:
               mongo-version: ["4.4", "5"]
-              node-version: ["14", "16"]
+              docker-image: ["circleci/node:14", "circleci/node:16", "cimg/node:18.16.0", "cimg/node:20.3.0"]
       - publish:
           requires:
             - checkout_and_test
