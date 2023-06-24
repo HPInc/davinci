@@ -18,7 +18,7 @@
 		"@davinci/reflector": "^2.2.0",
 		"amqp-connection-manager": "^4.1.9",
 		"amqplib": "^0.10.3",
-		"newrelic": "^9.2.0"
+		"newrelic": "^10.3.1"
 	},
 	"devDependencies": {
 		"@types/newrelic": "^7.0.4",
