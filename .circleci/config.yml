@@ -66,6 +66,10 @@ jobs:
             mkdir -p ~/.ssh
             ssh-keyscan github.com >> ~/.ssh/known_hosts
       - run:
+          name: refresh git tags
+          command: |
+            git fetch --tags
+      - run:
           name: publish
           command: |
             git config --global user.email "circleci@hp.com"
