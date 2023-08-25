@@ -21,15 +21,17 @@
 	"license": "MIT",
 	"dependencies": {
 		"@davinci/http-server": "^3.6.3",
-		"@davinci/reflector": "^2.2.0"
+		"@davinci/reflector": "^2.2.0",
+		"node-fetch": "2.7.0"
 	},
 	"peerDependencies": {
-		"qs": "^6.11.0",
 		"hono": "^3.5.4",
-		"light-my-request": "^4.0.0 || ^5.0.0"
+		"light-my-request": "^4.0.0 || ^5.0.0",
+		"qs": "^6.11.0"
 	},
 	"devDependencies": {
 		"@davinci/core": "^2.10.1",
+		"@types/node-fetch": "^2.6.4",
 		"axios": "^1.4.0",
 		"hono": "^3.5.4",
 		"light-my-request": "^5.10.0",
