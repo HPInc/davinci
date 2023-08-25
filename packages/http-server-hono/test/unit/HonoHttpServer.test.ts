@@ -318,13 +318,6 @@ describe('HonoHttpServer', () => {
 			expect(honoMocks.post.firstCall.args[0]).to.be.deep.equal('/');
 			honoHttpServer.all('/', cb);
 			expect(honoMocks.all.firstCall.args[0]).to.be.deep.equal('/');
-			/* honoHttpServer.static('/', { redirect: true });
-			expect(honoMocks.register.firstCall.args).to.be.deep.equal([
-				honoStatic,
-				{ root: '/', redirect: true }
-			]); */
-			/* honoHttpServer.listen();
-			expect(honoMocks.listen.firstCall.args).to.be.deep.equal([{ port: 3000, host: '0.0.0.0' }]); */
 		});
 
 		it('should propagate the calls to the underlying response', async () => {

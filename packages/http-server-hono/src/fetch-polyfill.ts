@@ -1,3 +1,6 @@
+// This polyfill targets Node.js versions < 18
+// where the fetch API is not available
+
 import fetch, { Headers, Request, Response } from 'node-fetch';
 
 if (!globalThis.fetch) {

@@ -264,6 +264,10 @@ export class HonoHttpServer extends HttpServerModule<{
 				return request.req.header(name as string);
 
 			case 'query':
+				// The Hono query parsing is very limited and it doesn't allow to plug any additional parsing logic.
+				// For this reason, we need to manually parse the querystring using qs and cache the result on the
+				// context. In the future the querystring logic could be more flexible, allowing to be controlled
+				// via module options.
 				// eslint-disable-next-line no-case-declarations
 				let parsedQuery: Record<string, unknown> = request.get('_parsedQuery');
 				if (!parsedQuery) {
