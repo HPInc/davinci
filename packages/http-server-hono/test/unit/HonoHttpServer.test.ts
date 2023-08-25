@@ -6,7 +6,6 @@ import { App } from '@davinci/core';
 import { route } from '@davinci/http-server';
 import { createSandbox } from 'sinon';
 import { reflect } from '@davinci/reflector';
-// eslint-disable-next-line import/no-unresolved
 import { Hono } from 'hono';
 import { expect } from '../support/chai';
 import { HonoHttpServer } from '../../src';
@@ -78,6 +77,16 @@ describe('HonoHttpServer', () => {
 			await app.registerModule(honoHttpServer);
 
 			expect(honoHttpServer.instance).to.exist;
+		});
+
+		it('should register the cors middleware', async () => {
+			const honoApp = new Hono();
+			const useSpy = sinon.spy(honoApp, 'use');
+			const honoHttpServer = new HonoHttpServer({ instance: honoApp, port: 3000, cors: { origin: '*' } });
+			await app.registerModule(honoHttpServer);
+			await app.init();
+
+			expect(useSpy.called).to.be.true;
 		});
 
 		it('should synchronously register the routes on the hono instance', async () => {

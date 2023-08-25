@@ -10,14 +10,18 @@ import {
 	RequestHandler
 } from '@davinci/http-server';
 import type { App } from '@davinci/core';
-// eslint-disable-next-line import/no-unresolved
 import { Context as HonoContext, ErrorHandler, Hono } from 'hono';
+// eslint-disable-next-line import/no-unresolved
+import type { cors } from 'hono/cors';
 import { InjectOptions } from 'light-my-request';
 import qs from 'qs';
+
+export type HonoCORSOptions = Parameters<typeof cors>[0];
 
 export interface HonoHttpServerModuleOptions extends HttpServerModuleOptions {
 	instance?: Hono | (() => Hono);
 	waitForAppInitOnRequest?: boolean;
+	cors?: boolean | HonoCORSOptions;
 	/* cors?: HonoCorsOptions;
 	plugins?: [HonoPluginCallback, HonoPluginOptions?][]; */
 }
@@ -47,7 +51,7 @@ export class HonoHttpServer extends HttpServerModule<{
 			this.logger.level = level;
 		}
 		this.initHttpServer();
-		this.registerPlugins();
+		this.registerMiddlewares();
 
 		if (this.moduleOptions?.waitForAppInitOnRequest && this.instance) {
 			this.instance.use(async (_ctx, next) => {
@@ -69,14 +73,14 @@ export class HonoHttpServer extends HttpServerModule<{
 		this.logger.info('Server destroyed');
 	}
 
-	registerPlugins() {
-		/* if (!this.instance) throw new Error('instance not set, aborting');
+	registerMiddlewares() {
+		if (!this.instance) throw new Error('instance not set, aborting');
 
-		if (this.moduleOptions?.cors) this.instance.register(fastifyCors, this.moduleOptions?.cors);
-		const promises =
-			this.moduleOptions?.plugins?.map(([plugin, options]) => this.instance?.register(plugin, options)) ?? [];
-
-		return Promise.all(promises); */
+		if (this.moduleOptions?.cors) {
+			// eslint-disable-next-line @typescript-eslint/no-var-requires,global-require,import/no-unresolved
+			const corsMiddleware = require('hono/cors');
+			this.instance.use(corsMiddleware.cors(this.moduleOptions.cors));
+		}
 	}
 
 	initHttpServer() {
