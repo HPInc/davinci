@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/example-next-amqp",
-	"version": "2.2.4",
+	"version": "2.2.2",
 	"private": true,
 	"description": "",
 	"main": "index.js",
