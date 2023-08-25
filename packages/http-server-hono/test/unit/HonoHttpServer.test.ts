@@ -341,7 +341,7 @@ describe('HonoHttpServer', () => {
 			expect(responseMock.redirect.firstCall.args).to.be.deep.equal(['http://redirect.url', 301]);
 			// @ts-ignore
 			honoHttpServer.setHeader(responseMock, 'x-my-header', '123');
-			expect(responseMock.header.firstCall.args).to.be.deep.equal(['x-my-header', '123']);
+			expect(responseMock.header.firstCall.args).to.be.deep.equal(['X-My-Header', '123']);
 		});
 	});
 
