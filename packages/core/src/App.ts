@@ -77,32 +77,26 @@ export class App extends Module implements LocalVarsContainer {
 
 		this.setStatus('registering');
 
-		await new Promise((resolve, reject) => {
-			process.nextTick(() => {
-				mapSeries(modules, async mod => {
-					mod.setStatus('registering');
-					await mod.onRegister?.(this);
-					mod.setStatus('registered');
-				})
-					.then(() => {
-						const allModulesRegistered = Object.keys(this.modulesDic)
-							.map(key => this.modulesDic[key].getStatus())
-							.every(status => status === 'registered');
+		await mapSeries(modules, async mod => {
+			mod.setStatus('registering');
+			await mod.onRegister?.(this);
+			mod.setStatus('registered');
+		})
+			.then(() => {
+				const allModulesRegistered = Object.keys(this.modulesDic)
+					.map(key => this.modulesDic[key].getStatus())
+					.every(status => status === 'registered');
 
-						if (allModulesRegistered) {
-							this.setStatus('registered');
-							this.eventBus.emit('registered');
-						}
-
-						resolve(null);
-					})
-					.catch(err => {
-						this.logger.fatal({ error: err }, 'Fatal error during module registration');
-						this.setStatus('error');
-						reject(err);
-					});
+				if (allModulesRegistered) {
+					this.setStatus('registered');
+					this.eventBus.emit('registered');
+				}
+			})
+			.catch(err => {
+				this.logger.fatal({ error: err }, 'Fatal error during module registration');
+				this.setStatus('error');
+				throw err;
 			});
-		});
 
 		return this;
 	}

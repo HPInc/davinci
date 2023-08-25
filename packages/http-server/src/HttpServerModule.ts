@@ -11,7 +11,6 @@ import {
 	Interceptor,
 	InterceptorNext,
 	mapParallel,
-	mapSeries,
 	Module,
 	omit
 } from '@davinci/core';
@@ -98,7 +97,7 @@ export abstract class HttpServerModule<
 		return this;
 	}
 
-	public async createRoutes(): Promise<Route<SMG['Request']>[]> {
+	public createRoutes() {
 		this.addInjectFunction();
 
 		const controllersReflection =
@@ -110,14 +109,14 @@ export abstract class HttpServerModule<
 						reflection.methods.some(m => m.decorators.some(d => d.module === 'http-server'))
 				) ?? [];
 
-		await mapSeries(controllersReflection, ({ controllerInstance, reflection: controllerReflection }) => {
+		controllersReflection.forEach(({ controllerInstance, reflection: controllerReflection }) => {
 			const controllerDecoratorMetadata: ControllerDecoratorMetadata = controllerReflection.decorators.find(
 				d => d.module === 'http-server' && d.type === 'controller'
 			);
 			const basePath =
 				controllerDecoratorMetadata?.options?.basePath ?? controllerDecoratorMetadata?.options?.basepath ?? '/';
 
-			return mapSeries(controllerReflection.methods, async methodReflection => {
+			return controllerReflection.methods.forEach(methodReflection => {
 				const methodDecoratorMetadatas: Array<MethodDecoratorMetadata> = methodReflection.decorators.filter(
 					d => d[DecoratorId] === 'http-server.method'
 				);
@@ -125,7 +124,7 @@ export abstract class HttpServerModule<
 
 				if (!methodDecoratorMetadatas.length) return null;
 
-				return mapSeries(methodDecoratorMetadatas, async methodDecoratorMetadata => {
+				return methodDecoratorMetadatas.forEach(methodDecoratorMetadata => {
 					const {
 						verb,
 						options: { path }
@@ -136,7 +135,7 @@ export abstract class HttpServerModule<
 						fullPath = fullPath.slice(0, -1);
 					}
 
-					const parametersConfig = await this.createParametersConfigurations({
+					const parametersConfig = this.createParametersConfigurations({
 						controllerReflection,
 						methodReflection
 					});
@@ -164,7 +163,7 @@ export abstract class HttpServerModule<
 
 					this.routes.push(route);
 
-					return this[verb](fullPath, await this.createRequestHandler(controllerInstance, methodName, route));
+					return this[verb](fullPath, this.createRequestHandler(controllerInstance, methodName, route));
 				});
 			});
 		});
@@ -172,11 +171,7 @@ export abstract class HttpServerModule<
 		return this.routes;
 	}
 
-	public async createRequestHandler(
-		controller: InstanceType<ClassType>,
-		methodName: string,
-		route: Route<SMG['Request']>
-	) {
+	public createRequestHandler(controller: InstanceType<ClassType>, methodName: string, route: Route<SMG['Request']>) {
 		const { methodReflection, controllerReflection, parametersConfig } = route;
 		// eslint-disable-next-line @typescript-eslint/no-this-alias
 		const httpServerModule = this;
@@ -195,7 +190,16 @@ export abstract class HttpServerModule<
 			{ preValidation: [], postValidation: [] }
 		);
 
-		const validatorFunction: ValidationFunction | undefined = await this.validationFactory?.(route);
+		const validatorFunctionPromise: ValidationFunction | Promise<ValidationFunction> | undefined =
+			this.validationFactory?.(route);
+
+		// if it's a promise, exit(1) on error
+		if (validatorFunctionPromise && 'then' in validatorFunctionPromise && 'catch' in validatorFunctionPromise) {
+			validatorFunctionPromise.catch(err => {
+				console.error(err);
+				process.exit(1);
+			});
+		}
 
 		// using a named function here for better instrumentation and reporting
 		return async function davinciHttpRequestHandler(request: SMG['Request'], response: SMG['Response']) {
@@ -260,7 +264,7 @@ export abstract class HttpServerModule<
 				// create the validation interceptor
 				const validationInterceptor = await httpServerModule.createValidationInterceptor({
 					parametersConfig: parametersConfigWithValues,
-					validatorFunction
+					validatorFunction: await validatorFunctionPromise
 				});
 
 				// create context for interceptors and parameters
@@ -294,7 +298,7 @@ export abstract class HttpServerModule<
 
 				httpServerModule.status(response, statusCode);
 
-				return httpServerModule.reply(response, result);
+				return httpServerModule.reply(response, result, statusCode);
 			} catch (err) {
 				// default error handler, can be overridden by a dedicated interceptor
 

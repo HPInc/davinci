@@ -1,0 +1,19 @@
+{
+	"extends": ["../.eslintrc"],
+	"rules": {
+		"import/no-extraneous-dependencies": "off",
+		"max-classes-per-file": "off",
+		"no-unused-expressions": "off",
+		"no-shadow": "off",
+		"@typescript-eslint/no-empty-function": "off",
+		"@typescript-eslint/no-var-requires": "off",
+		"dot-notation": "off"
+	},
+	"env": {
+		// let's add our mocha globals in to our environment
+		"mocha": true
+	},
+	"parserOptions": {
+		"project": "./tsconfig.json"
+	}
+}

@@ -1,0 +1,11 @@
+{
+	"extends": "./tsconfig.cjs.release.json",
+	"include": ["src/**/*", "test/**/*"],
+	"ts-node": {
+		"compilerOptions": {
+			"strictPropertyInitialization": false,
+			"strict": false,
+			"noImplicitAny": false
+		}
+	}
+}

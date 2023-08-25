@@ -31,10 +31,10 @@ describe('FastifyHttpServer', () => {
 
 	describe('lifecycle', () => {
 		it('should be reinit the module after destroy', async () => {
+			const onRegister = sinon.spy(FastifyHttpServer.prototype, 'onRegister');
 			const fastifyHttpServer = new FastifyHttpServer({ port: 3000 });
-			app.registerModule(fastifyHttpServer);
 
-			const onRegister = sinon.spy(fastifyHttpServer, 'onRegister');
+			app.registerModule(fastifyHttpServer);
 
 			await app.init();
 			await app.shutdown();
