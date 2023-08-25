@@ -96,7 +96,7 @@ export class HonoHttpServer extends HttpServerModule<{
 		}
 
 		if (typeof body === 'string') {
-			return honoCtx.text(body, statusCode);
+			return honoCtx.body(body, statusCode);
 		}
 
 		return honoCtx.newResponse(body as string | ArrayBuffer | ReadableStream, statusCode);
@@ -207,7 +207,12 @@ export class HonoHttpServer extends HttpServerModule<{
 	}
 
 	public setHeader(response: HonoContext, name: string, value: string) {
-		return response.header(name, value);
+		// hono is sensitive with the casing of the headers, let's format it propertly
+		const headerName = name
+			.split('-')
+			.map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+			.join('-');
+		return response.header(headerName, value);
 	}
 	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	public close() {}
