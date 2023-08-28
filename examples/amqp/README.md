@@ -1,1 +1,1 @@
-This example demonstrates the initialisation of a very basic RabbitMQ service
+This example demonstrates the initialisation of a very basic RabbitMQ service.
