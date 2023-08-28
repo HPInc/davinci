@@ -6,6 +6,7 @@
 import { ClassReflection, MethodReflection, TypeValue } from '@davinci/reflector';
 import { Interceptor, InterceptorBagGenerics, InterceptorDecoratorMeta, JSONSchema } from '@davinci/core';
 import { Level } from 'pino';
+import type { Response as LightMyRequestResponse } from 'light-my-request';
 import { ControllerDecoratorMetadata, MethodDecoratorMetadata, ParameterDecoratorOptions, Verb } from './decorators';
 
 export type RequestHandler<TRequest = any, TResponse = any> = (req: TRequest, res: TResponse, next?: Function) => any;
@@ -59,8 +60,9 @@ export interface ContextFactoryArguments<Request> {
 	reflection: { controllerReflection: ClassReflection; methodReflection: MethodReflection };
 }
 
-export type ContextFactory<Context, Request = any> =
-	(args: ContextFactoryArguments<Request>) => Promise<Context> | Context;
+export type ContextFactory<Context, Request = any> = (
+	args: ContextFactoryArguments<Request>
+) => Promise<Context> | Context;
 
 export type HttpServerInterceptorStage = 'preValidation' | 'postValidation';
 
@@ -127,3 +129,5 @@ export interface StaticServeOptions {
 	maxAge?: number | string;
 	redirect?: boolean;
 }
+
+export type InjectHttpResponse = Omit<LightMyRequestResponse, 'raw'>;

@@ -14,6 +14,7 @@
 						"modules/http-server/intro",
 						"modules/http-server/fastify",
 						"modules/http-server/express",
+						"modules/http-server/hono",
 						"modules/http-server/controllers",
 						"modules/http-server/context",
 						"modules/http-server/validation",

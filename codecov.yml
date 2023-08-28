@@ -15,6 +15,9 @@ coverage:
       http-server-fastify:
         flags:
           - http-server-fastify
+      http-server-hono:
+        flags:
+          - http-server-hono
       openapi:
         flags:
           - openapi
@@ -54,6 +57,10 @@ flags:
   http-server-fastify:
     paths:
       - packages/http-server-fastify
+    carryforward: true
+  http-server-hono:
+    paths:
+      - packages/http-server-hono
     carryforward: true
   openapi:
     paths:
