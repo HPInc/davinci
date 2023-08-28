@@ -322,12 +322,13 @@ export class HonoHttpServer extends HttpServerModule<{
 		return {
 			headers,
 			statusCode: response.status,
-			json: <T>() => response.json() as T,
+			json: <T>() => response.clone().json() as T,
 			rawPayload: Buffer.from(await response.clone().arrayBuffer()),
 			statusMessage: String(response.status),
 			payload,
 			body: payload,
-			cookies: [],
+			// @ts-ignore
+			cookies: response.headers?.getSetCookie(),
 			trailers: {}
 		};
 	}
