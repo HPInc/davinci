@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.5.0](https://github.com/HPInc/davinci/compare/@davinci/http-server-fastify@2.4.4...@davinci/http-server-fastify@2.5.0) (2023-08-28)
+
+
+### Features
+
+* **hono:** implemented HonoHttpServer module ([148ed98](https://github.com/HPInc/davinci/commit/148ed98cb096eed35c06cf6b79bd252b113ff388))
+
+
+
+
+
 ## [2.4.4](https://github.com/HPInc/davinci/compare/@davinci/http-server-fastify@2.4.3...@davinci/http-server-fastify@2.4.4) (2023-08-28)
 
 **Note:** Version bump only for package @davinci/http-server-fastify

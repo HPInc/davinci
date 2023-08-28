@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.11.0](https://github.com/HPInc/davinci/compare/@davinci/core@2.10.2...@davinci/core@2.11.0) (2023-08-28)
+
+
+### Features
+
+* **hono:** implemented HonoHttpServer module ([148ed98](https://github.com/HPInc/davinci/commit/148ed98cb096eed35c06cf6b79bd252b113ff388))
+
+
+
+
+
 ## [2.10.2](https://github.com/HPInc/davinci/compare/@davinci/core@2.10.1...@davinci/core@2.10.2) (2023-08-28)
 
 **Note:** Version bump only for package @davinci/core
