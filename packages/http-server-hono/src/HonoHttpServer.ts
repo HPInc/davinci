@@ -327,8 +327,8 @@ export class HonoHttpServer extends HttpServerModule<{
 			statusMessage: String(response.status),
 			payload,
 			body: payload,
-			// @ts-ignore
-			cookies: response.headers?.getSetCookie(),
+			// @ts-expect-error
+			cookies: response.headers?.getSetCookie?.(),
 			trailers: {}
 		};
 	}
