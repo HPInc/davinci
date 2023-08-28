@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.2.1](https://github.com/HPInc/davinci/compare/@davinci/messaging@2.2.0...@davinci/messaging@2.2.1) (2023-08-28)
+
+**Note:** Version bump only for package @davinci/messaging
+
+
+
+
+
 # [2.2.0](https://github.com/HPInc/davinci/compare/@davinci/messaging@2.1.2...@davinci/messaging@2.2.0) (2023-02-27)
 
 

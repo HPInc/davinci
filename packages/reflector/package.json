@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/reflector",
-	"version": "2.2.0",
+	"version": "2.3.0",
 	"description": "Utility module used for metadata reflection",
 	"main": "build/index.js",
 	"types": "build/index.d.ts",

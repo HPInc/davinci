@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.3.0](https://github.com/HPInc/davinci/compare/@davinci/reflector@2.2.0...@davinci/reflector@2.3.0) (2023-08-28)
+
+
+### Features
+
+* **reflector:** updated to @plumier/reflect@1.1.3 ([#230](https://github.com/HPInc/davinci/issues/230)) ([d1128ea](https://github.com/HPInc/davinci/commit/d1128ea8f0384a4309b8e7269e8034665de385d5))
+
+
+
+
+
 # [2.2.0](https://github.com/HPInc/davinci/compare/@davinci/reflector@2.1.2...@davinci/reflector@2.2.0) (2023-02-27)
 
 

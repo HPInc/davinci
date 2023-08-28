@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.10.2](https://github.com/HPInc/davinci/compare/@davinci/core@2.10.1...@davinci/core@2.10.2) (2023-08-28)
+
+**Note:** Version bump only for package @davinci/core
+
+
+
+
+
 ## [2.10.1](https://github.com/HPInc/davinci/compare/@davinci/core@2.10.0...@davinci/core@2.10.1) (2023-05-09)
 
 

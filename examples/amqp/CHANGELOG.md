@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.2.3](https://github.com/HPInc/davinci/compare/@davinci/example-next-amqp@2.2.2...@davinci/example-next-amqp@2.2.3) (2023-08-28)
+
+
+### Bug Fixes
+
+* dummy change to force bump ([8cbc1fd](https://github.com/HPInc/davinci/commit/8cbc1fd35c6b1e4de744cc0335497715a942ac7d))
+* re-trigger pipeline ([e42e26e](https://github.com/HPInc/davinci/commit/e42e26ed26300ca1261141f05710fcf636f6ebb5))
+* retrigger pipeline ([b4f1b1e](https://github.com/HPInc/davinci/commit/b4f1b1e262a5c4d99f9bddd6df55b883f5f51358))
+* retrigger pipeline ([b83a1fb](https://github.com/HPInc/davinci/commit/b83a1fb7950f3002bfecd0b7b7b4321811d28906))
+
+
+
+
+
 ## [2.2.2](https://github.com/HPInc/davinci/compare/@davinci/example-next-amqp@2.2.1...@davinci/example-next-amqp@2.2.2) (2023-05-09)
 
 **Note:** Version bump only for package @davinci/example-next-amqp
