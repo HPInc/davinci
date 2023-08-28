@@ -12,7 +12,7 @@ After that, register the HonoHttpServer module within the App
 
 ```diff
 import { createApp } from '@davinci/core';
-+import { HonoHttpServer } from '@davinci/http-server-fastify';
++import { HonoHttpServer } from '@davinci/http-server-hono';
 
 const app = createApp();
 
