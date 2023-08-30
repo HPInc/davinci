@@ -134,7 +134,9 @@ describe('EntityDefinition', () => {
 			type: 'object',
 			properties: {
 				name: {
-					enum: ['a', 'b', null], nullable: true, type: 'object'
+					enum: ['a', 'b', null],
+					nullable: true,
+					type: 'object'
 				}
 			}
 		});
@@ -156,7 +158,8 @@ describe('EntityDefinition', () => {
 			type: 'object',
 			properties: {
 				name: {
-					enum: ['a', 'b'], type: 'object'
+					enum: ['a', 'b'],
+					type: 'object'
 				}
 			}
 		});
@@ -450,6 +453,38 @@ describe('EntityDefinition', () => {
 		});
 		expect(entityDefinitionJsonSchema.properties.address.type).to.be.undefined;
 		expect(entityDefinitionJsonSchema.properties.number.type).to.be.undefined;
+	});
+
+	it('should not throw errors in case of members with non-class explicit types', () => {
+		class MyClass {
+			@entity.prop({ type: function myFunction() {} })
+			myProp1: boolean;
+
+			@entity.prop({ type: {} })
+			myProp2: boolean;
+
+			@entity.prop({ type: false })
+			myProp3: boolean;
+		}
+
+		const entityDefinition = new EntityDefinition({ type: MyClass });
+		const entityDefinitionJsonSchema = entityDefinition.getEntityDefinitionJsonSchema();
+
+		expect(entityDefinitionJsonSchema).to.containSubset({
+			title: 'MyClass',
+			type: 'object',
+			properties: {
+				myProp1: {
+					title: 'myProp1',
+					type: 'object'
+				},
+				myProp2: {
+					type: {}
+				},
+				myProp3: {}
+			},
+			required: []
+		});
 	});
 
 	describe('getName', () => {

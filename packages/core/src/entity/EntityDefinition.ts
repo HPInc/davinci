@@ -132,7 +132,7 @@ export class EntityDefinition {
 
 				const entityProps = this.filterEntityPropDecorators(reflection);
 				const { properties, required } =
-					entityProps.reduce<Partial<Pick<JSONSchema, 'properties' | 'required'>> | null>((acc, prop) => {
+					entityProps?.reduce<Partial<Pick<JSONSchema, 'properties' | 'required'>> | null>((acc, prop) => {
 						const accumulator = acc ?? { properties: {}, required: [] };
 						const entityPropDecorator = this.findEntityPropDecorator(prop);
 						const lazyType = entityPropDecorator.options?.typeFactory?.();
@@ -278,14 +278,14 @@ export class EntityDefinition {
 	}
 
 	private findEntityDecorator(reflection: ClassReflection): Maybe<{ [DecoratorId]: string; options: EntityOptions }> {
-		return reflection.decorators.find(d => d[DecoratorId] === 'entity');
+		return reflection.decorators?.find(d => d[DecoratorId] === 'entity');
 	}
 
 	private filterEntityPropDecorators(reflection: ClassReflection): PropertyReflection[] {
-		return reflection.properties.filter(this.findEntityPropDecorator);
+		return reflection.properties?.filter(this.findEntityPropDecorator);
 	}
 
 	private findEntityPropDecorator(reflection: PropertyReflection): EntityPropReflection {
-		return reflection.decorators.find(d => d[DecoratorId] === 'entity.prop');
+		return reflection.decorators?.find(d => d[DecoratorId] === 'entity.prop');
 	}
 }
