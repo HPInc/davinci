@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.11.1](https://github.com/HPInc/davinci/compare/@davinci/core@2.11.0...@davinci/core@2.11.1) (2023-08-30)
+
+
+### Bug Fixes
+
+* **EntityDefinition:** correct handling of members with non-class explicit types ([44a729a](https://github.com/HPInc/davinci/commit/44a729a975b1a7e779107fb7226d0c04975f6344))
+
+
+
+
+
 # [2.11.0](https://github.com/HPInc/davinci/compare/@davinci/core@2.10.2...@davinci/core@2.11.0) (2023-08-28)
 
 

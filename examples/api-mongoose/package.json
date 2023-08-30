@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/example-next-api-mongoose",
-	"version": "2.2.7",
+	"version": "2.2.8",
 	"private": true,
 	"description": "",
 	"main": "index.js",
@@ -12,10 +12,10 @@
 	"author": "HP",
 	"license": "MIT",
 	"dependencies": {
-		"@davinci/core": "^2.11.0",
-		"@davinci/http-server": "^3.7.0",
-		"@davinci/http-server-fastify": "^2.5.0",
-		"@davinci/mongoose": "^2.4.5",
+		"@davinci/core": "^2.11.1",
+		"@davinci/http-server": "^3.7.1",
+		"@davinci/http-server-fastify": "^2.5.1",
+		"@davinci/mongoose": "^2.4.6",
 		"@davinci/reflector": "^2.3.0",
 		"fastify": "^4.10.2",
 		"mongoose": "^6.6.4"

@@ -1,6 +1,6 @@
 {
 	"name": "@davinci/example-api-hono",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"private": true,
 	"description": "",
 	"main": "index.js",
@@ -13,10 +13,10 @@
 	"author": "HP",
 	"license": "MIT",
 	"dependencies": {
-		"@davinci/core": "^2.11.0",
-		"@davinci/http-server": "^3.7.0",
-		"@davinci/http-server-hono": "^0.2.0",
-		"@davinci/openapi": "^2.6.0",
+		"@davinci/core": "^2.11.1",
+		"@davinci/http-server": "^3.7.1",
+		"@davinci/http-server-hono": "^0.2.1",
+		"@davinci/openapi": "^2.6.1",
 		"@hono/node-server": "^1.1.1",
 		"ajv": "^8.11.2",
 		"ajv-errors": "^3.0.0",
