@@ -474,9 +474,8 @@ export class OpenAPIModule extends Module {
 	}
 
 	private joinPaths(...args: Array<string>) {
-		return args
-			.join('/')
-			.replace(/\/+/g, '/') // replace multiple slashes with one
-			.replace(/\/$/, ''); // remove trailing slash
+		const path = args.join('/').replace(/\/+/g, '/'); // replace multiple slashes with one
+
+		return path === '/' ? '/' : path.replace(/\/$/, ''); // remove trailing slash only if it's not '/'
 	}
 }

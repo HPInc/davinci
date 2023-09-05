@@ -129,7 +129,7 @@ export abstract class HttpServerModule<
 						options: { path }
 					} = methodDecoratorMetadata;
 
-					let fullPath = this.joinPath(basePath, path);
+					let fullPath = this.joinPaths(basePath, path);
 					if (fullPath.length > 1 && fullPath[fullPath.length - 1] === '/') {
 						fullPath = fullPath.slice(0, -1);
 					}
@@ -564,7 +564,7 @@ export abstract class HttpServerModule<
 		}
 	}
 
-	private joinPath(...args: Array<string>) {
+	private joinPaths(...args: Array<string>) {
 		const path = args.join('/').replace(/\/+/g, '/'); // replace multiple slashes with one
 
 		return path === '/' ? '/' : path.replace(/\/$/, ''); // remove trailing slash only if it's not '/'
