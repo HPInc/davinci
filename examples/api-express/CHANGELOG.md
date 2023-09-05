@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.4.5](https://github.com/HPInc/davinci/compare/@davinci/example-next-api-express@2.4.4...@davinci/example-next-api-express@2.4.5) (2023-09-05)
+
+**Note:** Version bump only for package @davinci/example-next-api-express
+
+
+
+
+
 ## [2.4.4](https://github.com/HPInc/davinci/compare/@davinci/example-next-api-express@2.4.3...@davinci/example-next-api-express@2.4.4) (2023-08-30)
 
 **Note:** Version bump only for package @davinci/example-next-api-express

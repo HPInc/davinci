@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.8.0](https://github.com/HPInc/davinci/compare/@davinci/http-server@3.7.1...@davinci/http-server@3.8.0) (2023-09-05)
+
+
+### Features
+
+* **edge:** avoid using nodejs modules when not necessary ([7b6edff](https://github.com/HPInc/davinci/commit/7b6edff4cd8a004d4cb6f1400509d7555f12e1c6))
+
+
+
+
+
 ## [3.7.1](https://github.com/HPInc/davinci/compare/@davinci/http-server@3.7.0...@davinci/http-server@3.7.1) (2023-08-30)
 
 **Note:** Version bump only for package @davinci/http-server
