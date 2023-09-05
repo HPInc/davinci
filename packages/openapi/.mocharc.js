@@ -14,5 +14,6 @@ module.exports = {
 	bail: true,
 	checkLeaks: true,
 	require: ['ts-node/register', 'source-map-support/register'],
-	spec: 'test/**/*.{js,ts}'
+	spec: 'test/**/*.{js,ts}',
+	globals: ['EdgeRuntime']
 };

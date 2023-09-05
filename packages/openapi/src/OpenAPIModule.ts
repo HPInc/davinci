@@ -20,9 +20,6 @@ import pino, { Level } from 'pino';
 import { OpenAPIV3 } from 'openapi-types';
 import createDeepMerge from '@fastify/deepmerge';
 import { ClassType, PartialDeep, TypeValue } from '@davinci/reflector';
-import { promises as fs } from 'fs';
-import { join as joinPaths } from 'path';
-import * as process from 'process';
 import { generateSwaggerUiHtml } from './swaggerUi';
 
 const deepMerge = createDeepMerge();
@@ -133,19 +130,40 @@ export class OpenAPIModule extends Module {
 
 		const relativeOutputPath = this.moduleOptions.document?.output?.path;
 		if (relativeOutputPath) {
+			await this.writeOpenAPIDocument(relativeOutputPath);
+		}
+	}
+
+	public getOpenAPIDocument(): PartialDeep<OpenAPIV3.Document> {
+		return this.openAPIDoc;
+	}
+
+	public async writeOpenAPIDocument(relativeOutputPath: string) {
+		/**
+		 	This block will be dead-code-eliminated on Edge
+		 	@see https://vercel.com/docs/functions/edge-functions/edge-runtime#check-if-you're-running-on-the-edge-runtime
+		 */
+		// @ts-expect-error
+		if (typeof EdgeRuntime === 'string') {
+			throw new Error('Write operation not available in Edge Runtime');
+		} else {
 			const stringifyOptions = this.moduleOptions.document?.output.stringifyOptions;
 			const stringifiedDocument = JSON.stringify(
 				this.openAPIDoc,
 				stringifyOptions?.replacer,
 				stringifyOptions?.space
 			);
-			const outputPath = joinPaths(process.cwd(), relativeOutputPath);
+
+			const fs = await import('fs').then(m => m.promises);
+			const process = await import('process');
+
+			const outputPath = this.joinPaths(process.cwd(), relativeOutputPath);
 			await fs.writeFile(outputPath, stringifiedDocument);
 			this.logger.debug(`The OpenAPI document has been written to the local file system at path: ${outputPath}`);
 		}
 	}
 
-	async createPathAndSchema(route: Route<unknown>): Promise<void> {
+	private async createPathAndSchema(route: Route<unknown>): Promise<void> {
 		const {
 			path: origPath,
 			verb,
@@ -359,7 +377,7 @@ export class OpenAPIModule extends Module {
 		});
 	}
 
-	async registerOpenapiRoutes() {
+	private async registerOpenapiRoutes() {
 		const documentEnabled = this.moduleOptions.document?.enabled;
 		const explorerEnabled = this.moduleOptions.explorer?.enabled;
 
@@ -382,10 +400,6 @@ export class OpenAPIModule extends Module {
 				return this.httpServerModule.reply(res, swaggerUiHtml);
 			});
 		}
-	}
-
-	getOpenAPIDocument(): PartialDeep<OpenAPIV3.Document> {
-		return this.openAPIDoc;
 	}
 
 	private createJsonSchema(entityJsonSchema: EntityDefinitionJSONSchema): Partial<JSONSchema> {
@@ -457,5 +471,11 @@ export class OpenAPIModule extends Module {
 		}
 
 		return jsonSchema;
+	}
+
+	private joinPaths(...args: Array<string>) {
+		const path = args.join('/').replace(/\/+/g, '/'); // replace multiple slashes with one
+
+		return path === '/' ? '/' : path.replace(/\/$/, ''); // remove trailing slash only if it's not '/'
 	}
 }
