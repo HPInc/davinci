@@ -14,7 +14,6 @@ import {
 	Module,
 	omit
 } from '@davinci/core';
-import pathUtils from 'path';
 import pino from 'pino';
 import { ClassReflection, ClassType, DecoratorId, MethodReflection } from '@davinci/reflector';
 import type { InjectOptions } from 'light-my-request';
@@ -130,7 +129,7 @@ export abstract class HttpServerModule<
 						options: { path }
 					} = methodDecoratorMetadata;
 
-					let fullPath = pathUtils.join(basePath, path);
+					let fullPath = this.joinPath(basePath, path);
 					if (fullPath.length > 1 && fullPath[fullPath.length - 1] === '/') {
 						fullPath = fullPath.slice(0, -1);
 					}
@@ -563,6 +562,12 @@ export abstract class HttpServerModule<
 			this.logger.error({ err }, 'An error happened during the creation of the context');
 			throw err;
 		}
+	}
+
+	private joinPath(...args: Array<string>) {
+		const path = args.join('/').replace(/\/+/g, '/'); // replace multiple slashes with one
+
+		return path === '/' ? '/' : path.replace(/\/$/, ''); // remove trailing slash only if it's not '/'
 	}
 
 	/* abstract render(response, view: string, options: unknown);

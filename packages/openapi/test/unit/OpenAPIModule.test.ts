@@ -127,7 +127,7 @@ describe('OpenAPIModule', () => {
 			}
 		}
 		const openApiModule = new OpenAPIModule(openapiModuleOpts);
-		const app = new App({ logger: { level: 'error' } });
+		const app = new App({ logger: { level: 'silent' } });
 		await app.registerController(CustomerController).registerModule(new FastifyHttpServer(), openApiModule);
 
 		await app.init();
@@ -1148,6 +1148,27 @@ describe('OpenAPIModule', () => {
 			expect(writeFileStub.called).to.be.true;
 			expect(writeFileStub.args[0][0]).to.match(/path\/to\/local\/file\.json$/);
 			expect(writeFileStub.args[0][1]).to.contain('"openapi": "3.0.0"');
+		});
+
+		it('should throw an error when trying to output in a Edge environment', async () => {
+			const origValue = globalThis.EdgeRuntime;
+			globalThis.EdgeRuntime = 'edge';
+
+			await expect(
+				initApp({
+					document: {
+						output: { path: 'path/to/local/file.json', stringifyOptions: { space: 2 } },
+						spec: { info: { title: '', version: '' } }
+					}
+				})
+			).to.rejectedWith('Write operation not available in Edge Runtime');
+
+			// eslint-disable-next-line require-atomic-updates
+			globalThis.EdgeRuntime = origValue;
+
+			/* expect(writeFileStub.called).to.be.true;
+			expect(writeFileStub.args[0][0]).to.match(/path\/to\/local\/file\.json$/);
+			expect(writeFileStub.args[0][1]).to.contain('"openapi": "3.0.0"'); */
 		});
 	});
 });
