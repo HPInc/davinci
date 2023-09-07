@@ -433,7 +433,7 @@ describe('HttpServerModule', () => {
 					methodReflection
 				})
 			});
-			const reqMock = {};
+			const reqMock = { body: 'invalidType' };
 			const resMock = {};
 			const result = await requestHandler(reqMock, resMock);
 
@@ -457,6 +457,49 @@ describe('HttpServerModule', () => {
 
 			expect(methodInterceptorPre.called).to.be.true;
 			expect(methodInterceptorPost.called).to.be.false;
+		});
+
+		it('should create a request handler that process preValidation interceptors', async () => {
+			const ctrlInterceptorPre = sinon.stub().callsFake(next => next());
+			const ctrlInterceptorPost = sinon.stub().callsFake(next => next());
+
+			const methodInterceptorPre = sinon.stub().callsFake(next => next());
+			const methodInterceptorPost = sinon.stub().callsFake(next => next());
+
+			@interceptor<HttpServerInterceptor>(ctrlInterceptorPre, { stage: 'preValidation' })
+			@interceptor<HttpServerInterceptor>(ctrlInterceptorPost, { stage: 'postValidation' })
+			@route.controller({ basePath: '/api/customers' })
+			class CustomerController {
+				@interceptor<HttpServerInterceptor>(methodInterceptorPre, { stage: 'preValidation' })
+				@interceptor<HttpServerInterceptor>(methodInterceptorPost, { stage: 'postValidation' })
+				@route.post({ path: '/all' })
+				find(@route.body({ required: true }) body) {
+					return { body };
+				}
+			}
+			const dummyHttpServer = new DummyHttpServer();
+			const controllerReflection = reflect(CustomerController);
+			const methodReflection = controllerReflection.methods[0];
+			const requestHandler = await dummyHttpServer.createRequestHandler(new CustomerController(), 'find', {
+				path: '/all',
+				verb: 'get',
+				controllerReflection,
+				methodReflection,
+				parametersConfig: dummyHttpServer.createParametersConfigurations({
+					controllerReflection,
+					methodReflection
+				})
+			});
+			const reqMock = {};
+			const resMock = {};
+			const result = await requestHandler(reqMock, resMock);
+
+			expect(result[1]).to.containSubset({ body: undefined });
+			expect(ctrlInterceptorPre.called).to.be.true;
+			expect(ctrlInterceptorPost.called).to.be.true;
+
+			expect(methodInterceptorPre.called).to.be.true;
+			expect(methodInterceptorPost.called).to.be.true;
 		});
 
 		it('should create a request handler tha process interceptors in the correct order', async () => {
