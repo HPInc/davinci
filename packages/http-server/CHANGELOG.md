@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.9.0](https://github.com/HPInc/davinci/compare/@davinci/http-server@3.8.0...@davinci/http-server@3.9.0) (2023-09-07)
+
+
+### Bug Fixes
+
+* update tests ([53b168c](https://github.com/HPInc/davinci/commit/53b168c946fd65d6665c69a69150fb374d6e5dc6))
+
+
+### Features
+
+* empty body default to empty object ([7783325](https://github.com/HPInc/davinci/commit/778332553f9f2676df404f4a07cff07ffc174e1c))
+
+
+
+
+
 # [3.8.0](https://github.com/HPInc/davinci/compare/@davinci/http-server@3.7.1...@davinci/http-server@3.8.0) (2023-09-05)
 
 
