@@ -271,8 +271,8 @@ export abstract class HttpServerModule<
 				const contextValue = contextParameterConfig
 					? contextParameterConfig.value
 					: await httpServerModule.createContext({
-							request,
-							reflection: { controllerReflection, methodReflection }
+						request,
+						reflection: { controllerReflection, methodReflection }
 					  });
 
 				const interceptorsBag = httpServerModule.prepareInterceptorBag({
@@ -420,7 +420,7 @@ export abstract class HttpServerModule<
 				}
 
 				if (parameterConfig.source === 'body') {
-					acc.body = parameterConfig.value;
+					acc.body = parameterConfig.value || {};
 				}
 
 				if (parameterConfig.source === 'header') {
