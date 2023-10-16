@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.2.11](https://github.com/HPInc/davinci/compare/@davinci/example-next-api-mongoose@2.2.10...@davinci/example-next-api-mongoose@2.2.11) (2023-10-16)
+
+**Note:** Version bump only for package @davinci/example-next-api-mongoose
+
+
+
+
+
 ## [2.2.10](https://github.com/HPInc/davinci/compare/@davinci/example-next-api-mongoose@2.2.9...@davinci/example-next-api-mongoose@2.2.10) (2023-09-07)
 
 **Note:** Version bump only for package @davinci/example-next-api-mongoose

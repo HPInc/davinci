@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.12.0](https://github.com/HPInc/davinci/compare/@davinci/core@2.11.1...@davinci/core@2.12.0) (2023-10-16)
+
+
+### Features
+
+* allow specifying custom formats for date fields ([0b015f1](https://github.com/HPInc/davinci/commit/0b015f12a81e1b7a1894050647d11ebdc33e6a1c))
+
+
+
+
+
 ## [2.11.1](https://github.com/HPInc/davinci/compare/@davinci/core@2.11.0...@davinci/core@2.11.1) (2023-08-30)
 
 
