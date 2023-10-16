@@ -198,7 +198,7 @@ export class EntityDefinition {
 
 								return null;
 							}
-						);
+						) as EntityDefinitionJSONSchema['properties'][string];
 
 						// passing false or null as the type value, will disable the automatic
 						// detection of the type
@@ -236,6 +236,11 @@ export class EntityDefinition {
 						accumulator.properties[prop.name] = deepMerge(extractedJsonSchema, generatedJsonSchema ?? {}, {
 							isMergeableObject: isPlainObject
 						});
+
+						// this allows specifying custom formats, especially useful for when the type is Date
+						if (accumulator.properties[prop.name].type === 'string' && extractedJsonSchema.format) {
+							accumulator.properties[prop.name].format = extractedJsonSchema.format;
+						}
 
 						if (
 							entityPropDecorator.options?.required &&

@@ -487,6 +487,20 @@ describe('EntityDefinition', () => {
 		});
 	});
 
+	it('should allow specifying custom formats for date fields', () => {
+		class MyClass {
+			@entity.prop({ format: 'date' })
+			birthDate: Date;
+		}
+
+		const entityDefinition = new EntityDefinition({ type: MyClass });
+		const entityDefinitionJsonSchema = entityDefinition.getEntityDefinitionJsonSchema();
+		expect(entityDefinitionJsonSchema?.properties?.birthDate).to.containSubset({
+			type: 'string',
+			format: 'date' // rather than the default date-time
+		});
+	});
+
 	describe('getName', () => {
 		it('should infer the entity name from the class', () => {
 			@entity()
