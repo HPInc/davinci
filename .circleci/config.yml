@@ -94,7 +94,7 @@ workflows:
           matrix:
             parameters:
               mongo-version: ["4.4", "5"]
-              docker-image: ["circleci/node:14", "circleci/node:16", "cimg/node:18.16.0"]
+              docker-image: ["circleci/node:16", "cimg/node:18.16.0"]
       - publish:
           requires:
             - checkout_and_test
