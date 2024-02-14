@@ -97,6 +97,27 @@ describe('generateModel', () => {
 				.fulfilled;
 		});
 
+		it('arrays support default value', async () => {
+			class CustomerBirth {
+				@mgoose.prop({ required: true })
+				place: string;
+			}
+
+			class Customer {
+				@mgoose.prop({ type: [CustomerBirth], required: true, default: [{ place: 'Rome' }] })
+				birth: CustomerBirth[];
+
+				@mgoose.prop({ type: [String] })
+				tags: string[];
+			}
+
+			const schema = mgoose.generateSchema(Customer, {});
+			const model = mongoose.model<Customer>('Customer', schema);
+
+			const created = await model.create({});
+			expect(created.birth[0]).to.have.property('place', 'Rome');
+		});
+
 		it('supports class inheritance', () => {
 			class BaseSchema {
 				@mgoose.prop()
