@@ -39,8 +39,8 @@ jobs:
             - when:
                   condition:
                       and:
-                          - equal: ['5', << parameters.mongo-version >>]
-                          - equal: ['cimg/node:18.16.0', << parameters.docker-image >>]
+                          - equal: ['6', << parameters.mongo-version >>]
+                          - equal: ['cimg/node:20.11.0', << parameters.docker-image >>]
                   steps:
                       - run:
                             name: upload coverage report
@@ -55,7 +55,7 @@ jobs:
                                 - '~'
     publish:
         docker:
-            - image: cimg/node:16.18.1
+            - image: cimg/node:20.11.0
         steps:
             - restore_cache:
                   key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
@@ -75,7 +75,7 @@ jobs:
 
     publish_docs:
         docker:
-            - image: cimg/node:16.18.1
+            - image: cimg/node:20.11.0
         steps:
             - restore_cache:
                   key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
