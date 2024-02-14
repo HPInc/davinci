@@ -9,7 +9,7 @@ jobs:
                 type: string
         docker:
             - image: << parameters.docker-image >>
-            - image: circleci/mongo:<< parameters.mongo-version >>
+            - image: mongo:<< parameters.mongo-version >>
             - image: rabbitmq:3.9-alpine
         steps:
             - checkout
