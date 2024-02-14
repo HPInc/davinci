@@ -75,7 +75,7 @@ describe('generateModel', () => {
 			}
 
 			class Customer {
-				@mgoose.prop({ type: [CustomerBirth] })
+				@mgoose.prop({ type: [CustomerBirth], default: [] })
 				birth: CustomerBirth[];
 
 				@mgoose.prop({ type: [String] })
@@ -85,10 +85,12 @@ describe('generateModel', () => {
 			const schema = mgoose.generateSchema(Customer, {});
 			expect(schema.obj).to.be.deep.equal({
 				birth: {
-					$type: [{ place: { $type: String } }]
+					$type: [{ place: { $type: String } }],
+					default: []
 				},
 				tags: {
-					$type: [String]
+					$type: [String],
+					default: undefined
 				}
 			});
 
@@ -196,11 +198,13 @@ describe('generateModel', () => {
 			expect(schema.obj).to.be.deep.equal({
 				profiles: {
 					required: true,
+					default: undefined,
 					$type: [
 						{
 							name: { $type: String },
 							phones: {
 								required: true,
+								default: undefined,
 								$type: [
 									{
 										type: { $type: String },
