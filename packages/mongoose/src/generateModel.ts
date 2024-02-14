@@ -114,12 +114,12 @@ export const generateSchema = <T>(
 
 			const prop = {
 				...omit(options ?? {}, ['type']),
-				type
+				$type: type
 			};
 
 			return {
 				...acc,
-				[reflection.name]: isArray ? [prop.type] : prop
+				[reflection.name]: isArray ? { ...prop, $type: [prop.$type] } : prop
 			};
 		}, {});
 
@@ -128,7 +128,7 @@ export const generateSchema = <T>(
 		const schemaOptions = schemaDecoration?.options;
 		const schema: Schema<U> =
 			(forceCreateSchema || schemaDecoration) &&
-				new Schema(definition, { ...(mergedOptions ?? schemaOptions) });
+			new Schema(definition, { ...(mergedOptions ?? schemaOptions), typeKey: '$type' });
 
 		// register methods
 		const methods = classReflection.methods.reduce((acc, methodReflection) => {

@@ -33,13 +33,13 @@ describe('generateModel', () => {
 
 			expect(schema.obj).to.be.deep.equal({
 				firstname: {
-					type: String
+					$type: String
 				},
 				age: {
-					type: Number
+					$type: Number
 				},
 				isActive: {
-					type: Boolean
+					$type: Boolean
 				}
 			});
 		});
@@ -59,9 +59,9 @@ describe('generateModel', () => {
 
 			expect(schema.obj).to.be.deep.equal({
 				birth: {
-					type: {
+					$type: {
 						place: {
-							type: String
+							$type: String
 						}
 					}
 				}
@@ -84,14 +84,12 @@ describe('generateModel', () => {
 
 			const schema = mgoose.generateSchema(Customer, {});
 			expect(schema.obj).to.be.deep.equal({
-				birth: [
-					{
-						place: {
-							type: String
-						}
-					}
-				],
-				tags: [String]
+				birth: {
+					$type: [{ place: { $type: String } }]
+				},
+				tags: {
+					$type: [String]
+				}
 			});
 
 			const CustomerModel = model('Customer', schema);
@@ -126,44 +124,49 @@ describe('generateModel', () => {
 			expect(Object.keys(baseSchema.obj)).be.deep.equal(['createdAt', 'updatedAt']);
 		});
 
-		/*
 		it('supports nested properties, with name "type"', () => {
-			class Phone {
+			class Phones {
 				@mgoose.prop()
 				type: string;
 
 				@mgoose.prop()
 				number: string;
 			}
+			class Profile {
+				@mgoose.prop()
+				name: string;
+
+				@mgoose.prop({ type: [Phones], required: true })
+				phones: Phones[];
+			}
 
 			class Customer {
-				@mgoose.prop({ type: [Phone], required: true })
-				phones: Phone[];
+				@mgoose.prop({ type: [Profile], required: true })
+				profiles: Profile[];
 			}
 
 			const schema = mgoose.generateSchema(Customer, {});
 
 			expect(schema.obj).to.be.deep.equal({
-				profiles: [
-					{
-						required: true,
-						type: {
-							name: { type: String },
-							phones: [
-								{
-									required: true,
-									type: {
-										type: { type: String },
-										number: { type: String }
+				profiles: {
+					required: true,
+					$type: [
+						{
+							name: { $type: String },
+							phones: {
+								required: true,
+								$type: [
+									{
+										type: { $type: String },
+										number: { $type: String }
 									}
-								}
-							]
+								]
+							}
 						}
-					}
-				]
+					]
+				}
 			});
 		});
-*/
 	});
 
 	describe('#mgoose.generateSchema', () => {
