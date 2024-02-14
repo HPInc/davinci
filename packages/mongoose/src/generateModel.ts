@@ -119,7 +119,7 @@ export const generateSchema = <T>(
 
 			return {
 				...acc,
-				[reflection.name]: isArray ? { ...prop, $type: [prop.$type] } : prop
+				[reflection.name]: isArray ? { ...prop, $type: [prop.$type], default: prop.default || undefined } : prop
 			};
 		}, {});
 

@@ -99,12 +99,12 @@ describe('generateModel', () => {
 
 		it('arrays support default value', async () => {
 			class CustomerBirth {
-				@mgoose.prop({ required: true })
+				@mgoose.prop()
 				place: string;
 			}
 
 			class Customer {
-				@mgoose.prop({ type: [CustomerBirth], required: true, default: [{ place: 'Rome' }] })
+				@mgoose.prop({ type: [CustomerBirth], default: [{ place: 'Rome' }] })
 				birth: CustomerBirth[];
 
 				@mgoose.prop({ type: [String] })
@@ -116,6 +116,31 @@ describe('generateModel', () => {
 
 			const created = await model.create({});
 			expect(created.birth[0]).to.have.property('place', 'Rome');
+		});
+
+		it('arrays support required option', async () => {
+			class CustomerBirth {
+				@mgoose.prop()
+				place: string;
+			}
+
+			class Customer {
+				@mgoose.prop({ type: [CustomerBirth], required: true })
+				birth: CustomerBirth[];
+
+				@mgoose.prop({ type: [String] })
+				tags: string[];
+			}
+
+			const schema = mgoose.generateSchema(Customer, {});
+			const model = mongoose.model<Customer>('Customer', schema);
+
+			try {
+				await model.create({});
+				throw new Error('Should not get here');
+			} catch (error) {
+				expect(error.name).to.equal('ValidationError');
+			}
 		});
 
 		it('supports class inheritance', () => {
