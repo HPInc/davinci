@@ -40,7 +40,7 @@ jobs:
                   condition:
                       and:
                           - equal: ['6', << parameters.mongo-version >>]
-                          - equal: ['cimg/node:20.11.0', << parameters.docker-image >>]
+                          - equal: ['cimg/node:20.11', << parameters.docker-image >>]
                   steps:
                       - run:
                             name: upload coverage report
@@ -55,7 +55,7 @@ jobs:
                                 - '~'
     publish:
         docker:
-            - image: cimg/node:20.11.0
+            - image: cimg/node:20.11
         steps:
             - restore_cache:
                   key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
@@ -75,7 +75,7 @@ jobs:
 
     publish_docs:
         docker:
-            - image: cimg/node:20.11.0
+            - image: cimg/node:20.11
         steps:
             - restore_cache:
                   key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
@@ -94,7 +94,7 @@ workflows:
                   matrix:
                       parameters:
                           mongo-version: ['5', '6']
-                          docker-image: ['cimg/node:18.19.0', 'cimg/node:20.11.0']
+                          docker-image: ['cimg/node:18.19', 'cimg/node:20.11', 'cimg/node:lts']
             - publish:
                   requires:
                       - checkout_and_test
