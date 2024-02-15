@@ -33,13 +33,13 @@ describe('generateModel', () => {
 
 			expect(schema.obj).to.be.deep.equal({
 				firstname: {
-					type: String
+					$type: String
 				},
 				age: {
-					type: Number
+					$type: Number
 				},
 				isActive: {
-					type: Boolean
+					$type: Boolean
 				}
 			});
 		});
@@ -59,9 +59,9 @@ describe('generateModel', () => {
 
 			expect(schema.obj).to.be.deep.equal({
 				birth: {
-					type: {
+					$type: {
 						place: {
-							type: String
+							$type: String
 						}
 					}
 				}
@@ -75,7 +75,7 @@ describe('generateModel', () => {
 			}
 
 			class Customer {
-				@mgoose.prop({ type: [CustomerBirth] })
+				@mgoose.prop({ type: [CustomerBirth], default: [] })
 				birth: CustomerBirth[];
 
 				@mgoose.prop({ type: [String] })
@@ -84,19 +84,65 @@ describe('generateModel', () => {
 
 			const schema = mgoose.generateSchema(Customer, {});
 			expect(schema.obj).to.be.deep.equal({
-				birth: [
-					{
-						place: {
-							type: String
-						}
-					}
-				],
-				tags: [String]
+				birth: {
+					$type: [{ place: { $type: String } }],
+					default: []
+				},
+				tags: {
+					$type: [String],
+					default: undefined
+				}
 			});
 
 			const CustomerModel = model('Customer', schema);
 			await expect(CustomerModel.create({ birth: [{ place: 'Rome' }], tags: ['nice'] })).to.eventually.be
 				.fulfilled;
+		});
+
+		it('arrays support default value', async () => {
+			class CustomerBirth {
+				@mgoose.prop()
+				place: string;
+			}
+
+			class Customer {
+				@mgoose.prop({ type: [CustomerBirth], default: [{ place: 'Rome' }] })
+				birth: CustomerBirth[];
+
+				@mgoose.prop({ type: [String] })
+				tags: string[];
+			}
+
+			const schema = mgoose.generateSchema(Customer, {});
+			const model = mongoose.model<Customer>('Customer', schema);
+
+			const created = await model.create({});
+			expect(created.birth[0]).to.have.property('place', 'Rome');
+		});
+
+		it('arrays support required option', async () => {
+			class CustomerBirth {
+				@mgoose.prop()
+				place: string;
+			}
+
+			class Customer {
+				@mgoose.prop({ type: [CustomerBirth], required: true })
+				birth: CustomerBirth[];
+
+				@mgoose.prop({ type: [String] })
+				tags: string[];
+			}
+
+			const schema = mgoose.generateSchema(Customer, {});
+			const model = mongoose.model<Customer>('Customer', schema);
+
+			try {
+				await model.create({});
+				throw new Error('Should not get here');
+			} catch (error) {
+				expect(error.name).to.equal('ValidationError');
+			}
 		});
 
 		it('supports class inheritance', () => {
@@ -126,44 +172,51 @@ describe('generateModel', () => {
 			expect(Object.keys(baseSchema.obj)).be.deep.equal(['createdAt', 'updatedAt']);
 		});
 
-		/*
 		it('supports nested properties, with name "type"', () => {
-			class Phone {
+			class Phones {
 				@mgoose.prop()
 				type: string;
 
 				@mgoose.prop()
 				number: string;
 			}
+			class Profile {
+				@mgoose.prop()
+				name: string;
+
+				@mgoose.prop({ type: [Phones], required: true })
+				phones: Phones[];
+			}
 
 			class Customer {
-				@mgoose.prop({ type: [Phone], required: true })
-				phones: Phone[];
+				@mgoose.prop({ type: [Profile], required: true })
+				profiles: Profile[];
 			}
 
 			const schema = mgoose.generateSchema(Customer, {});
 
 			expect(schema.obj).to.be.deep.equal({
-				profiles: [
-					{
-						required: true,
-						type: {
-							name: { type: String },
-							phones: [
-								{
-									required: true,
-									type: {
-										type: { type: String },
-										number: { type: String }
+				profiles: {
+					required: true,
+					default: undefined,
+					$type: [
+						{
+							name: { $type: String },
+							phones: {
+								required: true,
+								default: undefined,
+								$type: [
+									{
+										type: { $type: String },
+										number: { $type: String }
 									}
-								}
-							]
+								]
+							}
 						}
-					}
-				]
+					]
+				}
 			});
 		});
-*/
 	});
 
 	describe('#mgoose.generateSchema', () => {
