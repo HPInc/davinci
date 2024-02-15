@@ -23,6 +23,7 @@ describe('mongoose hooks', () => {
 	let afterDeleteCallback;
 	const context = { accountId: '123123' };
 	const customersData = [{ firstname: 'Mike' }, { firstname: 'John' }];
+	let customersDB // customers in Data Base
 
 	beforeEach(async () => {
 		mongoose.modelNames().forEach(modelName => mongoose.deleteModel(modelName));
@@ -62,7 +63,7 @@ describe('mongoose hooks', () => {
 			});
 			CustomerModel = mongoose.model('customer', CustomerSchema);
 			await CustomerModel.deleteMany({}, { skipHooks: true });
-			await CustomerModel.insertMany(customersData, { skipHooks: true });
+			customersDB = await CustomerModel.insertMany(customersData, { skipHooks: true });
 		});
 
 		afterEach(async () => {
@@ -394,6 +395,45 @@ describe('mongoose hooks', () => {
 			expect(afterDeleteArgs).to.containSubset({ hookName: 'remove' });
 			expect(afterDeleteArgs).have.property('result').have.property('firstname').equal('Mike');
 			expect(await CustomerModel.findOne({ firstname: 'Mike' })).be.null;
+		});
+	});
+
+	describe('findByIdAndUpdate', () => {
+		registerReadHooks({ read: true, write: true });
+
+		it('should correctly trigger the hooks', async () => {
+			await CustomerModel.findByIdAndUpdate(
+				customersDB[0]._id,
+				{ firstname: 'Steve' },
+				{ davinciContext: context, new: true }
+			);
+			const beforeReadArgs = beforeReadCallback.getCall(0).args[0];
+			const afterReadArgs = afterReadCallback.getCall(0).args[0];
+
+			const beforeWriteArgs = beforeWriteCallback.getCall(0).args[0];
+			const afterWriteArgs = afterWriteCallback.getCall(0).args[0];
+
+			expect(beforeReadCallback.callCount).be.equal(1);
+			expect(beforeReadArgs).to.containSubset({ hookName: 'findOneAndUpdate', context, davinciContext: context });
+			expect(beforeReadArgs).have.property('query');
+
+			expect(afterReadCallback.callCount).be.equal(1);
+			expect(afterReadArgs).to.containSubset({ hookName: 'findOneAndUpdate', context, davinciContext: context });
+			expect(afterReadArgs).have.property('query');
+			expect(afterReadArgs).have.property('result').to.containSubset({ firstname: 'Steve' });
+
+			expect(beforeWriteCallback.callCount).be.equal(1);
+			expect(beforeWriteArgs).to.containSubset({
+				hookName: 'findOneAndUpdate',
+				context,
+				davinciContext: context
+			});
+			expect(beforeWriteArgs).have.property('query');
+
+			expect(afterWriteCallback.callCount).be.equal(1);
+			expect(afterWriteArgs).to.containSubset({ hookName: 'findOneAndUpdate', context, davinciContext: context });
+			expect(afterWriteArgs).have.property('query');
+			expect(afterWriteArgs).have.property('result').to.containSubset({ firstname: 'Steve' });
 		});
 	});
 });

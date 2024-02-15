@@ -298,7 +298,7 @@ export type Handler<Context = unknown, ModelSchema = unknown> = {
 		args: PreArgs<Context, ModelSchema> & DocumentPreArgs<Context, ModelSchema>
 	) => unknown | Promise<unknown>;
 	afterWrite: (
-		args: AfterArgs<Context, ModelSchema> & DocumentPostArgs & AfterRawResultArgs<Context>
+		args: AfterArgs<Context, ModelSchema> & DocumentPostArgs<Context, ModelSchema> & AfterRawResultArgs<Context, ModelSchema>
 	) => unknown | Promise<unknown>;
 
 	beforeDelete: (
