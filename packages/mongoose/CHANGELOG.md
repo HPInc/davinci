@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.5.0](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.4.7...@davinci/mongoose@2.5.0) (2024-02-15)
+
+
+### Bug Fixes
+
+* fix tests ([6211174](https://github.com/HPInc/davinci/commit/62111742fd031a7ede5fa7862bed1f1d5de4e007))
+
+
+### Features
+
+* make required option work for arrays ([2d19c62](https://github.com/HPInc/davinci/commit/2d19c62ede11ff780259bb19bf0f93f182adb407))
+* **mongoose:** add support for nested properties with name "type" ([e6ca7a1](https://github.com/HPInc/davinci/commit/e6ca7a11080be73eb39e39221f0295f03f387e62))
+
+
+
+
+
 ## [2.4.7](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.4.6...@davinci/mongoose@2.4.7) (2023-10-16)
 
 **Note:** Version bump only for package @davinci/mongoose
