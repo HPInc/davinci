@@ -1,111 +1,111 @@
 version: 2.1
 
 jobs:
-  checkout_and_test:
-    parameters:
-      mongo-version:
-        type: string
-      docker-image:
-        type: string
-    docker:
-      - image: << parameters.docker-image >>
-      - image: circleci/mongo:<< parameters.mongo-version >>
-      - image: rabbitmq:3.9-alpine
-    steps:
-      - checkout
-#      - restore_cache:
-#          keys:
-#            - v2-npm-deps-{{ .Branch }}-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
-#            - v2-npm-deps-{{ .Branch }}-{{ checksum "package.json" }}
-#            - v2-npm-deps-{{ .Branch }}
-#            - v2-npm-deps-
-      - run:
-          name: install NPM dependencies
-          command: |
-            echo -e "//registry.npmjs.org/:_authToken=$NPM_TOKEN\nscope=@davinci" > .npmrc
-            npm install
-#      - save_cache:
-#          key: v2-npm-deps-{{ .Branch }}-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
-#          paths:
-#            - node_modules
-      - run:
-          name: build
-          command: |
-           npm run build
-      - run:
-          name: test
-          command: |
-           npm run cover
-      - when:
-          condition:
-            and:
-              - equal: [ "5", << parameters.mongo-version >> ]
-              - equal: [ "cimg/node:18.16.0", << parameters.docker-image >> ]
-          steps:
+    checkout_and_test:
+        parameters:
+            mongo-version:
+                type: string
+            docker-image:
+                type: string
+        docker:
+            - image: << parameters.docker-image >>
+            - image: mongo:<< parameters.mongo-version >>
+            - image: rabbitmq:3.9-alpine
+        steps:
+            - checkout
+            #      - restore_cache:
+            #          keys:
+            #            - v2-npm-deps-{{ .Branch }}-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
+            #            - v2-npm-deps-{{ .Branch }}-{{ checksum "package.json" }}
+            #            - v2-npm-deps-{{ .Branch }}
+            #            - v2-npm-deps-
             - run:
-                name: upload coverage report
-                command: |
-                  npx codecov -f packages/core/coverage/lcov.info -F core
-                  npx codecov -f packages/http-server/coverage/lcov.info -F http-server
-                  npx codecov -f packages/http-server-express/coverage/lcov.info -F http-server-express
-                  npx codecov -f packages/reflector/coverage/lcov.info -F reflector
-            - save_cache:
-                key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
-                paths:
-                  - "~"
-  publish:
-    docker:
-      - image: cimg/node:16.18.1
-    steps:
-      - restore_cache:
-          key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
-      - add_ssh_keys
-      - run:
-          name: Add github to known_hosts
-          command: |
-            mkdir -p ~/.ssh
-            ssh-keyscan github.com >> ~/.ssh/known_hosts
-      - run:
-          name: publish
-          command: |
-            git config --global user.email "circleci@hp.com"
-            git config --global user.name "CircleCI"
-            git checkout -f
-            npm run semantic-release
+                  name: install NPM dependencies
+                  command: |
+                      echo -e "//registry.npmjs.org/:_authToken=$NPM_TOKEN\nscope=@davinci" > .npmrc
+                      npm install
+            #      - save_cache:
+            #          key: v2-npm-deps-{{ .Branch }}-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
+            #          paths:
+            #            - node_modules
+            - run:
+                  name: build
+                  command: |
+                      npm run build
+            - run:
+                  name: test
+                  command: |
+                      npm run cover
+            - when:
+                  condition:
+                      and:
+                          - equal: ['6', << parameters.mongo-version >>]
+                          - equal: ['cimg/node:20.11', << parameters.docker-image >>]
+                  steps:
+                      - run:
+                            name: upload coverage report
+                            command: |
+                                npx codecov -f packages/core/coverage/lcov.info -F core
+                                npx codecov -f packages/http-server/coverage/lcov.info -F http-server
+                                npx codecov -f packages/http-server-express/coverage/lcov.info -F http-server-express
+                                npx codecov -f packages/reflector/coverage/lcov.info -F reflector
+                      - save_cache:
+                            key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
+                            paths:
+                                - '~'
+    publish:
+        docker:
+            - image: cimg/node:20.11
+        steps:
+            - restore_cache:
+                  key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
+            - add_ssh_keys
+            - run:
+                  name: Add github to known_hosts
+                  command: |
+                      mkdir -p ~/.ssh
+                      ssh-keyscan github.com >> ~/.ssh/known_hosts
+            - run:
+                  name: publish
+                  command: |
+                      git config --global user.email "circleci@hp.com"
+                      git config --global user.name "CircleCI"
+                      git checkout -f
+                      npm run semantic-release
 
-  publish_docs:
-    docker:
-      - image: cimg/node:16.18.1
-    steps:
-      - restore_cache:
-          key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
-      - add_ssh_keys
-      - run:
-          name: Deploy docs
-          command: |
-            rm .npmrc
-            sh ./docs/deploy.sh
+    publish_docs:
+        docker:
+            - image: cimg/node:20.11
+        steps:
+            - restore_cache:
+                  key: v1-source-{{ .Environment.CIRCLE_SHA1 }}
+            - add_ssh_keys
+            - run:
+                  name: Deploy docs
+                  command: |
+                      rm .npmrc
+                      sh ./docs/deploy.sh
 
 workflows:
-  version: 2
-  build_and_publish:
-    jobs:
-      - checkout_and_test:
-          matrix:
-            parameters:
-              mongo-version: ["4.4", "5"]
-              docker-image: ["circleci/node:14", "circleci/node:16", "cimg/node:18.16.0"]
-      - publish:
-          requires:
-            - checkout_and_test
-          filters:
-            branches:
-              only:
-                - master
-      - publish_docs:
-          requires:
-            - checkout_and_test
-          filters:
-            branches:
-              only:
-                - master
+    version: 2
+    build_and_publish:
+        jobs:
+            - checkout_and_test:
+                  matrix:
+                      parameters:
+                          mongo-version: ['5', '6']
+                          docker-image: ['cimg/node:18.19', 'cimg/node:20.11', 'cimg/node:lts']
+            - publish:
+                  requires:
+                      - checkout_and_test
+                  filters:
+                      branches:
+                          only:
+                              - master
+            - publish_docs:
+                  requires:
+                      - checkout_and_test
+                  filters:
+                      branches:
+                          only:
+                              - master
