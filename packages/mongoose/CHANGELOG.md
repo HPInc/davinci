@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.6.0](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.5.0...@davinci/mongoose@2.6.0) (2024-02-15)
+
+
+### Bug Fixes
+
+* add missing params in afterWrite hook ([d128a1c](https://github.com/HPInc/davinci/commit/d128a1ceb815b52329cbf4fb4aa13ccb784dabbe))
+
+
+### Features
+
+* dd findByIdAndUpdate test on mongoose component ([1d27ad7](https://github.com/HPInc/davinci/commit/1d27ad71dda4165cd5c900e086821764a2d8310c))
+
+
+
+
+
 # [2.5.0](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.4.7...@davinci/mongoose@2.5.0) (2024-02-15)
 
 
