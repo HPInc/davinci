@@ -26,15 +26,15 @@ type Hook =
 	| 'find'
 	| 'findOne'
 	| 'findOneAndUpdate'
-	| 'update'
+	| 'update' // removed from mongoose 7 onwards
 	| 'updateMany'
 	| 'updateOne'
 	| 'save'
 	| 'deleteMany'
 	| 'deleteOne'
-	| 'remove'
+	| 'remove' // removed from mongoose 7 onwards
 	| 'findOneAndDelete'
-	| 'findOneAndRemove';
+	| 'findOneAndRemove'; // removed from mongoose 8 onwards
 
 export interface PreArgs<Context = unknown, ModelSchema = unknown> {
 	query: Query<ModelSchema, ModelSchema & Document>;
