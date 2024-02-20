@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.7.0](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.6.0...@davinci/mongoose@2.7.0) (2024-02-20)
+
+
+### Features
+
+* allow mongoose 8 ([72609e1](https://github.com/HPInc/davinci/commit/72609e10bbbe8d8398c1425644dd54f13df80ad0))
+
+
+
+
+
 # [2.6.0](https://github.com/HPInc/davinci/compare/@davinci/mongoose@2.5.0...@davinci/mongoose@2.6.0) (2024-02-15)
 
 
